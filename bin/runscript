@@ -1,0 +1,5 @@
+#!/bin/bash
+java \
+ -cp /Users/jshook/IdeaProjects/testclient/target/testclient.jar \
+ com.metawiring.load.core.ScriptEnvironment \
+ $*

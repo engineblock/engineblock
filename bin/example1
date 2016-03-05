@@ -1,0 +1,15 @@
+#!/usr/bin/env jjs -scripting -doe=true -strict -cp /Users/jshook/IdeaProjects/testclient/target/testclient.jar
+#var tcclass = Java.type('com.metawiring.load.cli.TestPhaseClient');
+
+
+# var cf= new com.metawiring.load.config.TestClientConfig();
+# cf.host = 'cluster';
+# cf.graphiteHost = 'metrics';
+
+var sc = new com.metawiring.load.cycler.ScenarioController();
+# var tc= new com.metawiring.load.core.TestPhaseClient();
+
+sc.start('alias=test;source=test-activity;cycles=1;threads=1;async=1;');
+
+
+

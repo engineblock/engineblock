@@ -1,0 +1,12 @@
+@startuml
+scale 350 width
+
+[*] --> Initial : new()
+Initial --> HasStarted : start()
+HasStarted --> ShouldStop : controller request
+HasStarted --> HasFinished : exhausted input
+ShouldStop --> Stopped : last cycle while started
+Stopped --> [*]
+'Stopped --> Running : if reused
+
+@enduml

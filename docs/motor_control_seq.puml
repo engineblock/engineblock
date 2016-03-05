@@ -1,0 +1,37 @@
+@startuml
+hide footbox
+title Motor Control
+
+control AE
+control Control
+control Motor
+control Cycle
+
+== Normal Cycle ==
+AE -> Motor: start()
+Motor->Control: Running
+Motor -> Cycle: Begin Cycle
+activate Cycle
+activate Motor #Grey
+AE-> Control: request stop
+Motor <- Cycle : Complete Cycle
+deactivate Cycle
+Motor -> Control: getMotor
+Control -> Motor: request stop
+Motor -> Control: Stopped
+deactivate Motor
+
+== Pending Motor Cycle ==
+AE -> Motor: start()
+Motor->Control: Running
+Motor -> Cycle: Begin Cycle
+activate Cycle
+activate Motor #Grey
+AE-> Control: request stop
+AE -> Control: request start
+Motor <- Cycle: Complete Cycle
+deactivate Cycle
+Motor -> Control: getMotor
+Control -> Motor: request start
+Motor -> Control : Running
+@enduml

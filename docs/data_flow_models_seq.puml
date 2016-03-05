@@ -1,0 +1,30 @@
+@startuml
+Actor consumer
+Actor producer
+entity channel
+== Thread Locking and other Ugliness ==
+consumer -> channel :subscribe
+producer -> generator : getMotor one
+
+activate generator
+generator -> producer : OK
+deactivate generator
+producer -> channel : put one
+activate channel
+channel -> producer : OK
+deactivate channel
+
+channel -> consumer : notify
+activate consumer
+consumer -> channel : ok
+deactivate consumer
+
+consumer -> channel : getMotor one
+activate channel
+channel -> consumer : one
+deactivate channel
+
+
+== Reactive?? ==
+
+@enduml

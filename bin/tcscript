@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export scriptfile=${1:?No scriptfile was specified. You must call $0 <scriptfile> to use tcscript.}
+
+/usr/bin/env jjs -scripting "$scriptfile"
+
+

@@ -1,0 +1,14 @@
+dml:
+ - name: read-telemetry
+   cql: |
+     select * from <<KEYSPACE>>.<<TABLE>>_telemetry
+     where source=<<source>>
+     and epoch_hour=<<epoch_hour>>
+     and param=<<param>>
+     limit 10
+   bindings:
+     source: threadnum
+     epoch_hour: date-epoch-hour
+     param: varnames
+
+
