@@ -1,4 +1,4 @@
-# TestClient Command Line
+# Empirical Machine Command Line
 
 To get built-in help on the available command line options, run
 

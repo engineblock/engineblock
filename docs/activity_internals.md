@@ -1,4 +1,4 @@
-TestClient for Developers
+Empirical Machine for Developers
 =========================
 
 ## Activity Internals
@@ -33,7 +33,7 @@ In more detail:
 
 The _ActivityType_ interface is the starting point for implmenting a new Activity type.
 
-The _ActivityMotor_ represents the per-thread logic of an activity. It is responsible for taking inputs from an instance of _ActivityInput_ and applying an _ActivityAction_ to them. In the simplest terms, each thread in an activity is controlled by an activity motor. This inner harness is also responsible for basic TestClient instrumentation, logging, and control signalling with the associated _ActivityExecutor_. This is where the aspects end, however, and activity-specific details begin.
+The _ActivityMotor_ represents the per-thread logic of an activity. It is responsible for taking inputs from an instance of _ActivityInput_ and applying an _ActivityAction_ to them. In the simplest terms, each thread in an activity is controlled by an activity motor. This inner harness is also responsible for basic Empirical Machine instrumentation, logging, and control signalling with the associated _ActivityExecutor_. This is where the aspects end, however, and activity-specific details begin.
 
 Each Activity implementation is responsible for deciding how ActivityMotor instances are constructed, albeit indirectly. The hooks that determine the activity-specific behavior are implemented in terms of the core Java 8 _LongSupplier_ and _LongConsumer_ types. For each iteration of an _ActivityMotor_'s inner loop, another value is taken from the input (the LongSupplier). The action (the LongConsumer) is then called with that value.
  
