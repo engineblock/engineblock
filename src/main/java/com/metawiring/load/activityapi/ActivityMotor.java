@@ -49,4 +49,10 @@ public interface ActivityMotor extends Runnable {
     default boolean hasStarted() {
         return (getMotorController().getRunState() == MotorController.RunState.Started);
     }
+
+    /**
+     * get the slotId which this motor is assigned to within the activity instance.
+     * @return long slot id
+     */
+    long getSlotId();
 }

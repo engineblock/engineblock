@@ -98,6 +98,11 @@ public class CoreActivityMotor implements ActivityDefObserver, ActivityMotor {
     }
 
     @Override
+    public long getSlotId() {
+        return this.slotId;
+    }
+
+    @Override
     public void run() {
         motorController.signalStarted();
         long cyclenum;

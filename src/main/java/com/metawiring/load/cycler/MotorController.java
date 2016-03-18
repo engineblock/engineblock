@@ -16,6 +16,7 @@ package com.metawiring.load.cycler;
 
 
 import com.metawiring.load.activityapi.ActivityMotor;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -29,20 +30,29 @@ public class MotorController {
     public final AtomicReference<RunState> runState = new AtomicReference<>(RunState.Initialized);
 
     public boolean isStarted() {
-        return runState.get()==RunState.Started;
+        return runState.get() == RunState.Started;
     }
 
     public static enum RunState {
+
         // Initial state after creation of this control
-        Initialized,
+        Initialized("I"),
         // This thread is running. This should only be set by the controlled thread
-        Started,
+        Started("S"),
         // This thread has completed all of its activity, and will do no further work without new input
-        Finished,
+        Finished("F"),
         // The thread has been requested to stop. This says nothing of the internal state.
-        Stopping,
+        Stopping("_"),
         // The thread has stopped. This should only be set by the controlled thread
-        Stopped
+        Stopped(".");
+
+        private String runcode;
+
+        RunState(String runcode) {
+            this.runcode = runcode;
+        }
+
+        public String getCode() { return this.runcode; }
     }
 
     public MotorController(ActivityMotor activityMotor) {
@@ -54,7 +64,7 @@ public class MotorController {
     }
 
     public void signalStarted() {
-        transitionOrException(RunState.Initialized,RunState.Started);
+        transitionOrException(RunState.Initialized, RunState.Started);
     }
 
     /**
@@ -66,7 +76,7 @@ public class MotorController {
             case Finished:
                 break;
             case Started:
-                transitionOrException(RunState.Started,RunState.Stopping);
+                transitionOrException(RunState.Started, RunState.Stopping);
                 break;
             case Stopping:
                 break;
@@ -78,20 +88,20 @@ public class MotorController {
     }
 
     public void signalFinished() {
-        transitionOrException(RunState.Started,RunState.Finished);
+        transitionOrException(RunState.Started, RunState.Finished);
     }
 
     public void signalStopped() {
-        transitionOrException(RunState.Stopping,RunState.Stopped);
+        transitionOrException(RunState.Stopping, RunState.Stopped);
     }
 
 
     private boolean transition(RunState fromRunState, RunState toRunState) {
-        return runState.compareAndSet(fromRunState,toRunState);
+        return runState.compareAndSet(fromRunState, toRunState);
     }
 
     private void transitionOrException(RunState fromRunState, RunState toRunState) {
-        if (!runState.compareAndSet(fromRunState,toRunState)) {
+        if (!runState.compareAndSet(fromRunState, toRunState)) {
             throw new RuntimeException("Unable to transition motor controller " + fromRunState + " --> " + toRunState + ": current state:" + this);
         }
     }

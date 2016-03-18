@@ -267,6 +267,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     private void markMutation() {
         changeCounter.incrementAndGet();
+        logger.debug("calling " + listeners.size() + " listeners.");
         callListeners();
     }
 

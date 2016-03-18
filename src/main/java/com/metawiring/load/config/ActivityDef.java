@@ -18,6 +18,7 @@
 
 package com.metawiring.load.config;
 
+import com.metawiring.load.cycler.ActivityExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

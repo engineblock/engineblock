@@ -16,6 +16,12 @@ package com.metawiring.load.activityapi;
 
 import com.metawiring.load.config.ActivityDef;
 
+/**
+ * Decorator interface for getting notified when an activities parameters are changed at runtime.
+ *
+ * This can be optionally implemented by Any Motor, Input, or Action. The eventing is mediated
+ * through the ActivityExecutor in order to isolate the programmatic API from the internal API.
+ */
 public interface ActivityDefObserver {
     void onActivityDefUpdate(ActivityDef activityDef);
 }

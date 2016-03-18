@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>An ActivityExecutor is a named instance of an execution harness for a single activity instance.
@@ -57,7 +58,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
 //        ScopedCachingGeneratorSource gi = new ScopedGeneratorCache(
 //                new GeneratorInstantiator(), RuntimeScope.activity
 //        );
-//        activityDef.getParams().addListener(this);
+        activityDef.getParams().addListener(this);
     }
 
     public void setActivityMotorDispenser(MotorDispenser activityMotorDispenser) {
@@ -75,15 +76,21 @@ public class ActivityExecutor implements ParameterMap.Listener {
      */
     public synchronized void start() {
         logger.info("starting activity " + activityDef.getLogName());
-
         adjustToActivityDef(activityDef);
 
     }
 
-    private void adjustToActivityDef(ActivityDef activityDef) {
+    private String slotStatus() {
+        return activityMotors.stream()
+                .map(m -> m.getMotorController().getRunState().getCode())
+                .collect(Collectors.joining(",", "[", "]"));
+    }
+
+    private synchronized void adjustToActivityDef(ActivityDef activityDef) {
+        logger.debug(">-pre-adjust->" + slotStatus());
 
         Optional.ofNullable(activityMotorDispenser).orElseThrow(() ->
-        new RuntimeException("activityMotorFactory is required"));
+                new RuntimeException("activityMotorFactory is required"));
 
         while (activityMotors.size() > activityDef.getThreads()) {
             ActivityMotor motor = activityMotors.get(activityMotors.size() - 1);
@@ -103,15 +110,15 @@ public class ActivityExecutor implements ParameterMap.Listener {
                 .forEach(executorService::execute);
 
         activityMotors.stream()
-                .forEach(m -> awaitStartup(m,1000));
-        // TODO: await until all new are running
+                .forEach(m -> awaitStartup(m, 1000));
 
+        logger.debug(">post-adjust->" + slotStatus());
 
     }
 
     private void awaitStartup(ActivityMotor m, int i) {
-        long startedAt=System.currentTimeMillis();
-        while(!m.getMotorController().isStarted() && System.currentTimeMillis()< (startedAt+i) ) {
+        long startedAt = System.currentTimeMillis();
+        while (!m.getMotorController().isStarted() && System.currentTimeMillis() < (startedAt + i)) {
             try {
                 Thread.sleep(5);
             } catch (InterruptedException ignored) {
@@ -120,6 +127,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
         if (!m.getMotorController().isStarted()) {
             throw new RuntimeException("thread startup delayed excessivly. Adjust timeout or investigate.");
         }
+        logger.trace(activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now running.");
     }
 
     public synchronized void forceStop() {
@@ -161,7 +169,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
         activityMotors.stream().filter(
                 m -> (m instanceof ActivityDefObserver)
         ).forEach(
-                m -> ((ActivityDefObserver)m).onActivityDefUpdate(activityDef)
+                m -> ((ActivityDefObserver) m).onActivityDefUpdate(activityDef)
         );
         // TODO: clean this up: activityDef or parameterMap? Pick one.
     }
