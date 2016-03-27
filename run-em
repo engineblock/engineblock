@@ -9,7 +9,7 @@ then
  exit 2
 fi
 
-export EM_JARNAME="testclient.jar"
+export EM_JARNAME="em.jar"
 
 export browser_download_url=$(
  curl -s -L \
@@ -33,8 +33,8 @@ then
   cd /tmp ;
   curl -s -L -O "${browser_download_url}"
  )
- mv /tmp/testclient.jar ${EM_JARNAME}
- printf "The testclient jar has been saved as %s\n" ${EM_JARNAME}
+ mv /tmp/em.jar ${EM_JARNAME}
+ printf "The EM jar has been saved as %s\n" ${EM_JARNAME}
 fi
 
 if [ "${FETCH_ONLY}" = "true" ]
