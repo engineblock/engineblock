@@ -20,7 +20,7 @@ allow EM to be powered by multiple clients for greater load generating capacity.
 
 ## Getting Started
 
-You can begin at [Quick Start](docs/quickstart.md) or consult the full [Users Guide](docs/usersguide.md). At least taking a glance at the user guide is recommended.
+You can begin at [Quick Start](docs/quickstart.md) or consult the full [Usage Guide](docs/usage_guide.md). At least taking a glance at the guide is recommended.
 
 ## Contributions
 If you are interested in contributing to Empirical Machine, more information is available in the [Developer's section](doc/developers.md).
