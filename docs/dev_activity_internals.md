@@ -48,7 +48,7 @@ The only way to address a running activity for dynamic control is through its _a
 
 ## Iterating a Cycle
 
-While an activity is running, each of its slots has a running motor which does the following:
+While an activity is running, each of its slots has a running motor which does the following continuously.
 
 1. Verify Motor control state, stop if signalled
 1. Read the next input value (a long) from the Input.
