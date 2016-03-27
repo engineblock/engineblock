@@ -1,6 +1,6 @@
-## TestClient Metrics
+## EM Metrics
 
-If you like to have all of your testing data in one place, then you may be interested in reporting your measurements to a monitoring system. For this, test client includes a [Metrics Library](https://github.com/dropwizard/metrics). Graphite reporting is baked in as the default reporter.
+If you like to have all of your testing data in one place, then you may be interested in reporting your measurements to a monitoring system. For this, EM includes a [Metrics Library](https://github.com/dropwizard/metrics). Graphite reporting is baked in as the default reporter.
 
 In order to enable graphite reporting, use
 
@@ -9,26 +9,21 @@ In order to enable graphite reporting, use
 or
 
     --graphite <host>:<port>
-    
 
 ## Metric Naming
 
 ### Prefix
-Core metrics use the prefix _testclient_ by default. You can override this with the --prefix option:
+Core metrics use the prefix _em_ by default. You can override this with the --prefix option:
 
     --prefix myclient.group5
 
 ### Identifiers
 
 * Metrics associated with a specific activity will have the activity alias in their name.
-* Metrics associated with a particular client driver, like the DataStax Java Driver for Cassandra, for example, should have "driver" in the name.
-
-It is often helpful when instrumenting systems and apps to have a naming convention that works across all data sources. For this, I like to use the scheme _system | app_ . _client | server_ . ...
 
 ## Metrics Output
 
 By default, the metrics will be logged to console via the console log and logging metrics reporter. At the end of a run, the long form of the metrics summaries are dumped to console. The reporting interval for this method is every minute. Once you start the client, you'll see a periodic report to the screen showing the current testing time as a heartbeat that the test is running.
-
 
 ## Interpretation & Examples
 
