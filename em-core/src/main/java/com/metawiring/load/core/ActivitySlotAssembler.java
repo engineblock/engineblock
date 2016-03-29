@@ -3,7 +3,7 @@ package com.metawiring.load.core;
 import com.metawiring.load.activityapi.*;
 import com.metawiring.load.activitycore.CoreActionDispenser;
 import com.metawiring.load.activitycore.CoreInputDispenser;
-import com.metawiring.load.config.IActivityDef;
+import com.metawiring.load.config.ActivityDefImpl;
 import com.metawiring.load.activitycore.CoreMotorDispenser;
 
 /**
@@ -13,7 +13,7 @@ import com.metawiring.load.activitycore.CoreMotorDispenser;
 public class ActivitySlotAssembler {
 
     public static MotorDispenser resolveMotorDispenser(
-            IActivityDef activityDef,
+            ActivityDef activityDef,
             ActivityType activityType) {
 
         InputDispenser inputDispenser = resolveInputDispenser(activityDef, activityType);
@@ -26,7 +26,7 @@ public class ActivitySlotAssembler {
         }
     }
 
-    private static ActionDispenser resolveActionDispenser(IActivityDef activityDef, ActivityType activityType) {
+    private static ActionDispenser resolveActionDispenser(ActivityDef activityDef, ActivityType activityType) {
         if (activityType instanceof ActionDispenserProvider) {
             return ((ActionDispenserProvider) activityType).getActionDispenser(activityDef);
         } else {
@@ -34,7 +34,7 @@ public class ActivitySlotAssembler {
         }
     }
 
-    private static InputDispenser resolveInputDispenser(IActivityDef activityDef, ActivityType activityType) {
+    private static InputDispenser resolveInputDispenser(ActivityDef activityDef, ActivityType activityType) {
         if (activityType instanceof InputDispenserProvider) {
             return ((InputDispenserProvider) activityType).getInputDispensor(activityDef);
         } else {

@@ -2,7 +2,7 @@ package com.metawiring.load.cycler;
 
 import com.metawiring.load.activityapi.Action;
 import com.metawiring.load.activitycore.inputs.BlockingCycleValueSupplier;
-import com.metawiring.load.activityapi.ActivityMotor;
+import com.metawiring.load.activityapi.Motor;
 import com.metawiring.load.activitycore.CoreMotor;
 import org.testng.annotations.Test;
 
@@ -26,12 +26,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 *   limitations under the License.
 */
 @Test(enabled=false)
-public class ActivityMotorTest {
+public class MotorTest {
 
     @Test(enabled=false)
     public void testBasicActivityMotor() {
         BlockingCycleValueSupplier lockstepper = new BlockingCycleValueSupplier();
-        ActivityMotor cm = new CoreMotor(5L,lockstepper);
+        Motor cm = new CoreMotor(5L,lockstepper);
         AtomicLong observableAction = new AtomicLong(-3L);
         cm.setAction(getTestConsumer(observableAction));
         Thread t = new Thread(cm);

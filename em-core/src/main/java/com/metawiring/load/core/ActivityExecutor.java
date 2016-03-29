@@ -12,15 +12,10 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-package com.metawiring.load.cycler;
+package com.metawiring.load.core;
 
-import com.metawiring.load.activityapi.ActivityDef;
-import com.metawiring.load.config.IActivityDef;
-import com.metawiring.load.config.ParameterMap;
-import com.metawiring.load.core.IndexedThreadFactory;
-import com.metawiring.load.activityapi.MotorDispenser;
-import com.metawiring.load.activityapi.ActivityDefObserver;
-import com.metawiring.load.activityapi.ActivityMotor;
+import com.metawiring.load.activityapi.*;
+import com.metawiring.load.config.ParameterMapImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,16 +34,16 @@ import java.util.stream.Collectors;
  * scenario, but which is inactive. This can occur when an activity is paused by controlling logic,
  * or when the threads are set to zero.</p>
  */
-public class ActivityExecutor implements ParameterMap.Listener {
+public class ActivityExecutor implements ParameterMapImpl.Listener {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);
 
-    private IActivityDef activityDef;
+    private ActivityDef activityDef;
 
     private ExecutorService executorService;
     private MotorDispenser activityMotorDispenser;
-    private final List<ActivityMotor> activityMotors = new ArrayList<>();
+    private final List<Motor> motors = new ArrayList<>();
 
-    public ActivityExecutor(IActivityDef activityDef) {
+    public ActivityExecutor(ActivityDef activityDef) {
         this.activityDef = activityDef;
         executorService = new ThreadPoolExecutor(
                 0, Integer.MAX_VALUE,
@@ -82,50 +77,50 @@ public class ActivityExecutor implements ParameterMap.Listener {
     }
 
     private String slotStatus() {
-        return activityMotors.stream()
-                .map(m -> m.getMotorController().getRunState().getCode())
+        return motors.stream()
+                .map(m -> m.getSlotStatus().getCode())
                 .collect(Collectors.joining(",", "[", "]"));
     }
 
-    private synchronized void adjustToActivityDef(IActivityDef activityDef) {
+    private synchronized void adjustToActivityDef(ActivityDef activityDef) {
         logger.debug(">-pre-adjust->" + slotStatus());
 
         Optional.ofNullable(activityMotorDispenser).orElseThrow(() ->
                 new RuntimeException("activityMotorFactory is required"));
 
-        while (activityMotors.size() > activityDef.getThreads()) {
-            ActivityMotor motor = activityMotors.get(activityMotors.size() - 1);
+        while (motors.size() > activityDef.getThreads()) {
+            Motor motor = motors.get(motors.size() - 1);
             logger.trace("Stopping cycle motor thread:" + motor);
-            motor.getMotorController().requestStop();
-            activityMotors.remove(activityMotors.size() - 1);
+            motor.requestStop();
+            motors.remove(motors.size() - 1);
         }
 
-        while (activityMotors.size() < activityDef.getThreads()) {
-            ActivityMotor motor = activityMotorDispenser.getMotor(activityDef, activityMotors.size());
+        while (motors.size() < activityDef.getThreads()) {
+            Motor motor = activityMotorDispenser.getMotor(activityDef, motors.size());
             logger.trace("Starting cycle motor thread:" + motor);
-            activityMotors.add(motor);
+            motors.add(motor);
         }
 
-        activityMotors.stream()
-                .filter(m -> !m.hasStarted())
+        motors.stream()
+                .filter(m -> m.getSlotStatus() != SlotState.Started)
                 .forEach(executorService::execute);
 
-        activityMotors.stream()
+        motors.stream()
                 .forEach(m -> awaitStartup(m, 1000));
 
         logger.debug(">post-adjust->" + slotStatus());
 
     }
 
-    private void awaitStartup(ActivityMotor m, int i) {
+    private void awaitStartup(Motor m, int i) {
         long startedAt = System.currentTimeMillis();
-        while (!m.getMotorController().isStarted() && System.currentTimeMillis() < (startedAt + i)) {
+        while ((m.getSlotStatus()!=SlotState.Started) && System.currentTimeMillis() < (startedAt + i)) {
             try {
                 Thread.sleep(5);
             } catch (InterruptedException ignored) {
             }
         }
-        if (!m.getMotorController().isStarted()) {
+        if ((m.getSlotStatus()!=SlotState.Started)) {
             throw new RuntimeException("thread startup delayed excessivly. Adjust timeout or investigate.");
         }
         logger.trace(activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now running.");
@@ -147,10 +142,11 @@ public class ActivityExecutor implements ParameterMap.Listener {
 
     public synchronized void stop() {
         logger.info("stopping activity " + activityDef.getLogName());
-        for (ActivityMotor activityMotor : activityMotors) {
-            Optional.of(activityMotor)
-                    .map(ActivityMotor::getMotorController)
-                    .ifPresent(MotorController::requestStop);
+        for (Motor motor : motors) {
+            Optional.of(motor)
+                    .ifPresent(Motor::requestStop);
+//                    .map(ActivityMotor::getMotorController)
+//                    .ifPresent(MotorController::requestStop);
         }
     }
 
@@ -167,7 +163,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
     @Override
     public void handleParameterMapUpdate(ParameterMap parameterMap) {
         adjustToActivityDef(activityDef);
-        activityMotors.stream().filter(
+        motors.stream().filter(
                 m -> (m instanceof ActivityDefObserver)
         ).forEach(
                 m -> ((ActivityDefObserver) m).onActivityDefUpdate(activityDef)

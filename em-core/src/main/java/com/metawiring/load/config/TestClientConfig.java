@@ -199,7 +199,7 @@ public class TestClientConfig {
                     throw new RuntimeException("Invalid cycles definitions: " + aCycles);
             }
             activityDefs.add(
-                    ActivityDef.parseActivityDef(
+                    ActivityDefImpl.parseActivityDef(
                             "name="+aName+";"
                             + "mincycle=" + aCyclesMin + ";"
                             + "maxcycle=" + aCyclesMax + ";"

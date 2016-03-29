@@ -23,9 +23,6 @@ import org.apache.commons.math3.distribution.IntegerDistribution;
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.random.MersenneTwister;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class MapStringGenerator implements Generator<String> {
 
     private LineExtractGenerator paramGenerator;

@@ -15,12 +15,10 @@
 
 package com.metawiring.load.activityapi;
 
-import com.metawiring.load.cycler.MotorController;
-
 /**
  * The core threading harness within an activity.
  */
-public interface ActivityMotor extends Runnable {
+public interface Motor extends Runnable {
 
     /**
      * Set the input on this motor. It will be read from each cycle before applying the action.
@@ -28,7 +26,7 @@ public interface ActivityMotor extends Runnable {
      * @param input an instance of ActivityInput
      * @return this ActivityMotor, for method chaining
      */
-    ActivityMotor setInput(Input input);
+    Motor setInput(Input input);
 
     /**
      * Set the action on this motor. It will be applied to each input.
@@ -36,23 +34,16 @@ public interface ActivityMotor extends Runnable {
      * @param action an instance of activityAction
      * @return this ActivityMotor, for method chaining
      */
-    ActivityMotor setAction(Action action);
-
-    /**
-     * @return the motor controller instance which is used to signal motor state.
-     */
-    MotorController getMotorController();
-
-    /**
-     * @return true if the motor knows that is running in an active thread, false otherwise.
-     */
-    default boolean hasStarted() {
-        return (getMotorController().getRunState() == MotorController.RunState.Started);
-    }
+    Motor setAction(Action action);
 
     /**
      * get the slotId which this motor is assigned to within the activity instance.
      * @return long slot id
      */
     long getSlotId();
+
+    void requestStop();
+
+    SlotState getSlotStatus();
+
 }

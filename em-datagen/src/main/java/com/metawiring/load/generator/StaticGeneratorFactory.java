@@ -19,7 +19,6 @@
 package com.metawiring.load.generator;
 
 import com.metawiring.load.generator.Generator;
-import com.metawiring.load.generator.GeneratorFactory;
 import com.metawiring.load.generators.ThreadNumGenerator;
 
 public class StaticGeneratorFactory implements GeneratorFactory {

@@ -1,5 +1,6 @@
 package com.metawiring.load.config;
 
+import com.metawiring.load.activityapi.ParameterMap;
 import org.testng.annotations.Test;
 
 import java.util.Optional;

@@ -14,8 +14,6 @@
 */
 package com.metawiring.load.activityapi;
 
-import com.metawiring.load.config.ActivityDef;
-
 /**
  * Decorator interface for getting notified when an activities parameters are changed at runtime.
  *

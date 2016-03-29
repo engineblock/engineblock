@@ -16,7 +16,6 @@ package com.metawiring.load.activitytypes.diag;
 
 import com.google.auto.service.AutoService;
 import com.metawiring.load.activityapi.*;
-import com.metawiring.load.config.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +30,7 @@ import org.slf4j.LoggerFactory;
  * It serves as a basic template for implementing your own activity type.
  */
 @AutoService(ActivityType.class)
-public class DiagActivityType implements ActivityType {
-
-    // TODO: Allow Activity Types to optionally implement ActivityMotorFactory
-    // TODO: for activitytypes that need to take control of the activity at a deeper level.
+public class DiagActivityType implements ActivityType, ActionDispenserProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(DiagActivityType.class);
 
@@ -44,8 +40,7 @@ public class DiagActivityType implements ActivityType {
     }
 
     @Override
-    public <T extends ActivityDef> ActionDispenser getActionDispenser(T activityDef) {
+    public ActionDispenser getActionDispenser(ActivityDef activityDef) {
         return new DiagActionDispenser(activityDef);
     }
-
 }

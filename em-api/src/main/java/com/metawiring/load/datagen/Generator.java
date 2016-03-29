@@ -16,7 +16,7 @@
  *
  */
 
-package com.metawiring.load.generator;
+package com.metawiring.load.datagen;
 
 public interface Generator<T> {
 

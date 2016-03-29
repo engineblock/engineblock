@@ -15,15 +15,14 @@
 package com.metawiring.load.core;
 
 import com.metawiring.load.activityapi.*;
-import com.metawiring.load.config.IActivityDef;
-import com.metawiring.load.cycler.ActivityExecutor;
+import com.metawiring.load.config.ActivityDefImpl;
 
 /**
  * Controls the way that an activity type is used to create instances of an activity.
  */
 public class ActivityExecutorAssembler {
 
-    public static ActivityExecutor getExecutor(IActivityDef activityDef, ActivityType activityType) {
+    public static ActivityExecutor getExecutor(ActivityDef activityDef, ActivityType activityType) {
 
         ActivityExecutor executor = new ActivityExecutor(activityDef);
         MotorDispenser motorDispenser = ActivitySlotAssembler.resolveMotorDispenser(activityDef, activityType);

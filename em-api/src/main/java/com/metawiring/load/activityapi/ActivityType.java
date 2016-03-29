@@ -18,10 +18,6 @@
 
 package com.metawiring.load.activityapi;
 
-import com.metawiring.load.activitycore.CoreInputDispenser;
-import com.metawiring.load.config.ActivityDef;
-import com.metawiring.load.cycler.CoreMotorDispenser;
-
 /**
  * <p>An ActivityType is the central extension point in TestClient for new types of
  * activitytypes. It is responsible for naming the activity type, as well as providing

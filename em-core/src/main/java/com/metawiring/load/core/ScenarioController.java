@@ -16,9 +16,8 @@ package com.metawiring.load.core;
 
 import com.metawiring.load.activityapi.ActivityType;
 import com.metawiring.load.activityapi.ActivityDef;
-import com.metawiring.load.config.IActivityDef;
-import com.metawiring.load.config.ParameterMap;
-import com.metawiring.load.cycler.ActivityExecutor;
+import com.metawiring.load.config.ActivityDefImpl;
+import com.metawiring.load.activityapi.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,20 +33,20 @@ public class ScenarioController {
 
     private final Map<String, ActivityExecutor> activityExecutors = new HashMap<>();
 
-    public synchronized void start(IActivityDef activityDef) {
+    public synchronized void start(ActivityDef activityDef) {
         getActivityExecutor(activityDef).start();
     }
 
     public synchronized void start(String activityDef) {
-        start(ActivityDef.parseActivityDef(activityDef));
+        start(ActivityDefImpl.parseActivityDef(activityDef));
     }
 
-    public synchronized void stop(IActivityDef activityDef) {
+    public synchronized void stop(ActivityDef activityDef) {
         getActivityExecutor(activityDef).stop();
     }
 
     public synchronized void stop(String activityDef) {
-        stop(ActivityDef.parseActivityDef(activityDef));
+        stop(ActivityDefImpl.parseActivityDef(activityDef));
     }
 
     public synchronized void modify(String activityAlias, String param, String value) {
@@ -74,7 +73,7 @@ public class ScenarioController {
     }
 
     // TODO: Move activity construction logic out of scenario controller
-    private ActivityExecutor getActivityExecutor(IActivityDef activityDef) {
+    private ActivityExecutor getActivityExecutor(ActivityDef activityDef) {
         synchronized (activityExecutors) {
             ActivityExecutor executor = activityExecutors.get(activityDef.getAlias());
 

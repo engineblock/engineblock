@@ -14,8 +14,8 @@
 */
 package com.metawiring.load.activitytypes.diag;
 
-import com.metawiring.load.config.ActivityDef;
 import com.metawiring.load.activityapi.Action;
+import com.metawiring.load.activityapi.ActivityDef;
 import com.metawiring.load.activityapi.ActivityDefObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

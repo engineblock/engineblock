@@ -4,20 +4,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 public interface ActivityDef {
-    static Optional<ActivityDef> parseActivityDefOptionally(String namedActivitySpec) {
-        try {
-            ActivityDef activityDef = parseActivityDef(namedActivitySpec);
-            return Optional.of(activityDef);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-    }
 
-    static ActivityDef parseActivityDef(String namedActivitySpec) {
-        ParameterMap activityParameterMap = ParameterMap.parsePositional(namedActivitySpec, IActivityDef.field_list);
-        ActivityDef activityDef = new ActivityDef(activityParameterMap);
-        return activityDef;
-    }
 
     String getAlias();
 

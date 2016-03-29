@@ -18,6 +18,8 @@
 
 package com.metawiring.load.config;
 
+import com.metawiring.load.activityapi.ParameterMap;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

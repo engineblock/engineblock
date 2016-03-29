@@ -19,7 +19,6 @@
 package com.metawiring.load.generator;
 
 import com.google.common.collect.Lists;
-import com.metawiring.load.generators.IntegerModSequenceGenerator;
 import joptsimple.internal.Strings;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.slf4j.Logger;

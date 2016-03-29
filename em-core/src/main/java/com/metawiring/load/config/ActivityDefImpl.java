@@ -19,9 +19,11 @@
 package com.metawiring.load.config;
 
 import com.metawiring.load.activityapi.ActivityDef;
+import com.metawiring.load.activityapi.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -36,9 +38,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * Essentially, ActivityDef is just a type-aware wrapper around a thread-safe parameter map,
  * with an atomic change counter which can be used to signal changes to observers./p>
  */
-public class IActivityDef implements ActivityDef {
+public class ActivityDefImpl implements ActivityDef {
 
-    private final static Logger logger = LoggerFactory.getLogger(IActivityDef.class);
+    private final static Logger logger = LoggerFactory.getLogger(ActivityDefImpl.class);
 
     // an alias with which to control the activity while it is running
     private static final String FIELD_ALIAS = "alias";
@@ -74,10 +76,10 @@ public class IActivityDef implements ActivityDef {
     };
 //    private final AtomicInteger atomicThreadTarget = new AtomicInteger(0);
 
-    public IActivityDef(String parameterString) {
-        this.parameterMap = ParameterMap.parsePositional(parameterString, field_list);
+    public ActivityDefImpl(String parameterString) {
+        this.parameterMap = ParameterMapImpl.parsePositional(parameterString, field_list);
     }
-    protected IActivityDef(ParameterMap parameterMap) {
+    protected ActivityDefImpl(ParameterMap parameterMap) {
         this.parameterMap = parameterMap;
 //        updateAtomicThreadLevel();
     }
@@ -183,5 +185,21 @@ public class IActivityDef implements ActivityDef {
     public String getLogName() {
         return toString();
     }
+
+    public static Optional<ActivityDef> parseActivityDefOptionally(String namedActivitySpec) {
+        try {
+            ActivityDef activityDef = parseActivityDef(namedActivitySpec);
+            return Optional.of(activityDef);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    public static ActivityDef parseActivityDef(String namedActivitySpec) {
+        ParameterMap activityParameterMap = ParameterMapImpl.parsePositional(namedActivitySpec, field_list);
+        ActivityDef activityDef = new ActivityDefImpl(activityParameterMap);
+        return activityDef;
+    }
+
 
 }

@@ -14,8 +14,6 @@
 */
 package com.metawiring.load.activityapi;
 
-import com.metawiring.load.config.ActivityDef;
-
 /**
  * Allow for custom activity motors to be provided.
  */
@@ -26,5 +24,5 @@ public interface MotorDispenser {
      * @param slotId - The slot number of the motor.
      * @return the motor instance
      */
-    ActivityMotor getMotor(ActivityDef activityDef, int slotId);
+    Motor getMotor(ActivityDef activityDef, int slotId);
 }

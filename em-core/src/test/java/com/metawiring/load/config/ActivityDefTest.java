@@ -23,7 +23,7 @@ public class ActivityDefTest {
 
     @Test
     public void testParser() {
-        IActivityDef activityDef;
+        ActivityDefImpl activityDef;
 
         activityDef = ActivityDef.parseActivityDef("thename");
         assertThat(activityDef.getAlias()).isEqualTo("thename");

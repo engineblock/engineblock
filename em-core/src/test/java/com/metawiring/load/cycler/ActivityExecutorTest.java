@@ -5,9 +5,10 @@ import com.metawiring.load.activityapi.Action;
 import com.metawiring.load.activityapi.Input;
 import com.metawiring.load.activityapi.MotorDispenser;
 import com.metawiring.load.activitycore.CoreInput;
-import com.metawiring.load.activityapi.ActivityMotor;
+import com.metawiring.load.activityapi.Motor;
 import com.metawiring.load.activitycore.CoreMotor;
-import com.metawiring.load.config.IActivityDef;
+import com.metawiring.load.config.ActivityDefImpl;
+import com.metawiring.load.core.ActivityExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -32,7 +33,7 @@ public class ActivityExecutorTest {
 
     @Test(enabled=false)
     public void testNewActivityExecutor() {
-        IActivityDef ad = ActivityDef.parseActivityDef("alias=test");
+        ActivityDefImpl ad = ActivityDef.parseActivityDef("alias=test");
         ActivityExecutor ae = new ActivityExecutor(ad);
         Input longSupplier = new CoreInput();
         MotorDispenser cmf = getActivityMotorFactory(
@@ -60,8 +61,8 @@ public class ActivityExecutorTest {
     private MotorDispenser getActivityMotorFactory(final ActivityDef ad, Action lc, final Input ls) {
         MotorDispenser cmf = new MotorDispenser() {
             @Override
-            public ActivityMotor getMotor(ActivityDef activityDef, int slotId) {
-                ActivityMotor cm = new CoreMotor(slotId, ls);
+            public Motor getMotor(ActivityDef activityDef, int slotId) {
+                Motor cm = new CoreMotor(slotId, ls);
                 cm.setAction(lc);
                 return cm;
             }

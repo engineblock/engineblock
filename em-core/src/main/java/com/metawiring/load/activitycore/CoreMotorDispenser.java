@@ -16,7 +16,6 @@ package com.metawiring.load.activitycore;
 
 import com.metawiring.load.activityapi.*;
 import com.metawiring.load.activityapi.ActivityDef;
-import com.metawiring.load.activitycore.CoreMotor;
 
 /**
  * Produce index ActivityMotor instances with an input and action,
@@ -33,10 +32,10 @@ public class CoreMotorDispenser implements MotorDispenser {
     }
 
     @Override
-    public ActivityMotor getMotor(ActivityDef activityDef, int slotId) {
+    public Motor getMotor(ActivityDef activityDef, int slotId) {
         Action action = actionDispenser.getAction(slotId);
         Input input = inputDispenser.getInput(slotId);
-        ActivityMotor am = new CoreMotor(slotId,input,action);
+        Motor am = new CoreMotor(slotId,input,action);
         return am;
     }
 }

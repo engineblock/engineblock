@@ -14,10 +14,10 @@
 */
 package com.metawiring.load.config;
 
+import com.metawiring.load.activityapi.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.script.Bindings;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -35,61 +35,71 @@ import java.util.stream.Collectors;
  * <p/>
  * <p>No native types are used internally. Everything is encoded as a String.</p>
  */
-public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bindings {
-    private final static Logger logger = LoggerFactory.getLogger(ParameterMap.class);
+public class ParameterMapImpl extends ConcurrentHashMap<String,Object> implements ParameterMap {
+    private final static Logger logger = LoggerFactory.getLogger(ParameterMapImpl.class);
 
 
 //    private final ConcurrentHashMap<String, String> paramMap = new ConcurrentHashMap<>(10);
     private final AtomicLong changeCounter = new AtomicLong(0L);
     private final LinkedList<Listener> listeners = new LinkedList<>();
 
-    private ParameterMap(Map<String, String> valueMap) {
+    private ParameterMapImpl(Map<String, String> valueMap) {
         logger.info("new parameter map:" + valueMap.toString());
         super.putAll(valueMap);
     }
 
+    @Override
     public long getLongOrDefault(String paramName, long defaultLongValue) {
         Optional<String> l = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
         return l.map(Long::valueOf).orElse(defaultLongValue);
     }
 
+    @Override
     public double getDoubleOrDefault(String paramName, double defaultDoubleValue) {
         Optional<String> d = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
         return d.map(Double::valueOf).orElse(defaultDoubleValue);
     }
 
+    @Override
     public String getStringOrDefault(String paramName, String defaultStringValue) {
         Optional<String> s = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
         return s.orElse(defaultStringValue);
     }
 
+    @Override
     public Optional<String> getOptionalString(String paramName) {
         return Optional.ofNullable(super.get(paramName)).map(String::valueOf);
     }
 
+    @Override
     public Optional<Long> getOptionalLong(String paramName) {
         return Optional.ofNullable(super.get(paramName)).map(String::valueOf).map(Long::valueOf);
     }
 
+    @Override
     public Optional<Double> getOptionalDouble(String paramName) {
         return Optional.ofNullable(super.get(paramName)).map(String::valueOf).map(Double::valueOf);
     }
 
+    @Override
     public Optional<Boolean> getOptionalBoolean(String paramName) {
         return Optional.ofNullable(super.get(paramName)).map(String::valueOf).map(Boolean::valueOf);
     }
 
+    @Override
     public int getIntOrDefault(String paramName, int defaultIntValue) {
         Optional<String> i = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
         return i.map(Integer::valueOf).orElse(defaultIntValue);
     }
 
+    @Override
     public boolean getBoolOrDefault(String paramName, boolean defaultBoolValue) {
         Optional<String> b = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
         return b.map(Boolean::valueOf).orElse(defaultBoolValue);
     }
 
 
+    @Override
     public Long takeLongOrDefault(String paramName, Long defaultLongValue) {
         Optional<String> l = Optional.ofNullable(super.remove(paramName)).map(String::valueOf);
         Long lval = l.map(Long::valueOf).orElse(defaultLongValue);
@@ -97,6 +107,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         return lval;
     }
 
+    @Override
     public Double takeDoubleOrDefault(String paramName, double defaultDoubleValue) {
         Optional<String> d = Optional.ofNullable(super.remove(paramName)).map(String::valueOf);
         Double dval = d.map(Double::valueOf).orElse(defaultDoubleValue);
@@ -104,6 +115,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         return dval;
     }
 
+    @Override
     public String takeStringOrDefault(String paramName, String defaultStringValue) {
         Optional<String> s = Optional.ofNullable(super.remove(paramName)).map(String::valueOf);
         String sval = s.orElse(defaultStringValue);
@@ -111,6 +123,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         return sval;
     }
 
+    @Override
     public int takeIntOrDefault(String paramName, int paramDefault) {
         Optional<String> i = Optional.ofNullable(super.remove(paramName)).map(String::valueOf);
         int ival = i.map(Integer::valueOf).orElse(paramDefault);
@@ -118,6 +131,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         return ival;
     }
 
+    @Override
     public boolean takeBoolOrDefault(String paramName, boolean defaultBoolValue) {
         Optional<String> b = Optional.ofNullable(super.remove(paramName)).map(String::valueOf);
         boolean bval = b.map(Boolean::valueOf).orElse(defaultBoolValue);
@@ -132,6 +146,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         return super.get(key);
     }
 
+    @Override
     public void set(String paramName, Object newValue) {
         super.put(paramName, String.valueOf(newValue));
         logger.info("parameter " + paramName + " set to " + newValue);
@@ -139,87 +154,6 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     }
 
     private static Pattern encodedParamsPattern = Pattern.compile("(\\w+?)=(.+?);");
-
-    public static ParameterMap parseOrException(String encodedParams) {
-        if (encodedParams == null) {
-            throw new RuntimeException("Must provide a non-null String to parse parameters.");
-        }
-
-        Matcher matcher = encodedParamsPattern.matcher(encodedParams);
-
-        LinkedHashMap<String, String> newParamMap = new LinkedHashMap<>();
-
-        int lastEnd = 0;
-        int triedAt = 0;
-
-        while (matcher.find()) {
-            triedAt = lastEnd;
-            String paramName = matcher.group(1);
-            String paramValueString = matcher.group(2);
-            newParamMap.put(paramName, paramValueString);
-            lastEnd = matcher.end();
-        }
-
-        if (lastEnd != encodedParams.length()) {
-            throw new RuntimeException("unable to find pattern " + encodedParamsPattern.pattern() + " at position " + triedAt + " in input" + encodedParams);
-        }
-
-        return new ParameterMap(newParamMap);
-    }
-
-    public static Optional<ParameterMap> parseOptionalParams(Optional<String> optionalEncodedParams) {
-        if (optionalEncodedParams.isPresent()) {
-            return parseParams(optionalEncodedParams.get());
-        }
-        return Optional.empty();
-    }
-
-    public static Optional<ParameterMap> parseParams(String encodedParams) {
-        try {
-            return Optional.ofNullable(parseOrException(encodedParams));
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * Parse positional parameters, each suffixed with the ';' terminator.
-     * This form simply allows for the initial parameter names to be elided, so long as they
-     * are sure to match up with a well-known order. This method cleans up the input, injecting
-     * the field names as necessary, and then calls the normal parsing logic.
-     *
-     * @param encodedParams     parameter string
-     * @param defaultFieldNames the well-known field ordering
-     * @return a new ParameterMap, if parsing was successful
-     */
-    public static ParameterMap parsePositional(String encodedParams, String[] defaultFieldNames) {
-
-        String[] splitAtSemi = encodedParams.split(";");
-
-
-        for (int wordidx = 0; wordidx < splitAtSemi.length; wordidx++) {
-
-            if (!splitAtSemi[wordidx].contains("=")) {
-
-                if (wordidx > (defaultFieldNames.length - 1)) {
-                    throw new RuntimeException("positional param (without var=val; format) ran out of "
-                            + "positional field names:"
-                            + " names:" + Arrays.toString(defaultFieldNames)
-                            + ", values: " + Arrays.toString(splitAtSemi)
-                    );
-                }
-
-                splitAtSemi[wordidx] = defaultFieldNames[wordidx] + "=" + splitAtSemi[wordidx] + ";";
-            }
-            if (!splitAtSemi[wordidx].endsWith(";")) {
-                splitAtSemi[wordidx] = splitAtSemi[wordidx] + ";";
-            }
-        }
-
-        String allArgs = Arrays.asList(splitAtSemi).stream().collect(Collectors.joining());
-        ParameterMap parameterMap = ParameterMap.parseOrException(allArgs);
-        return parameterMap;
-    }
 
     @Override
     public Object put(String name, Object value) {
@@ -277,6 +211,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
      *
      * @return the atomic long change counter
      */
+    @Override
     public AtomicLong getChangeCounter() {
         return changeCounter;
     }
@@ -285,10 +220,12 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         return "C:" + this.changeCounter.get() + ":" + super.toString();
     }
 
+    @Override
     public void addListener(Listener listener) {
         listeners.add(listener);
     }
 
+    @Override
     public void removeListener(Listener listener) {
         listeners.remove(listener);
     }
@@ -300,12 +237,91 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         }
     }
 
+    @Override
     public int getSize() {
         return super.size();
     }
 
+    static ParameterMap parseOrException(String encodedParams) {
+        if (encodedParams == null) {
+            throw new RuntimeException("Must provide a non-null String to parse parameters.");
+        }
 
-    public static interface Listener {
-        void handleParameterMapUpdate(ParameterMap parameterMap);
+        Matcher matcher = ParameterMapImpl.encodedParamsPattern.matcher(encodedParams);
+
+        LinkedHashMap<String, String> newParamMap = new LinkedHashMap<>();
+
+        int lastEnd = 0;
+        int triedAt = 0;
+
+        while (matcher.find()) {
+            triedAt = lastEnd;
+            String paramName = matcher.group(1);
+            String paramValueString = matcher.group(2);
+            newParamMap.put(paramName, paramValueString);
+            lastEnd = matcher.end();
+        }
+
+        if (lastEnd != encodedParams.length()) {
+            throw new RuntimeException("unable to find pattern " + ParameterMapImpl.encodedParamsPattern.pattern() + " at position " + triedAt + " in input" + encodedParams);
+        }
+
+        return new ParameterMapImpl(newParamMap);
     }
+
+    static Optional<ParameterMap> parseOptionalParams(Optional<String> optionalEncodedParams) {
+        if (optionalEncodedParams.isPresent()) {
+            return parseParams(optionalEncodedParams.get());
+        }
+        return Optional.empty();
+    }
+
+    static Optional<ParameterMap> parseParams(String encodedParams) {
+        try {
+            return Optional.ofNullable(parseOrException(encodedParams));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Parse positional parameters, each suffixed with the ';' terminator.
+     * This form simply allows for the initial parameter names to be elided, so long as they
+     * are sure to match up with a well-known order. This method cleans up the input, injecting
+     * the field names as necessary, and then calls the normal parsing logic.
+     *
+     * @param encodedParams     parameter string
+     * @param defaultFieldNames the well-known field ordering
+     * @return a new ParameterMap, if parsing was successful
+     */
+    static ParameterMap parsePositional(String encodedParams, String[] defaultFieldNames) {
+
+        String[] splitAtSemi = encodedParams.split(";");
+
+
+        for (int wordidx = 0; wordidx < splitAtSemi.length; wordidx++) {
+
+            if (!splitAtSemi[wordidx].contains("=")) {
+
+                if (wordidx > (defaultFieldNames.length - 1)) {
+                    throw new RuntimeException("positional param (without var=val; format) ran out of "
+                            + "positional field names:"
+                            + " names:" + Arrays.toString(defaultFieldNames)
+                            + ", values: " + Arrays.toString(splitAtSemi)
+                    );
+                }
+
+                splitAtSemi[wordidx] = defaultFieldNames[wordidx] + "=" + splitAtSemi[wordidx] + ";";
+            }
+            if (!splitAtSemi[wordidx].endsWith(";")) {
+                splitAtSemi[wordidx] = splitAtSemi[wordidx] + ";";
+            }
+        }
+
+        String allArgs = Arrays.asList(splitAtSemi).stream().collect(Collectors.joining());
+        ParameterMap parameterMap = ParameterMapImpl.parseOrException(allArgs);
+        return parameterMap;
+    }
+
+
 }

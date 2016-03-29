@@ -14,12 +14,7 @@
 */
 package com.metawiring.load.activitycore;
 
-import com.metawiring.load.activityapi.ActivityMotor;
-import com.metawiring.load.config.IActivityDef;
-import com.metawiring.load.cycler.MotorController;
-import com.metawiring.load.activityapi.Action;
-import com.metawiring.load.activityapi.Input;
-import com.metawiring.load.activityapi.ActivityDefObserver;
+import com.metawiring.load.activityapi.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * input and action, respectively.
  * <p/>
  */
-public class CoreMotor implements ActivityDefObserver, ActivityMotor {
+public class CoreMotor implements ActivityDefObserver, Motor {
     private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
 
     private long slotId;
@@ -75,7 +70,7 @@ public class CoreMotor implements ActivityDefObserver, ActivityMotor {
      * @return this ActivityMotor, for chaining
      */
     @Override
-    public ActivityMotor setInput(Input input) {
+    public Motor setInput(Input input) {
         this.input = input;
         return this;
     }
@@ -87,14 +82,9 @@ public class CoreMotor implements ActivityDefObserver, ActivityMotor {
      * @return this ActivityMotor, for chaining
      */
     @Override
-    public ActivityMotor setAction(Action action) {
+    public Motor setAction(Action action) {
         this.action = action;
         return this;
-    }
-
-    @Override
-    public MotorController getMotorController() {
-        return motorController;
     }
 
     @Override
@@ -103,12 +93,22 @@ public class CoreMotor implements ActivityDefObserver, ActivityMotor {
     }
 
     @Override
+    public void requestStop() {
+
+    }
+
+    @Override
+    public SlotState getSlotStatus() {
+        return motorController.getRunState();
+    }
+
+    @Override
     public void run() {
         motorController.signalStarted();
         long cyclenum;
         long cycleMax = input.getMax();
 
-        while (motorController.getRunState() == MotorController.RunState.Started) {
+        while (motorController.getRunState() == SlotState.Started) {
             cyclenum = input.getAsLong();
             // TODO: Figure out how to signal any control logic to avoid or react
             // TODO: to graceful motor exits with spurious attempts to restart
@@ -128,11 +128,11 @@ public class CoreMotor implements ActivityDefObserver, ActivityMotor {
 
     @Override
     public String toString() {
-        return "slot:" + this.slotId + "; state:" + this.getMotorController();
+        return "slot:" + this.slotId + "; state:" + motorController;
     }
 
     @Override
-    public void onActivityDefUpdate(IActivityDef activityDef) {
+    public void onActivityDefUpdate(ActivityDef activityDef) {
         if (input instanceof ActivityDefObserver) {
             ((ActivityDefObserver) input).onActivityDefUpdate(activityDef);
         }
