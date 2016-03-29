@@ -1,0 +1,7 @@
+dml:
+ - name: read-tenfields-random
+   cql: |
+     select * from <<KEYSPACE>>.<<TABLE>>_tenfields
+     where key='?'
+   bindings:
+     key: CycleNumberStringGenerator

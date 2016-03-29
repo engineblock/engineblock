@@ -1,0 +1,26 @@
+dml:
+ - name: read-tenfields-random-in20
+   cql: |
+     select * from <<KEYSPACE>>.<<TABLE>>_tenfields
+     where key in (<<k1>>,<<k2>>,<<k3>>,<<k4>>,<<k5>>,<<k6>>,<<k7>>,<<k8>>,<<k9>>,<<k10>>,<<k11>>,<<k12>>,<<k13>>,<<k14>>,<<k15>>,<<k16>>,<<k17>>,<<k18>>,<<k19>>,<<k20>>)
+   bindings:
+     k1: RandomStringRangeGenerator:1:50000000
+     k2: RandomStringRangeGenerator:1:50000000
+     k3: RandomStringRangeGenerator:1:50000000
+     k4: RandomStringRangeGenerator:1:50000000
+     k5: RandomStringRangeGenerator:1:50000000
+     k6: RandomStringRangeGenerator:1:50000000
+     k7: RandomStringRangeGenerator:1:50000000
+     k8: RandomStringRangeGenerator:1:50000000
+     k9: RandomStringRangeGenerator:1:50000000
+     k10: RandomStringRangeGenerator:1:50000000
+     k11: RandomStringRangeGenerator:1:50000000
+     k12: RandomStringRangeGenerator:1:50000000
+     k13: RandomStringRangeGenerator:1:50000000
+     k14: RandomStringRangeGenerator:1:50000000
+     k15: RandomStringRangeGenerator:1:50000000
+     k16: RandomStringRangeGenerator:1:50000000
+     k17: RandomStringRangeGenerator:1:50000000
+     k18: RandomStringRangeGenerator:1:50000000
+     k19: RandomStringRangeGenerator:1:50000000
+     k20: RandomStringRangeGenerator:1:50000000

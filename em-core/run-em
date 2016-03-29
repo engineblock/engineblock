@@ -1,0 +1,56 @@
+#!/bin/bash
+
+export AUTO_INSTALL=${AUTO_INSTALL:-"true"}
+export FORCE_INSTALL=${FORCE_INSTALL:-"false"}
+export FETCH_ONLY=${FETCH_ONLY:-"false"}
+if ! which curl >> /dev/null 2>&1
+then
+ printf "$0 requires curl to be in the path.\n";
+ exit 2
+fi
+
+export EM_JARNAME="em.jar"
+
+export browser_download_url=$(
+ curl -s -L \
+ 'https://api.github.com/repos/jshook/em/releases/latest' \
+ -H 'Accept: application/json' \
+ | grep 'browser_download_url' \
+ | cut -d'"' -f4
+)
+
+DOINSTALL="false"
+if [ ! -f "${EM_JARNAME}" -a "${AUTO_INSTALL}" = "true" ]
+then DOINSTALL="true"
+elif [ "${FORCE_INSTALL}" = "true" ]
+then DOINSTALL="true"
+fi
+
+if [ "${DOINSTALL}" = "true" ]
+then
+ printf 'fetching empirical machine from %s...\n' "${browser_download_url}" 1>&2
+ (
+  cd /tmp ;
+  curl -s -L -O "${browser_download_url}"
+ )
+ mv /tmp/em.jar ${EM_JARNAME}
+ printf "The EM jar has been saved as %s\n" ${EM_JARNAME}
+fi
+
+if [ "${FETCH_ONLY}" = "true" ]
+then
+ printf "fetching client only, exiting\n" 1>&2
+ exit 0;
+fi;
+
+if [ -z "$*" ]
+then
+  printf "Pass additional arguments to this script, and they will be passed to em.jar\n" 1>&2
+  printf "To start, you need to provide --host <contact point> and at least one --activity=<def...>\n" 1>&2
+  printf "For more details, consult http://github.com/jshook/em\n" 1>&2
+  exit 2
+fi
+
+java -jar ${EM_JARNAME} \
+ $*
+

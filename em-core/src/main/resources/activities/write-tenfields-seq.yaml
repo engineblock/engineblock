@@ -1,0 +1,40 @@
+ddl:
+- name: create-keyspace
+  cql: |
+    create keyspace if not exists <<KEYSPACE>> WITH replication =
+    {'class': 'SimpleStrategy', 'replication_factor': <<RF>>} and durable_writes = true;
+- name: create-tenfields-table
+  cql: |
+    create table if not exists <<KEYSPACE>>.<<TABLE>>_tenfields (
+    key text primary key,
+    c0 text,
+    c1 text,
+    c2 text,
+    c3 text,
+    c4 text,
+    c5 text,
+    c6 text,
+    c7 text,
+    c8 text,
+    c9 text,
+    );
+
+dml:
+ - name: write-tenfields-seq
+   cql: |
+     insert into <<KEYSPACE>>.<<TABLE>>_tenfields (key, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9)
+     values (<<key>>,<<c0>>,<<c1>>,<<c2>>,<<c3>>,<<c4>>,<<c5>>,<<c6>>,<<c7>>,<<c8>>,<<c9>>);
+   bindings:
+     key: CycleNumberStringGenerator
+     c0: LoremExtractGenerator:1000:1000
+     c1: LoremExtractGenerator:1000:1000
+     c2: LoremExtractGenerator:1000:1000
+     c3: LoremExtractGenerator:1000:1000
+     c4: LoremExtractGenerator:1000:1000
+     c5: LoremExtractGenerator:1000:1000
+     c6: LoremExtractGenerator:1000:1000
+     c7: LoremExtractGenerator:1000:1000
+     c8: LoremExtractGenerator:1000:1000
+     c9: LoremExtractGenerator:1000:1000
+
+
