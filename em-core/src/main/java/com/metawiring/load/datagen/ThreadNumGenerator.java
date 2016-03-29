@@ -16,10 +16,9 @@
  *
  */
 
-package com.metawiring.load.generators;
+package com.metawiring.load.datagen;
 
 import com.metawiring.load.core.IndexedThreadFactory;
-import com.metawiring.load.generator.Generator;
 
 public class ThreadNumGenerator implements Generator<Integer> {
 

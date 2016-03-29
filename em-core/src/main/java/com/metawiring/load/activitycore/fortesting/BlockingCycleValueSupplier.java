@@ -12,7 +12,7 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-package com.metawiring.load.activitycore.inputs;
+package com.metawiring.load.activitycore.fortesting;
 
 import com.metawiring.load.activityapi.Input;
 
