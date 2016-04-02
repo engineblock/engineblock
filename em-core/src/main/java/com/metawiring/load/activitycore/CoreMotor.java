@@ -75,6 +75,8 @@ public class CoreMotor implements ActivityDefObserver, Motor {
         return this;
     }
 
+
+
     /**
      * Set the action for this ActivityMotor.
      *

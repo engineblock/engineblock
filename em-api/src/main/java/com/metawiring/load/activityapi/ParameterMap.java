@@ -1,61 +1,312 @@
+/*
+*   Copyright 2015 jshook
+*   Licensed under the Apache License, Version 2.0 (the "License");
+*   you may not use this file except in compliance with the License.
+*   You may obtain a copy of the License at
+*
+*       http://www.apache.org/licenses/LICENSE-2.0
+*
+*   Unless required by applicable law or agreed to in writing, software
+*   distributed under the License is distributed on an "AS IS" BASIS,
+*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*   See the License for the specific language governing permissions and
+*   limitations under the License.
+*/
 package com.metawiring.load.activityapi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.script.Bindings;
-import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-public interface ParameterMap extends Map<String, Object>,ConcurrentMap<String, Object>,Serializable, Bindings {
+/**
+ * <p>A concurrently accessible parameter map which holds both keys and values as strings.
+ * An atomic change counter tracks updates, to allow interested consumers to determine
+ * when to re-read values across threads. The basic format is
+ * &lt;paramname&gt;=&lt;paramvalue&gt;;...</p>
+ * <p/>
+ * <p>To create a parameter map, use one of the static parse... methods.</p>
+ * <p/>
+ * <p>No native types are used internally. Everything is encoded as a String.</p>
+ */
+public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bindings {
+    private final static Logger logger = LoggerFactory.getLogger(ParameterMap.class);
 
-    long getLongOrDefault(String paramName, long defaultLongValue);
 
-    double getDoubleOrDefault(String paramName, double defaultDoubleValue);
+//    private final ConcurrentHashMap<String, String> paramMap = new ConcurrentHashMap<>(10);
+    private final AtomicLong changeCounter = new AtomicLong(0L);
+    private final LinkedList<Listener> listeners = new LinkedList<>();
 
-    String getStringOrDefault(String paramName, String defaultStringValue);
+    private ParameterMap(Map<String, String> valueMap) {
+        logger.info("new parameter map:" + valueMap.toString());
+        super.putAll(valueMap);
+    }
 
-    Optional<String> getOptionalString(String paramName);
+    public long getLongOrDefault(String paramName, long defaultLongValue) {
+        Optional<String> l = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+        return l.map(Long::valueOf).orElse(defaultLongValue);
+    }
 
-    Optional<Long> getOptionalLong(String paramName);
+    public double getDoubleOrDefault(String paramName, double defaultDoubleValue) {
+        Optional<String> d = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+        return d.map(Double::valueOf).orElse(defaultDoubleValue);
+    }
 
-    Optional<Double> getOptionalDouble(String paramName);
+    public String getStringOrDefault(String paramName, String defaultStringValue) {
+        Optional<String> s = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+        return s.orElse(defaultStringValue);
+    }
 
-    Optional<Boolean> getOptionalBoolean(String paramName);
+    public Optional<String> getOptionalString(String paramName) {
+        return Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+    }
 
-    int getIntOrDefault(String paramName, int defaultIntValue);
+    public Optional<Long> getOptionalLong(String paramName) {
+        return Optional.ofNullable(super.get(paramName)).map(String::valueOf).map(Long::valueOf);
+    }
 
-    boolean getBoolOrDefault(String paramName, boolean defaultBoolValue);
+    public Optional<Double> getOptionalDouble(String paramName) {
+        return Optional.ofNullable(super.get(paramName)).map(String::valueOf).map(Double::valueOf);
+    }
 
-    Long takeLongOrDefault(String paramName, Long defaultLongValue);
+    public Optional<Boolean> getOptionalBoolean(String paramName) {
+        return Optional.ofNullable(super.get(paramName)).map(String::valueOf).map(Boolean::valueOf);
+    }
 
-    Double takeDoubleOrDefault(String paramName, double defaultDoubleValue);
+    public int getIntOrDefault(String paramName, int defaultIntValue) {
+        Optional<String> i = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+        return i.map(Integer::valueOf).orElse(defaultIntValue);
+    }
 
-    String takeStringOrDefault(String paramName, String defaultStringValue);
+    public boolean getBoolOrDefault(String paramName, boolean defaultBoolValue) {
+        Optional<String> b = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+        return b.map(Boolean::valueOf).orElse(defaultBoolValue);
+    }
 
-    int takeIntOrDefault(String paramName, int paramDefault);
 
-    boolean takeBoolOrDefault(String paramName, boolean defaultBoolValue);
+    public Long takeLongOrDefault(String paramName, Long defaultLongValue) {
+        Optional<String> l = Optional.ofNullable(super.remove(paramName)).map(String::valueOf);
+        Long lval = l.map(Long::valueOf).orElse(defaultLongValue);
+        markMutation();
+        return lval;
+    }
 
-    void set(String paramName, Object newValue);
+    public Double takeDoubleOrDefault(String paramName, double defaultDoubleValue) {
+        Optional<String> d = Optional.ofNullable(super.remove(paramName)).map(String::valueOf);
+        Double dval = d.map(Double::valueOf).orElse(defaultDoubleValue);
+        markMutation();
+        return dval;
+    }
+
+    public String takeStringOrDefault(String paramName, String defaultStringValue) {
+        Optional<String> s = Optional.ofNullable(super.remove(paramName)).map(String::valueOf);
+        String sval = s.orElse(defaultStringValue);
+        markMutation();
+        return sval;
+    }
+
+    public int takeIntOrDefault(String paramName, int paramDefault) {
+        Optional<String> i = Optional.ofNullable(super.remove(paramName)).map(String::valueOf);
+        int ival = i.map(Integer::valueOf).orElse(paramDefault);
+        markMutation();
+        return ival;
+    }
+
+    public boolean takeBoolOrDefault(String paramName, boolean defaultBoolValue) {
+        Optional<String> b = Optional.ofNullable(super.remove(paramName)).map(String::valueOf);
+        boolean bval = b.map(Boolean::valueOf).orElse(defaultBoolValue);
+        markMutation();
+        return bval;
+    }
+
 
     @Override
-    Object put(String name, Object value);
+    public Object get(Object key) {
+        logger.info("getting parameter " + key);
+        return super.get(key);
+    }
+
+    public void set(String paramName, Object newValue) {
+        super.put(paramName, String.valueOf(newValue));
+        logger.info("parameter " + paramName + " set to " + newValue);
+        markMutation();
+    }
+
+    private static Pattern encodedParamsPattern = Pattern.compile("(\\w+?)=(.+?);");
 
     @Override
-    void putAll(Map<? extends String, ?> toMerge);
+    public Object put(String name, Object value) {
+        Object oldVal = super.put(name, String.valueOf(value));
+        logger.info("parameter " + name + " put to " + value);
+
+        markMutation();
+        return oldVal;
+    }
 
     @Override
-    void clear();
+    public void putAll(Map<? extends String, ? extends Object> toMerge) {
+        for (Entry<? extends String, ? extends Object> entry : toMerge.entrySet()) {
+            super.put(entry.getKey(),String.valueOf(entry.getValue()));
+        }
+        markMutation();
+    }
 
-    AtomicLong getChangeCounter();
+    @Override
+    public Object remove(Object key) {
+        Object removed = super.remove(key);
+        logger.info("parameter " + key + " removed");
 
-    void addListener(Listener listener);
+        markMutation();
+        return removed;
+    }
 
-    void removeListener(Listener listener);
+    @Override
+    public void clear() {
+        logger.info("parameter map cleared:" + toString());
+        super.clear();
 
-    int getSize();
+        markMutation();
+    }
+
+    @Override
+    public Set<Entry<String, Object>> entrySet() {
+        logger.info("getting entry set for " + toString());
+        return super.entrySet()
+                .stream()
+                .map(e -> new AbstractMap.SimpleEntry<String,Object>(e.getKey(), e.getValue()) {})
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+
+    private void markMutation() {
+        changeCounter.incrementAndGet();
+        logger.debug("calling " + listeners.size() + " listeners.");
+        callListeners();
+    }
+
+    /**
+     * Get the atomic change counter for this parameter map.
+     * It getes incremented whenever any changes are made to the map.
+     *
+     * @return the atomic long change counter
+     */
+    public AtomicLong getChangeCounter() {
+        return changeCounter;
+    }
+
+    public String toString() {
+        return "C:" + this.changeCounter.get() + ":" + super.toString();
+    }
+
+    public void addListener(Listener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(Listener listener) {
+        listeners.remove(listener);
+    }
+
+    private void callListeners() {
+        for (Listener listener : listeners) {
+            logger.info("calling listener:" + listener);
+            listener.handleParameterMapUpdate(this);
+        }
+    }
+
+    public int getSize() {
+        return super.size();
+    }
+
+    public static ParameterMap parseOrException(String encodedParams) {
+        if (encodedParams == null) {
+            throw new RuntimeException("Must provide a non-null String to parse parameters.");
+        }
+
+        Matcher matcher = ParameterMap.encodedParamsPattern.matcher(encodedParams);
+
+        LinkedHashMap<String, String> newParamMap = new LinkedHashMap<>();
+
+        int lastEnd = 0;
+        int triedAt = 0;
+
+        while (matcher.find()) {
+            triedAt = lastEnd;
+            String paramName = matcher.group(1);
+            String paramValueString = matcher.group(2);
+            newParamMap.put(paramName, paramValueString);
+            lastEnd = matcher.end();
+        }
+
+        if (lastEnd != encodedParams.length()) {
+            throw new RuntimeException("unable to find pattern " + ParameterMap.encodedParamsPattern.pattern() + " at position " + triedAt + " in input" + encodedParams);
+        }
+
+        return new ParameterMap(newParamMap);
+    }
+
+    static Optional<ParameterMap> parseOptionalParams(Optional<String> optionalEncodedParams) {
+        if (optionalEncodedParams.isPresent()) {
+            return parseParams(optionalEncodedParams.get());
+        }
+        return Optional.empty();
+    }
+
+    public static Optional<ParameterMap> parseParams(String encodedParams) {
+        try {
+            return Optional.ofNullable(parseOrException(encodedParams));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Parse positional parameters, each suffixed with the ';' terminator.
+     * This form simply allows for the initial parameter names to be elided, so long as they
+     * are sure to match up with a well-known order. This method cleans up the input, injecting
+     * the field names as necessary, and then calls the normal parsing logic.
+     *
+     * @param encodedParams     parameter string
+     * @param defaultFieldNames the well-known field ordering
+     * @return a new ParameterMap, if parsing was successful
+     */
+    public static ParameterMap parsePositional(String encodedParams, String[] defaultFieldNames) {
+
+        String[] splitAtSemi = encodedParams.split(";");
+
+
+        for (int wordidx = 0; wordidx < splitAtSemi.length; wordidx++) {
+
+            if (!splitAtSemi[wordidx].contains("=")) {
+
+                if (wordidx > (defaultFieldNames.length - 1)) {
+                    throw new RuntimeException("positional param (without var=val; format) ran out of "
+                            + "positional field names:"
+                            + " names:" + Arrays.toString(defaultFieldNames)
+                            + ", values: " + Arrays.toString(splitAtSemi)
+                    );
+                }
+
+                splitAtSemi[wordidx] = defaultFieldNames[wordidx] + "=" + splitAtSemi[wordidx] + ";";
+            }
+            if (!splitAtSemi[wordidx].endsWith(";")) {
+                splitAtSemi[wordidx] = splitAtSemi[wordidx] + ";";
+            }
+        }
+
+        String allArgs = Arrays.asList(splitAtSemi).stream().collect(Collectors.joining());
+        ParameterMap parameterMap = ParameterMap.parseOrException(allArgs);
+        return parameterMap;
+    }
 
     public static interface Listener {
         void handleParameterMapUpdate(ParameterMap parameterMap);
     }
+
+
 }

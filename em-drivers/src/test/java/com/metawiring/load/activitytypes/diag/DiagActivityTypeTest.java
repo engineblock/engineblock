@@ -25,7 +25,7 @@ public class DiagActivityTypeTest {
     public void testDiagActivity() {
         DiagActivityType da = new DiagActivityType();
         da.getName();
-        ActivityDef ad = ActivityDef.parseActivityDef("type=diag;");
+        ActivityDef ad = ActivityDefImpl.parseActivityDef("type=diag;");
         ActionDispenser actionDispenser = da.getActionDispenser(ad);
         Action action = actionDispenser.getAction(1);
         action.accept(1L);

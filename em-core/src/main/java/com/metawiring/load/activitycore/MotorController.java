@@ -34,6 +34,7 @@ public class MotorController {
         return runState.get() == SlotState.Started;
     }
 
+
     public MotorController(Motor motor) {
         this.motor = motor;
     }

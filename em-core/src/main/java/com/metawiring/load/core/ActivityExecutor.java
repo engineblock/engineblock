@@ -15,7 +15,6 @@
 package com.metawiring.load.core;
 
 import com.metawiring.load.activityapi.*;
-import com.metawiring.load.config.ParameterMapImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,7 @@ import java.util.stream.Collectors;
  * scenario, but which is inactive. This can occur when an activity is paused by controlling logic,
  * or when the threads are set to zero.</p>
  */
-public class ActivityExecutor implements ParameterMapImpl.Listener {
+public class ActivityExecutor implements ParameterMap.Listener {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);
 
     private ActivityDef activityDef;

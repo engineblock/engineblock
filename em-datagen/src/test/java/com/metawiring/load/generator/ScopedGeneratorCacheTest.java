@@ -20,7 +20,6 @@ package com.metawiring.load.generator;
 
 import com.metawiring.load.generators.CycleNumberGenerator;
 import org.testng.annotations.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ScopedGeneratorCacheTest {

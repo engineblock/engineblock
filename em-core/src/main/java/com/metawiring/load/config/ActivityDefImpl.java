@@ -77,7 +77,7 @@ public class ActivityDefImpl implements ActivityDef {
 //    private final AtomicInteger atomicThreadTarget = new AtomicInteger(0);
 
     public ActivityDefImpl(String parameterString) {
-        this.parameterMap = ParameterMapImpl.parsePositional(parameterString, field_list);
+        this.parameterMap = ParameterMap.parsePositional(parameterString, field_list);
     }
     protected ActivityDefImpl(ParameterMap parameterMap) {
         this.parameterMap = parameterMap;
@@ -196,7 +196,7 @@ public class ActivityDefImpl implements ActivityDef {
     }
 
     public static ActivityDef parseActivityDef(String namedActivitySpec) {
-        ParameterMap activityParameterMap = ParameterMapImpl.parsePositional(namedActivitySpec, field_list);
+        ParameterMap activityParameterMap = ParameterMap.parsePositional(namedActivitySpec, field_list);
         ActivityDef activityDef = new ActivityDefImpl(activityParameterMap);
         return activityDef;
     }

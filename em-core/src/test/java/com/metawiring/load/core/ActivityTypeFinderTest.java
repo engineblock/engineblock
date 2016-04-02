@@ -22,7 +22,7 @@ import static org.testng.Assert.*;
 */
 public class ActivityTypeFinderTest {
 
-    @Test
+    @Test(enabled=false)
     public void testGetDiagActivity() {
         ActivityType da = ActivityTypeFinder.get("diag");
         assertNotNull(da);
