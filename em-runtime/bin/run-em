@@ -11,13 +11,6 @@ fi
 
 export EM_JARNAME="em.jar"
 
-export browser_download_url=$(
- curl -s -L \
- 'https://api.github.com/repos/jshook/em/releases/latest' \
- -H 'Accept: application/json' \
- | grep 'browser_download_url' \
- | cut -d'"' -f4
-)
 
 DOINSTALL="false"
 if [ ! -f "${EM_JARNAME}" -a "${AUTO_INSTALL}" = "true" ]
@@ -28,6 +21,15 @@ fi
 
 if [ "${DOINSTALL}" = "true" ]
 then
+
+ export browser_download_url=$(
+   curl -s -L \
+   'https://api.github.com/repos/jshook/em/releases/latest' \
+   -H 'Accept: application/json' | \
+   grep 'browser_download_url' | cut -d'"' -f4
+ )
+ browser_download_url=${browser_download_url:?"Unable to continue without finding a download url from the project repo."}
+
  printf 'fetching empirical machine from %s...\n' "${browser_download_url}" 1>&2
  (
   cd /tmp ;
@@ -46,7 +48,6 @@ fi;
 if [ -z "$*" ]
 then
   printf "Pass additional arguments to this script, and they will be passed to em.jar\n" 1>&2
-  printf "To start, you need to provide --host <contact point> and at least one --activity=<def...>\n" 1>&2
   printf "For more details, consult http://github.com/jshook/em\n" 1>&2
   exit 2
 fi

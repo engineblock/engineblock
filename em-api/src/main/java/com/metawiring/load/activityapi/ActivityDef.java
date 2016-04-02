@@ -31,4 +31,5 @@ public interface ActivityDef {
     void setDelay(int delay);
 
     String getLogName();
+
 }

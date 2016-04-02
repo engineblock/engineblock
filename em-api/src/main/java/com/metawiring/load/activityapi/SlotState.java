@@ -3,15 +3,15 @@ package com.metawiring.load.activityapi;
 public enum SlotState {
 
     // Initial state after creation of this control
-    Initialized("I"),
+    Initialized("I>"),
     // This thread is running. This should only be set by the controlled thread
-    Started("S"),
+    Started("S>"),
     // This thread has completed all of its activity, and will do no further work without new input
-    Finished("F"),
+    Finished("F."),
     // The thread has been requested to stop. This says nothing of the internal state.
-    Stopping("_"),
+    Stopping("-\\"),
     // The thread has stopped. This should only be set by the controlled thread
-    Stopped(".");
+    Stopped("_.");
 
     private String runcode;
 

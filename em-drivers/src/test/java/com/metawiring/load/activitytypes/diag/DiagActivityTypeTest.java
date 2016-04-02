@@ -3,6 +3,7 @@ package com.metawiring.load.activitytypes.diag;
 import com.metawiring.load.activityapi.ActionDispenser;
 import com.metawiring.load.activityapi.ActivityDef;
 import com.metawiring.load.activityapi.Action;
+import com.metawiring.load.config.ActivityDefImpl;
 import org.testng.annotations.Test;
 
 /*

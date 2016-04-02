@@ -61,7 +61,7 @@ public class IndexedThreadFactory implements ThreadFactory {
         int threadIndex = threadIndexer.incrementAndGet();
 
         IndexedThread thread = new IndexedThread(threadIndex, r);
-        thread.setName(name + ":t" + threadIndex + "/" + thread.getName());
+        thread.setName(name + String.format(":%03d", threadIndex));
         thread.setMetricName(thread.getName().split(":")[0].split("/")[0]);
 
         return thread;
