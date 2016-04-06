@@ -10,9 +10,9 @@ The slot assembly logic is contained within the ActivitySlotAssembler class. Tha
 
 ### How does it work?
 
-An ActivityType implementation determines which components of an activity instance it will manage per-slot. This means that it could, if desired, provide no dispensers at all. Such an implementation would be nonsensical, since the default action only logs the input value.
+An ActivityType implementation determines which components of an activity instance it will manage per-slot. This means that it could, if desired, provide no dispensers at all. Such an implementation would do close to nothing, since the default action only logs the input value.
 
-The three primary components to a slot are the Motor, the Input, and the Action. The Motor is the Runnable for the slots thread. It requires an input and an action instance. Each of the Motor, Input, and Action instances for a slot is provided by a MotorDispenser, InputDispenser, and ActionDispenser, respectively.
+The three primary components to a slot are the Motor, the Input, and the Action. The Motor is the Runnable for the slot's thread. It requires an input and an action instance. Each of the Motor, Input, and Action instances for a slot is provided by a MotorDispenser, InputDispenser, and ActionDispenser, respectively. The MotorDispenser provides the top level service, having both an InputDispenser and an ActionDispenser. The responsibility of the MotorDispenser then is to provide instances of Runnable to fill newly created slots in a running Activity instance.
 
 Here, a dispenser provides all the motor, input, and action instances for an activity. All of the dispenser methods take a slot number as a parameter. The rest of the details for how a particular instance of a motor, input or action is created are controlled by the instance of the dispenser itself.
 
