@@ -1,3 +1,6 @@
+# Status
+This is in active development. Collaborators are welcome. However, there is still work to be done to groom the slope for new users.
+
 ## The Empirical Machine
 
 This project aims to provide a missing power tool in the test tooling arsenal.
