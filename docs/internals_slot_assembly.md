@@ -54,7 +54,7 @@ With that ActionDispenser, the ActivityExecutor will create a new action to assi
 
 This same pattern applies to Motors and Inputs as well.
 
-![SlotAssembler](slot_assembly.svg)
+![SlotAssembler](diagrams/slot_assembly.svg)
 
 
 
