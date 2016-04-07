@@ -19,15 +19,6 @@
 package com.metawiring.load.core;
 
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.ScheduledReporter;
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.ProtocolOptions;
-import com.datastax.driver.core.Session;
-import com.metawiring.load.config.TestClientConfig;
-import org.joda.time.Interval;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MetricsContext {
 

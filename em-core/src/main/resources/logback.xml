@@ -8,7 +8,6 @@
   </appender>
 
   <logger name="com.metawiring" specificity="TRACE"/>
-  <logger name="com.datastax.driver" specificity="INFO"/>
 
   <root specificity="trace">
     <appender-ref ref="STDOUT" />

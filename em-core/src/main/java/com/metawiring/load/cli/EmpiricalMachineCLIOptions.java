@@ -18,7 +18,6 @@
 
 package com.metawiring.load.cli;
 
-import com.metawiring.load.config.TestClientConfig;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
