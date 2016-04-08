@@ -12,7 +12,7 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-package com.metawiring.load.activitytypes.diag;
+package com.metawiring.emdriver.diag;
 
 import com.google.auto.service.AutoService;
 import com.metawiring.load.activityapi.*;

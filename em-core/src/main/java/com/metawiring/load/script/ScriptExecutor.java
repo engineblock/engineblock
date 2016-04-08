@@ -41,11 +41,6 @@ public class ScriptExecutor implements Runnable {
     private ScriptEngine engine;
     private Optional<ScriptContext> scriptContext = Optional.empty();
 
-    public static void main(String[] args) {
-        ScriptExecutor env = new ScriptExecutor();
-        env.addScriptFiles(args);
-        env.run();
-    }
 
     public ScriptExecutor addScriptContext(ScriptContext context) {
         scriptContext = Optional.of(context);
@@ -57,7 +52,7 @@ public class ScriptExecutor implements Runnable {
         return this;
     }
 
-    public ScriptExecutor addScriptFiles(String[] args) {
+    public ScriptExecutor addScriptFiles(String... args) {
         for (String scriptFile : args) {
             Path scriptPath = Paths.get(scriptFile);
             byte[] bytes = new byte[0];
@@ -85,14 +80,10 @@ public class ScriptExecutor implements Runnable {
         engine.put("sc",scenario);
         engine.put("activities",new ScenarioBindings(scenario));
         // TODO: rename sc -> scene or scenario everywhere
-//        scriptContext.get().setAttribute("sc",sc,ScriptContext.ENGINE_SCOPE); // TODO: Global SC scope?
 
         for (String script : scripts) {
             try {
-//                Object result = engine.eval("load('bin/sanitycheck.js');");
                 Object result = engine.eval(script);
-
-//                logger.debug("engine eval result:" + result);
             } catch (ScriptException e) {
                 e.printStackTrace();
             }
@@ -108,4 +99,5 @@ public class ScriptExecutor implements Runnable {
         return new Result(iolog.toString());
 
     }
+
 }

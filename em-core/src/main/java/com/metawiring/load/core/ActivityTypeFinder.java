@@ -18,9 +18,7 @@ import com.metawiring.load.activityapi.ActivityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -59,4 +57,14 @@ public class ActivityTypeFinder {
         return types;
     }
 
+    /**
+     * Return list of activity types tha have been found by this runtime,
+     * in alphabetical order of their type names.
+     * @return a list of ActivityType instances.
+     */
+    public static List<ActivityType> getAll() {
+        List<ActivityType> types = new ArrayList<>(getTypes().values());
+        types.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+        return Collections.unmodifiableList(types);
+    }
 }

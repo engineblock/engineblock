@@ -1,4 +1,4 @@
-package com.metawiring.load.activitytypes.diag;
+package com.metawiring.emdriver.diag;
 
 import com.metawiring.load.activityapi.ActionDispenser;
 import com.metawiring.load.activityapi.ActivityDef;

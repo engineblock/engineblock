@@ -198,6 +198,8 @@ public class ActivityDefImpl implements ActivityDef {
     public static ActivityDef parseActivityDef(String namedActivitySpec) {
         ParameterMap activityParameterMap = ParameterMap.parsePositional(namedActivitySpec, field_list);
         ActivityDef activityDef = new ActivityDefImpl(activityParameterMap);
+        logger.debug("parsed activityDef " + namedActivitySpec + " to-> " + activityDef);
+
         return activityDef;
     }
 

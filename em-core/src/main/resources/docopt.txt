@@ -1,0 +1,18 @@
+Usage:
+  em [ -h | -v | -vv ]
+  em <script> ...
+  em --activity=<activity> ...
+  em --activity-types
+  em --activity-help <activitytype>
+
+Options:
+  -h                               Show help.
+  -v                               Show version, short form.
+  -vv                              Show version, long form, with artifact coordinates.
+  --activity-types                 Show the available activity types.
+  --activity-help <activitytype>   Show help for an activity type.
+  --activity=<activityDef>         Specify an activity to run.
+
+
+
+

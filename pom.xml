@@ -14,7 +14,7 @@
         <module>em-core</module>
         <module>em-api</module>
         <!--<module>em-datagen</module>-->
-        <module>em-drivers</module>
+        <module>em-activitytype-diag</module>
         <module>em-runtime</module>
     </modules>
 

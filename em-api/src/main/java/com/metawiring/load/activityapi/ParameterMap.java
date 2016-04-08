@@ -201,7 +201,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     }
 
     public String toString() {
-        return "C:" + this.changeCounter.get() + ":" + super.toString();
+        return "(" + this.changeCounter.get() + ")/" + super.toString();
     }
 
     public void addListener(Listener listener) {

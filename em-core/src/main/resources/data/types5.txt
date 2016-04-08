@@ -1,5 +1,0 @@
-type001
-type002
-type003
-type004
-type005
