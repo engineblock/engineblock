@@ -4,7 +4,7 @@ EM is packaged as a [Maven Reactor](https://maven.apache.org/guides/mini/guide-m
 
 There is no parent project for each of the modules. Dependencies between the modules is explicitly defined in the pom, or there is no dependency. Each module will produce its own artifacts. The project has a dependency structure that is a strict directed graph.
 
-[Project Structure](diagrams/project_structure.png)
+![Project Structure](diagrams/project_structure.png)
 ## em-runtime
 
 A runtime artifact is created that ties artifacts from all other modules into a single artifact. It is the apex consumer of the other modules, and as-such provides the main artifact for the whole project: __em.jar__.
