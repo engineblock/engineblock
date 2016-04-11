@@ -14,13 +14,13 @@
 */
 package com.metawiring.load.activitycore;
 
-import com.metawiring.load.activityapi.*;
+import com.metawiring.tools.activityapi.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * <p>ActivityMotor is a Runnable which runs in one of an activity's many threads.
- * It is the iteration harness for individual cycles of an Activity. Each ActivityMotor
+ * It is the iteration harness for individual cycles of an activity. Each ActivityMotor
  * instance is responsible for taking input from a LongSupplier and applying
  * the provided LongConsumer to it on each cycle. These two parameters are called
  * input and action, respectively.

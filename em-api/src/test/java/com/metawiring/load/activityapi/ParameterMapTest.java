@@ -1,6 +1,6 @@
 package com.metawiring.load.activityapi;
 
-import com.metawiring.load.activityapi.ParameterMap;
+import com.metawiring.tools.activityapi.ParameterMap;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 

@@ -1,80 +1,119 @@
 package com.metawiring.load.cli;
 
-import com.metawiring.load.activityapi.ActivityDef;
-import com.metawiring.load.config.ActivityDefImpl;
-import org.docopt.Docopt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.util.*;
+import java.security.InvalidParameterException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
+/**
+ * No CLI parser lib is useful for command structures, it seems. So we have this instead, which is good enough.
+ * If something better is needed later, this can be replaced.
+ */
 public class EMCLIOptions {
 
     private final static Logger logger = LoggerFactory.getLogger(EMCLIOptions.class);
 
-    public static final String docoptFileName = "docopt.txt";
-    private static final String ACTIVITY = "--activity";
-    private static final String VERSION = "-v";
-    private static final String SCRIPT = "<script>";
-    private static final String ACTIVITY_TYPES = "--activity-types";
+    public static final String docoptFileName = "com/metawiring/load/cli/docopt.txt";
 
-    private final Map<String, Object> optmap;
+    private static final String ACTIVITY = "activity";
+    private static final String VERSION = "version";
+    private static final String SCRIPT = "script";
+    private static final String ACTIVITY_TYPES = "activitytypes";
+    private static final String HELP = "help";
 
-    private EMCLIOptions(Map<String, Object> parsedOptions) {
-        this.optmap = parsedOptions;
+    private LinkedList<Cmd> cmdList = new LinkedList<>();
+    private boolean wantsVersion = false;
+    private boolean wantsActivityHelp = false;
+    private String wantsActivityHelpFor;
+    private boolean wantsActivityTypes = false;
+    private boolean wantsBasicHelp = false;
+
+    EMCLIOptions(String[] args) {
+        parse(args);
     }
 
-    public static EMCLIOptions parse(String[] args) {
-        InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(docoptFileName);
-        if (resourceAsStream == null) {
-            throw new RuntimeException("Unable to find " + docoptFileName + " in classpath.");
+    private void parse(String[] args) {
+
+        LinkedList<String> arglist = new LinkedList<String>() {{
+            addAll(Arrays.asList(args));
+        }};
+
+        if (arglist.peekFirst()==null) {
+            wantsBasicHelp = true;
+            return;
         }
-        Docopt docopt = new Docopt(resourceAsStream);
-        Map<String, Object> parsedOptions = docopt.parse(args);
-        return new EMCLIOptions(parsedOptions);
+
+        while (arglist.peekFirst() != null) {
+            String word = arglist.removeFirst();
+            switch (word) {
+                case ACTIVITY:
+                case SCRIPT:
+                    cmdList.add(new Cmd(CmdType.valueOf(word),arglist.removeFirst()));
+                    break;
+                case VERSION:
+                    wantsVersion = true;
+                    break;
+                case HELP:
+                case "-h":
+                case "--help":
+                    if (arglist.peekFirst()==null) {
+                        wantsBasicHelp = true;
+                        logger.info("getting basic help");
+                    } else {
+                        wantsActivityHelp = true;
+                        wantsActivityHelpFor = arglist.removeFirst();
+                    }
+                    break;
+                case ACTIVITY_TYPES:
+                    wantsActivityTypes = true;
+                    break;
+                default:
+                    throw new InvalidParameterException("unrecognized command:" + word);
+
+            }
+        }
     }
 
-    public List<ActivityDef> getActivities() {
-        List<ActivityDef> activityDefs = new ArrayList<>();
-        getStringList(ACTIVITY)
-                .stream().map(ActivityDefImpl::parseActivityDef)
-                .forEach(activityDefs::add);
-        return activityDefs;
-    }
-
-    public boolean wantsFullVersion() {
-        return (getInt(VERSION) == 2);
+    public List<Cmd> getCommands() {
+        return cmdList;
     }
 
     public boolean wantsVersion() {
-        return (getInt(VERSION) == 1);
-    }
-
-    public List<String> getScripts() {
-        List<String> scripts = new ArrayList<String>();
-        scripts.addAll(getStringList(SCRIPT));
-        return scripts;
-    }
-
-    private int getInt(String name) {
-        return (Integer) optmap.get(name);
-    }
-
-    private List<String> getStringList(String name) {
-        List<String> list = new ArrayList<String>();
-        @SuppressWarnings("unchecked")
-        Optional<List<Object>> o = Optional.ofNullable((List<Object>) optmap.get(name));
-        o.orElse(new ArrayList<Object>())
-                .stream().forEach(s -> list.add((String) s));
-        return list;
-    }
-
-    private boolean getBoolean(String name) {
-        return (optmap.get(name)!=null && ((Boolean) optmap.get(name)));
+        return wantsVersion;
     }
 
     public boolean wantsActivityTypes() {
-        return getBoolean(ACTIVITY_TYPES);
+        return wantsActivityTypes;
     }
+
+    public boolean wantsActivityHelp() {
+        return wantsActivityHelp;
+    }
+    public String wantsActivityHelpFor() {
+        return wantsActivityHelpFor;
+    }
+
+    public boolean wantsBasicHelp() {
+        return wantsBasicHelp;
+    }
+
+    public static enum CmdType {
+        activity,
+        script
+    }
+
+    public static class Cmd {
+        public CmdType cmdType;
+        public String cmdSpec;
+        public Cmd(CmdType cmdType, String cmdSpec) {
+            this.cmdSpec = cmdSpec; this.cmdType = cmdType;
+        }
+        public String getCmdSpec() { return cmdSpec; }
+        public CmdType getCmdType() { return cmdType; }
+        public String toString() { return "type:" + cmdType + ";spec=" + cmdSpec; }
+    }
+
 }

@@ -1,6 +1,6 @@
 package com.metawiring.load.core;
 
-import com.metawiring.load.activityapi.ActivityType;
+import com.metawiring.tools.activityapi.ActivityType;
 import org.testng.annotations.Test;
 
 

@@ -14,8 +14,9 @@
 */
 package com.metawiring.load.core;
 
-import com.metawiring.load.activityapi.*;
-import com.metawiring.load.config.ActivityDefImpl;
+import com.metawiring.tools.activityapi.ActivityDef;
+import com.metawiring.tools.activityapi.ActivityType;
+import com.metawiring.tools.activityapi.MotorDispenser;
 
 /**
  * Controls the way that an activity type is used to create instances of an activity.

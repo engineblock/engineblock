@@ -14,7 +14,7 @@
 */
 package com.metawiring.load.script;
 
-import com.metawiring.load.activityapi.ActivityDef;
+import com.metawiring.tools.activityapi.ActivityDef;
 import com.metawiring.load.core.ScenarioController;
 
 import javax.script.Bindings;

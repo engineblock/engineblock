@@ -14,8 +14,7 @@
 */
 package com.metawiring.load.activitycore;
 
-import com.metawiring.load.activityapi.*;
-import com.metawiring.load.activityapi.ActivityDef;
+import com.metawiring.tools.activityapi.*;
 
 /**
  * Produce index ActivityMotor instances with an input and action,

@@ -2,20 +2,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.metawiring.load</groupId>
+    <groupId>com.metawiring.tools</groupId>
     <artifactId>em</artifactId>
     <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>em</name>
-    <url>http://maven.apache.org</url>
+    <url>http://github.com/jshook/em</url>
+    <description>A reusable machine pattern for building dynamic testing systems.</description>
 
     <modules>
+        <module>em-runtime</module>
         <module>em-core</module>
         <module>em-api</module>
-        <!--<module>em-datagen</module>-->
-        <module>em-activitytype-diag</module>
-        <module>em-runtime</module>
+        <module>emd-diag</module>
     </modules>
 
     <properties>

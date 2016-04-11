@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.metawiring.load</groupId>
+    <groupId>com.metawiring.tools</groupId>
     <artifactId>em-runtime</artifactId>
     <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -15,13 +15,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.metawiring.load</groupId>
+            <groupId>com.metawiring.tools</groupId>
             <artifactId>em-core</artifactId>
             <version>1.2-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.metawiring.emdriver</groupId>
-            <artifactId>em-activitytype-diag</artifactId>
+            <groupId>com.metawiring.tools</groupId>
+            <artifactId>emd-diag</artifactId>
             <version>1.2-SNAPSHOT</version>
         </dependency>
     </dependencies>

@@ -14,10 +14,10 @@
 */
 package com.metawiring.load.core;
 
-import com.metawiring.load.activityapi.ActivityType;
-import com.metawiring.load.activityapi.ActivityDef;
-import com.metawiring.load.config.ActivityDefImpl;
-import com.metawiring.load.activityapi.ParameterMap;
+import com.metawiring.tools.activityapi.ActivityType;
+import com.metawiring.tools.activityapi.ActivityDef;
+import com.metawiring.tools.config.ActivityDefImpl;
+import com.metawiring.tools.activityapi.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

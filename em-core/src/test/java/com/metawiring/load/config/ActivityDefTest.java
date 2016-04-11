@@ -1,6 +1,7 @@
 package com.metawiring.load.config;
 
-import com.metawiring.load.activityapi.ActivityDef;
+import com.metawiring.tools.activityapi.ActivityDef;
+import com.metawiring.tools.config.ActivityDefImpl;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

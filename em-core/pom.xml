@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.metawiring.load</groupId>
+    <groupId>com.metawiring.tools</groupId>
     <artifactId>em-core</artifactId>
     <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -17,15 +17,16 @@
     <dependencies>
 
         <dependency>
+            <groupId>com.metawiring.tools</groupId>
+            <artifactId>em-api</artifactId>
+            <version>1.2-SNAPSHOT</version>
+        </dependency>
+
+
+        <dependency>
             <groupId>com.offbytwo</groupId>
             <artifactId>docopt</artifactId>
             <version>0.6.0.20150202</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.metawiring.load</groupId>
-            <artifactId>em-api</artifactId>
-            <version>1.2-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -110,11 +111,6 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <annotationProcessors>
-                        <annotationProcessor>
-                            com.google.auto.service.processor.AutoServiceProcessor
-                        </annotationProcessor>
-                    </annotationProcessors>
                 </configuration>
             </plugin>
 

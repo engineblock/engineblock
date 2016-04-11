@@ -14,9 +14,9 @@
 */
 package com.metawiring.load.activitycore;
 
-import com.metawiring.load.activityapi.Input;
-import com.metawiring.load.activityapi.InputDispenser;
-import com.metawiring.load.activityapi.ActivityDef;
+import com.metawiring.tools.activityapi.Input;
+import com.metawiring.tools.activityapi.InputDispenser;
+import com.metawiring.tools.activityapi.ActivityDef;
 
 /**
  * An input dispenser that returns the same sequence supplier to all consumers.

@@ -1,0 +1,16 @@
+Usage:
+  em <cmdSpec> ... [ -h | -v | -vv ]
+  em activitytypes
+  em help <activitytype>
+  em ( script <script> ) ...
+  em ( activity <activity> ) ...
+
+Options:
+  -h                               Show help.
+  -v                               Show version, short form.
+  -vv                              Show version, long form, with artifact coordinates.
+  -l <logfile>, --log <logfile>    Set the script logfile  [default: em.log]
+
+
+
+

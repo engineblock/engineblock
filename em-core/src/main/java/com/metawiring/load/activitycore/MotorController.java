@@ -15,8 +15,8 @@
 package com.metawiring.load.activitycore;
 
 
-import com.metawiring.load.activityapi.Motor;
-import com.metawiring.load.activityapi.SlotState;
+import com.metawiring.tools.activityapi.Motor;
+import com.metawiring.tools.activityapi.SlotState;
 
 import java.util.concurrent.atomic.AtomicReference;
 

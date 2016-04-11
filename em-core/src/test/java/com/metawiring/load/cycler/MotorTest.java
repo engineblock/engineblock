@@ -1,8 +1,8 @@
 package com.metawiring.load.cycler;
 
-import com.metawiring.load.activityapi.Action;
+import com.metawiring.tools.activityapi.Action;
 import com.metawiring.load.activitycore.fortesting.BlockingCycleValueSupplier;
-import com.metawiring.load.activityapi.Motor;
+import com.metawiring.tools.activityapi.Motor;
 import com.metawiring.load.activitycore.CoreMotor;
 import org.testng.annotations.Test;
 

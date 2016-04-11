@@ -2,6 +2,8 @@ package com.metawiring.load.cli;
 
 import org.testng.annotations.Test;
 
+import java.security.InvalidParameterException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
@@ -9,41 +11,57 @@ public class TestEMCLIOptions {
 
     @Test
     public void shouldRecognizeActivities() {
-        EMCLIOptions opts = EMCLIOptions.parse(new String[]{"--activity=foo", "--activity=bar"});
-        assertThat(opts.getActivities()).isNotNull();
-        assertThat(opts.getActivities().size()).isEqualTo(2);
-        assertThat(opts.getActivities().get(0).getAlias()).isEqualTo("foo");
-        assertThat(opts.getActivities().get(1).getAlias()).isEqualTo("bar");
+        EMCLIOptions opts = new EMCLIOptions(new String[]{"activity", "foo", "activity", "bar"});
+        assertThat(opts.getCommands()).isNotNull();
+        assertThat(opts.getCommands().size()).isEqualTo(2);
+        assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("foo");
+        assertThat(opts.getCommands().get(1).getCmdSpec()).isEqualTo("bar");
     }
 
     @Test
     public void shouldRecognizeVersion() {
-        EMCLIOptions opts = EMCLIOptions.parse(new String[]{"-v"});
+        EMCLIOptions opts = new EMCLIOptions(new String[]{"version"});
         assertThat(opts.wantsVersion()).isTrue();
-        assertThat(opts.wantsFullVersion()).isFalse();
-    }
-
-    @Test
-    public void shouldRecognizedVerboseVersion() {
-        EMCLIOptions opts = EMCLIOptions.parse(new String[]{"-vv"});
-        assertThat(opts.wantsVersion()).isFalse();
-        assertThat(opts.wantsFullVersion()).isTrue();
     }
 
     @Test
     public void shouldRecognizeScripts() {
-        EMCLIOptions opts = EMCLIOptions.parse(new String[]{"ascriptaone", "ascriptatwo"});
-        assertThat(opts.getScripts()).isNotNull();
-        assertThat(opts.getScripts().size()).isEqualTo(2);
-        assertThat(opts.getScripts().get(0)).isEqualTo("ascriptaone");
-        assertThat(opts.getScripts().get(1)).isEqualTo("ascriptatwo");
+        EMCLIOptions opts = new EMCLIOptions(new String[]{"script", "ascriptaone", "script", "ascriptatwo"});
+        assertThat(opts.getCommands()).isNotNull();
+        assertThat(opts.getCommands().size()).isEqualTo(2);
+        assertThat(opts.getCommands().get(0).getCmdType()).isEqualTo(EMCLIOptions.CmdType.script);
+        assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("ascriptaone");
+        assertThat(opts.getCommands().get(1).getCmdType()).isEqualTo(EMCLIOptions.CmdType.script);
+        assertThat(opts.getCommands().get(1).getCmdSpec()).isEqualTo("ascriptatwo");
     }
 
     @Test
     public void shouldRecognizeWantsActivityTypes() {
-        EMCLIOptions opts = EMCLIOptions.parse(new String[]{"--activity-types"});
+        EMCLIOptions opts = new EMCLIOptions(new String[]{"activitytypes"});
         assertThat(opts.wantsActivityTypes()).isTrue();
-        opts = EMCLIOptions.parse(new String[]{"foo"});
+        opts = new EMCLIOptions(new String[]{"version"});
         assertThat(opts.wantsActivityTypes()).isFalse();
+    }
+
+    @Test
+    public void shouldRecognizeWantsBasicHelp() {
+        EMCLIOptions opts = new EMCLIOptions(new String[]{"help"});
+        assertThat(opts.wantsBasicHelp()).isTrue();
+        opts = new EMCLIOptions(new String[]{"version"});
+        assertThat(opts.wantsActivityHelp()).isFalse();
+    }
+
+    @Test
+    public void shouldRecognizeWantsActivityHelp() {
+        EMCLIOptions opts = new EMCLIOptions(new String[]{"help", "foo"});
+        assertThat(opts.wantsActivityHelp()).isTrue();
+        assertThat(opts.wantsActivityHelpFor()).isEqualTo("foo");
+        opts = new EMCLIOptions(new String[]{"version"});
+        assertThat(opts.wantsActivityHelp()).isFalse();
+    }
+
+    @Test(expectedExceptions = {InvalidParameterException.class}, expectedExceptionsMessageRegExp = ".*unrecognized command.*")
+    public void shouldErrorSanelyWhenNoMatch() {
+        EMCLIOptions opts = new EMCLIOptions(new String[]{"unrecognizable command"});
     }
 }

@@ -14,7 +14,7 @@
 */
 package com.metawiring.load.activitycore.fortesting;
 
-import com.metawiring.load.activityapi.Input;
+import com.metawiring.tools.activityapi.Input;
 
 import java.util.concurrent.atomic.AtomicLong;
 

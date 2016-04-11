@@ -1,13 +1,13 @@
 package com.metawiring.load.cycler;
 
-import com.metawiring.load.activityapi.ActivityDef;
-import com.metawiring.load.activityapi.Action;
-import com.metawiring.load.activityapi.Input;
-import com.metawiring.load.activityapi.MotorDispenser;
+import com.metawiring.tools.activityapi.ActivityDef;
+import com.metawiring.tools.activityapi.Action;
+import com.metawiring.tools.activityapi.Input;
+import com.metawiring.tools.activityapi.MotorDispenser;
 import com.metawiring.load.activitycore.CoreInput;
-import com.metawiring.load.activityapi.Motor;
+import com.metawiring.tools.activityapi.Motor;
 import com.metawiring.load.activitycore.CoreMotor;
-import com.metawiring.load.config.ActivityDefImpl;
+import com.metawiring.tools.config.ActivityDefImpl;
 import com.metawiring.load.core.ActivityExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

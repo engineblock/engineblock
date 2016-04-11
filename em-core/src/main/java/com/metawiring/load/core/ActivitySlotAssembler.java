@@ -1,10 +1,9 @@
 package com.metawiring.load.core;
 
-import com.metawiring.load.activityapi.*;
 import com.metawiring.load.activitycore.CoreActionDispenser;
 import com.metawiring.load.activitycore.CoreInputDispenser;
-import com.metawiring.load.config.ActivityDefImpl;
 import com.metawiring.load.activitycore.CoreMotorDispenser;
+import com.metawiring.tools.activityapi.*;
 
 /**
  * Given an ActivityDef instance and an ActivityType instance, create a dispenser for the Runnable
