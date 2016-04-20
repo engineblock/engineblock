@@ -1,4 +1,4 @@
-//var sc = new com.metawiring.load.cycler.ScenarioController();
+//var sc = new com.metawiring.tools.cycler.ScenarioController();
 print('waiting 500 ms');
 sc.waitMillis(500);
 print('waited');

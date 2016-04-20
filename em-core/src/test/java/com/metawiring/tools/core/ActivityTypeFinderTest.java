@@ -1,3 +1,11 @@
+package com.metawiring.tools.core;
+
+import com.metawiring.tools.activityapi.ActivityType;
+import org.testng.annotations.Test;
+
+
+import static org.testng.Assert.*;
+
 /*
 *   Copyright 2016 jshook
 *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +20,12 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-package com.metawiring.tools.activityapi;
+public class ActivityTypeFinderTest {
 
-/**
- * A decorator interface which is capable of initializing an action instance.
- * If the ActionDispenser implements this method, it will be called with each
- * action that it creates.
- */
-public interface ActionInitializer {
-    void init();
+    @Test(enabled=false)
+    public void testGetDiagActivity() {
+        ActivityType da = ActivityTypeFinder.get().get("diag");
+        assertNotNull(da);
+    }
+
 }

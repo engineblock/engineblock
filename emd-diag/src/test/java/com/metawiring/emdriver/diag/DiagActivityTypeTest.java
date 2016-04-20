@@ -3,7 +3,7 @@ package com.metawiring.emdriver.diag;
 import com.metawiring.tools.activityapi.Action;
 import com.metawiring.tools.activityapi.ActionDispenser;
 import com.metawiring.tools.activityapi.ActivityDef;
-import com.metawiring.tools.config.ActivityDefImpl;
+import com.metawiring.tools.activityapi.ActivityDefImpl;
 import org.testng.annotations.Test;
 
 /*

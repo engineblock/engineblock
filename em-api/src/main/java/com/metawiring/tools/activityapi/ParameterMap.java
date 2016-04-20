@@ -308,5 +308,12 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         void handleParameterMapUpdate(ParameterMap parameterMap);
     }
 
+    public Map<String,String> getStringStringMap() {
+        return new HashMap<String,String>() {{
+            for (Entry entry : ParameterMap.this.entrySet()) {
+                put(entry.getKey().toString(),entry.getValue().toString());
+            }
+        }};
+    }
 
 }

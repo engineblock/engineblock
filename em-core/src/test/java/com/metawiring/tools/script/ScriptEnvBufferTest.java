@@ -1,3 +1,11 @@
+package com.metawiring.tools.script;
+
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 /*
 *   Copyright 2016 jshook
 *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +20,13 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-package com.metawiring.tools.activityapi;
+public class ScriptEnvBufferTest {
 
-/**
- * A decorator interface which is capable of initializing an action instance.
- * If the ActionDispenser implements this method, it will be called with each
- * action that it creates.
- */
-public interface ActionInitializer {
-    void init();
+    @Test
+    public void shouldCaptureLoggedOutput() throws IOException {
+        ScriptEnvBuffer seb = new ScriptEnvBuffer();
+        seb.getWriter().write("out\n");
+        assertThat(seb.getStdoutText()).isEqualTo("out\n");
+    }
+
 }
