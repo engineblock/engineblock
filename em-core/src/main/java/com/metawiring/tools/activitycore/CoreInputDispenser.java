@@ -26,10 +26,10 @@ public class CoreInputDispenser implements InputDispenser {
     private final CoreInput input;
 
     public CoreInputDispenser(ActivityDef activityDef) {
-        this.input = new CoreInput().setRange(
-                activityDef.getParams().getLongOrDefault("min",1L),
-                activityDef.getParams().getLongOrDefault("max",Long.MAX_VALUE)
-        );
+        long start = activityDef.getStartCycle();
+        long end = activityDef.getEndCycle();
+
+        this.input = new CoreInput().setRange(start,end);
     }
 
     @Override
