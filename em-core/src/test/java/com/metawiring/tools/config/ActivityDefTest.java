@@ -1,7 +1,6 @@
 package com.metawiring.tools.config;
 
 import com.metawiring.tools.activityapi.ActivityDef;
-import com.metawiring.tools.activityapi.ActivityDefImpl;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,58 +25,58 @@ public class ActivityDefTest {
     public void testParser() {
         ActivityDef activityDef;
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename");
+        activityDef = ActivityDef.parseActivityDef("thename");
         assertThat(activityDef.getAlias()).isEqualTo("thename");
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource");
         assertThat(activityDef.getAlias()).isEqualTo("thename");
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2");
         assertThat(activityDef.getAlias()).isEqualTo("thename");
         assertThat(activityDef.getStartCycle()).isEqualTo(1l);
         assertThat(activityDef.getEndCycle()).isEqualTo(2l);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2..5");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2..5");
         assertThat(activityDef.getAlias()).isEqualTo("thename");
         assertThat(activityDef.getStartCycle()).isEqualTo(2l);
         assertThat(activityDef.getEndCycle()).isEqualTo(5l);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2..5;100");
-        assertThat(activityDef.getAlias()).isEqualTo("thename");
-        assertThat(activityDef.getStartCycle()).isEqualTo(2l);
-        assertThat(activityDef.getEndCycle()).isEqualTo(5l);
-        assertThat(activityDef.getThreads()).isEqualTo(100);
-
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2..5;100;1000");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2..5;100");
         assertThat(activityDef.getAlias()).isEqualTo("thename");
         assertThat(activityDef.getStartCycle()).isEqualTo(2l);
         assertThat(activityDef.getEndCycle()).isEqualTo(5l);
         assertThat(activityDef.getThreads()).isEqualTo(100);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2..5;100;1000;5000");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2..5;100;1000");
         assertThat(activityDef.getAlias()).isEqualTo("thename");
         assertThat(activityDef.getStartCycle()).isEqualTo(2l);
         assertThat(activityDef.getEndCycle()).isEqualTo(5l);
         assertThat(activityDef.getThreads()).isEqualTo(100);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2..5;100;1000;5000");
+        assertThat(activityDef.getAlias()).isEqualTo("thename");
+        assertThat(activityDef.getStartCycle()).isEqualTo(2l);
+        assertThat(activityDef.getEndCycle()).isEqualTo(5l);
+        assertThat(activityDef.getThreads()).isEqualTo(100);
+
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2");
         assertThat(activityDef.getAlias()).isEqualTo("thename");
         assertThat(activityDef.getStartCycle()).isEqualTo(1l);
         assertThat(activityDef.getEndCycle()).isEqualTo(2l);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2;100");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2;100");
         assertThat(activityDef.getAlias()).isEqualTo("thename");
         assertThat(activityDef.getStartCycle()).isEqualTo(1l);
         assertThat(activityDef.getEndCycle()).isEqualTo(2l);
         assertThat(activityDef.getThreads()).isEqualTo(100);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2;100;1000");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2;100;1000");
         assertThat(activityDef.getAlias()).isEqualTo("thename");
         assertThat(activityDef.getStartCycle()).isEqualTo(1l);
         assertThat(activityDef.getEndCycle()).isEqualTo(2l);
         assertThat(activityDef.getThreads()).isEqualTo(100);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2;100;1000;5000");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2;100;1000;5000");
         assertThat(activityDef.getAlias()).isEqualTo("thename");
         assertThat(activityDef.getStartCycle()).isEqualTo(1l);
         assertThat(activityDef.getEndCycle()).isEqualTo(2l);
@@ -89,63 +88,63 @@ public class ActivityDefTest {
     public void testParserWithOptions() {
         ActivityDef activityDef;
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;param1=val1;");
+        activityDef = ActivityDef.parseActivityDef("thename;param1=val1;");
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
         assertThat(activityDef.getStartCycle()).isEqualTo(1l);
         assertThat(activityDef.getThreads()).isEqualTo(1);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;param1=val1;");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;param1=val1;");
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
         assertThat(activityDef.getStartCycle()).isEqualTo(1l);
         assertThat(activityDef.getThreads()).isEqualTo(1);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2;param1=val1;");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2;param1=val1;");
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
         assertThat(activityDef.getStartCycle()).isEqualTo(1l);
         assertThat(activityDef.getThreads()).isEqualTo(1);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2..5;param1=val1;");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2..5;param1=val1;");
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
         assertThat(activityDef.getStartCycle()).isEqualTo(2l);
         assertThat(activityDef.getThreads()).isEqualTo(1);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2..5;100;param1=val1;");
-        assertThat(activityDef).isNotNull();
-        assertThat(activityDef.getParams()).isNotNull();
-        assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
-        assertThat(activityDef.getStartCycle()).isEqualTo(2l);
-        assertThat(activityDef.getThreads()).isEqualTo(100);
-
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2..5;100;1000;param1=val1;");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2..5;100;param1=val1;");
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
         assertThat(activityDef.getStartCycle()).isEqualTo(2l);
         assertThat(activityDef.getThreads()).isEqualTo(100);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2..5;100;1000;5000;param1=val1;");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2..5;100;1000;param1=val1;");
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
         assertThat(activityDef.getStartCycle()).isEqualTo(2l);
         assertThat(activityDef.getThreads()).isEqualTo(100);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2;param1=val1;");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2..5;100;1000;5000;param1=val1;");
+        assertThat(activityDef).isNotNull();
+        assertThat(activityDef.getParams()).isNotNull();
+        assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
+        assertThat(activityDef.getStartCycle()).isEqualTo(2l);
+        assertThat(activityDef.getThreads()).isEqualTo(100);
+
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2;param1=val1;");
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
         assertThat(activityDef.getStartCycle()).isEqualTo(1l);
         assertThat(activityDef.getThreads()).isEqualTo(1);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2;100;param1=val1;");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2;100;param1=val1;");
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
@@ -153,7 +152,7 @@ public class ActivityDefTest {
         assertThat(activityDef.getEndCycle()).isEqualTo(2l);
         assertThat(activityDef.getThreads()).isEqualTo(100);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2;100;1000;param1=val1;");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2;100;1000;param1=val1;");
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
@@ -161,7 +160,7 @@ public class ActivityDefTest {
         assertThat(activityDef.getEndCycle()).isEqualTo(2l);
         assertThat(activityDef.getThreads()).isEqualTo(100);
 
-        activityDef = ActivityDefImpl.parseActivityDef("thename;thesource;2;100;1000;5000;param1=val1;");
+        activityDef = ActivityDef.parseActivityDef("thename;thesource;2;100;1000;5000;param1=val1;");
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
@@ -174,7 +173,7 @@ public class ActivityDefTest {
     @Test
     public void testMissingSemicolonErrorSanity() {
         ActivityDef activityDef;
-        activityDef = ActivityDefImpl.parseActivityDef("thename;param1=val1");
+        activityDef = ActivityDef.parseActivityDef("thename;param1=val1");
         assertThat(activityDef.getParams().getStringOrDefault("param1","invalid")).isEqualTo("val1");
     }
 

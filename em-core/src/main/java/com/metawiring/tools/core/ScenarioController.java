@@ -16,7 +16,6 @@ package com.metawiring.tools.core;
 
 import com.metawiring.tools.activityapi.ActivityType;
 import com.metawiring.tools.activityapi.ActivityDef;
-import com.metawiring.tools.activityapi.ActivityDefImpl;
 import com.metawiring.tools.activityapi.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,7 @@ public class ScenarioController {
     }
 
     public synchronized void start(String activityDef) {
-        start(ActivityDefImpl.parseActivityDef(activityDef));
+        start(ActivityDef.parseActivityDef(activityDef));
     }
 
     public synchronized void stop(ActivityDef activityDef) {
@@ -46,7 +45,7 @@ public class ScenarioController {
     }
 
     public synchronized void stop(String activityDef) {
-        stop(ActivityDefImpl.parseActivityDef(activityDef));
+        stop(ActivityDef.parseActivityDef(activityDef));
     }
 
     public synchronized void modify(String activityAlias, String param, String value) {

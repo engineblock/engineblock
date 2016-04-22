@@ -3,7 +3,6 @@ package com.metawiring.emdriver.diag;
 import com.metawiring.tools.activityapi.Action;
 import com.metawiring.tools.activityapi.ActionDispenser;
 import com.metawiring.tools.activityapi.ActivityDef;
-import com.metawiring.tools.activityapi.ActivityDefImpl;
 import org.testng.annotations.Test;
 
 /*
@@ -26,7 +25,7 @@ public class DiagActivityTypeTest {
     public void testDiagActivity() {
         DiagActivityType da = new DiagActivityType();
         da.getName();
-        ActivityDef ad = ActivityDefImpl.parseActivityDef("type=diag;");
+        ActivityDef ad = ActivityDef.parseActivityDef("type=diag;");
         ActionDispenser actionDispenser = da.getActionDispenser(ad);
         Action action = actionDispenser.getAction(1);
         action.accept(1L);

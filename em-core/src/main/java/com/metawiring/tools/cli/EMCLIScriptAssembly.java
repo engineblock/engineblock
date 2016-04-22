@@ -1,7 +1,6 @@
 package com.metawiring.tools.cli;
 
 import com.metawiring.tools.activityapi.ActivityDef;
-import com.metawiring.tools.activityapi.ActivityDefImpl;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -16,7 +15,7 @@ public class EMCLIScriptAssembly {
             switch (cmd.cmdType) {
                 case activity:
                     // Sanity check that this can parse before using it
-                    ActivityDef activityDef = ActivityDefImpl.parseActivityDef(cmd.cmdSpec);
+                    ActivityDef activityDef = ActivityDef.parseActivityDef(cmd.cmdSpec);
                     sb.append("sc.start('" + cmd.cmdSpec + "');\n");
                     break;
                 case script:

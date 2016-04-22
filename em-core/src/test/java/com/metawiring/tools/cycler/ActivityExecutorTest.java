@@ -7,7 +7,6 @@ import com.metawiring.tools.activityapi.MotorDispenser;
 import com.metawiring.tools.activitycore.CoreInput;
 import com.metawiring.tools.activityapi.Motor;
 import com.metawiring.tools.activitycore.CoreMotor;
-import com.metawiring.tools.activityapi.ActivityDefImpl;
 import com.metawiring.tools.core.ActivityExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,7 @@ public class ActivityExecutorTest {
 
     @Test(enabled=false)
     public void testNewActivityExecutor() {
-        ActivityDef ad = ActivityDefImpl.parseActivityDef("alias=test");
+        ActivityDef ad = ActivityDef.parseActivityDef("alias=test");
         ActivityExecutor ae = new ActivityExecutor(ad);
         Input longSupplier = new CoreInput();
         MotorDispenser cmf = getActivityMotorFactory(
