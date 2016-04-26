@@ -1,13 +1,13 @@
-# EM Project Structure
+# Engine Block Project Structure
 
-EM is packaged as a [Maven Reactor](https://maven.apache.org/guides/mini/guide-multiple-modules.html) project.
+EB is packaged as a [Maven Reactor](https://maven.apache.org/guides/mini/guide-multiple-modules.html) project.
 
 There is no parent project for each of the modules. Dependencies between the modules is explicitly defined in the pom, or there is no dependency. Each module will produce its own artifacts. The project has a dependency structure that is a strict directed graph.
 
 ![Project Structure](diagrams/project_structure.png)
 ## em-runtime
 
-A runtime artifact is created that ties artifacts from all other modules into a single artifact. It is the apex consumer of the other modules, and as-such provides the main artifact for the whole project: __em.jar__.
+A runtime artifact is created that ties artifacts from all other modules into a single artifact. It is the apex consumer of the other modules, and as-such provides the main artifact for the whole project: __eb.jar__.
 
 The full maven coordinates for em-runtime are:
 ~~~
@@ -18,11 +18,11 @@ The full maven coordinates for em-runtime are:
   </dependency>
 ~~~
 
-The coordinates above are useful for embedding into enhanced distributions of EM when you want to provide your own drivers into a single artifact.
+The coordinates above are useful for embedding into enhanced distributions of EB when you want to provide your own drivers into a single artifact.
 
 ## em-core
 
-The core EM module provides the core machinery needed to execute activities.
+The core EB module provides the core machinery needed to execute activities.
 
 ## em-api
 

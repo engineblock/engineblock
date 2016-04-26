@@ -1,9 +1,10 @@
 # Core Concepts
-EM is a machine pattern for test design and execution. This guide is intended to illustrate the moving parts and how they work together. In simplest form, EM serves as control wiring for a set of inputs, actions on those inputs, and instrumentation to measure the result of those actions.
+
+EngineBlock (EB) is a machine pattern for test design and execution. This guide is intended to illustrate the moving parts and how they work together. In simplest form, EB serves as control wiring for a set of inputs, actions on those inputs, and instrumentation to measure the result of those actions.
 
 ## Scenario
 
-A runtime instance of EM is called a Scenario. A scenario is the sandbox within which multiple activities run concurrently.
+A runtime instance of EB runs a Scenario. A scenario is the sandbox within which multiple activities run concurrently.
 
 ## Activity
 
@@ -15,7 +16,7 @@ Parallel motors run side-by-side when an Activity is running multi-threaded. The
 
 ## Activity Types
 
-Runnable activities come in various pre-assembled forms, known as Activity Types. The available activity types are determined by the libraries which are packaged or deployed along with your EM distribution.
+Runnable activities come in various pre-assembled forms, known as Activity Types. The available activity types are determined by the libraries which are packaged or deployed along with your EB distribution.
 
 New ActivityTypes are merely implementations of the ActivityType interface. They are packaged for usage by including the appropriate ServiceLocator data in your jar. At the very minimum, an ActivityType implementation must define an Action implementation. The default implementation of the Motor and Input interfaces are sufficient for most needs.
 
@@ -43,15 +44,15 @@ The format is simple:
 
 ## Scenario Script
 
-When a Scenario runs, it is controlled directly by a control script. Even when simpler modes of using Em are used, the control script is still running the show. For very basic tests, such as running a single workload against a target system, this may simply be a command to start the activity. For more complex scenarios, multiple activities may be started or stopped in various orders, with adjustments on the fly to controls such as thread count, delay settings, workload mix, etc. The open-ended scripting capabilities are one of the more powerful features of EM. Consult the section on [scripting](scripting.md) for more details.
+When a Scenario runs, it is controlled directly by a control script. Even when simpler modes of using EB are used, the control script is still running the show. For very basic tests, such as running a single workload against a target system, this may simply be a command to start the activity. For more complex scenarios, multiple activities may be started or stopped in various orders, with adjustments on the fly to controls such as thread count, delay settings, workload mix, etc. The open-ended scripting capabilities are one of the more powerful features of EM. Consult the section on [scripting](scripting.md) for more details.
 
 #### _Dynamic_ Activity Parameters
 
-All of the activity parameters mentioned in this documentation are provided to the scripting runtime as control variables. That means that as you modify their values, the EM runtime is reacting to the changes. This allows you to create a test which is as simple or as sophisticated as needed.
+All of the activity parameters mentioned in this documentation are provided to the scripting runtime as control variables. That means that as you modify their values, the EB runtime is reacting to the changes. This allows you to create a test which is as simple or as sophisticated as needed.
 
 #### Measurements
 
-Some core measurements are made by the EM runtime. These measurements are exposed to the control script as variables. However, they will be read-only to the control script. This makes it possible to dynamically adapt a test to the measured results as the test proceeds.
+Some core measurements are made by the EB runtime. These measurements are exposed to the control script as variables. However, they will be read-only to the control script. This makes it possible to dynamically adapt a test to the measured results as the test proceeds.
 
 
 

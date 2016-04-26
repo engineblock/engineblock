@@ -1,6 +1,6 @@
-## EM Metrics
+## EB Metrics
 
-If you like to have all of your testing data in one place, then you may be interested in reporting your measurements to a monitoring system. For this, EM includes a [Metrics Library](https://github.com/dropwizard/metrics). Graphite reporting is baked in as the default reporter.
+If you like to have all of your testing data in one place, then you may be interested in reporting your measurements to a monitoring system. For this, EB includes a [Metrics Library](https://github.com/dropwizard/metrics). Graphite reporting is baked in as the default reporter.
 
 In order to enable graphite reporting, use
 

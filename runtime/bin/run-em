@@ -9,11 +9,11 @@ then
  exit 2
 fi
 
-export EM_JARNAME="em.jar"
+export EB_JARNAME="eb.jar"
 
 
 DOINSTALL="false"
-if [ ! -f "${EM_JARNAME}" -a "${AUTO_INSTALL}" = "true" ]
+if [ ! -f "${EB_JARNAME}" -a "${AUTO_INSTALL}" = "true" ]
 then DOINSTALL="true"
 elif [ "${FORCE_INSTALL}" = "true" ]
 then DOINSTALL="true"
@@ -35,8 +35,8 @@ then
   cd /tmp ;
   curl -s -L -O "${browser_download_url}"
  )
- mv /tmp/em.jar ${EM_JARNAME}
- printf "The EM jar has been saved as %s\n" ${EM_JARNAME}
+ mv /tmp/eb.jar ${EB_JARNAME}
+ printf "The EB jar has been saved as %s\n" ${EB_JARNAME}
 fi
 
 if [ "${FETCH_ONLY}" = "true" ]
@@ -47,11 +47,11 @@ fi;
 
 if [ -z "$*" ]
 then
-  printf "Pass additional arguments to this script, and they will be passed to em.jar\n" 1>&2
+  printf "Pass additional arguments to this script, and they will be passed to eb.jar\n" 1>&2
   printf "For more details, consult http://github.com/jshook/em\n" 1>&2
   exit 2
 fi
 
-java -jar ${EM_JARNAME} \
+java -jar ${EB_JARNAME} \
  $*
 

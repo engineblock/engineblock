@@ -12,14 +12,13 @@ The design goals:
 3. Minimize the amount of effort required to get empirical results from a test cycle. For this, [metrics reporting](docs/metrics.md) is baked in.
 
 In short, Engine Block wishes to be a programmable power tool for performance testing. However, it is somewhat generic. It doesn't know directly about a particular type of system, or protocol.
-It simply provides a suitable machine harness in which to put your drivers and testing logic. If you know how to build a client for a particular kind of system, EM will let you load it like a plugin and control it dynamically.
+It simply provides a suitable machine harness in which to put your drivers and testing logic. If you know how to build a client for a particular kind of system, EB will let you load it like a plugin and control it dynamically.
 
-The most direct way to do this, if you are a tool developer, is to build your own activity type drivers and embed EM as the core runtime. You can always experiment with it and learn how it works by using the built-in diagnostic drivers.
+The most direct way to do this, if you are a tool developer, is to build your own activity type drivers and embed EB as the core runtime. You can always experiment with it and learn how it works by using the built-in diagnostic drivers.
 
 ## Scale
 
-For now, this is a single-instance client. For testing large clusters, you will still need to run multiple clients to provide adequate loading. Experience has shown that one client can adequately drive 3-5 target systems for typical workloads. As always, be sure to watch your metrics on both sides to ensure that your testing instrument isn't the thing being measured. A future enhancement may
-allow EM to be powered by multiple clients for greater load generating capacity.
+For now, this is a single-instance client. For testing large clusters, you will still need to run multiple clients to provide adequate loading. Experience has shown that one client can adequately drive 3-5 target systems for typical workloads. As always, be sure to watch your metrics on both sides to ensure that your testing instrument isn't the thing being measured. A future enhancement may allow EB to be powered by multiple clients for greater load generating capacity.
 
 ## Getting Started
 

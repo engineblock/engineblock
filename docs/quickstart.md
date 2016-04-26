@@ -2,21 +2,21 @@
 
 ## Installation
 
-EM is released as an executable jar. To use a specific release, simply download it and run it like this:
+EB is released as an executable jar. To use a specific release, simply download it and run it like this:
     
-    curl -O https://github.com/jshook/em/releases/download/1.0.0-snapshot/em.jar
-    java -jar em.jar
+    curl -O https://github.com/jshook/em/releases/download/1.0.0-snapshot/eb.jar
+    java -jar eb.jar
         
-The latest release can always be run with this simple script: [run-em](https://raw.githubusercontent.com/jshook/em/run-em). You can use the commands below to get it. It will simply download em.jar from the latest release if needed. As always, blindly running scripts from the web is not a good idea. Look at this script before you run it.
+The latest release can always be run with this simple script: [run-em](https://raw.githubusercontent.com/jshook/em/run-em). You can use the commands below to get it. It will simply download eb.jar from the latest release if needed. As always, blindly running scripts from the web is not a good idea. Look at this script before you run it.
 
     curl -O https://raw.githubusercontent.com/jshook/em/archwork/run-em
     chmod u+x run-em
 
 This script may be used in place of
 
-    java -jar em.jar arg0 ...
+    java -jar eb.jar arg0 ...
     
-It will have the same effect as running 'java -jar em.jar' with the supplied command line arguments, except that it will fetch em.jar if needed. The rest of the examples will use this method, although you can simply invoke the jar directly if you need.
+It will have the same effect as running 'java -jar eb.jar' with the supplied command line arguments, except that it will fetch eb.jar if needed. The rest of the examples will use this method, although you can simply invoke the jar directly if you need.
 
 # Usage
 
