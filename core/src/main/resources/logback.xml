@@ -7,7 +7,7 @@
     </encoder>
   </appender>
 
-  <logger name="com.metawiring" specificity="TRACE"/>
+  <logger name="io.engineblock" specificity="TRACE"/>
 
   <root specificity="trace">
     <appender-ref ref="STDOUT" />

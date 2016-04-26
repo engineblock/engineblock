@@ -1,4 +1,3 @@
-//var sc = new com.metawiring.tools.cycler.ScenarioController();
 print('waiting 500 ms');
 sc.waitMillis(500);
 print('waited');
@@ -9,9 +8,6 @@ print('waiting 5000 ms');
 sc.waitMillis(5000);
 sc.modify('test','threads',"20");
 print('modified threads to 20');
-
-//sc.modify('test','threads','15');
-//sc.stop('test');
 
 
 

@@ -1,4 +1,4 @@
-Empirical Machine for Developers
+Engine Block for Developers
 =========================
 
 ## Activity Internals
@@ -61,7 +61,7 @@ The default implementation of an activity input is a sequence generator. This is
 ### ActivityType Packaging & Discovery
 
 _ActivityType_ implementations are discovered by the runtime using the 
-[ServiceLoader API](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) , with the service name _com.metawiring.load.activities.ActivityType_. That means simply that you must add the fully-qualified class name of your ActivitType implementations to the META-INF/services/com.metawiring.load.activities.ActivityType file of your built jar.
+[ServiceLoader API](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) , with the service name __io.engineblock.activityapi.ActivityType.__ That means simply that you must add the fully-qualified class name of your ActivityType implementations to the META-INF/services/io.engineblock.activityapi.ActivityType file of your built jar. A maven plugin automates this during build, and is explained in further detail in the dev guides.
 
 
 

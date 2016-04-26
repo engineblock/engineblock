@@ -12,8 +12,8 @@ A runtime artifact is created that ties artifacts from all other modules into a 
 The full maven coordinates for em-runtime are:
 ~~~
   <dependency>
-    <groupId>com.metawiring</groupId>
-    <artifactId>em-runtime</artifactId>
+    <groupId>io.engineblock</groupId>
+    <artifactId>runtime</artifactId>
     <version>LATEST</version>
   </dependency>
 ~~~
@@ -31,8 +31,8 @@ The API defines the interfaces that must be implemented in order to realize a ne
 When you want to implement your own ActivityType, you'll need the full maven coordinates:
 ~~~
   <dependency>
-    <groupId>com.metawiring</groupId>
-    <artifactId>em-core</artifactId>
+    <groupId>io.engineblock</groupId>
+    <artifactId>core</artifactId>
     <version>LATEST</version>
   </dependency>
 ~~~

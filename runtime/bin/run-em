@@ -30,7 +30,7 @@ then
  )
  browser_download_url=${browser_download_url:?"Unable to continue without finding a download url from the project repo."}
 
- printf 'fetching empirical machine from %s...\n' "${browser_download_url}" 1>&2
+ printf 'fetching engine block runtime from %s...\n' "${browser_download_url}" 1>&2
  (
   cd /tmp ;
   curl -s -L -O "${browser_download_url}"
