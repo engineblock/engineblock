@@ -116,8 +116,6 @@ public class CoreMotor implements ActivityDefObserver, Motor {
 
         while (motorController.getRunState() == SlotState.Started) {
             cyclenum = input.getAsLong();
-            // TODO: Figure out how to signal any control logic to avoid or react
-            // TODO: to graceful motor exits with spurious attempts to restart
             if (cyclenum > cycleMax) {
                 logger.trace("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
                 motorController.requestStop();
@@ -127,7 +125,6 @@ public class CoreMotor implements ActivityDefObserver, Motor {
             action.accept(cyclenum);
         }
 
-        // TODO:zero-pad activity motor identifiers in log outputs
         motorController.signalStopped();
     }
 

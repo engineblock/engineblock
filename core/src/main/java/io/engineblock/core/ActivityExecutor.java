@@ -170,7 +170,6 @@ public class ActivityExecutor implements ParameterMap.Listener {
         ).forEach(
                 m -> ((ActivityDefObserver) m).onActivityDefUpdate(activityDef)
         );
-        // TODO: clean this up: activityDef or parameterMap? Pick one.
     }
 
     public ActivityDef getActivityDef() {

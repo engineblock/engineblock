@@ -71,7 +71,6 @@ public class ScenarioController {
 
     }
 
-    // TODO: Move activity construction logic out of scenario controller
     private ActivityExecutor getActivityExecutor(ActivityDef activityDef) {
         synchronized (activityExecutors) {
             ActivityExecutor executor = activityExecutors.get(activityDef.getAlias());

@@ -18,7 +18,6 @@ import java.util.LinkedList;
 
 /**
  * A simple callback handler for shutting down things gracefully.
- * TODO: Figure out how to register this for automatic execution on JVM shutdown.
  */
 public class ShutdownManager {
     private ShutdownManager() {}
