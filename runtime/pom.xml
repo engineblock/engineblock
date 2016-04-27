@@ -92,6 +92,7 @@
                                 </transformer>
 
                             </transformers>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <finalName>eb.jar</finalName>
                         </configuration>
                     </execution>
