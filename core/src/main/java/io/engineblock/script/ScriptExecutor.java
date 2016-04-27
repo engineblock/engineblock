@@ -77,9 +77,8 @@ public class ScriptExecutor implements Runnable {
         ScenarioController scenario = new ScenarioController();
         scriptContext = Optional.of(scriptContext.orElse(new ScriptEnv(scenario)));
         scriptContext.ifPresent(engine::setContext);
-        engine.put("sc",scenario);
+        engine.put("scenario",scenario);
         engine.put("activities",new ScenarioBindings(scenario));
-        // TODO: rename sc -> scene or scenario everywhere
 
         for (String script : scripts) {
             try {
