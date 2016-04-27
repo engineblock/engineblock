@@ -9,6 +9,7 @@
 
     <name>core</name>
     <url>http://engineblock.io/</url>
+    <description>Core runtime library for engineblock.</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -147,6 +148,21 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
 
         <resources>
@@ -163,5 +179,20 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
+
+    <developers>
+        <developer>
+            <name>Jonathan Shook</name>
+            <email>jshook@gmail.com</email>
+            <organization>EngineBlock.io</organization>
+            <organizationUrl>http://engineblock.io/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Kat Grigg</name>
+            <email>kat.grigg@gmail.com</email>
+            <organization>EngineBlock.io</organization>
+            <organizationUrl>http://engineblock.io/</organizationUrl>
+        </developer>
+    </developers>
 
 </project>
