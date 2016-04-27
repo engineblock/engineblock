@@ -30,9 +30,9 @@ import java.util.stream.Collectors;
  * An atomic change counter tracks updates, to allow interested consumers to determine
  * when to re-read values across threads. The basic format is
  * &lt;paramname&gt;=&lt;paramvalue&gt;;...</p>
- * <p/>
+ *
  * <p>To create a parameter map, use one of the static parse... methods.</p>
- * <p/>
+ *
  * <p>No native types are used internally. Everything is encoded as a String.</p>
  */
 public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bindings {

@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * <p>The canonical values for all parameters are kept internally in the parameter map.
  * Essentially, ActivityDef is just a type-aware wrapper around a thread-safe parameter map,
- * with an atomic change counter which can be used to signal changes to observers./p>
+ * with an atomic change counter which can be used to signal changes to observers.</p>
  */
 public class ActivityDef {
 

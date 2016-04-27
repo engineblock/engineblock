@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * instance is responsible for taking input from a LongSupplier and applying
  * the provided LongConsumer to it on each cycle. These two parameters are called
  * input and action, respectively.
- * <p/>
+ * </p>
  */
 public class CoreMotor implements ActivityDefObserver, Motor {
     private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
