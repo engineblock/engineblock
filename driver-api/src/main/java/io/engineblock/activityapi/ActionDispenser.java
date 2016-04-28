@@ -14,6 +14,19 @@
 */
 package io.engineblock.activityapi;
 
+/**
+ * An ActionDispenser is created for each Activity instance within a scenario.
+ * When a thread is created, the motor and its input and action instances are resolved.
+ * The ActionDispenser is responsible for choosing how the action is resolved,
+ * whether that is a shared thread-safe action or an action per slot.
+ */
 public interface ActionDispenser {
+
+    /**
+     * Resolve (find or create) an Action instance for the slot specified.
+     * The action is not required to be per-slot (per-thread), but any shared actions must be thread safe.
+     * @param slot The numbered slot within the activity instance for this action.
+     * @return A new or cached Action for the specified slot.
+     */
     Action getAction(int slot);
 }

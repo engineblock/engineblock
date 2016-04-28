@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.engineblock</groupId>
-    <artifactId>api</artifactId>
+    <artifactId>driver-api</artifactId>
     <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>api</name>
+    <name>${artifactId}</name>
     <url>http://engineblock.io/</url>
     <description>The driver API for engineblock.</description>
 

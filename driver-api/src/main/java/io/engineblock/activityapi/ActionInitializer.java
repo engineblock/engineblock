@@ -1,4 +1,4 @@
-package io.engineblock.activityapi;/*
+/*
 *   Copyright 2016 jshook
 *   Licensed under the Apache License, Version 2.0 (the "License");
 *   you may not use this file except in compliance with the License.
@@ -12,7 +12,18 @@ package io.engineblock.activityapi;/*
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
+package io.engineblock.activityapi;
 
-public interface InputDispenser {
-    public Input getInput(long slotId);
+/**
+ * A decorator interface which allows actions to have a separate init after construction.
+ * If an Action implements this interface, it will be called within the scope of
+ * each slot, meaning within the thread that will run the action instance.
+ */
+public interface ActionInitializer {
+
+    /**
+     * Called on actions that implement the owning interface, once in each thread slot that
+     * the action is assigned to.
+     */
+    void init();
 }

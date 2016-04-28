@@ -44,7 +44,7 @@ public class ActivityDef {
     private static final String FIELD_ALIAS = "alias";
 
     // a file or URL containing the activity: statements, generator bindings, ...
-    private static final String FIELD_SOURCE = "source";
+    private static final String FIELD_ATYPE = "type";
 
     // cycles for this activity in either "M" or "N..M" form. "M" form implies "1..M"
     private static final String FIELD_CYCLES = "cycles";
@@ -70,7 +70,7 @@ public class ActivityDef {
     private ParameterMap parameterMap;
 
     private static String[] field_list = new String[] {
-            FIELD_ALIAS, FIELD_SOURCE, FIELD_CYCLES, FIELD_THREADS, FIELD_ASYNC, FIELD_DELAY
+            FIELD_ALIAS, FIELD_ATYPE, FIELD_CYCLES, FIELD_THREADS, FIELD_DELAY
     };
 //    private final AtomicInteger atomicThreadTarget = new AtomicInteger(0);
 
@@ -90,10 +90,18 @@ public class ActivityDef {
         return "ActivityDef:" + parameterMap.toString();
     }
 
+    /**
+     * The alias that the associated activity instance is known by.
+     * @return the alias
+     */
     public String getAlias() {
         return parameterMap.getStringOrDefault("alias",DEFAULT_ALIAS);
     }
 
+    /**
+     * The first cycle that will be used for execution of this activity, inclusive.
+     * @return the long start cycle
+     */
     public long getStartCycle() {
         String cycles = parameterMap.getStringOrDefault("cycles",DEFAULT_CYCLES);
         int rangeAt = cycles.indexOf("..");
@@ -105,6 +113,10 @@ public class ActivityDef {
         }
     }
 
+    /**
+     * The last cycle that will be used for execution of this activity, inclusive.
+     * @return the long end cycle
+     */
     public long getEndCycle() {
         String cycles = parameterMap.getStringOrDefault("cycles",DEFAULT_CYCLES);
         int rangeAt = cycles.indexOf("..");
@@ -116,31 +128,27 @@ public class ActivityDef {
     }
 
     /**
-     * Returns the greater of threads or maxAsync. The reason for this is that maxAsync less than threads will starve
-     * threads of async grants, since the async is apportioned to threads in an activity.
-     *
-     * @return maxAsync, or threads if threads is greater
+     * The number of threads (AKA slots) that the associated activity should currently be using.
+     * @return target thread count
      */
-    public int getMaxAsync() {
-        int async = parameterMap.getIntOrDefault(FIELD_ASYNC,DEFAULT_ASYNC);
-        int threads = parameterMap.getIntOrDefault(FIELD_THREADS,DEFAULT_THREADS);
-        return (threads > async) ? threads : async;
-    }
-
     public int getThreads() {
         return parameterMap.getIntOrDefault(FIELD_THREADS,DEFAULT_THREADS);
     }
 
+    /**
+     * The number of milliseconds to delay within each thread for each operation.
+     * @return ms delay
+     */
     public int getInterCycleDelay() {
         return parameterMap.getIntOrDefault(FIELD_DELAY,DEFAULT_DELAY);
     }
 
+    /**
+     * Get the parameter map, which is the backing-store for all data within an ActivityDef.
+     * @return the parameter map
+     */
     public ParameterMap getParams() {
         return parameterMap;
-    }
-
-    public String getSource() {
-        return parameterMap.getStringOrDefault("source",DEFAULT_SOURCE);
     }
 
     public AtomicLong getChangeCounter() {
@@ -159,9 +167,6 @@ public class ActivityDef {
     public void setThreads(int threads) {
         parameterMap.set(FIELD_THREADS,threads);
 //        updateAtomicThreadLevel();
-    }
-    public void setAsync(int async) {
-        parameterMap.set(FIELD_ASYNC,async);
     }
     public void setDelay(int delay) {
         parameterMap.set(FIELD_DELAY,delay);

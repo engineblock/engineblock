@@ -19,15 +19,13 @@
 package io.engineblock.activityapi;
 
 /**
- * <p>An ActivityType is the central extension point in TestClient for new types of
- * activitytypes. It is responsible for naming the activity type, as well as providing
- * the input, activity, and motor instances that will be assembled into an activity.
- * At the very minimum, an implementation of an activity type must provide
- * an action dispenser. Default implementations of input and motor dispensers are provided,
- * and by extension, default inputs and motors.
+ * <p>An ActivityType is the central extension point in EngineBlock for new
+ * activity types drivers. It is responsible for naming the activity type, as well as providing
+ * the input, activity, and motor instances that will be assembled into an activity.</p>
  *
- * If you want to control the internal assembly of an activity at runtime, you may
- * override the default implementations of the input an/or motor.
+ * <p>At the very minimum, a useful implementation of an activity type should provide
+ * an action dispenser. Default implementations of input and motor dispensers are provided,
+ * and by extension, default inputs and motors.</p>
  *
  * <p>{@link InputDispenserProvider} - An input dispenser controls how input instances are created
  * for each slot in an activity. An InputDispenserProvider is used to get an InputDispenser tailored
@@ -50,11 +48,5 @@ public interface ActivityType {
      * @return An activity type name, like "diag"
      */
     String getName();
-
-    /**
-     * Provide a way to generate instances of an action. The action should be
-     *
-     * @return an action factory
-     */
 
 }

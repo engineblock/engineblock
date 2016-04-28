@@ -42,8 +42,16 @@ public interface Motor extends Runnable {
      */
     long getSlotId();
 
+    /**
+     * Ask this motor to stop cycling. This is an asynchronous request. Once the current active cycle
+     * completes, the request will cause the motor to stop cooperatively.
+     */
     void requestStop();
 
+    /**
+     * Get a description of the current slot run status.
+     * @return - a value from the {@link SlotState} enum
+     */
     SlotState getSlotStatus();
 
 }

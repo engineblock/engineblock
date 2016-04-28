@@ -25,12 +25,10 @@ import org.slf4j.LoggerFactory;
 /**
  * The DiagActivty, aka "diag", is simply a diagnostic activity.
  * It logs the input to priority INFO on some interval, in milliseconds.
- * Each interval, one of the activitytypes will report both the current input value and
+ * Each interval, one of the diag actions will report both the current input value and
  * the number of milliseconds that have elapsed since the activity was scheduled to report.
  *
- * It is built-in to the core TestClient codebase, and always available for sanity checks.
- * It is also the default activity that is selected if no activity type is specified nor inferred.
- * It serves as a basic template for implementing your own activity type.
+ * Diag serves as a basic template for implementing your own activity type.
  */
 @AutoService(ActivityType.class)
 public class DiagActivityType implements ActivityType, ActionDispenserProvider {

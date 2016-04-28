@@ -162,6 +162,11 @@ public class ActivityExecutor implements ParameterMap.Listener {
         }
     }
 
+
+    /**
+     * Listens for changes to parameter maps, maps them to the activity instance, and notifies
+     * all eligible listeners of changes.
+     */
     @Override
     public void handleParameterMapUpdate(ParameterMap parameterMap) {
         adjustToActivityDef(activityDef);

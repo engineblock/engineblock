@@ -7,7 +7,7 @@
     <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>runtime</name>
+    <name>${artifactId}</name>
     <url>http://engineblock.io/</url>
     <description>Runtime component for engineblock.</description>
 

@@ -12,6 +12,7 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
+
 package io.engineblock.activityapi;
 
 import org.slf4j.Logger;
@@ -33,7 +34,8 @@ import java.util.stream.Collectors;
  *
  * <p>To create a parameter map, use one of the static parse... methods.</p>
  *
- * <p>No native types are used internally. Everything is encoded as a String.</p>
+ * <p>No non-String types are used internally. Everything is encoded as a String, even though the
+ * generic type is parameterized for Bindings support.</p>
  */
 public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bindings {
     private final static Logger logger = LoggerFactory.getLogger(ParameterMap.class);

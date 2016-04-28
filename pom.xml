@@ -7,7 +7,7 @@
     <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>engineblock</name>
+    <name>${artifactId}</name>
     <url>http://engineblock.io/</url>
     <description>A reusable machine pattern for building dynamic load testing systems.</description>
 

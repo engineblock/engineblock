@@ -14,11 +14,19 @@
 */
 package io.engineblock.activityapi;
 
+import java.util.function.LongConsumer;
+
 /**
- * A decorator interface which is capable of initializing an action instance.
- * If the ActionDispenser implements this method, it will be called with each
- * action that it creates.
+ * An action is the core logic that occurs within an activity.
+ * Within a thread slot, a motor will continuously ask an action to process its input.
  */
-public interface ActionInitializer {
-    void init();
+public interface Action extends LongConsumer {
+
+    /**
+     * <p>Apply a work function to an input value.</p>
+     *
+     * @param value a long input
+     */
+    @Override
+    void accept(long value);
 }

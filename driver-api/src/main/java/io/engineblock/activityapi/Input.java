@@ -1,4 +1,4 @@
-package io.engineblock.activityapi;/*
+/*
 *   Copyright 2016 jshook
 *   Licensed under the Apache License, Version 2.0 (the "License");
 *   you may not use this file except in compliance with the License.
@@ -13,10 +13,14 @@ package io.engineblock.activityapi;/*
 *   limitations under the License.
 */
 
+package io.engineblock.activityapi;
+
 import java.util.function.LongSupplier;
 
 /**
- * This is essentially an alias for LongSupplier for now.
+ * An Input is the core data source for feeding actions within an activity.
+ * Inputs are required to act as sequences at this level. They act as the dataflow control points for
+ * banks of motors and actions. As such, they must know their bounds.
  */
 public interface Input extends LongSupplier {
     /**
