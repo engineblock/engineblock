@@ -2,39 +2,39 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>runtime</artifactId>
-    <packaging>jar</packaging>
+    <groupId>io.engineblock</groupId>
+    <artifactId>project-defaults</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-
-    <parent>
-        <artifactId>parentpom</artifactId>
-        <groupId>io.engineblock</groupId>
-        <version>1.0.0</version>
-        <relativePath>../parentpom</relativePath>
-    </parent>
+    <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
-    <description>Runtime component for engineblock.</description>
+    <url>http://engineblock.io/</url>
+    <description>
+        EngineBlock is the core of a programmable load test runtime.
+        This module acts as the parent pom for engineblock Maven modules.
+    </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.engineblock</groupId>
-            <artifactId>core</artifactId>
-            <version>1.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.engineblock</groupId>
-            <artifactId>diag-activity</artifactId>
-            <version>1.2-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@github.com:engineblock/engineblock.git</connection>
+        <developerConnection>scm:git:git@github.com:engineblock/engineblock.git</developerConnection>
+        <url>git@github.com:juven/git-demo.git</url>
+    </scm>
 
     <build>
         <plugins>
+
+            <!-- Compile & Source 1.8 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -45,13 +45,14 @@
                 </configuration>
             </plugin>
 
+            <!-- Javadoc -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.10.3</version>
                 <configuration>
-                    <doctitle>EngineBlock Runtime</doctitle>
-                    <windowtitle>EngineBlock Runtime</windowtitle>
+                    <doctitle>EngineBlock API</doctitle>
+                    <windowtitle>EngineBlock API</windowtitle>
                 </configuration>
                 <executions>
                     <execution>
@@ -63,6 +64,7 @@
                 </executions>
             </plugin>
 
+            <!-- Sources -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -78,33 +80,7 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.engineblock.cli.EMCLI</mainClass>
-                                </transformer>
-
-                            </transformers>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <finalName>eb</finalName>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
+            <!-- Signing -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
@@ -120,6 +96,7 @@
                 </executions>
             </plugin>
 
+            <!-- Distribution -->
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -132,16 +109,9 @@
                 </configuration>
             </plugin>
 
-
         </plugins>
     </build>
 
-    <licenses>
-        <license>
-            <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
 
     <developers>
         <developer>
@@ -158,6 +128,11 @@
         </developer>
     </developers>
 
-
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>

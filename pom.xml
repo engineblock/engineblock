@@ -9,18 +9,18 @@
 
     <name>${project.artifactId}</name>
     <url>http://engineblock.io/</url>
-    <description>A reusable machine pattern for building dynamic load testing systems.</description>
+    <description>A reusable machine pattern for building dynamic load testing systems</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <modules>
-        <module>parentpom</module> <!-- Holds project level defaults -->
-        <module>runtime</module> <!-- Binds the core, drivers, and APIs into a single runtime artifact -->
-        <module>core</module> <!-- Provides the core  -->
-        <module>driver-api</module> <!-- Provides the API needed to implement drivers to be loaded by the core -->
-        <module>diag-activity</module> <!-- -->
+        <module>at-diag</module> <!-- -->
+        <module>eb-api</module> <!-- Provides the API needed to implement drivers to be loaded by the core -->
+        <module>eb-core</module> <!-- Provides the core  -->
+        <module>eb-runtime</module> <!-- Binds the core, drivers, and APIs into a single runtime artifact -->
+        <module>project-defaults</module> <!-- Holds project level defaults -->
     </modules>
 
     <licenses>
