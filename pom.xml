@@ -4,7 +4,7 @@
 
     <groupId>io.engineblock</groupId>
     <artifactId>engineblock</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
@@ -16,10 +16,11 @@
     </properties>
 
     <modules>
-        <module>runtime</module>
-        <module>core</module>
-        <module>driver-api</module>
-        <module>diag-activity</module>
+        <module>parentpom</module> <!-- Holds project level defaults -->
+        <module>runtime</module> <!-- Binds the core, drivers, and APIs into a single runtime artifact -->
+        <module>core</module> <!-- Provides the core  -->
+        <module>driver-api</module> <!-- Provides the API needed to implement drivers to be loaded by the core -->
+        <module>diag-activity</module> <!-- -->
     </modules>
 
     <licenses>
@@ -51,6 +52,19 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -68,5 +82,12 @@
             <organizationUrl>http://engineblock.io/</organizationUrl>
         </developer>
     </developers>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>
