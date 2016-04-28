@@ -291,6 +291,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
                             + "positional field names:"
                             + " names:" + Arrays.toString(defaultFieldNames)
                             + ", values: " + Arrays.toString(splitAtSemi)
+                            + ", original: " + encodedParams
                     );
                 }
 

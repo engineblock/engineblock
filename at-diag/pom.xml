@@ -7,7 +7,7 @@
     <version>1.0.0-SNAPSHOT</version>
 
     <parent>
-        <artifactId>parentpom</artifactId>
+        <artifactId>project-defaults</artifactId>
         <groupId>io.engineblock</groupId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../project-defaults</relativePath>
@@ -100,7 +100,7 @@
                             </transformers>
                             <createSourcesJar>true</createSourcesJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <finalName>diag-activity.jar</finalName>
+                            <!--<finalName>at-diag</finalName>-->
                         </configuration>
                     </execution>
                 </executions>

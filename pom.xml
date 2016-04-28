@@ -2,10 +2,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.engineblock</groupId>
     <artifactId>engineblock</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
+    <parent>
+        <artifactId>project-defaults</artifactId>
+        <groupId>io.engineblock</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>project-defaults</relativePath>
+    </parent>
 
     <name>${project.artifactId}</name>
     <url>http://engineblock.io/</url>
@@ -16,9 +22,9 @@
     </properties>
 
     <modules>
-        <module>at-diag</module> <!-- -->
-        <module>eb-api</module> <!-- Provides the API needed to implement drivers to be loaded by the core -->
-        <module>eb-core</module> <!-- Provides the core  -->
+        <module>at-diag</module> <!-- ActivityType driver for diagnostics -->
+        <module>eb-api</module> <!-- APIs needed to implement drivers to be loaded by the core -->
+        <module>eb-core</module> <!-- Scripting harness and executive logic -->
         <module>eb-runtime</module> <!-- Binds the core, drivers, and APIs into a single runtime artifact -->
         <module>project-defaults</module> <!-- Holds project level defaults -->
     </modules>
@@ -36,37 +42,37 @@
         <url>git@github.com:juven/git-demo.git</url>
     </scm>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+    <!--<build>-->
+        <!--<plugins>-->
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-gpg-plugin</artifactId>-->
+                <!--<version>1.6</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>sign-artifacts</id>-->
+                        <!--<phase>verify</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>sign</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
 
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.3</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.sonatype.plugins</groupId>-->
+                <!--<artifactId>nexus-staging-maven-plugin</artifactId>-->
+                <!--<version>1.6.3</version>-->
+                <!--<extensions>true</extensions>-->
+                <!--<configuration>-->
+                    <!--<serverId>ossrh</serverId>-->
+                    <!--<nexusUrl>https://oss.sonatype.org/</nexusUrl>-->
+                    <!--<autoReleaseAfterClose>true</autoReleaseAfterClose>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
 
-        </plugins>
-    </build>
+        <!--</plugins>-->
+    <!--</build>-->
 
     <developers>
         <developer>

@@ -52,17 +52,13 @@ public class ActivityDef {
     // initial thread concurrency for this activity
     private static final String FIELD_THREADS = "threads";
 
-    // number of ops to keep in-flight
-    private static final String FIELD_ASYNC = "async";
-
     // milliseconds between cycles per thread, for slow tests only
     private static final String FIELD_DELAY = "delay";
 
     private static final String DEFAULT_ALIAS = "unknown-alias";
-    private static final String DEFAULT_SOURCE = "unknown-source";
+    private static final String DEFAULT_ATYPE = "unknown-type";
     private static final String DEFAULT_CYCLES = "1..1";
     private static final int DEFAULT_THREADS = 1;
-    private static final int DEFAULT_ASYNC = 1;
     private static final int DEFAULT_DELAY = 0;
 
 
@@ -98,6 +94,9 @@ public class ActivityDef {
         return parameterMap.getStringOrDefault("alias",DEFAULT_ALIAS);
     }
 
+    public String getActivityType() {
+        return parameterMap.getStringOrDefault("type", DEFAULT_ATYPE);
+    }
     /**
      * The first cycle that will be used for execution of this activity, inclusive.
      * @return the long start cycle
