@@ -26,7 +26,8 @@ public interface MotorDispenser {
      * Resolve (find or create) a Motor instance for the slot specified.
      * The motor is not required to be per-slot (per-thread), but any shared inputs motors be thread safe.
      *
-     * @param slot The numbered slot within the activity instance for this motor.
+     * @param activityDef the ActivityDef which will be used to parameterize the returned motor
+     * @param slot The numbered slot within the activity instance for this motor
      * @return A new or cached Motor for the specified slot.
      */
     Motor getMotor(ActivityDef activityDef, int slot);
