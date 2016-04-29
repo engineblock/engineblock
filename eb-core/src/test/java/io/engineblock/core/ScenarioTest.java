@@ -1,7 +1,7 @@
 package io.engineblock.core;
 
 import io.engineblock.script.ScriptEnvBuffer;
-import io.engineblock.script.ScriptExecutor;
+import io.engineblock.script.Scenario;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,12 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-public class ScriptExecutorTest {
+public class ScenarioTest {
 
     @Test
     public void shouldLoadScriptText() {
         ScriptEnvBuffer buffer = new ScriptEnvBuffer();
-        ScriptExecutor env = new ScriptExecutor();
+        Scenario env = new Scenario();
         env.addScriptContext(buffer);
         env.addScriptText("print('loaded script environment...');\n");
         env.run();

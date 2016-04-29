@@ -32,27 +32,32 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
-public class ScriptExecutor implements Runnable {
+public class Scenario implements Callable<Result> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ScriptExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(Scenario.class);
 
     private final List<String> scripts = new ArrayList<>();
     private ScriptEngine engine;
+
+    ScriptEngineManager scriptEngineManager;
+    ScenarioController scenarioController;
     private Optional<ScriptContext> scriptContext = Optional.empty();
+    private String name;
 
 
-    public ScriptExecutor addScriptContext(ScriptContext context) {
+    public Scenario addScriptContext(ScriptContext context) {
         scriptContext = Optional.of(context);
         return this;
     }
 
-    public ScriptExecutor addScriptText(String scriptText) {
+    public Scenario addScriptText(String scriptText) {
         scripts.add(scriptText);
         return this;
     }
 
-    public ScriptExecutor addScriptFiles(String... args) {
+    public Scenario addScriptFiles(String... args) {
         for (String scriptFile : args) {
             Path scriptPath = Paths.get(scriptFile);
             byte[] bytes = new byte[0];
@@ -69,16 +74,14 @@ public class ScriptExecutor implements Runnable {
         return this;
     }
 
-    @Override
     public void run() {
-        ScriptEngineManager sem = new ScriptEngineManager();
-        ScriptEngine engine = sem.getEngineByName("nashorn");
-
-        ScenarioController scenario = new ScenarioController();
-        scriptContext = Optional.of(scriptContext.orElse(new ScriptEnv(scenario)));
+        scriptEngineManager = new ScriptEngineManager();
+        ScriptEngine engine = scriptEngineManager.getEngineByName("nashorn");
+        scenarioController = new ScenarioController();
+        scriptContext = Optional.of(scriptContext.orElse(new ScriptEnv(scenarioController)));
         scriptContext.ifPresent(engine::setContext);
-        engine.put("scenario",scenario);
-        engine.put("activities",new ScenarioBindings(scenario));
+        engine.put("scenario",scenarioController);
+        engine.put("activities",new ScenarioBindings(scenarioController));
 
         for (String script : scripts) {
             try {
@@ -96,7 +99,9 @@ public class ScriptExecutor implements Runnable {
             iolog.append( ((ScriptEnvBuffer) engine.getContext()).getTimedLog());
         }
         return new Result(iolog.toString());
-
     }
 
+    public String getName() {
+        return name;
+    }
 }

@@ -1,0 +1,15 @@
+@startuml
+[*] --> Initialized
+
+state Cycling {
+Initialized --> Started : Run Thread
+ Started --> Stopping : End of Input
+ Started --> Stopping : Requested Stop
+
+}
+Started --> Stopped : No Remaining Input
+Stopping --> Stopped : Cycle Complete
+Stopped --> Finished : No Remaining Input Ever
+Finished -> [*]
+
+@enduml

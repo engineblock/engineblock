@@ -3,7 +3,8 @@ package io.engineblock.cli;
 import io.engineblock.activityapi.ActivityType;
 import io.engineblock.core.ActivityDocInfo;
 import io.engineblock.core.ActivityTypeFinder;
-import io.engineblock.script.ScriptExecutor;
+import io.engineblock.core.Result;
+import io.engineblock.script.Scenario;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -61,9 +62,10 @@ public class EMCLI {
     }
 
     private static void runScript(String scriptText) {
-        ScriptExecutor executor = new ScriptExecutor();
+        Scenario executor = new Scenario();
         executor.addScriptText(scriptText);
-        executor.run();
+        Result result = executor.call();
+        result.reportTo(System.out);
     }
 
 }

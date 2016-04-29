@@ -48,6 +48,23 @@ public class MotorController {
     }
 
     /**
+     * <p>Transition the thread slot to a new state. only accepting valid transitions.</p>
+     * <p>The valid slot states will be moved to a data type eventually, simplifying this method.</p>
+     * @param targetState The next SlotState for this thread/slot/motor
+     */
+    public synchronized void transition(SlotState targetState) {
+        switch(getRunState()) {
+            case Initialized:
+
+            case Started:
+            case Stopping:
+            case Stopped:
+            case Finished:
+        }
+    }
+
+
+    /**
      * Multiple threads may request a stop, including the controlled thread itself.
      * Allow this to return without exception if the target state is already set.
      */

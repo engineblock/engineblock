@@ -22,13 +22,19 @@ import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricFilter;
 
 import java.io.PrintStream;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class Result {
+    private Exception exception;
     private String iolog;
 
     public Result(String iolog) {
         this.iolog = iolog;
+    }
+    public Result(Exception e) {
+        this.iolog = e.getMessage();
+        this.exception = e;
     }
 
     public void reportTo(PrintStream out) {
@@ -42,5 +48,9 @@ public class Result {
                 .outputTo(out)
                 .build();
         consoleReporter.report();
+    }
+
+    public Optional<Exception> getException() {
+        return Optional.ofNullable(exception);
     }
 }
