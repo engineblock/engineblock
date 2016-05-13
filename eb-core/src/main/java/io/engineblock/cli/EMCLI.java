@@ -5,10 +5,12 @@ import io.engineblock.core.ActivityDocInfo;
 import io.engineblock.core.ActivityTypeFinder;
 import io.engineblock.core.Result;
 import io.engineblock.script.Scenario;
+import io.engineblock.script.ScenariosExecutor;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EMCLI {
@@ -57,8 +59,15 @@ public class EMCLI {
             System.out.println(activityHelpMarkdown);
         }
 
-        String scriptText = EMCLIScriptAssembly.assembleScript(options);
-        runScript(scriptText);
+        ScenariosExecutor executor = new ScenariosExecutor(1);
+        Scenario scenario = new Scenario();
+        String script = EMCLIScriptAssembly.assembleScript(options);
+        scenario.addScriptText(script);
+        executor.execute(scenario);
+        Map<String, Result> stringResultMap = executor.awaitAllResults();
+        stringResultMap.values().stream().forEach(
+                r -> r.reportTo(System.out)
+        );
     }
 
     private static void runScript(String scriptText) {
