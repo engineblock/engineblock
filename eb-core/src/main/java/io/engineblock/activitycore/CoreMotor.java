@@ -17,6 +17,8 @@ package io.engineblock.activitycore;
 import io.engineblock.activityapi.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.concurrent.atomic.AtomicReference;
+import static io.engineblock.activityapi.SlotState.*;
 
 /**
  * <p>ActivityMotor is a Runnable which runs in one of an activity's many threads.
@@ -27,10 +29,10 @@ import org.slf4j.LoggerFactory;
  * </p>
  */
 public class CoreMotor implements ActivityDefObserver, Motor {
-    private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
 
+    private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
+    private final AtomicReference<SlotState> slotState = new AtomicReference<>(SlotState.Initialized);
     private long slotId;
-    private final MotorController motorController = new MotorController(this);
     private Input input;
     private Action action;
 
@@ -94,19 +96,15 @@ public class CoreMotor implements ActivityDefObserver, Motor {
         return this.slotId;
     }
 
-    @Override
-    public void requestStop() {
-
-    }
-
-    @Override
-    public SlotState getSlotStatus() {
-        return motorController.getRunState();
-    }
 
     @Override
     public void run() {
-        motorController.signalStarted();
+
+        if (slotState.get()==Finished) {
+            logger.warn("input was already exhausted for slot " + slotId + ", cycling back to finished");
+        }
+
+        enterState(Started);
         long cyclenum;
         long cycleMax = input.getMax();
 
@@ -114,24 +112,26 @@ public class CoreMotor implements ActivityDefObserver, Motor {
             ((ActionInitializer)action).init();
         }
 
-        while (motorController.getRunState() == SlotState.Started) {
+        while (slotState.get() == Started) {
             cyclenum = input.getAsLong();
             if (cyclenum > cycleMax) {
-                logger.trace("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
-                motorController.requestStop();
+                logger.debug("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
+                enterState(Finished);
                 continue;
             }
             logger.trace("cycle " + cyclenum);
             action.accept(cyclenum);
         }
 
-        motorController.signalStopped();
+        if (slotState.get()==Stopping) {
+            enterState(Stopped);
+        }
     }
 
 
     @Override
     public String toString() {
-        return "slot:" + this.slotId + "; state:" + motorController;
+        return "slot:" + this.slotId + "; state:" + slotState.get();
     }
 
     @Override
@@ -143,4 +143,29 @@ public class CoreMotor implements ActivityDefObserver, Motor {
             ((ActivityDefObserver) action).onActivityDefUpdate(activityDef);
         }
     }
+
+    @Override
+    public void requestStop() {
+        enterState(SlotState.Stopping);
+    }
+
+    @Override
+    public SlotState getSlotState() {
+        return slotState.get();
+    }
+
+    /**
+     * <p>Transition the thread slot to a new state. only accepting valid transitions.</p>
+     * <p>The valid slot states will be moved to a data type eventually, simplifying this method.</p>
+     *
+     * @param to The next SlotState for this thread/slot/motor
+     */
+    private synchronized void enterState(SlotState to) {
+        SlotState from = slotState.get();
+        if (!from.isValid(from, to)) {
+            throw new RuntimeException("Invalid transition from " + from + " to " + to);
+        }
+        slotState.compareAndSet(from, to);
+    }
+
 }

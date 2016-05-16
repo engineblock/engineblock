@@ -90,6 +90,9 @@ public class Scenario implements Callable<Result> {
                 e.printStackTrace();
             }
         }
+        logger.info("Shutting down executors.");
+        scenarioController.awaitCompletion(864000000);
+
     }
 
     public Result call() {
@@ -99,6 +102,20 @@ public class Scenario implements Callable<Result> {
             iolog.append( ((ScriptEnvBuffer) engine.getContext()).getTimedLog());
         }
         return new Result(iolog.toString());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Scenario scenario = (Scenario) o;
+        return getName() != null ? getName().equals(scenario.getName()) : scenario.getName() == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getName() != null ? getName().hashCode() : 0;
     }
 
     public String getName() {

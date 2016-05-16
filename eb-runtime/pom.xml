@@ -22,14 +22,24 @@
     <dependencies>
         <dependency>
             <groupId>io.engineblock</groupId>
-            <artifactId>eb-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <artifactId>at-diag</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.engineblock</groupId>
-            <artifactId>at-diag</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <artifactId>eb-core</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.8.21</version>
+            <scope>test</scope>
+        </dependency>
+
+
     </dependencies>
 
     <build>

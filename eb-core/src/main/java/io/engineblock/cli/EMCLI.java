@@ -64,7 +64,7 @@ public class EMCLI {
         String script = EMCLIScriptAssembly.assembleScript(options);
         scenario.addScriptText(script);
         executor.execute(scenario);
-        Map<String, Result> stringResultMap = executor.awaitAllResults();
+        Map<Scenario, Result> stringResultMap = executor.awaitAllResults();
         stringResultMap.values().stream().forEach(
                 r -> r.reportTo(System.out)
         );

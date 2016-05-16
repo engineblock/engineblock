@@ -7,7 +7,6 @@ import io.engineblock.activityapi.MotorDispenser;
 import io.engineblock.activitycore.CoreInput;
 import io.engineblock.activityapi.Motor;
 import io.engineblock.activitycore.CoreMotor;
-import io.engineblock.core.ActivityExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -40,7 +39,7 @@ public class ActivityExecutorTest {
         );
         ae.setActivityMotorDispenser(cmf);
         ad.setThreads(5);
-        ae.start();
+        ae.startActivity();
 
         int[] speeds = new int[]{1,2000,5,2000,2,2000};
         for(int offset=0; offset<speeds.length; offset+=2) {

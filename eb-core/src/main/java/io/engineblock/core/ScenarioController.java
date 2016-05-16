@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * A ScenarioController provides a way to start Activities, modify them while running, and stop, pause or restart them.
+ * A ScenarioController provides a way to startActivity Activities, modify them while running, and forceStopMotors, pause or restart them.
  */
 public class ScenarioController {
 
@@ -33,7 +33,7 @@ public class ScenarioController {
     private final Map<String, ActivityExecutor> activityExecutors = new HashMap<>();
 
     public synchronized void start(ActivityDef activityDef) {
-        getActivityExecutor(activityDef).start();
+        getActivityExecutor(activityDef).startActivity();
     }
 
     public synchronized void start(String activityDef) {
@@ -41,7 +41,7 @@ public class ScenarioController {
     }
 
     public synchronized void stop(ActivityDef activityDef) {
-        getActivityExecutor(activityDef).stop();
+        getActivityExecutor(activityDef).stopActivity();
     }
 
     public synchronized void stop(String activityDef) {
@@ -78,7 +78,7 @@ public class ScenarioController {
             if (executor == null) {
                 String activityTypeName = activityDef.getParams().getStringOrDefault("type", "diag");
                 ActivityType activityType = ActivityTypeFinder.get().get(activityTypeName);
-                executor = ActivityExecutorAssembler.getExecutor(activityDef,activityType);
+                executor = ActivityExecutorAssembler.getExecutor(activityDef, activityType);
 
                 activityExecutors.put(activityDef.getAlias(), executor);
             }
@@ -92,7 +92,7 @@ public class ScenarioController {
 
         while (remaining > 0L) {
             try {
-                Thread.sleep(remaining );
+                Thread.sleep(remaining);
             } catch (InterruptedException spurrious) {
                 remaining = endTime - System.currentTimeMillis();
                 continue;
@@ -113,5 +113,13 @@ public class ScenarioController {
 
     public ActivityDef getActivityDef(String s) {
         return getActivityExecutor(s).getActivityDef();
+    }
+
+    public void forceStopScenario(int waitTimeMillis) {
+        activityExecutors.values().forEach(a -> a.forceStopExecutor(waitTimeMillis));
+    }
+
+    public void awaitCompletion(int waitTimeMillis) {
+        activityExecutors.values().forEach(a -> a.awaitCompletion(waitTimeMillis));
     }
 }

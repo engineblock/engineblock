@@ -21,18 +21,20 @@ import io.engineblock.core.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintStream;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class ScenariosExecutor {
 
     private final static Logger logger = LoggerFactory.getLogger(ScenariosExecutor.class);
 
-    private LinkedHashMap<String, Future<Result>> submittedScenarios = new LinkedHashMap<String, Future<Result>>();
+    private LinkedHashMap<Scenario, Future<Result>> submittedScenarios = new LinkedHashMap<>();
     private ExecutorService executor = Executors.newFixedThreadPool(1);
 
     public ScenariosExecutor() {
@@ -44,44 +46,56 @@ public class ScenariosExecutor {
 
     public void execute(Scenario scenario) {
         Future<Result> submitted = executor.submit(scenario);
-        submittedScenarios.put(scenario.getName(), submitted);
+        submittedScenarios.put(scenario, submitted);
     }
 
-    public Map<String, Result> awaitAllResults() {
+    /**
+     * Shuts down all running scenarios and awaits all results.
+     * @return the final scenario-result map.
+     */
+    public Map<Scenario, Result> awaitAllResults() {
         return awaitAllResults(Long.MAX_VALUE/2, 60000); // half max value, to avoid overflow
     }
 
-    public Map<String, Result> awaitAllResults(long timeout, long updateInterval) {
+    /**
+     * Shuts down all running scenarios and awaits all results.
+     * @param timeout how long to wait for the results to complete
+     * @param updateInterval how frequently to log status while waiting
+     * @return the final scenario-result map
+     */
+    public Map<Scenario, Result> awaitAllResults(long timeout, long updateInterval) {
         if (updateInterval > timeout) {
             throw new InvalidParameterException("timeout must be equal to or greater than updateInterval");
         }
         long timeoutAt = System.currentTimeMillis() + timeout;
 
-        boolean terminated = false;
-        while (!terminated && System.currentTimeMillis() < timeoutAt) {
-            long updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
-            while (!terminated && System.currentTimeMillis() < timeoutAt) {
+        executor.shutdown();
+        boolean isShutdown = false;
 
-                while (!terminated && System.currentTimeMillis() < updateAt) {
+        while (!isShutdown && System.currentTimeMillis() < timeoutAt) {
+            long updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
+            long waitedAt = System.currentTimeMillis();
+            while (!isShutdown && System.currentTimeMillis() < timeoutAt) {
+
+                while (!isShutdown && System.currentTimeMillis() < updateAt) {
                     try {
                         long timeRemaining = timeoutAt - System.currentTimeMillis();
                         logger.debug("Waiting for timeRemaining:" + timeRemaining + "ms for scenarios executor to shutdown.");
-                        terminated = executor.awaitTermination(timeRemaining, TimeUnit.MILLISECONDS);
+                        isShutdown = executor.awaitTermination(timeRemaining, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException ignored) {
                     }
                 }
                 updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
             }
 
-            logger.info("waited " + updateInterval + "ms for executor termination so far. terminated: "
-                    + terminated + " isTerminated" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
+            logger.info("scenarios executor shutdown after " + (System.currentTimeMillis()-waitedAt) + "ms.");
         }
 
-        if (!terminated) {
+        if (!isShutdown) {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
                     + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
-        Map<String, Result> results = new LinkedHashMap<>();
+        Map<Scenario, Result> results = new LinkedHashMap<Scenario,Result>();
         getAsyncResultStatus()
                 .entrySet().stream()
                 .forEach(es -> results.put(es.getKey(), es.getValue().orElseGet(null)));
@@ -92,7 +106,9 @@ public class ScenariosExecutor {
      * @return list of scenarios which have been submitted, in order
      */
     public List<String> getPendingScenarios() {
-        return new ArrayList<String>(submittedScenarios.keySet());
+        return new ArrayList<String>(
+                submittedScenarios.keySet().stream().map(Scenario::getName).collect(Collectors.toCollection(ArrayList::new))
+        );
     }
 
     /**
@@ -105,10 +121,10 @@ public class ScenariosExecutor {
      *
      * @return map of async results, with incomplete results as Optional.empty()
      */
-    public Map<String, Optional<Result>> getAsyncResultStatus() {
-        Map<String, Optional<Result>> optResults = new LinkedHashMap<>();
-        for (String pendingName : submittedScenarios.keySet()) {
-            Future<Result> resultFuture = submittedScenarios.get(pendingName);
+    public Map<Scenario, Optional<Result>> getAsyncResultStatus() {
+        Map<Scenario, Optional<Result>> optResults = new LinkedHashMap<>();
+        for (Scenario pendingScenario : submittedScenarios.keySet()) {
+            Future<Result> resultFuture = submittedScenarios.get(pendingScenario);
 
             Optional<Result> oResult = Optional.empty();
             if (resultFuture.isDone()) {
@@ -118,10 +134,28 @@ public class ScenariosExecutor {
                     oResult = Optional.of(new Result(e));
                 }
             }
-            optResults.put(pendingName, oResult);
+            optResults.put(pendingScenario, oResult);
 
         }
 
         return optResults;
+    }
+
+    public void reportSummaryTo(PrintStream out) {
+
+        Map<Scenario, Optional<Result>> ar = getAsyncResultStatus();
+
+        for (Map.Entry<Scenario, Optional<Result>> entry : ar.entrySet()) {
+            Scenario scenario = entry.getKey();
+            Optional<Result> oresult = entry.getValue();
+
+            out.print("scenario: " + scenario);
+
+            if (oresult.isPresent()) {
+                oresult.get().reportTo(out);
+            } else {
+                out.println(": incomplete");
+            }
+        }
     }
 }

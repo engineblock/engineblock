@@ -7,7 +7,10 @@ activities.test.threads=5;
 print('waiting 5000 ms');
 scenario.waitMillis(5000);
 activities.test.threads=20;
-activities.test.interval=500;
+//activities.test.interval=500;
+print('waiting 5000 ms');
+scenario.waitMillis(5000);
+
 
 
 

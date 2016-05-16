@@ -37,6 +37,52 @@ public enum SlotState {
         this.runcode = runcode;
     }
 
-    public String getCode() { return this.runcode; }
+    public String getCode() {
+        return this.runcode;
+    }
+
+    public boolean isValid(SlotState from, SlotState to) {
+        switch (from) {
+            default:
+                return false;
+            case Initialized:
+                switch (to) {
+                    case Started:
+                        return true;
+                    default:
+                        return false;
+                }
+            case Started:
+                switch (to) {
+                    case Stopping:
+                    case Finished:
+                        return true;
+                    default:
+                        return false;
+                }
+            case Stopping:
+                switch (to) {
+                    case Stopped:
+                        return true;
+                    default:
+                        return false;
+                }
+            case Stopped:
+                switch (to) {
+                    case Started:
+                        return true;
+                    default:
+                        return false;
+                }
+            case Finished:
+                switch (to) {
+                    case Started:
+                        return true; // not useful as of yet. Perhaps this will be allowed via explicit reset of input stream.
+                    default:
+                        return false;
+                }
+        }
+
+    }
 
 }

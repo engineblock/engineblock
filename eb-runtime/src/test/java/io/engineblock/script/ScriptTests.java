@@ -23,15 +23,16 @@ import org.testng.annotations.Test;
 import java.util.Map;
 
 @Test
-public class ScenariosExecutorTest {
+public class ScriptTests {
 
-    @Test(enabled=false)
-    public void testAwaitOnTime() {
+    @Test
+    public void testThreadChange() {
         ScenariosExecutor e = new ScenariosExecutor(1);
         Scenario s = new Scenario();
-        s.addScriptText("load('classpath:scripts/asyncs.js');\nsetTimeout(\"print('waited')\",5000);\n");
+        s.addScriptText("load('classpath:scripts/threadchange.js');");
         e.execute(s);
         Map<Scenario, Result> stringResultMap = e.awaitAllResults();
+        e.reportSummaryTo(System.out);
     }
 
 

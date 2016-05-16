@@ -39,7 +39,7 @@ public class Result {
 
     public void reportTo(PrintStream out) {
         out.println("IO Log:");
-        out.print(iolog);
+        out.println(iolog);
 
         ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(MetricsContext.metrics())
                 .convertDurationsTo(TimeUnit.MILLISECONDS)

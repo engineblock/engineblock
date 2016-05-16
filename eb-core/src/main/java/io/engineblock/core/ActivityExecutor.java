@@ -21,29 +21,24 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
  * <p>An ActivityExecutor is a named instance of an execution harness for a single activity instance.
  * It is responsible for managing threads and activity settings which may be changed while the
  * activity is running.</p>
- *
+ * <p>
  * <p>An ActivityExecutor may be represent an activity that is defined and active in the running
  * scenario, but which is inactive. This can occur when an activity is paused by controlling logic,
  * or when the threads are set to zero.</p>
  */
 public class ActivityExecutor implements ParameterMap.Listener {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);
-
+    private final List<Motor> motors = new ArrayList<>();
     private ActivityDef activityDef;
-
     private ExecutorService executorService;
     private MotorDispenser activityMotorDispenser;
-    private final List<Motor> motors = new ArrayList<>();
 
     public ActivityExecutor(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -67,71 +62,38 @@ public class ActivityExecutor implements ParameterMap.Listener {
      * <p>True-up the number of motor instances known to the executor. Start all non-running motors.
      * The protocol between the motors and the executor should be safe as long as each state change
      * is owned by either the motor logic or the activity executor but not both, and strictly serialized
-     * as well. This is enforced by forcing start() to be serialized as well as using CAS on the motor states.</p>
-     *
-     * <p>The start method may be called to true-up the number of active motors in an activity executor after
+     * as well. This is enforced by forcing startActivity() to be serialized as well as using CAS on the motor states.</p>
+     * <p>
+     * <p>The startActivity method may be called to true-up the number of active motors in an activity executor after
      * changes to threads.</p>
      */
-    public synchronized void start() {
+    public synchronized void startActivity() {
         logger.info("starting activity " + activityDef.getLogName());
         adjustToActivityDef(activityDef);
-
     }
 
-    private String slotStatus() {
-        return motors.stream()
-                .map(m -> m.getSlotStatus().getCode())
-                .collect(Collectors.joining(",", "[", "]"));
+    /**
+     * Simply stop the motors
+     */
+    public void stopActivity() {
+        logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
+        motors.stream().forEach(Motor::requestStop);
+        motors.stream().forEach(m -> awaitRequiredMotorState(m, 10000, 50, SlotState.Stopped));
+        logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
     }
 
-    private synchronized void adjustToActivityDef(ActivityDef activityDef) {
-        logger.debug(">-pre-adjust->" + slotStatus());
+    /**
+     * Shutdown the activity executor, with a grace period for the motor threads.
+     *
+     * @param initialSecondsToWait milliseconds to wait after graceful shutdown request, before forcing everything to stop
+     */
+    public synchronized void forceStopExecutor(int initialSecondsToWait) {
 
-        Optional.ofNullable(activityMotorDispenser).orElseThrow(() ->
-                new RuntimeException("activityMotorFactory is required"));
+        executorService.shutdown();
+        requestStopMotors();
 
-        while (motors.size() > activityDef.getThreads()) {
-            Motor motor = motors.get(motors.size() - 1);
-            logger.trace("Stopping cycle motor thread:" + motor);
-            motor.requestStop();
-            motors.remove(motors.size() - 1);
-        }
-
-        while (motors.size() < activityDef.getThreads()) {
-            Motor motor = activityMotorDispenser.getMotor(activityDef, motors.size());
-            logger.trace("Starting cycle motor thread:" + motor);
-            motors.add(motor);
-        }
-
-        motors.stream()
-                .filter(m -> m.getSlotStatus() != SlotState.Started)
-                .forEach(executorService::execute);
-
-        motors.stream()
-                .forEach(m -> awaitStartup(m, 1000));
-
-        logger.debug(">post-adjust->" + slotStatus());
-
-    }
-
-    private void awaitStartup(Motor m, int i) {
-        long startedAt = System.currentTimeMillis();
-        while ((m.getSlotStatus()!=SlotState.Started) && System.currentTimeMillis() < (startedAt + i)) {
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException ignored) {
-            }
-        }
-        if ((m.getSlotStatus()!=SlotState.Started)) {
-            throw new RuntimeException("thread startup delayed excessivly. Adjust timeout or investigate.");
-        }
-        logger.trace(activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now running.");
-    }
-
-    public synchronized void forceStop() {
-        stop();
         try {
-            Thread.sleep(1000); // Well, yeah, but this isn't that complicated, people.
+            Thread.sleep(initialSecondsToWait);
         } catch (InterruptedException ignored) {
         }
 
@@ -139,26 +101,15 @@ public class ActivityExecutor implements ParameterMap.Listener {
         List<Runnable> runnables = executorService.shutdownNow();
 
         logger.debug(runnables.size() + " threads never started.");
-
     }
 
-    public synchronized void stop() {
-        logger.info("stopping activity " + activityDef.getLogName());
-        for (Motor motor : motors) {
-            Optional.of(motor)
-                    .ifPresent(Motor::requestStop);
-//                    .map(ActivityMotor::getMotorController)
-//                    .ifPresent(MotorController::requestStop);
-        }
-    }
-
-    public void stopExecutor() {
+    public boolean requestStopExecutor(int secondsToWait) {
+        logger.info("Stopping executor for " + this.activityDef.getAlias());
         executorService.shutdown();
         try {
-            executorService.awaitTermination(60, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            return executorService.awaitTermination(secondsToWait, TimeUnit.SECONDS);
+        } catch (InterruptedException ignored) {
+            return false;
         }
     }
 
@@ -181,7 +132,108 @@ public class ActivityExecutor implements ParameterMap.Listener {
         return activityDef;
     }
 
+    public boolean awaitCompletion(int waitTime) {
+        return requestStopExecutor(waitTime);
+    }
+
     public String toString() {
         return getClass().getSimpleName() + "~" + activityDef.getAlias();
     }
+
+    private String getSlotStatus() {
+        return motors.stream()
+                .map(m -> m.getSlotState().getCode())
+                .collect(Collectors.joining(",", "[", "]"));
+    }
+
+    /**
+     * Stop extra motors, start missing motors
+     *
+     * @param activityDef the activityDef for this activity instance
+     */
+    private synchronized void adjustToActivityDef(ActivityDef activityDef) {
+        logger.debug(">-pre-adjust->" + getSlotStatus());
+
+        Optional.ofNullable(activityMotorDispenser).orElseThrow(() ->
+                new RuntimeException("activityMotorFactory is required"));
+
+        while (motors.size() > activityDef.getThreads()) {
+            Motor motor = motors.get(motors.size() - 1);
+            logger.trace("Stopping cycle motor thread:" + motor);
+            motor.requestStop();
+            motors.remove(motors.size() - 1);
+        }
+
+        while (motors.size() < activityDef.getThreads()) {
+            Motor motor = activityMotorDispenser.getMotor(activityDef, motors.size());
+            logger.trace("Starting cycle motor thread:" + motor);
+            motors.add(motor);
+        }
+
+        motors.stream()
+                .filter(m -> m.getSlotState() != SlotState.Started)
+                .forEach(executorService::execute);
+
+        motors.stream()
+                .forEach(m -> awaitRequiredMotorState(m, 5000, 50, SlotState.Started, SlotState.Finished));
+
+        logger.debug(">post-adjust->" + getSlotStatus());
+
+    }
+
+    /**
+     * Await a thread (aka motor/slot) entering a specific SlotState
+     *
+     * @param m         motor instance
+     * @param waitTime  milliseconds to wait, total
+     * @param pollTime  polling interval between state checks
+     * @param slotState any desired SlotState
+     * @return true, if the desired SlotState was detected
+     */
+    private boolean awaitMotorState(Motor m, int waitTime, int pollTime, SlotState... slotState) {
+        long startedAt = System.currentTimeMillis();
+        while (System.currentTimeMillis() < (startedAt + waitTime)) {
+            for (SlotState state : slotState) {
+                if (m.getSlotState() == state) {
+                    logger.trace(activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now in state " + m.getSlotState());
+                    return true;
+                }
+            }
+            try {
+                Thread.sleep(pollTime);
+            } catch (InterruptedException ignored) {
+            }
+        }
+        logger.trace(activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now in state " + m.getSlotState());
+        return false;
+
+    }
+
+    /**
+     * Await a required thread (aka motor/slot) entering a specific SlotState
+     *
+     * @param m             motor instance
+     * @param waitTime      milliseconds to wait, total
+     * @param pollTime      polling interval between state checks
+     * @param awaitingState desired SlotState
+     * @throws RuntimeException if the waitTime is used up and the desired state is not reached
+     */
+    private void awaitRequiredMotorState(Motor m, int waitTime, int pollTime, SlotState... awaitingState) {
+        SlotState startingState = m.getSlotState();
+        boolean awaitedRequiredState = awaitMotorState(m, waitTime, pollTime, awaitingState);
+        if (!awaitedRequiredState) {
+            String error = "Unable to await " + activityDef.getAlias() +
+                    "/Motor[" + m.getSlotId() + "]: from state " + startingState + " to " + m.getSlotState();
+            RuntimeException e = new RuntimeException(error);
+            logger.error(error);
+            throw e;
+        }
+    }
+
+    private synchronized void requestStopMotors() {
+        logger.info("stopping activity " + activityDef.getLogName());
+        motors.stream().forEach(Motor::requestStop);
+    }
+
+
 }

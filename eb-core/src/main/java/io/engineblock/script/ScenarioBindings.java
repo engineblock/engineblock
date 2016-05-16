@@ -102,7 +102,7 @@ public class ScenarioBindings implements Bindings {
 
     @Override
     public Object remove(Object key) {
-        throw new RuntimeException("this is not the advised way to stop an activity");
-//        scenario.stop(String.valueOf(key));
+        throw new RuntimeException("this is not the advised way to forceStopMotors an activity");
+//        scenario.forceStopMotors(String.valueOf(key));
     }
 }
