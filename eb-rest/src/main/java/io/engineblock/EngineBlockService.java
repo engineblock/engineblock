@@ -18,8 +18,10 @@
 package io.engineblock;
 
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.engineblock.resources.ActivityTypeResources;
 import io.engineblock.resources.ScenarioResources;
 import io.engineblock.resources.ScenariosResources;
 import io.engineblock.script.ScenariosExecutor;
@@ -48,6 +50,7 @@ public class EngineBlockService extends Application<EngineBlockServiceConfig> {
         };
 
         bootstrap.addBundle(swaggerBundle);
+        bootstrap.addBundle(new AssetsBundle("/assets/","/"));
 
     }
 
@@ -56,6 +59,7 @@ public class EngineBlockService extends Application<EngineBlockServiceConfig> {
 
         environment.jersey().register(new ScenarioResources(executor));
         environment.jersey().register(new ScenariosResources(executor));
+        environment.jersey().register(new ActivityTypeResources());
     }
 
 }

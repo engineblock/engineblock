@@ -1,3 +1,5 @@
+server:
+  rootPath: '/api/*'
 swagger:
   resourcePackage: io.engineblock.resources
 logging:

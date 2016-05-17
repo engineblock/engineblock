@@ -31,7 +31,18 @@
             <artifactId>eb-core</artifactId>
             <version>1.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>io.engineblock</groupId>
+            <artifactId>at-diag</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
 
+
+        <dependency>
+            <groupId>com.atlassian.commonmark</groupId>
+            <artifactId>commonmark</artifactId>
+            <version>0.5.0</version>
+        </dependency>
 
         <dependency>
             <groupId>ch.qos.logback</groupId>

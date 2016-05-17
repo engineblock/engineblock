@@ -24,7 +24,7 @@ public class ActivityTypeFinderTest {
 
     @Test(enabled=false)
     public void testGetDiagActivity() {
-        ActivityType da = ActivityTypeFinder.get().get("diag");
+        ActivityType da = ActivityTypeFinder.instance().getOrThrow("diag");
         assertNotNull(da);
     }
 

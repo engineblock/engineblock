@@ -15,7 +15,6 @@
 package io.engineblock.script;
 
 import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
 import org.slf4j.LoggerFactory;
@@ -52,12 +51,14 @@ public class Scenario implements Callable<Result> {
 
     public Scenario(String name) {
         this.name = name;
+        init();
     }
 
     public Scenario addScriptText(String scriptText) {
         scripts.add(scriptText);
         return this;
     }
+
 
     public Scenario addScriptFiles(String... args) {
         for (String scriptFile : args) {
@@ -76,21 +77,29 @@ public class Scenario implements Callable<Result> {
         return this;
     }
 
-    public void run() {
-        scenarioController = new ScenarioController();
-        bufferAppender = new BufferAppender<ILoggingEvent>();
-        bufferAppender.setName("scenario-" + getName());
-        scenarioLogger = (Logger) LoggerFactory.getLogger("scenario-" + getName());
-        bufferAppender.setContext(scenarioLogger.getLoggerContext());
-        scenarioLogger.addAppender(bufferAppender);
+    private void init() {
         nashorn = engineManager.getEngineByName("nashorn");
+
         scriptEnv = new ScriptEnv(scenarioController);
         nashorn.setContext(scriptEnv);
 
-        nashorn.put("logger", scenarioLogger);
+        scenarioController = new ScenarioController();
         nashorn.put("scenario", scenarioController);
+
         nashorn.put("activities", new ScenarioBindings(scenarioController));
 
+//        bufferAppender = new BufferAppender<ILoggingEvent>();
+//        bufferAppender.setName("scenario-" + getName());
+//        bufferAppender.setContext(scenarioLogger.getLoggerContext());
+//        scenarioLogger = (Logger) LoggerFactory.getLogger("scenario-" + getName());
+//        scenarioLogger.addAppender(bufferAppender);
+//        nashorn.put("logger", scenarioLogger);
+
+    }
+
+    public void run() {
+
+        logger.info("Running control script for " + getName() + ".");
         for (String script : scripts) {
             try {
                 Object result = nashorn.eval(script);

@@ -40,7 +40,7 @@ public class ScenarioData {
         this.activityDefs = scenario.getScenarioController().getActivityDefs();
         if (scenario.getIOLog().isPresent()) {
             this.iolog = scenario.getIOLog().get();
-//            this.iolog = scenario.getIOLog().get().stream().collect(Collectors.joining());
+//            this.iolog = scenario.getIOLog().getOrThrow().stream().collect(Collectors.joining());
         } else {
             this.iolog = new ArrayList<String>();
 //            this.iolog = "not logged data";

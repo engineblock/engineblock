@@ -34,14 +34,29 @@ public class ActivityTypeFinder {
     private ActivityTypeFinder() {
     }
 
-    public synchronized static ActivityTypeFinder get() {
+    public synchronized static ActivityTypeFinder instance() {
         if (instance==null) {
             instance = new ActivityTypeFinder();
         }
         return instance;
     };
 
-    public ActivityType get(String activityType) {
+    /**
+     * Return the named activity type, optionally.
+     * @param activityTypeName The canonical activity type name.
+     * @return an optional ActivityType instance
+     */
+    public Optional<ActivityType> get(String activityTypeName) {
+        return Optional.ofNullable(getTypes().get(activityTypeName));
+    }
+
+    /**
+     * Return the named activity type or throw an error.
+     * @param activityType The canonical activity type name.
+     * @return an ActivityType instance
+     * @throws RuntimeException if the activity type isn't found.
+     */
+    public ActivityType getOrThrow(String activityType) {
         Optional<ActivityType> at = Optional.ofNullable(getTypes().get(activityType));
         return at.orElseThrow(
                 () -> new RuntimeException("ActivityType '" + activityType + "' not found.")

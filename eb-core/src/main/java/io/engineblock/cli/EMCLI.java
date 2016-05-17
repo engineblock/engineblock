@@ -32,7 +32,7 @@ public class EMCLI {
         }
 
         if (options.wantsActivityTypes()) {
-            ActivityTypeFinder.get().getAll().stream().map(ActivityType::getName).forEach(System.out::println);
+            ActivityTypeFinder.instance().getAll().stream().map(ActivityType::getName).forEach(System.out::println);
             System.exit(0);
         }
 

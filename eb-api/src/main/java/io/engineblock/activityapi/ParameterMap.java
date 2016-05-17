@@ -45,7 +45,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     private final AtomicLong changeCounter = new AtomicLong(0L);
     private final LinkedList<Listener> listeners = new LinkedList<>();
 
-    private ParameterMap(Map<String, String> valueMap) {
+    public ParameterMap(Map<String, String> valueMap) {
         logger.info("new parameter map:" + valueMap.toString());
         super.putAll(valueMap);
     }

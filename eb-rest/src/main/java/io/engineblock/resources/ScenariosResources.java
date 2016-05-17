@@ -18,17 +18,20 @@
 package io.engineblock.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @Api("/scenarios")
 @Path("/scenarios")
@@ -37,6 +40,7 @@ public class ScenariosResources {
     private final static Logger logger = LoggerFactory.getLogger(ScenariosResources.class);
 
     private final ScenariosExecutor executor;
+
     public ScenariosResources(ScenariosExecutor executor) {
         this.executor = executor;
     }
@@ -49,5 +53,6 @@ public class ScenariosResources {
     public List<String> getScenarioList() {
         return executor.getPendingScenarios();
     }
+
 
 }

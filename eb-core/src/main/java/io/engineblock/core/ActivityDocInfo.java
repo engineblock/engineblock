@@ -17,7 +17,7 @@ public class ActivityDocInfo {
     }
 
     public String forActivityInstance(String s) {
-        ActivityType activityType = ActivityTypeFinder.get().get(s);
+        ActivityType activityType = ActivityTypeFinder.instance().getOrThrow(s);
 //        String docFileName = activityType.getClass().getPackage().getName().replaceAll("\\.", File.separator) + File.separator + activityType.getName() + ".md";
         String docFileName = activityType.getName() + ".md";
 

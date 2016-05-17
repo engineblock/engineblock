@@ -73,7 +73,8 @@ public class ActivityDef {
     public ActivityDef(String parameterString) {
         this.parameterMap = ParameterMap.parsePositional(parameterString, field_list);
     }
-    protected ActivityDef(ParameterMap parameterMap) {
+
+    public ActivityDef(ParameterMap parameterMap) {
         this.parameterMap = parameterMap;
 //        updateAtomicThreadLevel();
     }
@@ -191,6 +192,5 @@ public class ActivityDef {
 
         return activityDef;
     }
-
 
 }
