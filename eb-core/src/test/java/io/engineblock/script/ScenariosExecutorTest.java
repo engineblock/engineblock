@@ -28,7 +28,7 @@ public class ScenariosExecutorTest {
     @Test(enabled=false)
     public void testAwaitOnTime() {
         ScenariosExecutor e = new ScenariosExecutor(1);
-        Scenario s = new Scenario();
+        Scenario s = new Scenario("testing");
         s.addScriptText("load('classpath:scripts/asyncs.js');\nsetTimeout(\"print('waited')\",5000);\n");
         e.execute(s);
         Map<Scenario, Result> stringResultMap = e.awaitAllResults();

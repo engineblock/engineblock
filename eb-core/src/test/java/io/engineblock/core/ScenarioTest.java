@@ -25,11 +25,10 @@ public class ScenarioTest {
     @Test
     public void shouldLoadScriptText() {
         ScriptEnvBuffer buffer = new ScriptEnvBuffer();
-        Scenario env = new Scenario();
-        env.addScriptContext(buffer);
+        Scenario env = new Scenario("testing");
         env.addScriptText("print('loaded script environment...');\n");
         env.run();
-        assertThat(buffer.getStdoutText()).startsWith("loaded script environment...");
+        assertThat(env.getIOLog().get().get(0)).contains("loaded script environment...");
     }
 
     @Test

@@ -20,11 +20,34 @@
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-runtime</artifactId>
             <version>1.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>io.engineblock</groupId>
+            <artifactId>eb-core</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.1.7</version>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.slf4j</groupId>-->
+            <!--<artifactId>slf4j-api</artifactId>-->
+            <!--<version>1.7.21</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>io.dropwizard</groupId>
@@ -36,12 +59,6 @@
             <groupId>com.smoketurner</groupId>
             <artifactId>dropwizard-swagger</artifactId>
             <version>1.0.0-rc2-1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.engineblock</groupId>
-            <artifactId>eb-core</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

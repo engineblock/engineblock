@@ -1,3 +1,4 @@
+logger.info("testing dynamically changing threads.");
 print('waiting 500 ms');
 scenario.waitMillis(500);
 print('waited');
@@ -10,7 +11,3 @@ activities.test.threads=20;
 //activities.test.interval=500;
 print('waiting 5000 ms');
 scenario.waitMillis(5000);
-
-
-
-

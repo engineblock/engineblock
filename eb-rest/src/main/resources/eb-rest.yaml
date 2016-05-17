@@ -1,2 +1,7 @@
 swagger:
   resourcePackage: io.engineblock.resources
+logging:
+  appenders:
+    - type: console
+      threshold: DEBUG
+      target: stderr

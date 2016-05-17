@@ -34,7 +34,11 @@ public class ScenariosExecutor {
 
     private final static Logger logger = LoggerFactory.getLogger(ScenariosExecutor.class);
 
-    private LinkedHashMap<Scenario, Future<Result>> submittedScenarios = new LinkedHashMap<>();
+    private LinkedHashMap<String, SubmittedScenario> submitted = new LinkedHashMap<>();
+//
+//    private LinkedHashMap<String, Future<Result>> submittedFutures = new LinkedHashMap<>();
+//    private LinkedHashMap<String, Scenario> submittedScenarios = new LinkedHashMap<>();
+
     private ExecutorService executor = Executors.newFixedThreadPool(1);
 
     public ScenariosExecutor() {
@@ -44,22 +48,28 @@ public class ScenariosExecutor {
         executor = Executors.newFixedThreadPool(threads);
     }
 
-    public void execute(Scenario scenario) {
-        Future<Result> submitted = executor.submit(scenario);
-        submittedScenarios.put(scenario, submitted);
+    public synchronized void execute(Scenario scenario) {
+        if (submitted.get(scenario.getName())!=null) {
+            throw new RuntimeException("Scenario " + scenario.getName() + " is already defined. Remove it first to reuse the name.");
+        }
+        Future<Result> future = executor.submit(scenario);
+        SubmittedScenario s = new SubmittedScenario(scenario, future);
+        submitted.put(s.getName(), s);
     }
 
     /**
      * Shuts down all running scenarios and awaits all results.
+     *
      * @return the final scenario-result map.
      */
     public Map<Scenario, Result> awaitAllResults() {
-        return awaitAllResults(Long.MAX_VALUE/2, 60000); // half max value, to avoid overflow
+        return awaitAllResults(Long.MAX_VALUE / 2, 60000); // half max value, to avoid overflow
     }
 
     /**
      * Shuts down all running scenarios and awaits all results.
-     * @param timeout how long to wait for the results to complete
+     *
+     * @param timeout        how long to wait for the results to complete
      * @param updateInterval how frequently to log status while waiting
      * @return the final scenario-result map
      */
@@ -88,14 +98,14 @@ public class ScenariosExecutor {
                 updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
             }
 
-            logger.info("scenarios executor shutdown after " + (System.currentTimeMillis()-waitedAt) + "ms.");
+            logger.info("scenarios executor shutdown after " + (System.currentTimeMillis() - waitedAt) + "ms.");
         }
 
         if (!isShutdown) {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
                     + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
-        Map<Scenario, Result> results = new LinkedHashMap<Scenario,Result>();
+        Map<Scenario, Result> results = new LinkedHashMap<Scenario, Result>();
         getAsyncResultStatus()
                 .entrySet().stream()
                 .forEach(es -> results.put(es.getKey(), es.getValue().orElseGet(null)));
@@ -107,24 +117,27 @@ public class ScenariosExecutor {
      */
     public List<String> getPendingScenarios() {
         return new ArrayList<String>(
-                submittedScenarios.keySet().stream().map(Scenario::getName).collect(Collectors.toCollection(ArrayList::new))
-        );
+                submitted.values().stream()
+                        .map(SubmittedScenario::getName)
+                        .collect(Collectors.toCollection(ArrayList::new)));
     }
 
     /**
      * <p>Returns a map of all pending scenario names and optional results.
      * All submitted scenarios are included. Those which are still pending
      * are returned with an empty option.</p>
-     *
+     * <p>
      * <p>Results may be exceptional. If {@link Result#getException()} is present,
      * then the result did not complete normally.</p>
      *
      * @return map of async results, with incomplete results as Optional.empty()
      */
     public Map<Scenario, Optional<Result>> getAsyncResultStatus() {
+
         Map<Scenario, Optional<Result>> optResults = new LinkedHashMap<>();
-        for (Scenario pendingScenario : submittedScenarios.keySet()) {
-            Future<Result> resultFuture = submittedScenarios.get(pendingScenario);
+
+        for (SubmittedScenario submittedScenario : submitted.values()) {
+            Future<Result> resultFuture = submittedScenario.getResultFuture();
 
             Optional<Result> oResult = Optional.empty();
             if (resultFuture.isDone()) {
@@ -134,7 +147,8 @@ public class ScenariosExecutor {
                     oResult = Optional.of(new Result(e));
                 }
             }
-            optResults.put(pendingScenario, oResult);
+
+            optResults.put(submittedScenario.getScenario(),oResult);
 
         }
 
@@ -156,6 +170,74 @@ public class ScenariosExecutor {
             } else {
                 out.println(": incomplete");
             }
+        }
+    }
+
+    public Optional<Scenario> getPendingScenario(String scenarioName) {
+        return Optional.ofNullable(submitted.get(scenarioName)).map(SubmittedScenario::getScenario);
+    }
+
+    /**
+     * Get the result of a pending or completed scenario. If the scenario has run to
+     * completion, then the Optional will be present. If the scenario threw an
+     * exception, or there was an error accessing the future, then the result will
+     * contain the exception. If the callable for the scenario was cancelled, then the
+     * result will contain an exception stating such.
+     *
+     * If the scenario is still pending, then the optional will be empty.
+     *
+     * @param scenarioName the scenario name of interest
+     * @return an optional result
+     */
+    public Optional<Result> getPendingResult(String scenarioName) {
+
+        Future<Result> resultFuture1 = submitted.get(scenarioName).resultFuture;
+        if (resultFuture1==null) {
+            throw new RuntimeException("Unknown scenario name:" + scenarioName);
+        }
+        if (resultFuture1.isDone()) {
+            try {
+                return Optional.ofNullable(resultFuture1.get());
+            } catch (Exception e) {
+                return Optional.of(new Result(e));
+            }
+        } else if (resultFuture1.isCancelled()) {
+            return Optional.of(new Result(new Exception("result was cancelled.")));
+        }
+        return Optional.empty();
+    }
+
+    public synchronized void cancelScenario(String scenarioName) {
+        Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
+        Optional<Result> pendingResult = getPendingResult(scenarioName);
+        if (pendingScenario.isPresent()) {
+            pendingScenario.get().getScenarioController().forceStopScenario(0);
+            submitted.remove(scenarioName);
+            logger.info("cancelled scenario "+ scenarioName);
+        } else {
+            throw new RuntimeException("Unable to cancel scenario: " + scenarioName + ": not found");
+        }
+    }
+
+    private static class SubmittedScenario {
+        private Scenario scenario;
+        private Future<Result> resultFuture;
+
+        SubmittedScenario(Scenario scenario, Future<Result> resultFuture) {
+            this.scenario = scenario;
+            this.resultFuture = resultFuture;
+        }
+
+        public Scenario getScenario() {
+            return scenario;
+        }
+
+        Future<Result> getResultFuture() {
+            return resultFuture;
+        }
+
+        public String getName() {
+            return scenario.getName();
         }
     }
 }

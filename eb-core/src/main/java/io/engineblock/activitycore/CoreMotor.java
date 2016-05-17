@@ -145,8 +145,10 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     }
 
     @Override
-    public void requestStop() {
-        enterState(SlotState.Stopping);
+    public synchronized void requestStop() {
+        if (slotState.get()==Started) {
+            enterState(SlotState.Stopping);
+        }
     }
 
     @Override

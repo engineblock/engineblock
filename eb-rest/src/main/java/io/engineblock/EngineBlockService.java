@@ -21,13 +21,14 @@ import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.engineblock.resources.ScenarioResources;
+import io.engineblock.resources.ScenariosResources;
 import io.engineblock.script.ScenariosExecutor;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 public class EngineBlockService extends Application<EngineBlockServiceConfig> {
 
-    ScenariosExecutor executor;
+    private ScenariosExecutor executor;
 
     public static void main(String[] args) throws Exception {
         new EngineBlockService().run(args);
@@ -46,6 +47,7 @@ public class EngineBlockService extends Application<EngineBlockServiceConfig> {
             }
         };
 
+        bootstrap.addBundle(swaggerBundle);
 
     }
 
@@ -53,6 +55,7 @@ public class EngineBlockService extends Application<EngineBlockServiceConfig> {
     public void run(EngineBlockServiceConfig engineBlockServiceConfig, Environment environment) throws Exception {
 
         environment.jersey().register(new ScenarioResources(executor));
+        environment.jersey().register(new ScenariosResources(executor));
     }
 
 }

@@ -60,7 +60,7 @@ public class EMCLI {
         }
 
         ScenariosExecutor executor = new ScenariosExecutor(1);
-        Scenario scenario = new Scenario();
+        Scenario scenario = new Scenario("cli");
         String script = EMCLIScriptAssembly.assembleScript(options);
         scenario.addScriptText(script);
         executor.execute(scenario);
@@ -69,12 +69,4 @@ public class EMCLI {
                 r -> r.reportTo(System.out)
         );
     }
-
-    private static void runScript(String scriptText) {
-        Scenario executor = new Scenario();
-        executor.addScriptText(scriptText);
-        Result result = executor.call();
-        result.reportTo(System.out);
-    }
-
 }

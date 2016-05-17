@@ -14,12 +14,12 @@
 */
 package io.engineblock.script;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -33,23 +33,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 public class Scenario implements Callable<Result> {
 
-    private static final Logger logger = LoggerFactory.getLogger(Scenario.class);
+    private static final Logger logger = (Logger) LoggerFactory.getLogger(Scenario.class);
+    private static final ScriptEngineManager engineManager = new ScriptEngineManager();
+
+    private ScriptEngine nashorn;
 
     private final List<String> scripts = new ArrayList<>();
-    private ScriptEngine engine;
 
-    ScriptEngineManager scriptEngineManager;
-    ScenarioController scenarioController;
-    private Optional<ScriptContext> scriptContext = Optional.empty();
+    private ScenarioController scenarioController;
+    private ScriptEnv scriptEnv;
     private String name;
+    private Logger scenarioLogger;
+    private BufferAppender bufferAppender;
 
-
-    public Scenario addScriptContext(ScriptContext context) {
-        scriptContext = Optional.of(context);
-        return this;
+    public Scenario(String name) {
+        this.name = name;
     }
 
     public Scenario addScriptText(String scriptText) {
@@ -75,17 +77,23 @@ public class Scenario implements Callable<Result> {
     }
 
     public void run() {
-        scriptEngineManager = new ScriptEngineManager();
-        ScriptEngine engine = scriptEngineManager.getEngineByName("nashorn");
         scenarioController = new ScenarioController();
-        scriptContext = Optional.of(scriptContext.orElse(new ScriptEnv(scenarioController)));
-        scriptContext.ifPresent(engine::setContext);
-        engine.put("scenario",scenarioController);
-        engine.put("activities",new ScenarioBindings(scenarioController));
+        bufferAppender = new BufferAppender<ILoggingEvent>();
+        bufferAppender.setName("scenario-" + getName());
+        scenarioLogger = (Logger) LoggerFactory.getLogger("scenario-" + getName());
+        bufferAppender.setContext(scenarioLogger.getLoggerContext());
+        scenarioLogger.addAppender(bufferAppender);
+        nashorn = engineManager.getEngineByName("nashorn");
+        scriptEnv = new ScriptEnv(scenarioController);
+        nashorn.setContext(scriptEnv);
+
+        nashorn.put("logger", scenarioLogger);
+        nashorn.put("scenario", scenarioController);
+        nashorn.put("activities", new ScenarioBindings(scenarioController));
 
         for (String script : scripts) {
             try {
-                Object result = engine.eval(script);
+                Object result = nashorn.eval(script);
             } catch (ScriptException e) {
                 e.printStackTrace();
             }
@@ -97,11 +105,8 @@ public class Scenario implements Callable<Result> {
 
     public Result call() {
         run();
-        StringBuilder iolog = new StringBuilder();
-        if (engine.getContext() instanceof ScriptEnvBuffer) {
-            iolog.append( ((ScriptEnvBuffer) engine.getContext()).getTimedLog());
-        }
-        return new Result(iolog.toString());
+        String iolog = scriptEnv.getTimedLog().stream().collect(Collectors.joining());
+        return new Result(iolog);
     }
 
     @Override
@@ -121,4 +126,22 @@ public class Scenario implements Callable<Result> {
     public String getName() {
         return name;
     }
+
+    public ScenarioController getScenarioController() {
+        return scenarioController;
+    }
+
+    public String getScriptText() {
+        return scripts.stream().collect(Collectors.joining());
+    }
+
+    public Optional<List<String>> getIOLog() {
+        return Optional.ofNullable(scriptEnv)
+                .map(ScriptEnvBuffer::getTimedLog);
+    }
+
+    public Optional<BufferAppender> getLogBuffer() {
+        return Optional.ofNullable(bufferAppender);
+    }
 }
+

@@ -130,7 +130,7 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
 
         Writer wrapped;
         private final String prefix;
-        CharArrayWriter buffer = new CharArrayWriter(0);
+        CharArrayWriter buffer = new CharArrayWriter();
         private List<String> timedLog = new ArrayList<String>();
 
         public DiagWriter(Writer wrapped, String prefix) {

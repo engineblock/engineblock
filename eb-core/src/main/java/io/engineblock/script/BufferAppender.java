@@ -17,24 +17,33 @@
 
 package io.engineblock.script;
 
-import io.engineblock.core.Result;
-import org.testng.annotations.Test;
+import ch.qos.logback.core.OutputStreamAppender;
 
-import java.util.Map;
+import java.io.CharArrayWriter;
 
-@Test
-public class ScriptTests {
+public class BufferAppender<E> extends OutputStreamAppender<E> {
 
-    @Test
-    public void testThreadChange() {
-        ScenariosExecutor e = new ScenariosExecutor(1);
-        Scenario s = new Scenario("testing thread changes");
-        s.addScriptText("load('classpath:scripts/threadchange.js');");
-        e.execute(s);
-        Map<Scenario, Result> stringResultMap = e.awaitAllResults();
-        e.reportSummaryTo(System.out);
+    private CharArrayWriter buffer = new CharArrayWriter(0);
+
+    @Override
+    public void start() {
+        buffer = new CharArrayWriter(0);
+        super.start();
     }
 
+    @Override
+    public void stop() {
+        super.stop();
+        buffer.reset();
+    }
 
+    @Override
+    protected void append(E eventObject) {
+        super.append(eventObject);
+        buffer.append(eventObject.toString());
+    }
 
+    public String toString() {
+        return (buffer==null) ? "" : buffer.toString();
+    }
 }
