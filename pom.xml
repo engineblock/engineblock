@@ -68,6 +68,24 @@
         <!--</plugins>-->
     <!--</build>-->
 
+    <build>
+        <plugins>
+           <!-- Force version on maven-release-plugin -->
+            <plugin>
+                <version>2.5.3</version>
+                <artifactId>maven-release-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <configuration>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <releaseProfiles>release</releaseProfiles>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+
     <developers>
         <developer>
             <name>Jonathan Shook</name>
@@ -82,6 +100,13 @@
             <organizationUrl>http://engineblock.io/</organizationUrl>
         </developer>
     </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/engineblock/engineblock.git</connection>
+        <developerConnection>scm:git:https://github.com/engineblock/engineblock.git</developerConnection>
+        <!--<developerConnection>scm:git:git@github.com:engineblock/engineblock.git</developerConnection> broken? -->
+        <url>scm:git:git@github.com:engineblock/engineblock.git</url>
+    </scm>
 
     <distributionManagement>
         <snapshotRepository>

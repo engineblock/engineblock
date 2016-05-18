@@ -24,12 +24,6 @@
         </license>
     </licenses>
 
-    <scm>
-        <connection>scm:git:https://github.com/engineblock/engineblock.git</connection>
-        <developerConnection>scm:git:git@github.com:engineblock/engineblock.git</developerConnection>
-        <url>scm:git:git@github.com:engineblock/engineblock.git</url>
-    </scm>
-
     <issueManagement>
         <system>GitHub</system>
         <url>https://github.com/engineblock/engineblock/issues</url>
@@ -37,13 +31,6 @@
 
     <build>
         <plugins>
-
-            <!-- Force version on maven-release-plugin -->
-            <plugin>
-                <version>2.5.3</version>
-                <artifactId>maven-release-plugin</artifactId>
-                <groupId>org.apache.maven.plugins</groupId>
-            </plugin>
 
             <!-- Compile & Source 1.8 -->
             <plugin>
