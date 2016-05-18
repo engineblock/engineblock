@@ -33,6 +33,13 @@
     <build>
         <plugins>
 
+            <!-- Force version on maven-release-plugin -->
+            <plugin>
+                <version>2.5.3</version>
+                <artifactId>maven-release-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+            </plugin>
+
             <!-- Compile & Source 1.8 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
