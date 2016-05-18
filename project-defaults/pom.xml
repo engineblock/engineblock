@@ -29,6 +29,10 @@
         <url>https://github.com/engineblock/engineblock/issues</url>
     </issueManagement>
 
+    <scm>
+        <url>scm:git:https://github.com/engineblock/engineblock.git</url>
+    </scm>
+
     <build>
         <plugins>
 
