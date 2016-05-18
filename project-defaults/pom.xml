@@ -25,10 +25,15 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:engineblock/engineblock.git</connection>
-        <url>scm:git:git@github.com:engineblock/engineblock.git</url>
+        <connection>scm:git:https://github.com/engineblock/engineblock.git</connection>
         <developerConnection>scm:git:git@github.com:engineblock/engineblock.git</developerConnection>
+        <url>scm:git:git@github.com:engineblock/engineblock.git</url>
     </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/engineblock/engineblock/issues</url>
+    </issueManagement>
 
     <build>
         <plugins>
