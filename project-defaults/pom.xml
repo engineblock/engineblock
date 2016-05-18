@@ -3,7 +3,7 @@
 
     <groupId>io.engineblock</groupId>
     <artifactId>project-defaults</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
@@ -31,7 +31,8 @@
 
     <scm>
         <url>scm:git:https://github.com/engineblock/engineblock.git</url>
-    </scm>
+      <tag>engineblock-1.0.2</tag>
+  </scm>
 
     <build>
         <plugins>
