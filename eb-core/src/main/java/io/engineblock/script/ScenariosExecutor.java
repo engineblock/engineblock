@@ -90,7 +90,7 @@ public class ScenariosExecutor {
                 while (!isShutdown && System.currentTimeMillis() < updateAt) {
                     try {
                         long timeRemaining = timeoutAt - System.currentTimeMillis();
-                        logger.debug("Waiting for timeRemaining:" + timeRemaining + "ms for scenarios executor to shutdown.");
+                        logger.debug("Waiting for timeRemaining:" + timeRemaining + "ms for scenarios executor to shutdownActivity.");
                         isShutdown = executor.awaitTermination(timeRemaining, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException ignored) {
                     }
@@ -98,7 +98,7 @@ public class ScenariosExecutor {
                 updateAt = Math.min(timeoutAt, System.currentTimeMillis() + updateInterval);
             }
 
-            logger.info("scenarios executor shutdown after " + (System.currentTimeMillis() - waitedAt) + "ms.");
+            logger.info("scenarios executor shutdownActivity after " + (System.currentTimeMillis() - waitedAt) + "ms.");
         }
 
         if (!isShutdown) {

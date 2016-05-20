@@ -77,6 +77,10 @@ public class CoreMotor implements ActivityDefObserver, Motor {
         return this;
     }
 
+    @Override
+    public Input getInput() {
+        return input;
+    }
 
 
     /**
@@ -89,6 +93,11 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     public Motor setAction(Action action) {
         this.action = action;
         return this;
+    }
+
+    @Override
+    public Action getAction() {
+        return action;
     }
 
     @Override

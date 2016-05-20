@@ -28,6 +28,8 @@ public interface Motor extends Runnable {
      */
     Motor setInput(Input input);
 
+    Input getInput();
+
     /**
      * Set the action on this motor. It will be applied to each input.
      *
@@ -35,6 +37,8 @@ public interface Motor extends Runnable {
      * @return this ActivityMotor, for method chaining
      */
     Motor setAction(Action action);
+
+    Action getAction();
 
     /**
      * get the slotId which this motor is assigned to within the activity instance.

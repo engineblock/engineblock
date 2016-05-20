@@ -237,7 +237,7 @@ public class ScenarioController {
     }
 
     /**
-     * Await completion of all running activities, but do not force shutdown. This method is meant to provide
+     * Await completion of all running activities, but do not force shutdownActivity. This method is meant to provide
      * the blocking point for calling logic. It waits.
      * @param waitTimeMillis The time to wait, usually set very high
      * @return true, if all activities completed before the timer expired, false otherwise
