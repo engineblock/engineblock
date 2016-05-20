@@ -1,4 +1,6 @@
 @startuml
+title Creating Dispensers for an Activity Instance
+
 Executor -> Assembler: getMotorDispenser(ActivityDef)
 
 alt ActivityType provides inputs

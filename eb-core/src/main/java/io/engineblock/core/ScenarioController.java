@@ -25,7 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * A ScenarioController provides a way to startActivity Activities, modify them while running, and forceStopMotors, pause or restart them.
+ * A ScenarioController provides a way to start Activities, modify them while running, and forceStopMotors, pause or restart them.
  */
 public class ScenarioController {
 

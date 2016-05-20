@@ -62,7 +62,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
      * <p>True-up the number of motor instances known to the executor. Start all non-running motors.
      * The protocol between the motors and the executor should be safe as long as each state change
      * is owned by either the motor logic or the activity executor but not both, and strictly serialized
-     * as well. This is enforced by forcing startActivity() to be serialized as well as using CAS on the motor states.</p>
+     * as well. This is enforced by forcing start(...) to be serialized as well as using CAS on the motor states.</p>
      *
      * <p>The startActivity method may be called to true-up the number of active motors in an activity executor after
      * changes to threads.</p>

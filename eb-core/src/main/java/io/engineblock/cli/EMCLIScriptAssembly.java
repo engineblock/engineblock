@@ -16,7 +16,7 @@ public class EMCLIScriptAssembly {
                 case activity:
                     // Sanity check that this can parse before using it
                     ActivityDef activityDef = ActivityDef.parseActivityDef(cmd.cmdSpec);
-                    sb.append("scenario.startActivity('" + cmd.cmdSpec + "');\n");
+                    sb.append("scenario.start('" + cmd.cmdSpec + "');\n");
                     break;
                 case script:
                     String scriptData = loadScript(cmd.cmdSpec);
