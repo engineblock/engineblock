@@ -98,7 +98,7 @@
                             </transformers>
                             <createSourcesJar>true</createSourcesJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <!--<finalName>at-diag</finalName>-->
+                            <minimizeJar>false</minimizeJar>
                         </configuration>
                     </execution>
                 </executions>
