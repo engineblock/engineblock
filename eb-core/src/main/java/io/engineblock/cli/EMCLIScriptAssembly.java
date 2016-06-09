@@ -1,13 +1,15 @@
 package io.engineblock.cli;
 
 import io.engineblock.activityapi.ActivityDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.stream.Collectors;
 
 public class EMCLIScriptAssembly {
+    private final static Logger logger = LoggerFactory.getLogger(EMCLIScriptAssembly.class);
 
     public static String assembleScript(EMCLIOptions options) {
         StringBuilder sb = new StringBuilder();
@@ -30,7 +32,15 @@ public class EMCLIScriptAssembly {
 
     private static String loadScript(String cmdSpec) {
         String scriptData;
-        InputStream resourceAsStream = EMCLIScriptAssembly.class.getResourceAsStream(cmdSpec);
+
+        try {
+            logger.debug("Looking for " + new File(".").getCanonicalPath() + File.separator + cmdSpec);
+        } catch (IOException ignored) {
+        }
+        InputStream resourceAsStream = EMCLIScriptAssembly.class.getClassLoader().getResourceAsStream(cmdSpec);
+        if (resourceAsStream==null) {
+                throw new RuntimeException("Unable to find " + cmdSpec);
+        }
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(resourceAsStream))) {
             scriptData = buffer.lines().collect(Collectors.joining("\n"));
         } catch (Throwable t) {

@@ -1,4 +1,4 @@
-logger.info("testing dynamically changing threads.");
+//logger.info("testing dynamically changing threads.");
 print('waiting 500 ms');
 scenario.waitMillis(500);
 print('waited');
