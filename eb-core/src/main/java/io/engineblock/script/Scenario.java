@@ -15,6 +15,7 @@
 package io.engineblock.script;
 
 import ch.qos.logback.classic.Logger;
+import io.engineblock.core.MetricsContext;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
 import org.slf4j.LoggerFactory;
@@ -84,9 +85,12 @@ public class Scenario implements Callable<Result> {
         nashorn.setContext(scriptEnv);
 
         scenarioController = new ScenarioController();
+
         nashorn.put("scenario", scenarioController);
 
         nashorn.put("activities", new ScenarioBindings(scenarioController));
+
+        nashorn.put("metrics", new MetricsBindings(MetricsContext.getInstance()));
 
 //        bufferAppender = new BufferAppender<ILoggingEvent>();
 //        bufferAppender.setName("scenario-" + getName());
