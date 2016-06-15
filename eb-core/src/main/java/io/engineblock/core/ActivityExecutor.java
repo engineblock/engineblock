@@ -239,6 +239,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
             logger.error(error);
             throw e;
         }
+        logger.debug("motor " + m + " entered awaited state: " + awaitingState);
     }
 
     private synchronized void requestStopMotors() {

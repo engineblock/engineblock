@@ -14,8 +14,8 @@
 */
 package io.engineblock.core;
 
-import io.engineblock.activityapi.ActivityType;
 import io.engineblock.activityapi.ActivityDef;
+import io.engineblock.activityapi.ActivityType;
 import io.engineblock.activityapi.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +36,7 @@ public class ScenarioController {
     /**
      * Start an activity, given the activity definition for it. The activity will be known in the scenario
      * by the alias parameter.
+     *
      * @param activityDef string in alias=value1;type=value2;... format
      */
     public synchronized void start(ActivityDef activityDef) {
@@ -45,9 +46,10 @@ public class ScenarioController {
     /**
      * Start an activity, given a map which holds the activity definition for it. The activity will be known in
      * the scenario by the alias parameter.
+     *
      * @param activityDefMap A map containing the activity definition
      */
-    public synchronized void start(Map<String,String> activityDefMap) {
+    public synchronized void start(Map<String, String> activityDefMap) {
         ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
         start(ad);
     }
@@ -55,6 +57,7 @@ public class ScenarioController {
     /**
      * Start an activity, given the name by which it is known already in the scenario. This is useful if you have
      * stopped an activity and want to start it again.
+     *
      * @param alias the alias of an activity that is already known to the scenario
      */
     public synchronized void start(String alias) {
@@ -64,7 +67,7 @@ public class ScenarioController {
     /**
      * <p>Stop an activity, given an activity def. The only part of the activity def that is important is the
      * alias parameter. This method retains the activity def signature to provide convenience for scripting.</p>
-     *
+     * <p>
      * <p>For example, sc.stop("alias=foo")</p>
      *
      * @param activityDef An activity def, including at least the alias parameter.
@@ -76,9 +79,10 @@ public class ScenarioController {
     /**
      * <p>Stop an activity, given an activity def map. The only part of the map that is important is the
      * alias parameter. This method retains the map signature to provide convenience for scripting.</p>
+     *
      * @param activityDefMap A map, containing at least the alias parameter
      */
-    public synchronized void stop(Map<String,String> activityDefMap) {
+    public synchronized void stop(Map<String, String> activityDefMap) {
         ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
         stop(ad);
     }
@@ -97,6 +101,7 @@ public class ScenarioController {
     /**
      * Modify one of the parameters in a defined activity. Any observing activity components will be notified of the
      * changes made to activity parameters.
+     *
      * @param alias The name of an activity that is already known to the scenario.
      * @param param The parameter name
      * @param value a new parameter value
@@ -118,16 +123,16 @@ public class ScenarioController {
      *
      * @param appliedParams Map of new values.
      */
-    public synchronized void apply(Map<String,String> appliedParams) {
+    public synchronized void apply(Map<String, String> appliedParams) {
         String alias = appliedParams.get("alias");
 
-        if (alias==null) {
+        if (alias == null) {
             throw new RuntimeException("alias must be provided");
         }
 
-        ActivityExecutor executor =activityExecutors.get(alias);
+        ActivityExecutor executor = activityExecutors.get(alias);
 
-        if (executor==null) {
+        if (executor == null) {
             logger.info("started scenario from apply:" + alias);
             start(appliedParams);
             return;
@@ -141,7 +146,7 @@ public class ScenarioController {
 
             if (!prevVal.isPresent() || !prevVal.get().equals(appliedVal)) {
                 logger.info("applying new value to activity '" + alias + "': '" + prevVal.get() + "' -> '" + appliedVal + "'");
-                previousMap.set(paramName,appliedVal);
+                previousMap.set(paramName, appliedVal);
             }
         }
     }
@@ -180,6 +185,7 @@ public class ScenarioController {
 
     /**
      * Wait for a bit. This is not the best approach, and will be replace with a different system in the future.
+     *
      * @param waitMillis time to wait, in milliseconds
      */
     public void waitMillis(long waitMillis) {
@@ -199,6 +205,7 @@ public class ScenarioController {
 
     /**
      * Return all the names of the activites that are known to this scenario.
+     *
      * @return set of activity names
      */
     public Set<String> getAliases() {
@@ -207,6 +214,7 @@ public class ScenarioController {
 
     /**
      * Return all the activity definitions that are known to this scenario.
+     *
      * @return list of activity defs
      */
     public List<ActivityDef> getActivityDefs() {
@@ -217,6 +225,7 @@ public class ScenarioController {
 
     /**
      * Get the named activity def, if it is known to this scenario.
+     *
      * @param alias The name by which the activity is known to this scenario.
      * @return an ActivityDef instance
      * @throws RuntimeException if the alias is not known to the scenario
@@ -239,13 +248,14 @@ public class ScenarioController {
     /**
      * Await completion of all running activities, but do not force shutdownActivity. This method is meant to provide
      * the blocking point for calling logic. It waits.
+     *
      * @param waitTimeMillis The time to wait, usually set very high
      * @return true, if all activities completed before the timer expired, false otherwise
      */
     public boolean awaitCompletion(int waitTimeMillis) {
-        boolean completed=false;
+        boolean completed = false;
         for (ActivityExecutor executor : activityExecutors.values()) {
-            if(!executor.awaitCompletion(waitTimeMillis))
+            if (!executor.awaitCompletion(waitTimeMillis))
                 return false;
         }
         return true;
@@ -254,7 +264,7 @@ public class ScenarioController {
     /**
      * @return an unmodifyable String to executor map of all activities known to this scenario
      */
-    public Map<String,ActivityExecutor> getActivityMap() {
+    public Map<String, ActivityExecutor> getActivityMap() {
         return Collections.unmodifiableMap(activityExecutors);
     }
 }

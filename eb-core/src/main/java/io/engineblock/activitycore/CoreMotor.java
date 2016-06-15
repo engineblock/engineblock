@@ -14,7 +14,9 @@
 */
 package io.engineblock.activitycore;
 
+import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.*;
+import io.engineblock.core.MetricsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,33 +37,39 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     private long slotId;
     private Input input;
     private Action action;
+    private Timer timer;
+    private String metricsName;
 
     /**
      * Create an ActivityMotor.
      *
+     * @param metricsName The base name for all metrics specific to this Motor's activity.
      * @param slotId The enumeration of the motor, as assigned by its executor.
      * @param input   A LongSupplier which provides the cycle number inputs.
      */
     public CoreMotor(
+            String metricsName,
             long slotId,
             Input input) {
         this.slotId = slotId;
         setInput(input);
+        this.metricsName = metricsName;
     }
 
     /**
      * Create an ActivityMotor.
      *
+     * @param metricsName The base name for all metrics specific to this Motor's activity.
      * @param slotId The enumeration of the motor, as assigned by its executor.
      * @param input   A LongSupplier which provides the cycle number inputs.
      * @param action  An LongConsumer which is applied to the input for each cycle.
      */
     public CoreMotor(
-            long slotId,
+            String metricsName, long slotId,
             Input input,
             Action action
     ) {
-        this(slotId, input);
+        this(metricsName, slotId, input);
         setAction(action);
     }
 
@@ -109,6 +117,8 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     @Override
     public void run() {
 
+        timer = MetricsContext.metrics().timer(metricsName + ".cycles");
+
         if (slotState.get()==Finished) {
             logger.warn("input was already exhausted for slot " + slotId + ", cycling back to finished");
         }
@@ -117,11 +127,14 @@ public class CoreMotor implements ActivityDefObserver, Motor {
         long cyclenum;
         long cycleMax = input.getMax();
 
+
         if (action instanceof ActionInitializer) {
             ((ActionInitializer)action).init();
         }
 
         while (slotState.get() == Started) {
+            Timer.Context cycleTime = timer.time();
+
             cyclenum = input.getAsLong();
             if (cyclenum > cycleMax) {
                 logger.debug("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
@@ -130,6 +143,7 @@ public class CoreMotor implements ActivityDefObserver, Motor {
             }
             logger.trace("cycle " + cyclenum);
             action.accept(cyclenum);
+            cycleTime.stop();
         }
 
         if (slotState.get()==Stopping) {

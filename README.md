@@ -36,3 +36,5 @@ The Engine Block project started as a branch of [test client](http://github.com/
 This is licensed under the Apache Public License 2.0
 
 
+![Travis CI Build Status](https://api.travis-ci.org/engineblock/engineblock.svg)
+

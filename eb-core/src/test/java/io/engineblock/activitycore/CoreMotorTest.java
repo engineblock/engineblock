@@ -30,7 +30,7 @@ public class CoreMotorTest {
     @Test(enabled=false)
     public void testBasicActivityMotor() {
         BlockingCycleValueSupplier lockstepper = new BlockingCycleValueSupplier();
-        Motor cm = new CoreMotor(5L,lockstepper);
+        Motor cm = new CoreMotor("testing-basic-activity-motor", 5L, lockstepper);
         AtomicLong observableAction = new AtomicLong(-3L);
         cm.setAction(getTestConsumer(observableAction));
         Thread t = new Thread(cm);
