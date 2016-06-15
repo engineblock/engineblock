@@ -1,0 +1,19 @@
+@startuml
+title engineblock dependencies
+'node engineblock
+'node defaults as "project-defaults"
+
+folder engineblock {
+node diag as "at-diag"
+node api as "eb-api"
+node core as "eb-core"
+node rest as "eb-rest"
+node runtime as "eb-runtime"
+rest .. runtime
+runtime .. core
+runtime .. diag
+core .. api
+diag .. api
+}
+
+@enduml
