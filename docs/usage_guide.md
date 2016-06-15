@@ -7,8 +7,7 @@ The EB User's Guide is organized in order of increasing detail. Simply read thro
 3. [Using the Command Line](command_line.md)
 4. [Wiring up Metrics](metrics.md)
 5. [Writing Scenario Scripts](scripting.md)
-1. [Development - Building Activity Types](building_activities.md)
-2. [Development - Activity Internals](dev_activity_internals.md)
-3. [Development - Building Data Providers](data_providers.md)
+6. [Development - Building Activity Types](dev_building_activities.md)
+7. [Development - Activity Internals](dev_activity_internals.md)
 
 
