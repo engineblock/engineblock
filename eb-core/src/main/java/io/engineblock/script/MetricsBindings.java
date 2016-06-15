@@ -15,84 +15,47 @@
 package io.engineblock.script;
 
 import com.codahale.metrics.Metric;
-import io.engineblock.core.MetricsContext;
+import com.codahale.metrics.MetricRegistry;
 
-import javax.script.Bindings;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class MetricsBindings implements Bindings {
+/**
+ * <p>Provide a Bindings layer for metrics.</p>
+ *
+ * <p>This is not straight-forward because the dotted naming scheme used for
+ * metrics is not always used for layering. For example, a metric named "my.basic.metric"
+ * may exist only at one level in the metrics data, so looking for it under "my" or
+ * "my.basic" will not work.</p>
+ *
+ * <p>Since the dotted naming scheme will be presumed by most users to represent tree
+ * traversal, this binding layer will create the structure to support such navigation</p>
+ */
+public class MetricsBindings extends ReadOnlyBindings<MetricRegistry> {
 
-    private final MetricsContext context;
-
-    public MetricsBindings(MetricsContext metricsContext) {
-        this.context = metricsContext;
+    public MetricsBindings(MetricRegistry contextObject) {
+        super(contextObject);
     }
 
     @Override
-    public Object put(String name, Object value) {
-        throw new RuntimeException("Metrics are read only.");
-    }
+    protected Map<String, Object> getMap(MetricRegistry contextObject) {
+        Map<String,Object> map = new HashMap<String,Object>();
 
-    @Override
-    public void putAll(Map<? extends String, ? extends Object> toMerge) {
-        throw new RuntimeException("Metrics are read only.");
-    }
-
-    @Override
-    public void clear() {
-        throw new RuntimeException("Metrics are read only.");
-    }
-
-    @Override
-    public Set<String> keySet() {
-        return context.getMetrics().getNames();
-    }
-
-    @Override
-    public Collection<Object> values() {
-        Collection<Object> values = new ArrayList<Object>();
-        values.addAll(
-            context.getMetrics().getMetrics().values()
-        );
-        return values;
-    }
-
-    @Override
-    public Set<Entry<String, Object>> entrySet() {
-        Set<Entry<String,Object>> newset = new HashSet<>();
-        for (Entry<String, Metric> entry : context.getMetrics().getMetrics().entrySet()) {
-            newset.add(new AbstractMap.SimpleImmutableEntry<String, Object>(entry));
+        for (Entry<String, Metric> entry : contextObject.getMetrics().entrySet()) {
+            map.put(entry.getKey(),entry.getValue());
         }
-        return newset;
+
+        return map;
     }
 
-    @Override
-    public int size() {
-        return context.getMetrics().getMetrics().size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return context.getMetrics().getMetrics().isEmpty();
-    }
-
-    @Override
-    public boolean containsKey(Object key) {
-        return context.getMetrics().getNames().contains(key);
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return context.getMetrics().getMetrics().values().contains(value);
-    }
-
+    /**
+     * For debugging purposes - remove this
+     * @param key key
+     * @return value
+     */
     @Override
     public Object get(Object key) {
-        return context.getMetrics().getMetrics().get(key);
-    }
-
-    @Override
-    public Object remove(Object key) {
-        throw new RuntimeException("Metrics are read only.");
+        Object o = super.get(key);
+        return o;
     }
 }

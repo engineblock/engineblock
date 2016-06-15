@@ -90,7 +90,7 @@ public class Scenario implements Callable<Result> {
 
         nashorn.put("activities", new ScenarioBindings(scenarioController));
 
-        nashorn.put("metrics", new MetricsBindings(MetricsContext.getInstance()));
+        nashorn.put("metrics", new MetricsBindings(MetricsContext.getInstance().getMetrics()));
 
 //        bufferAppender = new BufferAppender<ILoggingEvent>();
 //        bufferAppender.setName("scenario-" + getName());
@@ -111,7 +111,7 @@ public class Scenario implements Callable<Result> {
                 e.printStackTrace();
             }
         }
-        logger.info("Shutting down executors.");
+        logger.info("Shutting down scenario executors.");
         scenarioController.awaitCompletion(864000000);
 
     }

@@ -60,7 +60,7 @@ public class ActivityExecutorTest {
         MotorDispenser cmf = new MotorDispenser() {
             @Override
             public Motor getMotor(ActivityDef activityDef, int slotId) {
-                Motor cm = new CoreMotor("testing", slotId, ls);
+                Motor cm = new CoreMotor("activity." + activityDef.getAlias(), slotId, ls);
                 cm.setAction(lc);
                 return cm;
             }
