@@ -23,7 +23,7 @@ public class EBCLI {
     public EBCLI() {}
 
     public void run(String[] args) {
-        EMCLIOptions options = new EMCLIOptions(args);
+        EBCLIOptions options = new EBCLIOptions(args);
 
         if (options.wantsVersion()) {
             System.out.println(new VersionInfo().getVersion());
@@ -61,7 +61,7 @@ public class EBCLI {
 
         ScenariosExecutor executor = new ScenariosExecutor(1);
         Scenario scenario = new Scenario("cli");
-        String script = EMCLIScriptAssembly.assembleScript(options);
+        String script = EBCLIScriptAssembly.assembleScript(options);
         scenario.addScriptText(script);
         executor.execute(scenario);
         Map<Scenario, Result> stringResultMap = executor.awaitAllResults();

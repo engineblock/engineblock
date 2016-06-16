@@ -3,13 +3,13 @@
 To get built-in help on the available command line options, run
 
 ~~~
-run-eb -h
+java -jar eb.jar -h
 ~~~
 
 The most common and useful commands will be explained at some depth in this guide, however
 the built-in help above will be complete, with proper syntax for all commands.
 
-There is more than one way to invoke EngineBLock. The sections below explain more about them, with more detail about how EngineBlock works as you read further.
+There is more than one way to invoke EngineBlock. The sections below explain more about them, with more detail about how EngineBlock works as you read further.
 
 __Running a pre-defined activity__
 

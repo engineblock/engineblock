@@ -2,43 +2,54 @@
 
 ## Installation
 
-EB is released as an executable jar. To use a specific release, simply download it and run it like this:
-    
-    curl -O https://github.com/jshook/em/releases/download/1.0.0-snapshot/eb.jar
-    java -jar eb.jar
-        
-The latest release can always be run with this simple script: [run-em](https://raw.githubusercontent.com/jshook/em/run-em). You can use the commands below to get it. It will simply download eb.jar from the latest release if needed. As always, blindly running scripts from the web is not a good idea. Look at this script before you run it.
+EngineBlock is released as an executable jar. To use a specific release, simply download it and run it like this:
+~~~
+curl -o eb.jar https://repo1.maven.org/maven2/io/engineblock/eb-runtime/1.0.3/eb-runtime-1.0.3.jar
+java -jar eb.jar
+~~~
 
-    curl -O https://raw.githubusercontent.com/jshook/em/archwork/run-em
-    chmod u+x run-em
+The latest release can always be run with this simple script: [run-eb](https://raw.githubusercontent.com/engineblock/engineblock/eb-runtime/bin/run-eb). You can use the commands below to get it.
 
-This script may be used in place of
+~~~
+curl -O https://raw.githubusercontent.com/engineblock/engineblock/eb-runtine/bin/run-eb
+chmod u+x run-eb
+~~~
 
-    java -jar eb.jar arg0 ...
-    
-It will have the same effect as running 'java -jar eb.jar' with the supplied command line arguments, except that it will fetch eb.jar if needed. The rest of the examples will use this method, although you can simply invoke the jar directly if you need.
+**A cautionary word**: As always, blindly running scripts from the web is not a good idea. Look at this script before you run it. Make sure you are comfortable with what it does. This is not a signed artifact as it is.
+
+This script demonstrates how to fetch the version of the latest published artifact via maven central search. It also downloads that artifact if it doesn't find it locally cached.
+
+This script may be used in place of:
+~~~
+java -jar eb.jar arg0 ...
+~~~
+All command line arguments will be carried through.
 
 # Usage
 
 __Available Activity Types__
 
-    ./run-em --list-activity-types
+~~~
+./run-eb --list-activity-types
+~~~
 
 This should provide a list of the activity types that are known to the client. The build-in activity type "diag", is always available. To really be useful, you need to add activity type libraries to the libs directory.
 
 __Activity Type Docs__
 
 You can get further documentation about an activity...
+~~~
+./run-eb help diag
+~~~
 
-    ./run-em --activity-help diag
-
-This will show the internal documentation for the named activity type. There will be documentation for every activity, as the activity loader will not recognize one without it.
+This will show the internal documentation for the diag activity type. There will be documentation for every activity, as the activity loader will not recognize one without it.
 
 __Running an Activity__
 
 You can run an instance of an activity:
-
-    ./run-em --activity alias=test1;type=diag;threads=10;interval=200;
+~~~
+./run-em activity alias test1 type=diag threads=10 interval=200
+~~~
 
 This shows the standard form of an activity definition. It is simply a map of activity parameters and values.
 Here is what they do:
