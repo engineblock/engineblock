@@ -48,7 +48,7 @@ __Running an Activity__
 
 You can run an instance of an activity:
 ~~~
-./run-em activity alias test1 type=diag threads=10 interval=200
+./run-eb activity alias test1 type=diag threads=10 interval=200
 ~~~
 
 This shows the standard form of an activity definition. It is simply a map of activity parameters and values.
@@ -60,13 +60,15 @@ Here is what they do:
 
 You can also run multiple activities:
 
-    ./run-em \
-    --activity alias=test1;type=diag;threads=10;interval=200; \
-    --activity alias=test2;type=diag;threads=1;interval=10;
+~~~
+./run-eb \
+activity alias=test1 type=diag threads=10 interval=200  \
+activity alias=test2 type=diag threads=1 interval=10
+~~~
 
 __Scripting__
 
-    ./run-em some
+./run-eb somescript
 
 ## The Command Line
 
