@@ -4,11 +4,11 @@ If you like to have all of your testing data in one place, then you may be inter
 
 In order to enable graphite reporting, use
 
-    --graphite <host>
+    report-graphite-to <host>
     
 or
 
-    --graphite <host>:<port>
+    report-graphite-to <host>:<port>
 
 ## Metric Naming
 

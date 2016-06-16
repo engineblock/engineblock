@@ -11,11 +11,19 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldRecognizeActivities() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"activity", "foo", "activity", "bar"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"activity", "foo=wan", "activity", "bar=lan"});
         assertThat(opts.getCommands()).isNotNull();
         assertThat(opts.getCommands().size()).isEqualTo(2);
-        assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("foo");
-        assertThat(opts.getCommands().get(1).getCmdSpec()).isEqualTo("bar");
+        assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("foo=wan;");
+        assertThat(opts.getCommands().get(1).getCmdSpec()).isEqualTo("bar=lan;");
+    }
+
+    @Test
+    public void shouldParseLongActivityForm() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"activity","param1=param2","param3=param4","report-graphite-to","woot"});
+        assertThat(opts.getCommands().size()).isEqualTo(1);
+        assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("param1=param2;param3=param4;");
+        assertThat(opts.wantsReportGraphiteTo()).isEqualTo("woot");
     }
 
     @Test
@@ -64,4 +72,5 @@ public class TestEBCLIOptions {
     public void shouldErrorSanelyWhenNoMatch() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"unrecognizable command"});
     }
+
 }
