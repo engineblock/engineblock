@@ -7,11 +7,11 @@ import java.security.InvalidParameterException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
-public class TestEMCLIOptions {
+public class TestEBCLIOptions {
 
     @Test
     public void shouldRecognizeActivities() {
-        EMCLIOptions opts = new EMCLIOptions(new String[]{"activity", "foo", "activity", "bar"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"activity", "foo", "activity", "bar"});
         assertThat(opts.getCommands()).isNotNull();
         assertThat(opts.getCommands().size()).isEqualTo(2);
         assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("foo");
@@ -20,48 +20,48 @@ public class TestEMCLIOptions {
 
     @Test
     public void shouldRecognizeVersion() {
-        EMCLIOptions opts = new EMCLIOptions(new String[]{"version"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"version"});
         assertThat(opts.wantsVersion()).isTrue();
     }
 
     @Test
     public void shouldRecognizeScripts() {
-        EMCLIOptions opts = new EMCLIOptions(new String[]{"script", "ascriptaone", "script", "ascriptatwo"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"script", "ascriptaone", "script", "ascriptatwo"});
         assertThat(opts.getCommands()).isNotNull();
         assertThat(opts.getCommands().size()).isEqualTo(2);
-        assertThat(opts.getCommands().get(0).getCmdType()).isEqualTo(EMCLIOptions.CmdType.script);
+        assertThat(opts.getCommands().get(0).getCmdType()).isEqualTo(EBCLIOptions.CmdType.script);
         assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("ascriptaone");
-        assertThat(opts.getCommands().get(1).getCmdType()).isEqualTo(EMCLIOptions.CmdType.script);
+        assertThat(opts.getCommands().get(1).getCmdType()).isEqualTo(EBCLIOptions.CmdType.script);
         assertThat(opts.getCommands().get(1).getCmdSpec()).isEqualTo("ascriptatwo");
     }
 
     @Test
     public void shouldRecognizeWantsActivityTypes() {
-        EMCLIOptions opts = new EMCLIOptions(new String[]{"activitytypes"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"activitytypes"});
         assertThat(opts.wantsActivityTypes()).isTrue();
-        opts = new EMCLIOptions(new String[]{"version"});
+        opts = new EBCLIOptions(new String[]{"version"});
         assertThat(opts.wantsActivityTypes()).isFalse();
     }
 
     @Test
     public void shouldRecognizeWantsBasicHelp() {
-        EMCLIOptions opts = new EMCLIOptions(new String[]{"help"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"help"});
         assertThat(opts.wantsBasicHelp()).isTrue();
-        opts = new EMCLIOptions(new String[]{"version"});
+        opts = new EBCLIOptions(new String[]{"version"});
         assertThat(opts.wantsActivityHelp()).isFalse();
     }
 
     @Test
     public void shouldRecognizeWantsActivityHelp() {
-        EMCLIOptions opts = new EMCLIOptions(new String[]{"help", "foo"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"help", "foo"});
         assertThat(opts.wantsActivityHelp()).isTrue();
         assertThat(opts.wantsActivityHelpFor()).isEqualTo("foo");
-        opts = new EMCLIOptions(new String[]{"version"});
+        opts = new EBCLIOptions(new String[]{"version"});
         assertThat(opts.wantsActivityHelp()).isFalse();
     }
 
     @Test(expectedExceptions = {InvalidParameterException.class}, expectedExceptionsMessageRegExp = ".*unrecognized command.*")
     public void shouldErrorSanelyWhenNoMatch() {
-        EMCLIOptions opts = new EMCLIOptions(new String[]{"unrecognizable command"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"unrecognizable command"});
     }
 }
