@@ -13,14 +13,14 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class EMCLI {
+public class EBCLI {
 
     public static void main(String[] args) {
-        EMCLI cli = new EMCLI();
+        EBCLI cli = new EBCLI();
         cli.run(args);
     }
 
-    public EMCLI() {}
+    public EBCLI() {}
 
     public void run(String[] args) {
         EMCLIOptions options = new EMCLIOptions(args);

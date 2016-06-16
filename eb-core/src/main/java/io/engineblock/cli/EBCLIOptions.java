@@ -12,9 +12,9 @@ import java.util.List;
  * No CLI parser lib is useful for command structures, it seems. So we have this instead, which is good enough.
  * If something better is needed later, this can be replaced.
  */
-public class EMCLIOptions {
+public class EBCLIOptions {
 
-    private final static Logger logger = LoggerFactory.getLogger(EMCLIOptions.class);
+    private final static Logger logger = LoggerFactory.getLogger(EBCLIOptions.class);
 
     public static final String docoptFileName = "docopt.txt";
 
@@ -31,7 +31,7 @@ public class EMCLIOptions {
     private boolean wantsActivityTypes = false;
     private boolean wantsBasicHelp = false;
 
-    EMCLIOptions(String[] args) {
+    EBCLIOptions(String[] args) {
         parse(args);
     }
 
