@@ -5,15 +5,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.stream.Collectors;
 
-public class EMCLIScriptAssembly {
-    private final static Logger logger = LoggerFactory.getLogger(EMCLIScriptAssembly.class);
+public class EBCLIScriptAssembly {
+    private final static Logger logger = LoggerFactory.getLogger(EBCLIScriptAssembly.class);
 
-    public static String assembleScript(EMCLIOptions options) {
+    public static String assembleScript(EBCLIOptions options) {
         StringBuilder sb = new StringBuilder();
-        for (EMCLIOptions.Cmd cmd : options.getCommands()) {
+        for (EBCLIOptions.Cmd cmd : options.getCommands()) {
             switch (cmd.cmdType) {
                 case activity:
                     // Sanity check that this can parse before using it
@@ -37,7 +36,7 @@ public class EMCLIScriptAssembly {
             logger.debug("Looking for " + new File(".").getCanonicalPath() + File.separator + cmdSpec);
         } catch (IOException ignored) {
         }
-        InputStream resourceAsStream = EMCLIScriptAssembly.class.getClassLoader().getResourceAsStream(cmdSpec);
+        InputStream resourceAsStream = EBCLIScriptAssembly.class.getClassLoader().getResourceAsStream(cmdSpec);
         if (resourceAsStream==null) {
                 throw new RuntimeException("Unable to find " + cmdSpec);
         }
