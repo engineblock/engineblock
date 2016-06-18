@@ -57,17 +57,4 @@ public class ScriptTests {
 
     }
 
-    @Test
-    public void testReadMetric() {
-        ScenariosExecutor e = new ScenariosExecutor(1);
-        Scenario s = new Scenario("testing metric sandbox variables for read");
-        s.addScriptText("load('classpath:scripts/readmetrics.js');");
-        e.execute(s);
-
-        Map<Scenario, Result> stringResultMap = e.awaitAllResults();
-        e.reportSummaryTo(System.out);
-
-    }
-
-
 }
