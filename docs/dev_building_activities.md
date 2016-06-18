@@ -5,43 +5,40 @@
 - Java 8
 - Maven
 
+## Get EngineBlock
+
+1a. Add EngineBlock to your project via Maven, if you simply want to use a release version. This is sufficient for building ActivityTypes.
+
+~~~
+<dependency>
+  <groupId>io.engineblock</groupId>
+  <artifactId>engineblock</artifactId>
+  <version>1.0.3</version>
+  <type>pom</type>
+</dependency>
+~~~
+
+1b. Download and locally build EngineBlock. Do this if you want contribute or otherwise experiment with the EngineBlock code base.
+
+~~~
+git clone http://github.com/engineblock/engineblock.git
+pushd engineblock
+mvn test
+~~~
+
 ## Building new Activity types
 
-This is the short-form recipe for building a new driver for EM.
+This is the short-form recipe for building a new driver for EngineBlock.
 
-1. Add EB to your maven project. Until EB is in a public Maven repo, you can simply build it and install it to your local maven repo.
-
-
-    git clone http://github.com/jshook/eb.git
-    pushd eb
-    mvn install
-
+1. Get EngineBlock (above)
 2. Implement the ActivityType interface.
-3. Add the ___ dependency to your project.
-4. Annotate your ActivityType implementation with..
-
-
-    @AutoService(ActivityType.class)
-    public class MyNewActivityType implements ActivityType {
-    ...
-
-5. Build your artifact.
+3. Implement ActionDispenserProvider in the same class.
+4. Use the [Annotated Diag ActivityType] as a reference point as needed.
+5. File Issues against the [EngineBlock Project](http://github.com/engineblock/engineblock/issues) for any doc or API enhancements that you need.
+6. Add your new ActivityType implementation to the EngineBlock classpath.
 
 ## Using ActivityTypes
 
 There are a couple ways you can use your new ActivityTypes with the EB runtime. You can mix and match these as needed.
-
-#### Embedding Engine Block with Maven
-
-This is as simple as wrapping the core Maven build of EB as an artifact with the correct Maven Mojo ...
-
-    <build>
-    ...
-    </build>
-
-
-#### Loading ActivityType jars at Runtime
-
-By default, EB will add jars in the `lib/` directory to it's class path. If you simply drop any ActivityType artifacts you've built into that directory, the driver types will be discovered.
 
 

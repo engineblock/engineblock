@@ -1,6 +1,6 @@
 # Understanding Slot Assembly
 
-If you are building new ActionType implementations for EM, it can help to understand the creational pattern used for slot assembly.
+If you are building new ActionType implementations for EngineBlock, it can help to understand the creational patterns used for slot assembly.
 
 ### What is Slot Assembly?
 

@@ -3,6 +3,7 @@
 export AUTO_INSTALL=${AUTO_INSTALL:-"true"}
 export FORCE_INSTALL=${FORCE_INSTALL:-"false"}
 export FETCH_ONLY=${FETCH_ONLY:-"false"}
+
 if ! which curl >> /dev/null 2>&1
 then
  printf "$0 requires curl to be in the path.\n";
@@ -10,7 +11,6 @@ then
 fi
 
 export EB_JARNAME="eb.jar"
-
 
 DOINSTALL="false"
 if [ ! -f "${EB_JARNAME}" -a "${AUTO_INSTALL}" = "true" ]
@@ -22,21 +22,24 @@ fi
 if [ "${DOINSTALL}" = "true" ]
 then
 
- export browser_download_url=$(
+export central_runtime_version=$(
    curl -s -L \
-   'https://api.github.com/repos/jshook/em/releases/latest' \
-   -H 'Accept: application/json' | \
-   grep 'browser_download_url' | cut -d'"' -f4
- )
- browser_download_url=${browser_download_url:?"Unable to continue without finding a download url from the project repo."}
+   'http://search.maven.org/solrsearch/select?q=g:"io.engineblock"%20AND%20a:"eb-runtime"%20AND%20p:"jar"&wt=json&rows=1' \
+   | perl -pe 'if (/"latestVersion":"([\d\.]+?)"/) { $_ = $1 } else {$_="nope"}'
+)
+export DOWNLOAD_VERSION=${central_runtime_version:?"Unable to find a downloadble version via maven central search."}
+printf 'Downloading version: %s\n...' ${DOWNLOAD_VERSION} 1>&2
+export DOWNLOAD_URL="https://repo1.maven.org/maven2/io/engineblock/eb-runtime/${DOWNLOAD_VERSION}/eb-runtime-${DOWNLOAD_VERSION}.jar"
+printf 'Download URL: %s\n' ${DOWNLOAD_URL}
 
- printf 'fetching engine block runtime from %s...\n' "${browser_download_url}" 1>&2
- (
-  cd /tmp ;
-  curl -s -L -O "${browser_download_url}"
- )
- mv /tmp/eb.jar ${EB_JARNAME}
- printf "The EB jar has been saved as %s\n" ${EB_JARNAME}
+printf 'fetching EngineBlock runtime from %s...\n' "${DOWNLOAD_URL}" 1>&2
+
+(
+ cd /tmp ;
+ curl -s -L -o 'eb.jar' "${DOWNLOAD_URL}"
+)
+mv /tmp/eb.jar ${EB_JARNAME}
+printf "The EB jar has been saved as %s\n" ${EB_JARNAME}
 fi
 
 if [ "${FETCH_ONLY}" = "true" ]
@@ -48,7 +51,7 @@ fi;
 if [ -z "$*" ]
 then
   printf "Pass additional arguments to this script, and they will be passed to eb.jar\n" 1>&2
-  printf "For more details, consult http://github.com/jshook/em\n" 1>&2
+  printf "For more details, consult http://engineblock.io/ or http://github.com/engineblock/engineblock\n" 1>&2
   exit 2
 fi
 

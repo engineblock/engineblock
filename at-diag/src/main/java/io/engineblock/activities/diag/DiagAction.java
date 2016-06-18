@@ -36,6 +36,7 @@ public class DiagAction implements Action, ActivityDefObserver {
 
         updateReportTime();
     }
+
     private void updateReportTime() {
         lastUpdate = System.currentTimeMillis() - calculateOffset(slot, activityDef);
         quantizedInterval = calculateInterval(activityDef);

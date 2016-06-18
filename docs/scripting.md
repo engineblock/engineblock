@@ -2,23 +2,21 @@
 
 ## Motive
 
-The EB runtime is a combination of a scripting sandbox and a workload execution machine. This is not accidental.
-With this particular arrangement, it should be possible to build sophisticated tests across a variety of scenarios. 
-In particular, logic which can observe and react to the system under test can be powerful. It can make it possible
-to break away from the conventional run-interpret-adjust cycle which is all too often done by human hands. The ability
-to get a useful set of answers from nontrivial systems with reasonable effort requires a more sophisticated approach.
+The EB runtime is a combination of a scripting sandbox and a workload execution machine. This is not accidental. With this particular arrangement, it should be possible to build sophisticated tests across a variety of scenarios. In particular, logic which can observe and react to the system under test can be powerful. It can make it possible
+to break away from the conventional run-interpret-adjust cycle which is all too often done by human hands. The ability to get a useful set of answers from nontrivial systems with reasonable effort requires a more sophisticated approach.
 
-## Script Environment
+## Scripting Environment
 
-The TestScript environment is the standard Nashorn Javascript environment, with slight modifications meant to streamline
-understanding and usage. The modification are:
+The EngineBlock scripting environment is provided by Nashorn, with slight modifications meant to streamline understanding and usage.
 
-- Active Variables, control variables which, when assigned to, cause an immediate change in the EB runtime. Each of the variables below is pre-wired into each script environment.
-- - activities._&lt;alias&gt;.&lt;paramname&gt;_ - (read+write) - Every parameter which is assigned to in this map will cause a synchronous notification to the execution runtime, including the respective activity (identified by &lt;alias&gt;) if it has been implemented to react.
-- - metrics._&lt;alias&gt;.&lt;metric&gt;_ - (read-only) - Every value available here is a metrics object from the internal instrumentation.
-- - _sc_ - (read+write) - This is the __Scenario Controller__ object which manages the activity executors in the runtime.
+The modification are:
 
-Interaction with the EB runtime and the activities therein is made easy by the above variables and objects. When an assignment is made to any of these variables, the changes are propagated to internal listeners. For changes to _threads_, the thread pool responsible for the affected activity adjusts the number of active threads (AKA slots). Other changes are further propagated directly to the thread harness (motor) and to each interested input and action.
+- Active Bindings, control variables which, when assigned to, cause an immediate change in the behavior of the runtime. Each of the variables below is pre-wired into each script environment.
+  - __sc__ - (read+write) - This is the __Scenario Controller__ object which manages the activity executors in the runtime.
+  - __activities.&lt;activity alias&gt;.&lt;paramname&gt;__ - (read+write) - Every parameter which is assigned to in this map will cause a synchronous notification to the execution runtime, including the respective activity (identified by &lt;activity alias&gt;) if it has been implemented to react.
+  - __metrics__ - (read-only) - This is the metrics map from the MetricRegistry.getMetrics() call.
+
+Interaction with the EB runtime and the activities therein is made easy by the above variables and objects. When an assignment is made to any of these variables, the changes are propagated to internal listeners. For changes to _threads_, the thread pool responsible for the affected activity adjusts the number of active threads (AKA slots). Other changes are further propagated directly to the thread harness (motor) and to each interested input and action. Assignment to the _type_ and _alias_ activity parameters has no special effect.
 
 You can make use of more extensive Java or Javascript libraries as needed, mixing then with the runtime controls provided above.
 
@@ -28,7 +26,7 @@ When a script is run, it has absolute control over the scenario runtime while it
 
 ## Strategies
 
-You can use EB in the classic form with _--activity=..._ command line syntax. There are reasons, however, that you will sometimes want customize and modify your scripts directly, such as:
+You can use EngineBlock in the classic form with _activity &lt;param&gt;=&lt;value&gt; ..._ command line syntax. There are reasons, however, that you will sometimes want customize and modify your scripts directly, such as:
 
 - permute test variables to cover many sub-conditions in a test
 - automatically adjust load factors to identify the nominal capacity of a system
@@ -37,4 +35,4 @@ You can use EB in the classic form with _--activity=..._ command line syntax. Th
 
 ## Script Input & Output
 
-Internal buffers are kept for _stdin_, _stdout_, and _stderr_. Logging for these buffers is separately controllable via the [logging settings](logging.md).
+Internal buffers are kept for _stdin_, _stdout_, and _stderr_.

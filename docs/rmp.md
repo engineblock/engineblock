@@ -9,7 +9,7 @@ As a machine, it is built upon the following notions:
 
 1. The core components should be based on tangible concepts.
 2. It should be easy to reason about and experiment with.
-3. It should be self-standing, but allow for trivial addition of use-specific plugins.
+3. It should be self-standing, but allow for trivial addition of plugins.
 4. A plugin-in or extension scheme must be provided with examples and documentation.
 
 While we  may have many examples of software that follow these basic points, we need to be more specific about what qualifies something as an RMP...
