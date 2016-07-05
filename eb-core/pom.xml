@@ -3,12 +3,12 @@
 
     <artifactId>eb-core</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.5</version>
 
     <parent>
         <artifactId>project-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>1.0.5-SNAPSHOT</version>
+        <version>1.0.5</version>
         <relativePath>../project-defaults</relativePath>
     </parent>
 
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-api</artifactId>
-            <version>1.0.5-SNAPSHOT</version>
+            <version>1.0.5</version>
         </dependency>
 
         <dependency>
