@@ -25,6 +25,7 @@
             <artifactId>at-diag</artifactId>
             <version>1.0.4-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-core</artifactId>
