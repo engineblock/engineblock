@@ -35,7 +35,6 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
     private final AtomicReference<SlotState> slotState = new AtomicReference<>(SlotState.Initialized);
     private long slotId;
-    private ActivityDef activityDef;
     private Input input;
     private Action action;
     private Timer timer;
@@ -118,7 +117,7 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     @Override
     public void run() {
 
-        timer = MetricsContext.metrics().timer("activity." + activityDef.getAlias() + ".timer");
+        timer = MetricsContext.metrics().timer("activity." + metricsName + ".timer");
 
         if (slotState.get()==Finished) {
             logger.warn("input was already exhausted for slot " + slotId + ", cycling back to finished");
