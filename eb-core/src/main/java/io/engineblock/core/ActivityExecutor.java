@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * <p>An ActivityExecutor is a named instance of an execution harness for a single activity instance.
  * It is responsible for managing threads and activity settings which may be changed while the
  * activity is running.</p>
- * <p>
+ *
  * <p>An ActivityExecutor may be represent an activity that is defined and active in the running
  * scenario, but which is inactive. This can occur when an activity is paused by controlling logic,
  * or when the threads are set to zero.</p>
@@ -63,7 +63,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
      * The protocol between the motors and the executor should be safe as long as each state change
      * is owned by either the motor logic or the activity executor but not both, and strictly serialized
      * as well. This is enforced by forcing start(...) to be serialized as well as using CAS on the motor states.</p>
-     * <p>
+     *
      * <p>The startActivity method may be called to true-up the number of active motors in an activity executor after
      * changes to threads.</p>
      */

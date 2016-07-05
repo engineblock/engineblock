@@ -67,7 +67,7 @@ public class ScenarioController {
     /**
      * <p>Stop an activity, given an activity def. The only part of the activity def that is important is the
      * alias parameter. This method retains the activity def signature to provide convenience for scripting.</p>
-     * <p>
+     *
      * <p>For example, sc.stop("alias=foo")</p>
      *
      * @param activityDef An activity def, including at least the alias parameter.
