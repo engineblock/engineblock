@@ -17,21 +17,19 @@
 
 package io.engineblock.script;
 
-import io.engineblock.core.Result;
+import io.engineblock.core.ScenariosResults;
 import org.testng.annotations.Test;
-
-import java.util.Map;
 
 @Test
 public class ScenariosExecutorTest {
 
     @Test(enabled=false)
     public void testAwaitOnTime() {
-        ScenariosExecutor e = new ScenariosExecutor(1);
+        ScenariosExecutor e = new ScenariosExecutor(ScenariosExecutorTest.class.getSimpleName(), 1);
         Scenario s = new Scenario("testing");
         s.addScriptText("load('classpath:scripts/asyncs.js');\nsetTimeout(\"print('waited')\",5000);\n");
         e.execute(s);
-        Map<Scenario, Result> stringResultMap = e.awaitAllResults();
+        ScenariosResults scenariosResults = e.awaitAllResults();
     }
 
 

@@ -120,7 +120,7 @@ public class Scenario implements Callable<Result> {
 
     public Result call() {
         run();
-        String iolog = scriptEnv.getTimedLog().stream().collect(Collectors.joining());
+        String iolog = scriptEnv.getTimedLog();
         return new Result(iolog);
     }
 
@@ -151,12 +151,15 @@ public class Scenario implements Callable<Result> {
     }
 
     public Optional<List<String>> getIOLog() {
-        return Optional.ofNullable(scriptEnv)
-                .map(ScriptEnvBuffer::getTimedLog);
+        return Optional.ofNullable(scriptEnv).map(ScriptEnvBuffer::getTimeLogLines);
     }
 
     public Optional<BufferAppender> getLogBuffer() {
         return Optional.ofNullable(bufferAppender);
+    }
+
+    public String toString() {
+        return "name:'" + this.getName() + "'";
     }
 }
 

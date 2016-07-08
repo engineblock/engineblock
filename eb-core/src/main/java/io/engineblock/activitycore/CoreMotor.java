@@ -117,10 +117,10 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     @Override
     public void run() {
 
-        timer = MetricsContext.metrics().timer("activity." + metricsName + ".timer");
+        timer = MetricsContext.metrics().timer(metricsName + ".timer");
 
         if (slotState.get()==Finished) {
-            logger.warn("input was already exhausted for slot " + slotId + ", cycling back to finished");
+            logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
         }
 
         enterState(Started);

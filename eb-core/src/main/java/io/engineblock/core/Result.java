@@ -32,6 +32,7 @@ public class Result {
     public Result(String iolog) {
         this.iolog = iolog;
     }
+
     public Result(Exception e) {
         this.iolog = e.getMessage();
         this.exception = e;
@@ -39,7 +40,7 @@ public class Result {
 
     public void reportTo(PrintStream out) {
         out.println("IO Log:");
-        out.print(iolog);
+        out.println(iolog);
 
         ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(MetricsContext.metrics())
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
@@ -52,5 +53,9 @@ public class Result {
 
     public Optional<Exception> getException() {
         return Optional.ofNullable(exception);
+    }
+
+    public String getIOLog() {
+        return this.iolog;
     }
 }
