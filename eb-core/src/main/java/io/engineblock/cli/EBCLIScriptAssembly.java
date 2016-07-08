@@ -1,6 +1,7 @@
 package io.engineblock.cli;
 
 import io.engineblock.activityapi.ActivityDef;
+import io.engineblock.util.EngineBlockFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ public class EBCLIScriptAssembly {
                 case activity:
                     // Sanity check that this can parse before using it
                     ActivityDef activityDef = ActivityDef.parseActivityDef(cmd.cmdSpec);
-                    sb.append("scenario.start('" + cmd.cmdSpec + "');\n");
+                    sb.append("scenario.start(\"" + cmd.cmdSpec + "\");\n");
                     break;
                 case script:
                     String scriptData = loadScript(cmd.cmdSpec);
@@ -36,10 +37,9 @@ public class EBCLIScriptAssembly {
             logger.debug("Looking for " + new File(".").getCanonicalPath() + File.separator + cmdSpec);
         } catch (IOException ignored) {
         }
-        InputStream resourceAsStream = EBCLIScriptAssembly.class.getClassLoader().getResourceAsStream(cmdSpec);
-        if (resourceAsStream==null) {
-                throw new RuntimeException("Unable to find " + cmdSpec);
-        }
+
+        InputStream resourceAsStream = EngineBlockFiles.findRequiredStreamOrFile(cmdSpec, "js", "scripts");
+
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(resourceAsStream))) {
             scriptData = buffer.lines().collect(Collectors.joining("\n"));
         } catch (Throwable t) {
