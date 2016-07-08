@@ -39,7 +39,7 @@ public class EngineBlockService extends Application<EngineBlockServiceConfig> {
     @Override
     public void initialize(Bootstrap<EngineBlockServiceConfig> bootstrap) {
 
-        executor = new ScenariosExecutor();
+        executor = new ScenariosExecutor("scenarios-executor for " + this.getName());
 
         SwaggerBundle<EngineBlockServiceConfig> swaggerBundle;
         swaggerBundle = new SwaggerBundle<EngineBlockServiceConfig>() {

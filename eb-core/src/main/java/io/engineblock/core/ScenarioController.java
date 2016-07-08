@@ -54,6 +54,17 @@ public class ScenarioController {
         start(ad);
     }
 
+    public synchronized void run(int timeout, Map<String, String> activityDefMap) {
+        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
+        run(timeout, ad);
+    }
+
+    public synchronized void run(int timeout, ActivityDef activityDef) {
+        ActivityExecutor activityExecutor = getActivityExecutor(activityDef);
+        activityExecutor.startActivity();
+        activityExecutor.awaitCompletion(timeout);
+    }
+
     /**
      * Start an activity, given the name by which it is known already in the scenario. This is useful if you have
      * stopped an activity and want to start it again.
@@ -67,7 +78,7 @@ public class ScenarioController {
     /**
      * <p>Stop an activity, given an activity def. The only part of the activity def that is important is the
      * alias parameter. This method retains the activity def signature to provide convenience for scripting.</p>
-     *
+     * <p>
      * <p>For example, sc.stop("alias=foo")</p>
      *
      * @param activityDef An activity def, including at least the alias parameter.

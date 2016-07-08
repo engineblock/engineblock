@@ -45,31 +45,31 @@ public enum SlotState {
         switch (from) {
             default:
                 return false;
-            case Initialized:
+            case Initialized: // A motor was just created. This is its initial state.
                 switch (to) {
-                    case Started:
+                    case Started: // a motor has been executed after being initialized
                         return true;
                     default:
                         return false;
                 }
             case Started:
                 switch (to) {
-                    case Stopping:
-                    case Finished:
+                    case Stopping: // A request was made to stop the motor before it finished
+                    case Finished: // A motor has exhausted its input, and is finished with its work
                         return true;
                     default:
                         return false;
                 }
             case Stopping:
                 switch (to) {
-                    case Stopped:
+                    case Stopped: // A motor was stopped by request before exhausting input
                         return true;
                     default:
                         return false;
                 }
             case Stopped:
                 switch (to) {
-                    case Started:
+                    case Started: // A motor was restarted after being stopped
                         return true;
                     default:
                         return false;
@@ -77,7 +77,11 @@ public enum SlotState {
             case Finished:
                 switch (to) {
                     case Started:
-                        return true; // not useful as of yet. Perhaps this will be allowed via explicit reset of input stream.
+                        return true;
+                    // not useful as of yet.
+                    // Perhaps this will be allowed via explicit reset of input stream.
+                    // If the input isn't reset, then trying to start a finished motor
+                    // will cause it to short-circuit back to Finished state.
                     default:
                         return false;
                 }

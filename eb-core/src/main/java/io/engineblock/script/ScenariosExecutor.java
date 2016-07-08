@@ -18,10 +18,10 @@
 package io.engineblock.script;
 
 import io.engineblock.core.Result;
+import io.engineblock.core.ScenariosResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.PrintStream;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -40,12 +40,15 @@ public class ScenariosExecutor {
 //    private LinkedHashMap<String, Scenario> submittedScenarios = new LinkedHashMap<>();
 
     private ExecutorService executor = Executors.newFixedThreadPool(1);
+    private String name;
 
-    public ScenariosExecutor() {
+    public ScenariosExecutor(String name) {
+        this.name = name;
     }
 
-    public ScenariosExecutor(int threads) {
+    public ScenariosExecutor(String name, int threads) {
         executor = Executors.newFixedThreadPool(threads);
+        this.name = name;
     }
 
     public synchronized void execute(Scenario scenario) {
@@ -62,7 +65,7 @@ public class ScenariosExecutor {
      *
      * @return the final scenario-result map.
      */
-    public Map<Scenario, Result> awaitAllResults() {
+    public ScenariosResults awaitAllResults() {
         return awaitAllResults(Long.MAX_VALUE / 2, 60000); // half max value, to avoid overflow
     }
 
@@ -73,7 +76,7 @@ public class ScenariosExecutor {
      * @param updateInterval how frequently to log status while waiting
      * @return the final scenario-result map
      */
-    public Map<Scenario, Result> awaitAllResults(long timeout, long updateInterval) {
+    public ScenariosResults awaitAllResults(long timeout, long updateInterval) {
         if (updateInterval > timeout) {
             throw new InvalidParameterException("timeout must be equal to or greater than updateInterval");
         }
@@ -105,11 +108,11 @@ public class ScenariosExecutor {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
                     + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
-        Map<Scenario, Result> results = new LinkedHashMap<Scenario, Result>();
+        Map<Scenario, Result> scenarioResultMap = new LinkedHashMap<Scenario, Result>();
         getAsyncResultStatus()
                 .entrySet().stream()
-                .forEach(es -> results.put(es.getKey(), es.getValue().orElseGet(null)));
-        return results;
+                .forEach(es -> scenarioResultMap.put(es.getKey(), es.getValue().orElseGet(null)));
+        return new ScenariosResults(this,scenarioResultMap);
     }
 
     /**
@@ -153,24 +156,6 @@ public class ScenariosExecutor {
         }
 
         return optResults;
-    }
-
-    public void reportSummaryTo(PrintStream out) {
-
-        Map<Scenario, Optional<Result>> ar = getAsyncResultStatus();
-
-        for (Map.Entry<Scenario, Optional<Result>> entry : ar.entrySet()) {
-            Scenario scenario = entry.getKey();
-            Optional<Result> oresult = entry.getValue();
-
-            out.print("scenario: " + scenario);
-
-            if (oresult.isPresent()) {
-                oresult.get().reportTo(out);
-            } else {
-                out.println(": incomplete");
-            }
-        }
     }
 
     public Optional<Scenario> getPendingScenario(String scenarioName) {
@@ -217,6 +202,10 @@ public class ScenariosExecutor {
         } else {
             throw new RuntimeException("Unable to cancel scenario: " + scenarioName + ": not found");
         }
+    }
+
+    public String getName() {
+        return name;
     }
 
     private static class SubmittedScenario {

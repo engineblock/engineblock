@@ -18,43 +18,62 @@
 package io.engineblock.script;
 
 import io.engineblock.core.Result;
+import io.engineblock.core.ScenariosResults;
 import org.testng.annotations.Test;
 
-import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
 public class ScriptTests {
 
     @Test
+    public void testBlockingRun() {
+        String scenarioName = "testing activity start and stop";
+        ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":testBlockingRun", 1);
+        Scenario s = new Scenario(scenarioName);
+        s.addScriptText("load('classpath:scripts/blockingrun.js');");
+        e.execute(s);
+        ScenariosResults scenariosResults = e.awaitAllResults();
+        Result result  =scenariosResults.getOne();
+        result.reportTo(System.out);
+
+        int a1end = result.getIOLog().indexOf("blockingactivity1 finished");
+        int a2start = result.getIOLog().indexOf("running blockingactivity2");
+        assertThat(a1end).isLessThan(a2start);
+
+    }
+
+    @Test
     public void testStartStop() {
-        ScenariosExecutor e = new ScenariosExecutor(1);
+        ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":testStartStop");
         Scenario s = new Scenario("testing activity start and stop");
         s.addScriptText("load('classpath:scripts/startstopdiag.js');");
         e.execute(s);
-        Map<Scenario, Result> stringResultMap = e.awaitAllResults();
-        e.reportSummaryTo(System.out);
+        ScenariosResults scenariosResults = e.awaitAllResults();
+        Result result  =scenariosResults.getOne();
+        result.reportTo(System.out);
     }
 
     @Test
     public void testThreadChange() {
-        ScenariosExecutor e = new ScenariosExecutor(1);
+        ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":testThreadChange");
         Scenario s = new Scenario("testing thread changes");
         s.addScriptText("load('classpath:scripts/threadchange.js');");
         e.execute(s);
-        Map<Scenario, Result> stringResultMap = e.awaitAllResults();
-        e.reportSummaryTo(System.out);
+        ScenariosResults scenariosResults = e.awaitAllResults();
+        Result result  =scenariosResults.getOne();
+        result.reportTo(System.out);
     }
 
     @Test
     public void testReadMetric() {
-        ScenariosExecutor e = new ScenariosExecutor(1);
+        ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":testReadMetric");
         Scenario s = new Scenario("testing metric sandbox variables for read");
         s.addScriptText("load('classpath:scripts/readmetrics.js');");
         e.execute(s);
-
-        Map<Scenario, Result> stringResultMap = e.awaitAllResults();
-        e.reportSummaryTo(System.out);
-
+        ScenariosResults scenariosResults = e.awaitAllResults();
+        Result result  =scenariosResults.getOne();
+        result.reportTo(System.out);
     }
 
 

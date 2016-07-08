@@ -3,14 +3,13 @@ package io.engineblock.cli;
 import io.engineblock.activityapi.ActivityType;
 import io.engineblock.core.ActivityDocInfo;
 import io.engineblock.core.ActivityTypeFinder;
-import io.engineblock.core.Result;
+import io.engineblock.core.ScenariosResults;
 import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EBCLI {
@@ -59,14 +58,12 @@ public class EBCLI {
             System.out.println(activityHelpMarkdown);
         }
 
-        ScenariosExecutor executor = new ScenariosExecutor(1);
+        ScenariosExecutor executor = new ScenariosExecutor("runat@"+String.valueOf(System.currentTimeMillis()),1);
         Scenario scenario = new Scenario("cli");
         String script = EBCLIScriptAssembly.assembleScript(options);
         scenario.addScriptText(script);
         executor.execute(scenario);
-        Map<Scenario, Result> stringResultMap = executor.awaitAllResults();
-        stringResultMap.values().stream().forEach(
-                r -> r.reportTo(System.out)
-        );
+        ScenariosResults scenariosResults = executor.awaitAllResults();
+        scenariosResults.reportSummaryTo(System.out);
     }
 }

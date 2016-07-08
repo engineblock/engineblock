@@ -28,6 +28,7 @@ public class DiagAction implements Action, ActivityDefObserver {
     private int slot;
     private long lastUpdate;
     private long quantizedInterval;
+    private long reportModulo;
 
 
     public DiagAction(int slot, ActivityDef activityDef) {
@@ -40,13 +41,15 @@ public class DiagAction implements Action, ActivityDefObserver {
     private void updateReportTime() {
         lastUpdate = System.currentTimeMillis() - calculateOffset(slot, activityDef);
         quantizedInterval = calculateInterval(activityDef);
-        logger.debug("updating report time for slot:" + slot + ", def:" + activityDef + " to " + quantizedInterval);
+        reportModulo = activityDef.getParams().getLongOrDefault("modulo",1000000);
+        logger.debug("updating report time for slot:" + slot + ", def:" + activityDef + " to " + quantizedInterval
+        + ", and modulo " + reportModulo);
     }
 
     @Override
     public void accept(long value) {
         long now = System.currentTimeMillis();
-        if ((now - lastUpdate) > quantizedInterval) {
+        if ((now - lastUpdate) > quantizedInterval || ( (value % reportModulo) == 0)) {
 
             logger.info("diag action, input=" + value + ", report delay=" + ((now - lastUpdate) - quantizedInterval));
             lastUpdate += quantizedInterval;

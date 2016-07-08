@@ -15,13 +15,16 @@
 package io.engineblock.script;
 
 import javax.script.SimpleScriptContext;
-import java.io.*;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * ScriptEnvBuffer provides a variant of SimpleScriptContext which captures all
@@ -86,13 +89,16 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
         return stdoutBuffer.buffer.toString();
     }
 
-    public List<String> getTimedLog() {
+    public List<String> getTimeLogLines() {
         List<String> log = new ArrayList<String>();
         Optional.ofNullable(this.stdinBuffer).map(t->t.timedLog).ifPresent(log::addAll);
         Optional.ofNullable(this.stderrBuffer).map(t->t.timedLog).ifPresent(log::addAll);
         Optional.ofNullable(this.stdoutBuffer).map(t->t.timedLog).ifPresent(log::addAll);
-        Collections.sort(log);
+        log = log.stream().map(l -> l+"\n").collect(Collectors.toList());
         return log;
+    }
+    public String getTimedLog() {
+        return getTimeLogLines().stream().collect(Collectors.joining());
     }
 
     private class DiagReader extends Reader {
@@ -143,8 +149,11 @@ public class ScriptEnvBuffer extends SimpleScriptContext {
             String tsprefix = LocalDateTime.now().format(tsformat);
 
             buffer.write(cbuf, off, len);
-
-            timedLog.add(tsprefix + prefix + new String(cbuf, off, len));
+            String text = new String(cbuf, off, len);
+            if (!text.equals("\n")) {
+                String tslogEntry = tsprefix + prefix + new String(cbuf, off, len);
+                timedLog.add(tslogEntry);
+            }
 
             wrapped.write(cbuf, off, len);
         }
