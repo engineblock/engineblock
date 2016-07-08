@@ -31,7 +31,7 @@ public class ActivityDefTest {
         assertThat(activityDef.getAlias()).isEqualTo("analias");
         assertThat(activityDef.getActivityType()).isEqualTo("unknown-type");
         assertThat(activityDef.getInterCycleDelay()).isEqualTo(0);
-        assertThat(activityDef.getStartCycle()).isEqualTo(1L);
+        assertThat(activityDef.getStartCycle()).isEqualTo(0L);
         assertThat(activityDef.getEndCycle()).isEqualTo(1L);
         assertThat(activityDef.getThreads()).isEqualTo(1);
     }
@@ -60,7 +60,7 @@ public class ActivityDefTest {
         ActivityDef activityDef = ActivityDef.parseActivityDef("thealias;thetype;2");
         assertThat(activityDef.getAlias()).isEqualTo("thealias");
         assertThat(activityDef.getActivityType()).isEqualTo("thetype");
-        assertThat(activityDef.getStartCycle()).isEqualTo(1L);
+        assertThat(activityDef.getStartCycle()).isEqualTo(0L);
         assertThat(activityDef.getEndCycle()).isEqualTo(2L);
     }
 
@@ -107,7 +107,7 @@ public class ActivityDefTest {
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
-        assertThat(activityDef.getStartCycle()).isEqualTo(1L);
+        assertThat(activityDef.getStartCycle()).isEqualTo(0L);
         assertThat(activityDef.getThreads()).isEqualTo(1);
     }
 
@@ -118,7 +118,7 @@ public class ActivityDefTest {
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
-        assertThat(activityDef.getStartCycle()).isEqualTo(1L);
+        assertThat(activityDef.getStartCycle()).isEqualTo(0L);
         assertThat(activityDef.getThreads()).isEqualTo(1);
 
     }
@@ -130,7 +130,7 @@ public class ActivityDefTest {
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");
-        assertThat(activityDef.getStartCycle()).isEqualTo(1L);
+        assertThat(activityDef.getStartCycle()).isEqualTo(0L);
         assertThat(activityDef.getThreads()).isEqualTo(1);
 
     }

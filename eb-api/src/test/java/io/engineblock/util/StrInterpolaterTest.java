@@ -47,7 +47,7 @@ public class StrInterpolaterTest {
         );
     }};
 
-    private static StrInterpolater interp = new StrInterpolater(abcd,"NOMATCHY");
+    private static StrInterpolater interp = new StrInterpolater(abcd);
 
     @Test
     public void shouldReturnIdentity() {
@@ -64,7 +64,7 @@ public class StrInterpolaterTest {
     @Test
     public void shouldReturnWarningWhenUnmatched() {
         String a = interp.apply("<<nokeymatchesthis>>");
-        assertThat(a).isEqualTo("NOMATCHY:nokeymatchesthis");
+        assertThat(a).isEqualTo("UNSET:nokeymatchesthis");
     }
 
     @Test

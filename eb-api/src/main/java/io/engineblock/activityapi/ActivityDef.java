@@ -26,12 +26,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <p>A runtime definition for an activity.</p>
- *
+ * <p>
  * <p>Instances of ActivityDef hold control values for the execution of a single activity.
  * Each thread of the related activity is initialized with the associated ActivityDef.
  * When the ActivityDef is modified, interested activity threads are notified so that
  * they can dynamically adjust.</p>
- *
+ * <p>
  * <p>The canonical values for all parameters are kept internally in the parameter map.
  * Essentially, ActivityDef is just a type-aware wrapper around a thread-safe parameter map,
  * with an atomic change counter which can be used to signal changes to observers.</p>
@@ -57,17 +57,14 @@ public class ActivityDef {
 
     private static final String DEFAULT_ALIAS = "unknown-alias";
     private static final String DEFAULT_ATYPE = "unknown-type";
-    private static final String DEFAULT_CYCLES = "1..1";
+    private static final String DEFAULT_CYCLES = "1";
     private static final int DEFAULT_THREADS = 1;
     private static final int DEFAULT_DELAY = 0;
-
-
-    // parameter map has its own internal atomic map
-    private ParameterMap parameterMap;
-
-    private static String[] field_list = new String[] {
+    private static String[] field_list = new String[]{
             FIELD_ALIAS, FIELD_ATYPE, FIELD_CYCLES, FIELD_THREADS, FIELD_DELAY
     };
+    // parameter map has its own internal atomic map
+    private ParameterMap parameterMap;
 //    private final AtomicInteger atomicThreadTarget = new AtomicInteger(0);
 
     public ActivityDef(String parameterString) {
@@ -82,99 +79,6 @@ public class ActivityDef {
     //    private void updateAtomicThreadLevel() {
 //        this.atomicThreadTarget.set(getThreads());
 //    }
-
-    public String toString() {
-        return "ActivityDef:" + parameterMap.toString();
-    }
-
-    /**
-     * The alias that the associated activity instance is known by.
-     * @return the alias
-     */
-    public String getAlias() {
-        return parameterMap.getStringOrDefault("alias",DEFAULT_ALIAS);
-    }
-
-    public String getActivityType() {
-        return parameterMap.getStringOrDefault("type", DEFAULT_ATYPE);
-    }
-    /**
-     * The first cycle that will be used for execution of this activity, inclusive.
-     * @return the long start cycle
-     */
-    public long getStartCycle() {
-        String cycles = parameterMap.getStringOrDefault("cycles",DEFAULT_CYCLES);
-        int rangeAt = cycles.indexOf("..");
-        if (rangeAt > 0) {
-            return Long.valueOf(cycles.substring(0,rangeAt));
-
-        } else {
-            return 1L;
-        }
-    }
-
-    /**
-     * The last cycle that will be used for execution of this activity, inclusive.
-     * @return the long end cycle
-     */
-    public long getEndCycle() {
-        String cycles = parameterMap.getStringOrDefault("cycles",DEFAULT_CYCLES);
-        int rangeAt = cycles.indexOf("..");
-        if (rangeAt > 0) {
-            return Long.valueOf(cycles.substring(rangeAt+2));
-        } else {
-            return Long.valueOf(cycles);
-        }
-    }
-
-    /**
-     * The number of threads (AKA slots) that the associated activity should currently be using.
-     * @return target thread count
-     */
-    public int getThreads() {
-        return parameterMap.getIntOrDefault(FIELD_THREADS,DEFAULT_THREADS);
-    }
-
-    /**
-     * The number of milliseconds to delay within each thread for each operation.
-     * @return ms delay
-     */
-    public int getInterCycleDelay() {
-        return parameterMap.getIntOrDefault(FIELD_DELAY,DEFAULT_DELAY);
-    }
-
-    /**
-     * Get the parameter map, which is the backing-store for all data within an ActivityDef.
-     * @return the parameter map
-     */
-    public ParameterMap getParams() {
-        return parameterMap;
-    }
-
-    public AtomicLong getChangeCounter() {
-        return parameterMap.getChangeCounter();
-    }
-
-    public void setCycles(String cycles) {
-        parameterMap.set(FIELD_CYCLES,cycles);
-    }
-    public void setStartCycle(long startCycle) {
-        parameterMap.set("cycles","" + startCycle + ".." + getEndCycle());
-    }
-    public void setEndCycle(long endCycle) {
-        parameterMap.set(FIELD_CYCLES,"" + getStartCycle() + ".." + endCycle);
-    }
-    public void setThreads(int threads) {
-        parameterMap.set(FIELD_THREADS,threads);
-//        updateAtomicThreadLevel();
-    }
-    public void setDelay(int delay) {
-        parameterMap.set(FIELD_DELAY,delay);
-    }
-
-    public String getLogName() {
-        return toString();
-    }
 
     public static Optional<ActivityDef> parseActivityDefOptionally(String namedActivitySpec) {
         try {
@@ -191,6 +95,112 @@ public class ActivityDef {
         logger.debug("parsed activityDef " + namedActivitySpec + " to-> " + activityDef);
 
         return activityDef;
+    }
+
+    public String toString() {
+        return "ActivityDef:" + parameterMap.toString();
+    }
+
+    /**
+     * The alias that the associated activity instance is known by.
+     *
+     * @return the alias
+     */
+    public String getAlias() {
+        return parameterMap.getStringOrDefault("alias", DEFAULT_ALIAS);
+    }
+
+    public String getActivityType() {
+        return parameterMap.getStringOrDefault("type", DEFAULT_ATYPE);
+    }
+
+    /**
+     * The first cycle that will be used for execution of this activity, inclusive.
+     * If the value is provided as a range as in 0..10, then the first number is the start cycle
+     * and the second number is the end cycle +1. Effectively, cycle ranges
+     * are [closed,open) intervals, as in [min..max)
+     *
+     * @return the long start cycle
+     */
+    public long getStartCycle() {
+        String cycles = parameterMap.getStringOrDefault("cycles", DEFAULT_CYCLES);
+        int rangeAt = cycles.indexOf("..");
+        if (rangeAt > 0) {
+            return Long.valueOf(cycles.substring(0, rangeAt));
+        } else {
+            return 0L;
+        }
+    }
+
+    public void setStartCycle(long startCycle) {
+        parameterMap.set(FIELD_CYCLES, "" + startCycle + ".." + getEndCycle());
+    }
+
+    /**
+     * The last cycle that will be used for execution of this activity, inclusive.
+     *
+     * @return the long end cycle
+     */
+    public long getEndCycle() {
+        String cycles = parameterMap.getStringOrDefault(FIELD_CYCLES, DEFAULT_CYCLES);
+        int rangeAt = cycles.indexOf("..");
+        if (rangeAt > 0) {
+            return Long.valueOf(cycles.substring(rangeAt + 2));
+        } else {
+            return Long.valueOf(cycles);
+        }
+    }
+
+    public void setEndCycle(long endCycle) {
+        parameterMap.set(FIELD_CYCLES, "" + getStartCycle() + ".." + endCycle);
+    }
+
+    /**
+     * The number of threads (AKA slots) that the associated activity should currently be using.
+     *
+     * @return target thread count
+     */
+    public int getThreads() {
+        return parameterMap.getIntOrDefault(FIELD_THREADS, DEFAULT_THREADS);
+    }
+
+    public void setThreads(int threads) {
+        parameterMap.set(FIELD_THREADS, threads);
+//        updateAtomicThreadLevel();
+    }
+
+    /**
+     * The number of milliseconds to delay within each thread for each operation.
+     *
+     * @return ms delay
+     */
+    public int getInterCycleDelay() {
+        return parameterMap.getIntOrDefault(FIELD_DELAY, DEFAULT_DELAY);
+    }
+
+    /**
+     * Get the parameter map, which is the backing-store for all data within an ActivityDef.
+     *
+     * @return the parameter map
+     */
+    public ParameterMap getParams() {
+        return parameterMap;
+    }
+
+    public AtomicLong getChangeCounter() {
+        return parameterMap.getChangeCounter();
+    }
+
+    public void setCycles(String cycles) {
+        parameterMap.set(FIELD_CYCLES, cycles);
+    }
+
+    public void setDelay(int delay) {
+        parameterMap.set(FIELD_DELAY, delay);
+    }
+
+    public String getLogName() {
+        return toString();
     }
 
 }

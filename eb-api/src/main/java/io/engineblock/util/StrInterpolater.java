@@ -21,34 +21,26 @@ import io.engineblock.activityapi.ActivityDef;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class StrInterpolater implements Function<String, String> {
 
-    private StrSubstitutor substitutor;
-    private MultiMap multimap;
+    private MultiMap multimap = new MultiMap();
+    private StrSubstitutor substitutor= new StrSubstitutor(multimap,"<<",">>",'\\',",");
 
     public StrInterpolater(ActivityDef... activityDefs) {
-        ArrayList<Map<String, String>> listOfMaps = Arrays.asList(activityDefs).stream()
+        Arrays.asList(activityDefs).stream()
                 .map(ad -> ad.getParams().getStringStringMap())
-                .collect(Collectors.toCollection(ArrayList::new));
-
-        this.multimap = new MultiMap(listOfMaps, "INTERPOLATION_ERROR");
+                .forEach(multimap::add);
     }
 
     // for testing
-    protected StrInterpolater(Map<String, String> map, String warnPrefix) {
-        this(new ArrayList<Map<String, String>>() {{
-            add(map);
-        }}, warnPrefix);
-    }
-
-    // for testing
-    protected StrInterpolater(List<Map<String, String>> maps, String warnPrefix) {
-        this.multimap = new MultiMap(maps, warnPrefix);
-        this.substitutor = new StrSubstitutor(multimap, "<<", ">>", '\\', ",");
+    protected StrInterpolater(List<Map<String, String>> maps) {
+        maps.forEach(multimap::add);
     }
 
     @Override
@@ -58,12 +50,11 @@ public class StrInterpolater implements Function<String, String> {
 
     private static class MultiMap extends StrLookup<String> {
 
-        private List<Map<String, String>> maps;
-        private String warnPrefix = "UNSET:";
+        private List<Map<String, String>> maps = new ArrayList<>();
+        private String warnPrefix = "UNSET";
 
-        public MultiMap(List<Map<String, String>> maps, String warnPrefix) {
-            this.maps = maps;
-            this.warnPrefix = warnPrefix;
+        public void add(Map<String,String> addedMap) {
+            maps.add(addedMap);
         }
 
         @Override

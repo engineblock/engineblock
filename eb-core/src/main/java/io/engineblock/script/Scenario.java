@@ -109,6 +109,8 @@ public class Scenario implements Callable<Result> {
                 Object result = nashorn.eval(script);
             } catch (ScriptException e) {
                 e.printStackTrace();
+            } catch (Exception o) {
+                o.printStackTrace();
             }
         }
         logger.info("Shutting down scenario executors.");
