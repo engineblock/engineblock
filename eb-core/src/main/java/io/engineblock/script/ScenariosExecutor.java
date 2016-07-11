@@ -60,6 +60,11 @@ public class ScenariosExecutor {
         submitted.put(s.getName(), s);
     }
 
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
     /**
      * Shuts down all running scenarios and awaits all results.
      *

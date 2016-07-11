@@ -75,6 +75,19 @@ public class ScenarioController {
         start(ActivityDef.parseActivityDef(alias));
     }
 
+    public boolean isRunningActivity(String alias) {
+        return isRunningActivity(ActivityDef.parseActivityDef(alias));
+    }
+
+    public boolean isRunningActivity(ActivityDef activityDef) {
+        return getActivityExecutor(activityDef).isRunning();
+    }
+
+    public boolean isRunningActivity(Map<String, String> activityDefMap) {
+        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
+        return isRunningActivity(ad);
+    }
+
     /**
      * <p>Stop an activity, given an activity def. The only part of the activity def that is important is the
      * alias parameter. This method retains the activity def signature to provide convenience for scripting.</p>

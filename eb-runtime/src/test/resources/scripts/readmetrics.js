@@ -7,13 +7,6 @@ activitydef = {
     "interval" : "2000"
 };
 
-scenario.start(activitydef);
-remaining=100;
-while (!metrics.get("activity.testactivity.timer") && (remaining > 0)) {
-    print('waiting 100ms for cycles to be present');
-    scenario.waitMillis(100);
-    remaining--;
-}
 while (metrics.get("activity.testactivity.timer").getCount() < 10000) {
     print('waiting 10ms because metrics.testactivity.cycles<10000 : ' + metrics.get("activity.testactivity.timer").getCount());
     scenario.waitMillis(10);

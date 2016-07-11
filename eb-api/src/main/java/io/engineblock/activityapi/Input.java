@@ -15,6 +15,7 @@
 
 package io.engineblock.activityapi;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongSupplier;
 
 /**
@@ -26,12 +27,12 @@ public interface Input extends LongSupplier {
     /**
      * @return the minimum value to be provided by this input sequence.
      */
-    long getMin();
+    AtomicLong getMin();
 
     /**
      * @return the maximum value to be provided by this input sequence.
      */
-    long getMax();
+    AtomicLong getMax();
 
     /**
      * For the sake of efficiency, ActivityMotors that consume values from this interface should do a range check

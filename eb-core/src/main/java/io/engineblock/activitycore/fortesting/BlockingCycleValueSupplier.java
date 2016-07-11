@@ -26,6 +26,8 @@ import java.util.concurrent.atomic.AtomicLong;
 public class BlockingCycleValueSupplier implements Input {
 
     private final AtomicLong cycle = new AtomicLong(0L);
+    private final AtomicLong minValue = new AtomicLong(Long.MIN_VALUE);
+    private final AtomicLong maxValue = new AtomicLong(Long.MAX_VALUE);
 
     public BlockingCycleValueSupplier setValue(long newFixedCycle) {
         cycle.set(newFixedCycle);
@@ -33,13 +35,13 @@ public class BlockingCycleValueSupplier implements Input {
     }
 
     @Override
-    public long getMin() {
-        return Long.MIN_VALUE;
+    public AtomicLong getMin() {
+        return minValue;
     }
 
     @Override
-    public long getMax() {
-        return Long.MAX_VALUE;
+    public AtomicLong getMax() {
+        return maxValue;
     }
 
     @Override

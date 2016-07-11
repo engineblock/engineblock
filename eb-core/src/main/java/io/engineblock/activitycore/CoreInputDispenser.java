@@ -19,17 +19,14 @@ import io.engineblock.activityapi.InputDispenser;
 import io.engineblock.activityapi.ActivityDef;
 
 /**
- * An input dispenser that returns the same sequence supplier to all consumers.
+ * An input dispenser that returns the same rate-limiting sequence supplier to all consumers.
  */
 public class CoreInputDispenser implements InputDispenser {
 
     private final CoreInput input;
 
     public CoreInputDispenser(ActivityDef activityDef) {
-        long start = activityDef.getStartCycle();
-        long end = activityDef.getEndCycle();
-
-        this.input = new CoreInput().setRange(start,end);
+        this.input = new CoreInput(activityDef);
     }
 
     @Override

@@ -39,9 +39,12 @@ public class Result {
     }
 
     public void reportTo(PrintStream out) {
-        out.println("IO Log:");
-        out.println(iolog);
+        out.println("Control script IO Log begins on next line.");
+        out.println("====================    BEGIN-IO-LOG    ====================");
+        out.print(iolog);
+        out.println("====================     END-IO-LOG     ====================");
 
+        out.println("====================  BEGIN-METRIC-LOG  ====================");
         ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(MetricsContext.metrics())
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .convertRatesTo(TimeUnit.SECONDS)
@@ -49,6 +52,8 @@ public class Result {
                 .outputTo(out)
                 .build();
         consoleReporter.report();
+        out.println("====================   END-METRIC-LOG   ====================");
+
     }
 
     public Optional<Exception> getException() {

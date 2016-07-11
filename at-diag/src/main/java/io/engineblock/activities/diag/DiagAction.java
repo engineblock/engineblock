@@ -38,37 +38,62 @@ public class DiagAction implements Action, ActivityDefObserver {
         updateReportTime();
     }
 
-    private void updateReportTime() {
-        lastUpdate = System.currentTimeMillis() - calculateOffset(slot, activityDef);
-        quantizedInterval = calculateInterval(activityDef);
-        reportModulo = activityDef.getParams().getLongOrDefault("modulo", 1000000);
-        logger.debug("updating report time for slot:" + slot + ", def:" + activityDef + " to " + quantizedInterval
-                + ", and modulo " + reportModulo);
-    }
-
     @Override
     public void accept(long value) {
         long now = System.currentTimeMillis();
         if ((now - lastUpdate) > quantizedInterval) {
-
             logger.info("diag action interval, input=" + value + ", report delay=" + ((now - lastUpdate) - quantizedInterval));
             lastUpdate += quantizedInterval;
-        } else if ((value % reportModulo) == 0) {
+        }
+        if ((value % reportModulo) == 0) {
             logger.info("diag action   modulo, input=" + value);
         }
     }
 
+    /**
+     * idempotently assign the last update reference time and the interval which, when added to it, represent when this
+     * diagnostic thread should take its turn to log cycle info. Also, update the modulo parameter.
+     */
+    private void updateReportTime() {
+
+        reportModulo = activityDef.getParams().getLongOrDefault("modulo", 10000000);
+        lastUpdate = System.currentTimeMillis() - calculateOffset(slot, activityDef);
+        quantizedInterval = calculateInterval(activityDef);
+        logger.trace("updating report time for slot:" + slot + ", def:" + activityDef + " to " + quantizedInterval
+                + ", and modulo " + reportModulo);
+
+    }
+
+    /**
+     * Calculate a reference point in the past which would have been this thread's time to update,
+     * for use as a discrete reference point upon which the quantizedIntervals can be stacked to find the
+     * ideal schedule.
+     * @param timeslot - This thread's offset within the scheduled rotation, determined simply by thread enumeration
+     * @param activityDef - the def for this activity instance
+     * @return last time this thread would have updated
+     */
     private long calculateOffset(long timeslot, ActivityDef activityDef) {
-        long updateInterval = activityDef.getParams().getLongOrDefault("interval", 100L);
+        long updateInterval = activityDef.getParams().getLongOrDefault("interval", 1000L);
         long offset = calculateInterval(activityDef) - (updateInterval * timeslot);
         return offset;
     }
 
+    /**
+     * Calculate how frequently a thread needs to update in order to achieve an aggregate update interval for
+     * a given number of cooperating threads.
+     * @param activityDef - the def for this activity instance
+     * @return long ms interval for this thread (the same for all threads, but calculated independently for each)
+     */
     private long calculateInterval(ActivityDef activityDef) {
-        long updateInterval = activityDef.getParams().getLongOrDefault("interval", 100L);
+        long updateInterval = activityDef.getParams().getLongOrDefault("interval", 1000L);
+        if (updateInterval == 0) { // Effectively disable this if it is set to 0 as an override.
+            return Long.MAX_VALUE;
+        }
+
         int threads = activityDef.getThreads();
         return updateInterval * threads;
     }
+
 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {

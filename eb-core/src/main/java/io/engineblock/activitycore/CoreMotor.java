@@ -19,7 +19,10 @@ import io.engineblock.activityapi.*;
 import io.engineblock.core.MetricsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+
 import static io.engineblock.activityapi.SlotState.*;
 
 /**
@@ -125,8 +128,7 @@ public class CoreMotor implements ActivityDefObserver, Motor {
 
         enterState(Started);
         long cyclenum;
-        long cycleMax = input.getMax();
-
+        AtomicLong cycleMax = input.getMax();
 
         if (action instanceof ActionInitializer) {
             ((ActionInitializer)action).init();
@@ -136,8 +138,8 @@ public class CoreMotor implements ActivityDefObserver, Motor {
             Timer.Context cycleTime = timer.time();
 
             cyclenum = input.getAsLong();
-            if (cyclenum > cycleMax) {
-                logger.debug("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
+            if (cyclenum >= cycleMax.get()) {
+                logger.trace("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
                 enterState(Finished);
                 continue;
             }
@@ -146,6 +148,7 @@ public class CoreMotor implements ActivityDefObserver, Motor {
             cycleTime.stop();
         }
 
+        //MetricsContext.getInstance().getMetrics().getTimers().get("foo").getMeanRate();
         if (slotState.get()==Stopping) {
             enterState(Stopped);
         }

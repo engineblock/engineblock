@@ -79,7 +79,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
     public void stopActivity() {
         logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
         motors.stream().forEach(Motor::requestStop);
-        motors.stream().forEach(m -> awaitRequiredMotorState(m, 10000, 50, SlotState.Stopped));
+        motors.stream().forEach(m -> awaitRequiredMotorState(m, 10000, 50, SlotState.Stopped, SlotState.Finished));
         logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
     }
 
@@ -172,7 +172,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
      * @param activityDef the activityDef for this activity instance
      */
     private synchronized void adjustToActivityDef(ActivityDef activityDef) {
-        logger.debug(">-pre-adjust->" + getSlotStatus());
+        logger.trace(">-pre-adjust->" + getSlotStatus());
 
         Optional.ofNullable(activityMotorDispenser).orElseThrow(() ->
                 new RuntimeException("activityMotorFactory is required"));
@@ -201,7 +201,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
         motors.stream()
                 .forEach(m -> awaitRequiredMotorState(m, 5000, 50, SlotState.Started, SlotState.Finished));
 
-        logger.debug(">post-adjust->" + getSlotStatus());
+        logger.trace(">post-adjust->" + getSlotStatus());
 
     }
 
@@ -294,7 +294,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
             logger.error(error);
             throw e;
         }
-        logger.debug("motor " + m + " entered awaited state: " + Arrays.asList(awaitingState));
+        logger.trace("motor " + m + " entered awaited state: " + Arrays.asList(awaitingState));
     }
 
     private synchronized void requestStopMotors() {
@@ -303,4 +303,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
     }
 
 
+    public boolean isRunning() {
+        return motors.stream().anyMatch(m -> m.getSlotState() == SlotState.Started);
+    }
 }

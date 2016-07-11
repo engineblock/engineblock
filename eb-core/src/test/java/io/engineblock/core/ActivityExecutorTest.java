@@ -33,7 +33,7 @@ public class ActivityExecutorTest {
     public void testNewActivityExecutor() {
         ActivityDef ad = ActivityDef.parseActivityDef("alias=test");
         ActivityExecutor ae = new ActivityExecutor(ad);
-        Input longSupplier = new CoreInput();
+        Input longSupplier = new CoreInput(ad);
         MotorDispenser cmf = getActivityMotorFactory(
                 ad, motorActionDelay(999), longSupplier
         );

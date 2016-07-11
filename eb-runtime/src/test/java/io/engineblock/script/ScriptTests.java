@@ -26,17 +26,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Test
 public class ScriptTests {
 
-    @Test
-    public void testBlockingRun() {
-        String scenarioName = "testing activity start and stop";
-        ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":testBlockingRun", 1);
+    private Result runScenario(String scriptname) {
+        String scenarioName = "testing activity" + scriptname;
+        ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName);
-        s.addScriptText("load('classpath:scripts/blockingrun.js');");
+        s.addScriptText("load('classpath:scripts/"+ scriptname + ".js');");
         e.execute(s);
         ScenariosResults scenariosResults = e.awaitAllResults();
         Result result  =scenariosResults.getOne();
         result.reportTo(System.out);
 
+        return result;
+    }
+
+    @Test(enabled = false)
+    public void testSpeedSanity() {
+        Result result = runScenario("speedcheck");
+    }
+
+    @Test
+    public void testRateLimiter() {
+        Result result = runScenario("ratelimiter");
+    }
+
+    @Test
+    public void testBlockingRun() {
+        Result result= runScenario("blockingrun");
         int a1end = result.getIOLog().indexOf("blockingactivity1 finished");
         int a2start = result.getIOLog().indexOf("running blockingactivity2");
         assertThat(a1end).isLessThan(a2start);
@@ -44,36 +59,24 @@ public class ScriptTests {
     }
 
     @Test
+    public void testThreadSpeeds() {
+        Result result = runScenario("threadspeeds");
+    }
+
+    @Test
     public void testStartStop() {
-        ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":testStartStop");
-        Scenario s = new Scenario("testing activity start and stop");
-        s.addScriptText("load('classpath:scripts/startstopdiag.js');");
-        e.execute(s);
-        ScenariosResults scenariosResults = e.awaitAllResults();
-        Result result  =scenariosResults.getOne();
+        Result result = runScenario("startstopdiag");
         result.reportTo(System.out);
     }
 
     @Test
     public void testThreadChange() {
-        ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":testThreadChange");
-        Scenario s = new Scenario("testing thread changes");
-        s.addScriptText("load('classpath:scripts/threadchange.js');");
-        e.execute(s);
-        ScenariosResults scenariosResults = e.awaitAllResults();
-        Result result  =scenariosResults.getOne();
-        result.reportTo(System.out);
+        Result result = runScenario("threadchange");
     }
 
     @Test
     public void testReadMetric() {
-        ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":testReadMetric");
-        Scenario s = new Scenario("testing metric sandbox variables for read");
-        s.addScriptText("load('classpath:scripts/readmetrics.js');");
-        e.execute(s);
-        ScenariosResults scenariosResults = e.awaitAllResults();
-        Result result  =scenariosResults.getOne();
-        result.reportTo(System.out);
+        Result result = runScenario("readmetric");
     }
 
 
