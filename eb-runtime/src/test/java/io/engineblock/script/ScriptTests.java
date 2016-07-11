@@ -30,10 +30,10 @@ public class ScriptTests {
         String scenarioName = "testing activity" + scriptname;
         ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName);
-        s.addScriptText("load('classpath:scripts/"+ scriptname + ".js');");
+        s.addScriptText("load('classpath:scripts/" + scriptname + ".js');");
         e.execute(s);
         ScenariosResults scenariosResults = e.awaitAllResults();
-        Result result  =scenariosResults.getOne();
+        Result result = scenariosResults.getOne();
         result.reportTo(System.out);
 
         return result;
@@ -44,6 +44,12 @@ public class ScriptTests {
         Result result = runScenario("speedcheck");
     }
 
+    @Test(enabled = false)
+    public void testThreadSpeeds() {
+        Result result = runScenario("threadspeeds");
+    }
+
+
     @Test
     public void testRateLimiter() {
         Result result = runScenario("ratelimiter");
@@ -51,16 +57,11 @@ public class ScriptTests {
 
     @Test
     public void testBlockingRun() {
-        Result result= runScenario("blockingrun");
+        Result result = runScenario("blockingrun");
         int a1end = result.getIOLog().indexOf("blockingactivity1 finished");
         int a2start = result.getIOLog().indexOf("running blockingactivity2");
         assertThat(a1end).isLessThan(a2start);
 
-    }
-
-    @Test
-    public void testThreadSpeeds() {
-        Result result = runScenario("threadspeeds");
     }
 
     @Test
