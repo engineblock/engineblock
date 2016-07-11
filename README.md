@@ -38,7 +38,7 @@ This is licensed under the Apache Public License 2.0
 
 ![Travis CI Build Status](https://api.travis-ci.org/engineblock/engineblock.svg)
 
-[Travis CI Buil Details](https://travis-ci.org/engineblock/engineblock)
+[Travis CI Build Details](https://travis-ci.org/engineblock/engineblock)
 
 
 
