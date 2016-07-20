@@ -2,8 +2,15 @@
 
 ## Motive
 
-The EB runtime is a combination of a scripting sandbox and a workload execution machine. This is not accidental. With this particular arrangement, it should be possible to build sophisticated tests across a variety of scenarios. In particular, logic which can observe and react to the system under test can be powerful. It can make it possible
-to break away from the conventional run-interpret-adjust cycle which is all too often done by human hands. The ability to get a useful set of answers from nontrivial systems with reasonable effort requires a more sophisticated approach.
+The EB runtime is a combination of a scripting sandbox and a workload execution machine. This is not accidental. With this particular arrangement, it should be possible to build sophisticated tests across a variety of scenarios. In particular, logic which can observe and react to the system under test can be powerful. With this approach, it becomes possible to break away from the conventional run-interpret-adjust cycle which is all too often done by human hands.
+
+## Machinery vs Controls
+
+All of the heavy lifting is left to Java and the core EngineBlock runtime. This includes the iterative workloads that are meant to test the target system. This is combined with a control layer which is provided by Nashorn in Java 8. This division of responsibility allows the high-level test logic to be "script" and the low-level activity logic to be "machinery". The net effect is that you have the efficiency of the iterative test loads in conjunction with the expressivity of an open-ended scripting sandbox.
+
+Here is a view of what is below the line, separate form the scripting sandbox, and what is hoisted up into the scripting sandbox.
+[ScriptingEngine](diagrams/artandmachinery.png)
+
 
 ## Scripting Environment
 
