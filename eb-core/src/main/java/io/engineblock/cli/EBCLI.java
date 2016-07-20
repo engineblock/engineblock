@@ -52,7 +52,7 @@ public class EBCLI {
             } catch (Throwable t) {
                 throw new RuntimeException("Unable to buffer " + docoptFileName + ": " + t);
             }
-            basicHelp.replaceAll("PROG",commandName );
+            basicHelp = basicHelp.replaceAll("PROG",commandName );
             System.out.println(basicHelp);
             System.exit(0);
 
