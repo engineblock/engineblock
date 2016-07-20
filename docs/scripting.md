@@ -43,4 +43,4 @@ You can use EngineBlock in the classic form with _activity &lt;param&gt;=&lt;val
 
 ## Script Input & Output
 
-Internal buffers are kept for _stdin_, _stdout_, and _stderr_.
+Internal buffers are kept for _stdin_, _stdout_, and _stderr_. These are logged to the logfile upon script completion, with markers showing the timestamp and file descriptor (stdin, stdout, or stderr) that each line was recorded from.
