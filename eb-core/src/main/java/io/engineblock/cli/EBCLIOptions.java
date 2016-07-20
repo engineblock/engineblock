@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  */
 public class EBCLIOptions {
 
-    public static final String docoptFileName = "docopt.txt";
+    public static final String docoptFileName = "commandline.txt";
     private final static Logger logger = LoggerFactory.getLogger(EBCLIOptions.class);
     private static final String ACTIVITY = "activity";
     private static final String VERSION = "version";

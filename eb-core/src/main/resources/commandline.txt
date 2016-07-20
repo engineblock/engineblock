@@ -1,0 +1,16 @@
+Usage:
+  PROG <cmdSpec> ... [ -h | -v | -vv ]
+  PROG activitytypes
+  PROG help <activitytype>
+  PROG ( script <script> ) ...
+  PROG ( activity <activity> ) ...
+
+Options:
+  -h                               Show help.
+  -v                               Show version, short form.
+  -vv                              Show version, long form, with artifact coordinates.
+  -l <logfile>, --log <logfile>    Set the script logfile  [default: console]
+
+
+
+

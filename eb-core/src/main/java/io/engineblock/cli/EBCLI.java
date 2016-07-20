@@ -14,12 +14,16 @@ import java.util.stream.Collectors;
 
 public class EBCLI {
 
-    public static void main(String[] args) {
-        EBCLI cli = new EBCLI();
-        cli.run(args);
+    private String commandName;
+
+    public EBCLI(String commandName) {
+        this.commandName = commandName;
     }
 
-    public EBCLI() {}
+    public static void main(String[] args) {
+        EBCLI cli = new EBCLI("eb");
+        cli.run(args);
+    }
 
     public void run(String[] args) {
         EBCLIOptions options = new EBCLIOptions(args);
@@ -36,7 +40,7 @@ public class EBCLI {
         }
 
         if (options.wantsBasicHelp()) {
-            String docoptFileName = "docopt.txt";
+            String docoptFileName = "commandline.txt";
             ClassLoader cl = getClass().getClassLoader();
             InputStream resourceAsStream = cl.getResourceAsStream(docoptFileName);
             if (resourceAsStream == null) {
@@ -48,6 +52,7 @@ public class EBCLI {
             } catch (Throwable t) {
                 throw new RuntimeException("Unable to buffer " + docoptFileName + ": " + t);
             }
+            basicHelp.replaceAll("CMD",commandName );
             System.out.println(basicHelp);
             System.exit(0);
 
