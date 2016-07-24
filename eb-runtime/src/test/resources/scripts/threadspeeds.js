@@ -1,11 +1,10 @@
-var scenario=Java.type("io.engineblock.core.ScenarioController");
-
 activitydef = {
     "alias" : "threadspeeds",
     "type" : "diag",
     "cycles" : "1..4000000000000",
     "threads" : "1",
-    "interval" : "10000"
+    "interval" : "10000",
+    "targetrate" : "1000000"
 };
 scenario.start(activitydef);
 
@@ -15,7 +14,8 @@ var latencies = [];
 function aTestCycle(threads, index) {
     activities.threadspeeds.threads = threads; // dynamically adjust the active threads for this activity
     scenario.waitMillis(60000);                // wait for 1 minute to get a clean 1 minute average speed
-    speeds[threads]= metrics.get("activity.threadspeeds.timer").getOneMinuteRate(); // record 1 minute avg speed
+//     scenario.waitMillis(5000);                // wait for 1 minute to get a clean 1 minute average speed
+    speeds[threads]= metrics.threadspeeds.timer.oneMinuteRate; // record 1 minute avg speed
     print("speeds:" + speeds.toString());
 
 }
@@ -38,6 +38,14 @@ while (min<mid && mid<max && scenario.isRunningActivity(activitydef)) {
     aTestCycle(mid);
 }
 print("The optimum number of threads is " + mid + ", with " + speeds[mid] + " cps");
+var targetrate = (speeds[mid] * .7)|0;
+print("Measuring latency with threads=" + mid + " and targetrate=" + targetrate);
+
+activities.threadspeeds.threads = mid;
+activities.threadspeeds.targetrate = targetrate;
+scenario.waitMillis(60000);
+
+
 scenario.stop(threadspeeds);
 
 

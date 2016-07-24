@@ -32,7 +32,7 @@ public class DiagActionDispenser implements ActionDispenser {
 
     @Override
     public Action getAction(int slot) {
-        logger.debug("creating new DiagAction instance for slot=" + slot +", activityDef=" + activityDef);
+        logger.trace("creating new DiagAction instance for slot=" + slot +", activityDef=" + activityDef);
         return new DiagAction(slot, activityDef);
     }
 }

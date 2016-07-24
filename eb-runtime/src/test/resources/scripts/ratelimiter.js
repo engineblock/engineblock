@@ -10,8 +10,8 @@ activitydef = {
 scenario.start(activitydef);
 
 while (scenario.isRunningActivity(activitydef)) {
-    achievedRate = metrics.get("activity.ratelimited.timer").getMeanRate();
-    currentCycle = metrics.get("activity.ratelimited.timer").getCount();
+    achievedRate = metrics.ratelimited.timer.meanRate;
+    currentCycle = metrics.ratelimited.timer.count;
     print("currentCycle = " + currentCycle + ", mean rate = " + achievedRate);
     scenario.waitMillis(100);
 }

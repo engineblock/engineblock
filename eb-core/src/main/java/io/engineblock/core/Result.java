@@ -20,6 +20,7 @@ package io.engineblock.core;
 
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricFilter;
+import io.engineblock.metrics.MetricsContext;
 
 import java.io.PrintStream;
 import java.util.Optional;

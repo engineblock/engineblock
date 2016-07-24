@@ -15,7 +15,7 @@
 package io.engineblock.script;
 
 import ch.qos.logback.classic.Logger;
-import io.engineblock.core.MetricsContext;
+import io.engineblock.metrics.MetricsContext;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
 import org.slf4j.LoggerFactory;
@@ -90,7 +90,7 @@ public class Scenario implements Callable<Result> {
 
         nashorn.put("activities", new ScenarioBindings(scenarioController));
 
-        nashorn.put("metrics", new MetricsBindings(MetricsContext.getInstance().getMetrics()));
+        nashorn.put("metrics", MetricsContext.getInstance().getScriptBindings());
 
 //        bufferAppender = new BufferAppender<ILoggingEvent>();
 //        bufferAppender.setName("scenario-" + getName());
@@ -108,9 +108,11 @@ public class Scenario implements Callable<Result> {
             try {
                 Object result = nashorn.eval(script);
             } catch (ScriptException e) {
-                e.printStackTrace();
+                scenarioController.forceStopScenario(5000);
+                throw new RuntimeException("Script error while running scenario:" + e.getMessage(), e);
             } catch (Exception o) {
-                o.printStackTrace();
+                scenarioController.forceStopScenario(5000);
+                throw new RuntimeException("Non-Script error while running scenario:" + o.getMessage(), o);
             }
         }
         logger.info("Shutting down scenario executors.");

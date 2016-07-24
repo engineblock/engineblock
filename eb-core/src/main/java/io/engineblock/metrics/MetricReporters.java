@@ -1,26 +1,27 @@
 /*
  *
- *       Copyright 2015 Jonathan Shook
+ *    Copyright 2016 jshook
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *        http://www.apache.org/licenses/LICENSE-2.0
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ * /
  */
 
-package io.engineblock.core;
+package io.engineblock.metrics;
 
 import com.codahale.metrics.*;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
+import io.engineblock.core.IShutdown;
+import io.engineblock.core.ShutdownManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +62,7 @@ public class MetricReporters implements IShutdown {
             GraphiteReporter graphiteReporter = GraphiteReporter.forRegistry(prefixedRegistry.metricRegistry)
                     .prefixedWith(prefixedRegistry.prefix != null ? (!prefixedRegistry.prefix.isEmpty() ? prefix + "." + prefixedRegistry.prefix : prefix) : prefix)
                     .convertRatesTo(TimeUnit.SECONDS)
-                    .convertDurationsTo(TimeUnit.MILLISECONDS)
+                    .convertDurationsTo(TimeUnit.MICROSECONDS)
                     .filter(MetricFilter.ALL)
                     .build(graphite);
 
@@ -91,7 +92,7 @@ public class MetricReporters implements IShutdown {
 
             Slf4jReporter loggerReporter = Slf4jReporter.forRegistry(prefixedRegistry.metricRegistry)
                     .convertRatesTo(TimeUnit.SECONDS)
-                    .convertDurationsTo(TimeUnit.MILLISECONDS)
+                    .convertDurationsTo(TimeUnit.MICROSECONDS)
                     .filter(MetricFilter.ALL)
                     .outputTo(logger)
                     .build();

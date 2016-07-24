@@ -77,7 +77,7 @@ public class ScriptTests {
 
     @Test
     public void testReadMetric() {
-        Result result = runScenario("readmetric");
+        Result result = runScenario("readmetrics");
     }
 
 

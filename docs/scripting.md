@@ -44,3 +44,8 @@ You can use EngineBlock in the classic form with _activity &lt;param&gt;=&lt;val
 ## Script Input & Output
 
 Internal buffers are kept for _stdin_, _stdout_, and _stderr_. These are logged to the logfile upon script completion, with markers showing the timestamp and file descriptor (stdin, stdout, or stderr) that each line was recorded from.
+
+## External Docs
+- [Java Platform, Standard Edition Nashorn User's Guide (Java 8)](https://docs.oracle.com/javase/8/docs/technotes/guides/scripting/nashorn/api.html)
+- [Nashorn extensions on OpenJDK Wiki](https://wiki.openjdk.java.net/display/Nashorn/Nashorn+extensions)
+- [Scripting for the Java (8) Platform](http://docs.oracle.com/javase/8/docs/technotes/guides/scripting/)

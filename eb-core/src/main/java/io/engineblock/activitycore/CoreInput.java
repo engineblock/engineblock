@@ -19,7 +19,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.ActivityDef;
 import io.engineblock.activityapi.ActivityDefObserver;
 import io.engineblock.activityapi.Input;
-import io.engineblock.core.MetricsContext;
+import io.engineblock.metrics.MetricsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

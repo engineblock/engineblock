@@ -157,6 +157,12 @@ public class ScenarioResources {
 //        executor.execute(new Scenario(scenarioName).addScriptText(content));
 //        return new ScenarioData(executor.getPendingScenario(scenarioName).getOrThrow(),null);
 //    }
+
+
+    /**
+     * @param scenarioName The canonical name of the scenario to be deleted
+     * @return response status
+     */
     @DELETE
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XHTML_XML})
     @Timed
