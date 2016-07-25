@@ -26,12 +26,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <p>A runtime definition for an activity.</p>
- * <p>
  * <p>Instances of ActivityDef hold control values for the execution of a single activity.
  * Each thread of the related activity is initialized with the associated ActivityDef.
  * When the ActivityDef is modified, interested activity threads are notified so that
  * they can dynamically adjust.</p>
- * <p>
  * <p>The canonical values for all parameters are kept internally in the parameter map.
  * Essentially, ActivityDef is just a type-aware wrapper around a thread-safe parameter map,
  * with an atomic change counter which can be used to signal changes to observers.</p>

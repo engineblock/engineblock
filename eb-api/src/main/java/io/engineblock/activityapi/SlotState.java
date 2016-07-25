@@ -41,8 +41,8 @@ public enum SlotState {
         return this.runcode;
     }
 
-    public boolean isValid(SlotState from, SlotState to) {
-        switch (from) {
+    public boolean canTransitionTo(SlotState to) {
+        switch (this) {
             default:
                 return false;
             case Initialized: // A motor was just created. This is its initial state.

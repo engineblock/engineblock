@@ -25,9 +25,8 @@ public class ActivityExecutorAssembler {
 
     public static ActivityExecutor getExecutor(ActivityDef activityDef, ActivityType activityType) {
 
-        ActivityExecutor executor = new ActivityExecutor(activityDef);
         MotorDispenser motorDispenser = ActivitySlotAssembler.resolveMotorDispenser(activityDef, activityType);
-        executor.setActivityMotorDispenser(motorDispenser);
+        ActivityExecutor executor = new ActivityExecutor(activityDef,motorDispenser);
         return executor;
     }
 

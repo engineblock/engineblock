@@ -22,7 +22,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -40,9 +43,11 @@ public class ActivityExecutor implements ParameterMap.Listener {
     private ActivityDef activityDef;
     private ExecutorService executorService;
     private MotorDispenser activityMotorDispenser;
+    private SlotState intendedState = SlotState.Initialized;
 
-    public ActivityExecutor(ActivityDef activityDef) {
+    public ActivityExecutor(ActivityDef activityDef, MotorDispenser activityMotorDispenser) {
         this.activityDef = activityDef;
+        this.activityMotorDispenser = activityMotorDispenser;
         executorService = new ThreadPoolExecutor(
                 0, Integer.MAX_VALUE,
                 0L, TimeUnit.SECONDS,
@@ -55,10 +60,10 @@ public class ActivityExecutor implements ParameterMap.Listener {
         activityDef.getParams().addListener(this);
     }
 
-    public void setActivityMotorDispenser(MotorDispenser activityMotorDispenser) {
-        this.activityMotorDispenser = activityMotorDispenser;
-    }
-
+//    public void setActivityMotorDispenser(MotorDispenser activityMotorDispenser) {
+//        this.activityMotorDispenser = activityMotorDispenser;
+//    }
+//
     /**
      * <p>True-up the number of motor instances known to the executor. Start all non-running motors.
      * The protocol between the motors and the executor should be safe as long as each state change
@@ -69,6 +74,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
      */
     public synchronized void startActivity() {
         logger.info("starting activity " + activityDef.getLogName());
+        this.intendedState=SlotState.Started;
         adjustToActivityDef(activityDef);
     }
 
@@ -77,6 +83,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
      */
     public void stopActivity() {
         logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
+        this.intendedState=SlotState.Stopped;
         motors.stream().forEach(Motor::requestStop);
         motors.stream().forEach(m -> awaitRequiredMotorState(m, 10000, 50, SlotState.Stopped, SlotState.Finished));
         logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
@@ -88,6 +95,8 @@ public class ActivityExecutor implements ParameterMap.Listener {
      * @param initialSecondsToWait milliseconds to wait after graceful shutdownActivity request, before forcing everything to stop
      */
     public synchronized void forceStopExecutor(int initialSecondsToWait) {
+
+        this.intendedState=SlotState.Stopped;
 
         executorService.shutdown();
         requestStopMotors();
@@ -105,6 +114,8 @@ public class ActivityExecutor implements ParameterMap.Listener {
 
     public boolean requestStopExecutor(int secondsToWait) {
         logger.info("Stopping executor for " + this.activityDef.getAlias());
+        intendedState=SlotState.Stopped;
+
         executorService.shutdown();
         boolean wasStopped = false;
         try {
@@ -149,8 +160,8 @@ public class ActivityExecutor implements ParameterMap.Listener {
 
     public boolean awaitFinish(int timeout) {
         boolean awaited = awaitAllRequiredMotorState(timeout, 50, SlotState.Finished, SlotState.Stopped);
-        if(awaited) {
-            awaited =awaitCompletion(timeout);
+        if (awaited) {
+            awaited = awaitCompletion(timeout);
         }
         return awaited;
     }
@@ -173,35 +184,51 @@ public class ActivityExecutor implements ParameterMap.Listener {
     private synchronized void adjustToActivityDef(ActivityDef activityDef) {
         logger.trace(">-pre-adjust->" + getSlotStatus());
 
-        Optional.ofNullable(activityMotorDispenser).orElseThrow(() ->
-                new RuntimeException("activityMotorFactory is required"));
+        adjustToIntendedState();
 
-        // Stop extra motor slots
+        // Stop and remove extra motor slots
         while (motors.size() > activityDef.getThreads()) {
             Motor motor = motors.get(motors.size() - 1);
             logger.trace("Stopping cycle motor thread:" + motor);
-            motor.requestStop();
             motors.remove(motors.size() - 1);
         }
 
-        // Create motor slots for those that are missing
+        // Create motor slots
         while (motors.size() < activityDef.getThreads()) {
+            Optional.ofNullable(activityMotorDispenser).orElseThrow(() ->
+                    new RuntimeException("activityMotorFactory is required"));
+
             Motor motor = activityMotorDispenser.getMotor(activityDef, motors.size());
             logger.trace("Starting cycle motor thread:" + motor);
             motors.add(motor);
         }
 
-        // start all motors which aren't started, even if they are not in init state
-        motors.stream()
-                .filter(m -> m.getSlotState() != SlotState.Started)
-                .forEach(executorService::execute);
+        adjustToIntendedState();
 
         // Await all motors to be in started or finished state
-        motors.stream()
-                .forEach(m -> awaitRequiredMotorState(m, 5000, 50, SlotState.Started, SlotState.Finished));
+        motors.forEach(m -> awaitRequiredMotorState(m, 5000, 50, SlotState.Started, SlotState.Finished));
 
         logger.trace(">post-adjust->" + getSlotStatus());
 
+    }
+
+    private void adjustToIntendedState() {
+        switch (intendedState) {
+            case Started:
+                motors.stream()
+                        .filter(m -> m.getSlotState() != SlotState.Started)
+                        .forEach(executorService::execute);
+                break;
+            case Stopped:
+                motors.stream()
+                        .filter(m -> m.getSlotState() != SlotState.Stopped)
+                        .forEach(Motor::requestStop);
+                break;
+            case Initialized:
+            case Finished:
+            case Stopping:
+                throw new RuntimeException("Invalid requested state in activity executor:" + intendedState);
+        }
     }
 
     /**
@@ -298,6 +325,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
 
     private synchronized void requestStopMotors() {
         logger.info("stopping activity " + activityDef.getLogName());
+        intendedState = SlotState.Stopped;
         motors.stream().forEach(Motor::requestStop);
     }
 

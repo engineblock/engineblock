@@ -42,7 +42,7 @@ public class Result {
     public void reportTo(PrintStream out) {
         out.println("Control script IO Log begins on next line.");
         out.println("====================    BEGIN-IO-LOG    ====================");
-        out.print(iolog);
+        out.println(iolog);
         out.println("====================     END-IO-LOG     ====================");
 
         out.println("====================  BEGIN-METRIC-LOG  ====================");

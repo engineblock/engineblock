@@ -190,7 +190,7 @@ public class CoreMotor implements ActivityDefObserver, Motor {
      */
     private synchronized void enterState(SlotState to) {
         SlotState from = slotState.get();
-        if (!from.isValid(from, to)) {
+        if (!from.canTransitionTo(to)) {
             throw new RuntimeException("Invalid transition from " + from + " to " + to);
         }
         slotState.compareAndSet(from, to);

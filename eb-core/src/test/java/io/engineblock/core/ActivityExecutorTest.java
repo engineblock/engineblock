@@ -32,12 +32,11 @@ public class ActivityExecutorTest {
     @Test(enabled=false)
     public void testNewActivityExecutor() {
         ActivityDef ad = ActivityDef.parseActivityDef("alias=test");
-        ActivityExecutor ae = new ActivityExecutor(ad);
         Input longSupplier = new CoreInput(ad);
         MotorDispenser cmf = getActivityMotorFactory(
                 ad, motorActionDelay(999), longSupplier
         );
-        ae.setActivityMotorDispenser(cmf);
+        ActivityExecutor ae = new ActivityExecutor(ad,cmf);
         ad.setThreads(5);
         ae.startActivity();
 
