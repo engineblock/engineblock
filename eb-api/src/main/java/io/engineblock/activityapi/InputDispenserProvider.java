@@ -18,13 +18,15 @@
 
 package io.engineblock.activityapi;
 
+import io.engineblock.activityimpl.ActivityDef;
+
 /**
  * InputDispenserProvider is the top level interface for constructing inputs.
  * However, InputDispenserProvider are ActivityType-scoped, meaning there is exactly one
  * InputDispenserProvider per ActivityType instance (aka engineblock driver) in the runtime.
  * If you mean to provide your own instancing or factory scheme for inputs, implement this
  * interface on your ActivityType and then implement the
- * {@link io.engineblock.activityapi.InputDispenserProvider#getInputDispensor(io.engineblock.activityapi.ActivityDef)}
+ * {@link io.engineblock.activityapi.InputDispenserProvider#getInputDispensor(ActivityDef)}
  * method.
  */
 public interface InputDispenserProvider {

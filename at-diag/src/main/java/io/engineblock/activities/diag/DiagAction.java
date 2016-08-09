@@ -15,7 +15,7 @@
 package io.engineblock.activities.diag;
 
 import io.engineblock.activityapi.Action;
-import io.engineblock.activityapi.ActivityDef;
+import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityapi.ActivityDefObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

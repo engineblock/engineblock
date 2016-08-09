@@ -16,7 +16,7 @@
  *
  */
 
-package io.engineblock.activityapi;
+package io.engineblock.activityimpl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

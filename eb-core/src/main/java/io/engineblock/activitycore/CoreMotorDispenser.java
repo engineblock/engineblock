@@ -15,6 +15,7 @@
 package io.engineblock.activitycore;
 
 import io.engineblock.activityapi.*;
+import io.engineblock.activityimpl.ActivityDef;
 
 /**
  * Produce index ActivityMotor instances with an input and action,

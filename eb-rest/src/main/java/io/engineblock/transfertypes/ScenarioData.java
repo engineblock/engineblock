@@ -18,7 +18,7 @@
 package io.engineblock.transfertypes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.engineblock.activityapi.ActivityDef;
+import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.core.Result;
 import io.engineblock.script.BufferAppender;
 import io.engineblock.script.Scenario;

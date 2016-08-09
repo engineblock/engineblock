@@ -16,7 +16,7 @@ package io.engineblock.activitycore;
 
 import io.engineblock.activityapi.Input;
 import io.engineblock.activityapi.InputDispenser;
-import io.engineblock.activityapi.ActivityDef;
+import io.engineblock.activityimpl.ActivityDef;
 
 /**
  * An input dispenser that returns the same rate-limiting sequence supplier to all consumers.

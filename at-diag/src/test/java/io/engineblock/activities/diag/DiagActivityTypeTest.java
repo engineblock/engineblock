@@ -2,7 +2,7 @@ package io.engineblock.activities.diag;
 
 import io.engineblock.activityapi.Action;
 import io.engineblock.activityapi.ActionDispenser;
-import io.engineblock.activityapi.ActivityDef;
+import io.engineblock.activityimpl.ActivityDef;
 import org.testng.annotations.Test;
 
 /*

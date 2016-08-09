@@ -14,9 +14,9 @@
 */
 package io.engineblock.core;
 
-import io.engineblock.activityapi.ActivityDef;
+import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityapi.ActivityType;
-import io.engineblock.activityapi.ParameterMap;
+import io.engineblock.activityimpl.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

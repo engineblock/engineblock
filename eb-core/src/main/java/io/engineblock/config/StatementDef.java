@@ -18,7 +18,7 @@
 
 package io.engineblock.config;
 
-import io.engineblock.activityapi.ParameterMap;
+import io.engineblock.activityimpl.ParameterMap;
 
 import java.util.*;
 import java.util.regex.Matcher;

@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activityapi;
+package io.engineblock.activityimpl;
 
 /**
  * Represents an error that occurred while initializing an activity instance to run.

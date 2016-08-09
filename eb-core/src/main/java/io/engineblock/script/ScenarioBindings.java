@@ -14,7 +14,7 @@
 */
 package io.engineblock.script;
 
-import io.engineblock.activityapi.ActivityDef;
+import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.core.ScenarioController;
 
 import javax.script.Bindings;

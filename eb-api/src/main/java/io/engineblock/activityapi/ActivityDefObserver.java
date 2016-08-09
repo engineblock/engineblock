@@ -14,6 +14,8 @@
 */
 package io.engineblock.activityapi;
 
+import io.engineblock.activityimpl.ActivityDef;
+
 /**
  * Decorator interface for getting notified when an activities parameters are changed at runtime.
  *

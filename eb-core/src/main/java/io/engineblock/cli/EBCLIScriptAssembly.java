@@ -1,6 +1,6 @@
 package io.engineblock.cli;
 
-import io.engineblock.activityapi.ActivityDef;
+import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.util.EngineBlockFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

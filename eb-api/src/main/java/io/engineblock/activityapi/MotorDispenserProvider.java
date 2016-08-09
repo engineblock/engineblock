@@ -18,6 +18,8 @@
 
 package io.engineblock.activityapi;
 
+import io.engineblock.activityimpl.ActivityDef;
+
 /**
  * <p>MotorDispenserProvider is the top level interface for constructing motors. A motor is the
  * Runnable for threads within an activity.</p>

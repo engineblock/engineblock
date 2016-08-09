@@ -14,6 +14,8 @@
 */
 package io.engineblock.activityapi;
 
+import io.engineblock.activityimpl.ActivityDef;
+
 /**
  * A MotorDispenser is created for each Activity instance within a scenario.
  * When a thread is created, the motor and its input and action instances are resolved.

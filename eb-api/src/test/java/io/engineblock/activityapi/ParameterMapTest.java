@@ -18,6 +18,7 @@
 
 package io.engineblock.activityapi;
 
+import io.engineblock.activityimpl.ParameterMap;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 

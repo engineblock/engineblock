@@ -14,13 +14,15 @@
 */
 package io.engineblock.activityapi;
 
+import io.engineblock.activityimpl.ActivityDef;
+
 /**
  * ActionDispenserProvider is the top level interface for constructing actions.
  * However, ActionDispenserProvider are ActivityType-scoped, meaning there is exactly one
  * ActionDispenserProvider per ActivityType instance (aka engineblock driver) in the runtime.
  * If you mean to provide your own instancing or factory scheme for actions, implement this
  * interface on your ActivityType and then implement the
- * {@link io.engineblock.activityapi.ActionDispenserProvider#getActionDispenser(io.engineblock.activityapi.ActivityDef)}
+ * {@link io.engineblock.activityapi.ActionDispenserProvider#getActionDispenser(ActivityDef)}
  * method.
  */
 public interface ActionDispenserProvider {

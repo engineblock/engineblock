@@ -17,6 +17,7 @@
 
 package io.engineblock.activityapi;
 
+import io.engineblock.activityimpl.ActivityDef;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

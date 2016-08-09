@@ -1,4 +1,5 @@
 /*
+/*
 *   Copyright 2016 jshook
 *   Licensed under the Apache License, Version 2.0 (the "License");
 *   you may not use this file except in compliance with the License.
@@ -17,7 +18,7 @@ package io.engineblock.activities.diag;
 import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.ActionDispenser;
 import io.engineblock.activityapi.ActionDispenserProvider;
-import io.engineblock.activityapi.ActivityDef;
+import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityapi.ActivityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

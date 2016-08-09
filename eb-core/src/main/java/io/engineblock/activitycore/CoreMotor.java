@@ -16,6 +16,7 @@ package io.engineblock.activitycore;
 
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.*;
+import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.MetricsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
