@@ -29,18 +29,6 @@ import io.engineblock.activityimpl.*;
  * an action dispenser. Default implementations of input and motor dispensers are provided,
  * and by extension, default inputs and motors.</p>
  *
- * <p>{@link InputDispenserProvider} - An input dispenser controls how input instances are created
- * for each slot in an activity. An InputDispenserProvider is used to get an InputDispenser tailored
- * to each ActivityDef.</p>
- *
- * <p>{@link ActionDispenserProvider} - An action dispenser controls how action instances are created
- * for each slot in an activity.  An ActionDispenserProvider is used to get an ActionDispenser tailored
- * to each ActivityDef.</p>
- *
- * <p>{@link MotorDispenserProvider} - This interface allows for control of the per-thread
- * execution harness which takes inputs and applies action to them.  A MotorDispenserProvider is used
- * to get an MotorDispenser tailored to each ActivityDef.</p>
- *
  */
 public interface ActivityType {
     /**

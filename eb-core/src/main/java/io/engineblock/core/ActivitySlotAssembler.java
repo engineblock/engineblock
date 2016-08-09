@@ -17,27 +17,15 @@ public class ActivitySlotAssembler {
             ActivityType activityType,
             InputDispenser inputDispenser,
             ActionDispenser actionDispenser) {
-        if (activityType instanceof MotorDispenserProvider) {
-            return ((MotorDispenserProvider) activityType).getMotorDispenser(activityDef, inputDispenser, actionDispenser);
-        } else {
-            return new CoreMotorDispenser(activityDef, inputDispenser, actionDispenser);
-        }
+        return activityType.getMotorDispenser(activityDef,inputDispenser,actionDispenser);
     }
 
     public static ActionDispenser resolveActionDispenser(ActivityDef activityDef, ActivityType activityType) {
-        if (activityType instanceof ActionDispenserProvider) {
-            return ((ActionDispenserProvider) activityType).getActionDispenser(activityDef);
-        } else {
-            return new CoreActionDispenser(activityDef);
-        }
+        return activityType.getActionDispenser(activityDef);
     }
 
     public static InputDispenser resolveInputDispenser(ActivityDef activityDef, ActivityType activityType) {
-        if (activityType instanceof InputDispenserProvider) {
-            return ((InputDispenserProvider) activityType).getInputDispensor(activityDef);
-        } else {
-            return new CoreInputDispenser(activityDef);
-        }
+        return activityType.getInputDispensor(activityDef);
     }
 
 }
