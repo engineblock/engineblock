@@ -1,12 +1,10 @@
 package io.engineblock.core;
 
-import io.engineblock.activityapi.ActivityDef;
-import io.engineblock.activityapi.Action;
-import io.engineblock.activityapi.Input;
-import io.engineblock.activityapi.MotorDispenser;
-import io.engineblock.activitycore.CoreInput;
-import io.engineblock.activityapi.Motor;
-import io.engineblock.activitycore.CoreMotor;
+import io.engineblock.activityapi.*;
+import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityimpl.CoreInput;
+import io.engineblock.activityimpl.CoreMotor;
+import io.engineblock.activityimpl.SimpleActivity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -36,7 +34,8 @@ public class ActivityExecutorTest {
         MotorDispenser cmf = getActivityMotorFactory(
                 ad, motorActionDelay(999), longSupplier
         );
-        ActivityExecutor ae = new ActivityExecutor(ad,cmf);
+        Activity a = new SimpleActivity(ad);
+        ActivityExecutor ae = new ActivityExecutor(a);
         ad.setThreads(5);
         ae.startActivity();
 
@@ -59,7 +58,7 @@ public class ActivityExecutorTest {
         MotorDispenser cmf = new MotorDispenser() {
             @Override
             public Motor getMotor(ActivityDef activityDef, int slotId) {
-                Motor cm = new CoreMotor("activity." + activityDef.getAlias(), slotId, ls);
+                Motor cm = new CoreMotor(activityDef, slotId, ls);
                 cm.setAction(lc);
                 return cm;
             }

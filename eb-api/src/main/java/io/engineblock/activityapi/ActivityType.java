@@ -18,6 +18,8 @@
 
 package io.engineblock.activityapi;
 
+import io.engineblock.activityimpl.*;
+
 /**
  * <p>An ActivityType is the central extension point in EngineBlock for new
  * activity types drivers. It is responsible for naming the activity type, as well as providing
@@ -48,5 +50,39 @@ public interface ActivityType {
      * @return An activity type name, like "diag"
      */
     String getName();
+
+    /**
+     * Create an instance of an activity from the activity type.
+     * @param activityDef the definition that initializes and controls the activity.
+     * @return a distinct Activity instance fr each call
+     */
+     default Activity getActivity(ActivityDef activityDef) {
+         return new SimpleActivity(activityDef);
+     }
+
+    /**
+     * This method will be called <em>once</em> per action instance.
+     *
+     * @param activityDef The activity definition instance that will parameterize the returned ActionDispenser instance.
+     * @return an instance of ActionDispenser
+     */
+    default ActionDispenser getActionDispenser(ActivityDef activityDef) {
+        return new CoreActionDispenser(activityDef);
+    }
+
+    /**
+     * Return the InputDispenser instance that will be used by the associated activity to create Input factories
+     * for each thread slot.
+     * @param activityDef an ActivityDef which will parameterize this InputDispenser
+     * @return the InputDispenser for the associated activity
+     */
+     default InputDispenser getInputDispensor(ActivityDef activityDef) {
+         return new CoreInputDispenser(activityDef);
+     }
+
+    default MotorDispenser getMotorDispenser(ActivityDef activityDef, InputDispenser inputDispenser, ActionDispenser actionDispenser) {
+        return new CoreMotorDispenser(activityDef, inputDispenser, actionDispenser);
+    }
+
 
 }

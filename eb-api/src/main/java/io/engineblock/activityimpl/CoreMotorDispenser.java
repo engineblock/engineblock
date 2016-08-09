@@ -12,10 +12,9 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-package io.engineblock.activitycore;
+package io.engineblock.activityimpl;
 
 import io.engineblock.activityapi.*;
-import io.engineblock.activityimpl.ActivityDef;
 
 /**
  * Produce index ActivityMotor instances with an input and action,
@@ -26,7 +25,9 @@ public class CoreMotorDispenser implements MotorDispenser {
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
 
-    public CoreMotorDispenser(InputDispenser inputDispenser, ActionDispenser actionDispenser) {
+    public CoreMotorDispenser(ActivityDef activityDef,
+                              InputDispenser inputDispenser,
+                              ActionDispenser actionDispenser) {
         this.inputDispenser = inputDispenser;
         this.actionDispenser = actionDispenser;
     }
@@ -35,7 +36,7 @@ public class CoreMotorDispenser implements MotorDispenser {
     public Motor getMotor(ActivityDef activityDef, int slotId) {
         Action action = actionDispenser.getAction(slotId);
         Input input = inputDispenser.getInput(slotId);
-        Motor am = new CoreMotor(activityDef.getAlias(), slotId, input, action);
+        Motor am = new CoreMotor(activityDef, slotId, input, action);
         return am;
     }
 }

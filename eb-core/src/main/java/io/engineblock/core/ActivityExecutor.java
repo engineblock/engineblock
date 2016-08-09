@@ -15,6 +15,8 @@
 package io.engineblock.core;
 
 import io.engineblock.activityapi.*;
+import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityimpl.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,24 +42,27 @@ import java.util.stream.Collectors;
 public class ActivityExecutor implements ParameterMap.Listener {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);
     private final List<Motor> motors = new ArrayList<>();
-    private ActivityDef activityDef;
+    private final Activity activity;
+    private final ActivityDef activityDef;
+    //    private ActivityDef activityDef;
     private ExecutorService executorService;
-    private MotorDispenser activityMotorDispenser;
+//    private MotorDispenser activityMotorDispenser;
     private SlotState intendedState = SlotState.Initialized;
 
-    public ActivityExecutor(ActivityDef activityDef, MotorDispenser activityMotorDispenser) {
-        this.activityDef = activityDef;
-        this.activityMotorDispenser = activityMotorDispenser;
+    public ActivityExecutor(Activity activity) {
+        this.activity = activity;
+        this.activityDef = activity.getActivityDef();
+//        this.activityMotorDispenser = activity.getMotorDispenser();
         executorService = new ThreadPoolExecutor(
                 0, Integer.MAX_VALUE,
                 0L, TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
-                new IndexedThreadFactory(activityDef.getAlias())
+                new IndexedThreadFactory(activity.getAlias())
         );
 //        ScopedCachingGeneratorSource gi = new ScopedGeneratorCache(
 //                new GeneratorInstantiator(), RuntimeScope.activity
 //        );
-        activityDef.getParams().addListener(this);
+        activity.getActivityDef().getParams().addListener(this);
     }
 
 //    public void setActivityMotorDispenser(MotorDispenser activityMotorDispenser) {
@@ -73,9 +78,9 @@ public class ActivityExecutor implements ParameterMap.Listener {
      * changes to threads.</p>
      */
     public synchronized void startActivity() {
-        logger.info("starting activity " + activityDef.getLogName());
+        logger.info("starting activity " + activity.getAlias());
         this.intendedState=SlotState.Started;
-        adjustToActivityDef(activityDef);
+        adjustToActivityDef(activity.getActivityDef());
     }
 
     /**
@@ -84,8 +89,8 @@ public class ActivityExecutor implements ParameterMap.Listener {
     public void stopActivity() {
         logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
         this.intendedState=SlotState.Stopped;
-        motors.stream().forEach(Motor::requestStop);
-        motors.stream().forEach(m -> awaitRequiredMotorState(m, 10000, 50, SlotState.Stopped, SlotState.Finished));
+        motors.forEach(Motor::requestStop);
+        motors.forEach(m -> awaitRequiredMotorState(m, 10000, 50, SlotState.Stopped, SlotState.Finished));
         logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
     }
 
@@ -106,14 +111,14 @@ public class ActivityExecutor implements ParameterMap.Listener {
         } catch (InterruptedException ignored) {
         }
 
-        logger.info("stopping activity forcibly " + activityDef.getLogName());
+        logger.info("stopping activity forcibly " + activity.getAlias());
         List<Runnable> runnables = executorService.shutdownNow();
 
         logger.debug(runnables.size() + " threads never started.");
     }
 
     public boolean requestStopExecutor(int secondsToWait) {
-        logger.info("Stopping executor for " + this.activityDef.getAlias());
+        logger.info("Stopping executor for " + activity.getAlias());
         intendedState=SlotState.Stopped;
 
         executorService.shutdown();
@@ -127,7 +132,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
         // TODO: This is a dirty hack and it has to be fixed
         motors.stream().findAny().ifPresent(m -> {
             if (m.getAction() instanceof ActivityShutdown) {
-                logger.info("Calling shutdownActivity on activity " + activityDef + "with slot:" + m.getSlotId());
+                logger.info("Calling shutdownActivity on activity " + activity + "with slot:" + m.getSlotId());
                 ((ActivityShutdown) m.getAction()).shutdownActivity();
             }
         });
@@ -142,7 +147,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
      */
     @Override
     public void handleParameterMapUpdate(ParameterMap parameterMap) {
-        adjustToActivityDef(activityDef);
+        adjustToActivityDef(activity.getActivityDef());
         motors.stream().filter(
                 m -> (m instanceof ActivityDefObserver)
         ).forEach(
@@ -195,10 +200,10 @@ public class ActivityExecutor implements ParameterMap.Listener {
 
         // Create motor slots
         while (motors.size() < activityDef.getThreads()) {
-            Optional.ofNullable(activityMotorDispenser).orElseThrow(() ->
+            Optional.ofNullable(activity.getActionDispenser()).orElseThrow(() ->
                     new RuntimeException("activityMotorFactory is required"));
 
-            Motor motor = activityMotorDispenser.getMotor(activityDef, motors.size());
+            Motor motor = activity.getMotorDispenser().getMotor(activityDef, motors.size());
             logger.trace("Starting cycle motor thread:" + motor);
             motors.add(motor);
         }
@@ -324,9 +329,9 @@ public class ActivityExecutor implements ParameterMap.Listener {
     }
 
     private synchronized void requestStopMotors() {
-        logger.info("stopping activity " + activityDef.getLogName());
+        logger.info("stopping activity " + activity);
         intendedState = SlotState.Stopped;
-        motors.stream().forEach(Motor::requestStop);
+        motors.forEach(Motor::requestStop);
     }
 
 

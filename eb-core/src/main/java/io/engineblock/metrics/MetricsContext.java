@@ -18,8 +18,11 @@
 package io.engineblock.metrics;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.auto.service.AutoService;
+import io.engineblock.activityapi.MetricRegistryService;
 
-public class MetricsContext {
+@AutoService(MetricRegistryService.class)
+public class MetricsContext implements MetricRegistryService {
 
     private static MetricsContext instance;
 
@@ -52,5 +55,10 @@ public class MetricsContext {
      */
     public static MetricRegistry metrics() {
         return getInstance().getMetrics();
+    }
+
+    @Override
+    public MetricRegistry getMetricRegistry() {
+        return getMetrics();
     }
 }

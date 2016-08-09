@@ -14,9 +14,8 @@
 */
 package io.engineblock.core;
 
-import io.engineblock.activityapi.ActivityDef;
-import io.engineblock.activityapi.ActivityType;
-import io.engineblock.activityapi.MotorDispenser;
+import io.engineblock.activityapi.*;
+import io.engineblock.activityimpl.ActivityDef;
 
 /**
  * Controls the way that an activity type is used to create instances of an activity.
@@ -25,9 +24,19 @@ public class ActivityExecutorAssembler {
 
     public static ActivityExecutor getExecutor(ActivityDef activityDef, ActivityType activityType) {
 
-        MotorDispenser motorDispenser = ActivitySlotAssembler.resolveMotorDispenser(activityDef, activityType);
-        ActivityExecutor executor = new ActivityExecutor(activityDef,motorDispenser);
+        Activity activity = activityType.getActivity(activityDef);
+        InputDispenser inputDispenser = ActivitySlotAssembler.resolveInputDispenser(activityDef, activityType);
+        activity.setInputDispenser(inputDispenser);
+        ActionDispenser actionDispenser = ActivitySlotAssembler.resolveActionDispenser(activityDef, activityType);
+        activity.setActionDispenser(actionDispenser);
+        activity.setMotorDispenser(ActivitySlotAssembler.resolveMotorDispenser(activityDef, activityType, inputDispenser, actionDispenser));
+
+        ActivityExecutor executor = new ActivityExecutor(activity);
         return executor;
+    }
+
+    public static ActivityExecutor getExecutor(Activity activity) {
+        return new ActivityExecutor(activity);
     }
 
 }

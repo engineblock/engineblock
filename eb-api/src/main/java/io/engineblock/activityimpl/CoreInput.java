@@ -12,14 +12,13 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-package io.engineblock.activitycore;
+package io.engineblock.activityimpl;
 
 import com.codahale.metrics.Gauge;
 import com.google.common.util.concurrent.RateLimiter;
-import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityapi.ActivityDefObserver;
+import io.engineblock.activityapi.ActivityMetrics;
 import io.engineblock.activityapi.Input;
-import io.engineblock.metrics.MetricsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,16 +113,13 @@ public class CoreInput implements Input, ActivityDefObserver {
                 rateLimiter.setRate(rate);
             }
 
-            String targetRateMetricName = "activity." + activityDef.getAlias() + "." + "targetrate";
-            if (!MetricsContext.metrics().getGauges().containsKey(targetRateMetricName)) {
-                Gauge<Double> rateGauge = new Gauge<Double>() {
-                    @Override
-                    public Double getValue() {
-                        return rateLimiter.getRate();
-                    }
-                };
-                MetricsContext.metrics().register(targetRateMetricName, rateGauge);
-            }
+            Gauge<Double> rateGauge = new Gauge<Double>() {
+                @Override
+                public Double getValue() {
+                    return rateLimiter.getRate();
+                }
+            };
+            ActivityMetrics.gauge(activityDef,"targetrate",rateGauge);
 
             logger.info("targetrate was set to:" + rate);
         }

@@ -197,8 +197,4 @@ public class ActivityDef {
         parameterMap.set(FIELD_DELAY, delay);
     }
 
-    public String getLogName() {
-        return toString();
-    }
-
 }

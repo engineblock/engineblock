@@ -12,11 +12,10 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-package io.engineblock.activitycore;
+package io.engineblock.activityimpl;
 
 import io.engineblock.activityapi.Input;
 import io.engineblock.activityapi.InputDispenser;
-import io.engineblock.activityimpl.ActivityDef;
 
 /**
  * An input dispenser that returns the same rate-limiting sequence supplier to all consumers.

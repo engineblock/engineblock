@@ -12,12 +12,10 @@
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-package io.engineblock.activitycore;
+package io.engineblock.activityimpl;
 
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.*;
-import io.engineblock.activityimpl.ActivityDef;
-import io.engineblock.metrics.MetricsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,38 +40,38 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     private Input input;
     private Action action;
     private Timer timer;
-    private String metricsName;
+    private ActivityDef activityDef;
 
     /**
      * Create an ActivityMotor.
-     *
-     * @param metricsName The base name for all metrics specific to this Motor's activity.
+     * @param activityDef The activity definition that this motor is based on.
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      */
     public CoreMotor(
-            String metricsName,
+            ActivityDef activityDef,
             long slotId,
             Input input) {
+        this.activityDef = activityDef;
         this.slotId = slotId;
         setInput(input);
-        this.metricsName = metricsName;
     }
 
     /**
      * Create an ActivityMotor.
      *
-     * @param metricsName The base name for all metrics specific to this Motor's activity.
+     * @param activityDef The activity definition that this motor is based on.
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      * @param action      An LongConsumer which is applied to the input for each cycle.
      */
     public CoreMotor(
-            String metricsName, long slotId,
+            ActivityDef activityDef,
+            long slotId,
             Input input,
             Action action
     ) {
-        this(metricsName, slotId, input);
+        this(activityDef, slotId, input);
         setAction(action);
     }
 
@@ -121,7 +119,7 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     @Override
     public void run() {
 
-        timer = MetricsContext.metrics().timer(metricsName + ".timer");
+        timer = ActivityMetrics.timer(activityDef,"cycles");
 
         if (slotState.get() == Finished) {
             logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
@@ -175,6 +173,8 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     public synchronized void requestStop() {
         if (slotState.get() == Started) {
             enterState(SlotState.Stopping);
+        } else {
+            logger.warn("attempted to stop motor " + this.getSlotId() + ": from non Started state:" + slotState.get());
         }
     }
 

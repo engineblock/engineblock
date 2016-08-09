@@ -1,7 +1,6 @@
-package io.engineblock.activitycore;
+package io.engineblock.activityimpl;
 
 import io.engineblock.activityapi.Action;
-import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +20,7 @@ public class CoreAction implements Action {
     @Override
     public void accept(long value) {
         if ((value % interval) == 0) {
-            logger.info(activityDef.getLogName() + "[" + slot + "]: cycle=" + value);
+            logger.info(activityDef.getAlias() + "[" + slot + "]: cycle=" + value);
         }
 
     }
