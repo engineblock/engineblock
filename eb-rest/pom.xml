@@ -24,17 +24,17 @@
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-runtime</artifactId>
-            <version>1.0.12-SNAPSHOT</version>
+            <version>1.0.13-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-core</artifactId>
-            <version>1.0.12-SNAPSHOT</version>
+            <version>1.0.13-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>at-diag</artifactId>
-            <version>1.0.12-SNAPSHOT</version>
+            <version>1.0.13-SNAPSHOT</version>
         </dependency>
 
 
