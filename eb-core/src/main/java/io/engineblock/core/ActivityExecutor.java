@@ -79,6 +79,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
      */
     public synchronized void startActivity() {
         logger.info("starting activity " + activity.getAlias());
+        activity.initActivity();
         this.intendedState=SlotState.Started;
         adjustToActivityDef(activity.getActivityDef());
     }
@@ -91,6 +92,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
         this.intendedState=SlotState.Stopped;
         motors.forEach(Motor::requestStop);
         motors.forEach(m -> awaitRequiredMotorState(m, 10000, 50, SlotState.Stopped, SlotState.Finished));
+        activity.shutdownActivity();
         logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
     }
 

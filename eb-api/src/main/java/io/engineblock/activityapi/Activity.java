@@ -23,4 +23,8 @@ public interface Activity extends Comparable<Activity> {
         return getActivityDef().getAlias();
     }
 
+    default void initActivity() {}
+
+    default void shutdownActivity() {}
+    
 }
