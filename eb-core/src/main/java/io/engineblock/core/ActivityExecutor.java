@@ -131,14 +131,6 @@ public class ActivityExecutor implements ParameterMap.Listener {
             wasStopped = false;
         }
 
-        // TODO: This is a dirty hack and it has to be fixed
-        motors.stream().findAny().ifPresent(m -> {
-            if (m.getAction() instanceof ActivityShutdown) {
-                logger.info("Calling shutdownActivity on activity " + activity + "with slot:" + m.getSlotId());
-                ((ActivityShutdown) m.getAction()).shutdownActivity();
-            }
-        });
-
         return wasStopped;
     }
 

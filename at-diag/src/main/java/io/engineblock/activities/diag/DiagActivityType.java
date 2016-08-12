@@ -17,6 +17,7 @@ package io.engineblock.activities.diag;
 
 import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.ActionDispenser;
+import io.engineblock.activityapi.Activity;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityapi.ActivityType;
 import org.slf4j.Logger;
@@ -41,7 +42,8 @@ public class DiagActivityType implements ActivityType {
     }
 
     @Override
-    public ActionDispenser getActionDispenser(ActivityDef activityDef) {
-        return new DiagActionDispenser(activityDef);
+    public ActionDispenser getActionDispenser(Activity activity) {
+        return new DiagActionDispenser(activity);
     }
+
 }

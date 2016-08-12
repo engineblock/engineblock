@@ -25,18 +25,17 @@ public class ActivityExecutorAssembler {
     public static ActivityExecutor getExecutor(ActivityDef activityDef, ActivityType activityType) {
 
         Activity activity = activityType.getActivity(activityDef);
-        InputDispenser inputDispenser = ActivitySlotAssembler.resolveInputDispenser(activityDef, activityType);
+        InputDispenser inputDispenser = activityType.getInputDispenser(activity);
         activity.setInputDispenser(inputDispenser);
-        ActionDispenser actionDispenser = ActivitySlotAssembler.resolveActionDispenser(activityDef, activityType);
+
+        ActionDispenser actionDispenser = activityType.getActionDispenser(activity);
         activity.setActionDispenser(actionDispenser);
-        activity.setMotorDispenser(ActivitySlotAssembler.resolveMotorDispenser(activityDef, activityType, inputDispenser, actionDispenser));
+
+        MotorDispenser motorDispenser = activityType.getMotorDispenser(activity,inputDispenser,actionDispenser);
+        activity.setMotorDispenser(motorDispenser);
 
         ActivityExecutor executor = new ActivityExecutor(activity);
         return executor;
-    }
-
-    public static ActivityExecutor getExecutor(Activity activity) {
-        return new ActivityExecutor(activity);
     }
 
 }

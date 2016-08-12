@@ -15,6 +15,7 @@
 package io.engineblock.activities.diag;
 
 import io.engineblock.activityapi.Action;
+import io.engineblock.activityapi.Activity;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityapi.ActivityDefObserver;
 import org.slf4j.Logger;
@@ -23,8 +24,8 @@ import org.slf4j.LoggerFactory;
 public class DiagAction implements Action, ActivityDefObserver {
 
     private final static Logger logger = LoggerFactory.getLogger(DiagAction.class);
+    private final ActivityDef activityDef;
 
-    private ActivityDef activityDef;
     private int slot;
     private long lastUpdate;
     private long quantizedInterval;

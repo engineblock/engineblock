@@ -14,18 +14,23 @@
 */
 package io.engineblock.activityimpl;
 
+import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.Input;
 import io.engineblock.activityapi.InputDispenser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An input dispenser that returns the same rate-limiting sequence supplier to all consumers.
  */
 public class CoreInputDispenser implements InputDispenser {
 
+    private final static Logger logger = LoggerFactory.getLogger(CoreActionDispenser.class);
+
     private final CoreInput input;
 
-    public CoreInputDispenser(ActivityDef activityDef) {
-        this.input = new CoreInput(activityDef);
+    public CoreInputDispenser(Activity activity) {
+        this.input = new CoreInput(activity.getActivityDef());
     }
 
     @Override

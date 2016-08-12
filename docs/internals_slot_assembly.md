@@ -43,7 +43,7 @@ if you wanted to add an action to it, so that it does something besides just log
 
 To implement the ActivityDispenserProvider interface, you must provide a method:
 
-    public getActionDispenser(ActivityDef activityDef) {
+    public getActionDispenser(ActivityDef activity) {
      // return an ActionDispenser that is tailored to the ActivityDef
      ...
     }

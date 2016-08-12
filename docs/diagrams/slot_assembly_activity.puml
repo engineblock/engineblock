@@ -39,7 +39,7 @@ partition "construct Motor (thread scope, by slot#)" {
 
  :return
  motorDispenser
- .getMotor(activityDef, slot#);
+ .getMotor(activity, slot#);
 
 floating note right
   calls inputDispenser

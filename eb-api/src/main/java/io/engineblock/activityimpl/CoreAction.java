@@ -1,6 +1,7 @@
 package io.engineblock.activityimpl;
 
 import io.engineblock.activityapi.Action;
+import io.engineblock.activityapi.Activity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,8 +9,8 @@ public class CoreAction implements Action {
     private final static Logger logger = LoggerFactory.getLogger(CoreAction.class);
 
     private final int interval;
-    private final ActivityDef activityDef;
     private final int slot;
+    private final ActivityDef activityDef;
 
     public CoreAction(ActivityDef activityDef, int slot) {
         this.activityDef = activityDef;

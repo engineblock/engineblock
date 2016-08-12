@@ -37,8 +37,8 @@ Since we chose to implement ActionDispenserProvider, we must now provide its imp
 
 ~~~
     @Override
-    public ActionDispenser getActionDispenser(ActivityDef activityDef) {
-        return new DiagActionDispenser(activityDef);
+    public ActionDispenser getActionDispenser(ActivityDef activity) {
+        return new DiagActionDispenser(activity);
     }
 }
 ~~~
@@ -48,20 +48,20 @@ Now, on to the implementation of the DiagActionDispenser we just saw above.
 This implementation does little, but what it does is important. First, it remembers the ActivityDef that goes with the activity instance. This is intended to be the initializer data for the activity instance.
 Second, it simply provides an Action when asked. Now we see the second opportunity to specialize the behavior of the Action, around the slot number.
 
-Whether we want it or not, the slot number is available to us. Notice that the DiagAction itself is taking the slot number and the activityDef. We'll explain why further down.
+Whether we want it or not, the slot number is available to us. Notice that the DiagAction itself is taking the slot number and the activity. We'll explain why further down.
 
 
 ~~~
 public class DiagActionDispenser implements ActionDispenser {
-    private ActivityDef activityDef;
+    private ActivityDef activity;
 
-    public DiagActionDispenser(ActivityDef activityDef) {
-        this.activityDef = activityDef;
+    public DiagActionDispenser(ActivityDef activity) {
+        this.activity = activity;
     }
 
     @Override
     public Action getAction(int slot) {
-        return new DiagAction(slot, activityDef);
+        return new DiagAction(slot, activity);
     }
 }
 ~~~
@@ -90,7 +90,7 @@ DiagAction is also an ActivityDefObserver. This is how an activity is able to be
 Now, the local state:
 
 ~~~
-    private ActivityDef activityDef;
+    private ActivityDef activity;
     private int slot;
     private long lastUpdate;
     private long quantizedInterval;
@@ -110,8 +110,8 @@ A logline for the input value is reported at every configured 'interval', in mil
 In order to support this behavior, when the activity (and its actions) are initialized, each Action computes a time interval which would put it in the right place on the reporting schedule. This method is updateReportTime(), as seen in the constructor:
 
 ~~~
-    public DiagAction(int slot, ActivityDef activityDef) {
-        this.activityDef = activityDef;
+    public DiagAction(int slot, ActivityDef activity) {
+        this.activity = activity;
         this.slot = slot;
 
         updateReportTime();
@@ -122,20 +122,20 @@ In order to support this behavior, when the activity (and its actions) are initi
 Some helper methods make updateReportTime and the math around time offsets easier to read.
 ~~~
     private void updateReportTime() {
-        lastUpdate = System.currentTimeMillis() - calculateOffset(slot, activityDef);
-        quantizedInterval = calculateInterval(activityDef);
-        logger.debug("updating report time for slot:" + slot + ", def:" + activityDef + " to " + quantizedInterval);
+        lastUpdate = System.currentTimeMillis() - calculateOffset(slot, activity);
+        quantizedInterval = calculateInterval(activity);
+        logger.debug("updating report time for slot:" + slot + ", def:" + activity + " to " + quantizedInterval);
     }
 
-    private long calculateOffset(long timeslot, ActivityDef activityDef) {
-        long updateInterval = activityDef.getParams().getLongOrDefault("interval", 100L);
-        long offset = calculateInterval(activityDef) - (updateInterval * timeslot);
+    private long calculateOffset(long timeslot, ActivityDef activity) {
+        long updateInterval = activity.getParams().getLongOrDefault("interval", 100L);
+        long offset = calculateInterval(activity) - (updateInterval * timeslot);
         return offset;
     }
 
-    private long calculateInterval(ActivityDef activityDef) {
-        long updateInterval = activityDef.getParams().getLongOrDefault("interval", 100L);
-        int threads = activityDef.getThreads();
+    private long calculateInterval(ActivityDef activity) {
+        long updateInterval = activity.getParams().getLongOrDefault("interval", 100L);
+        int threads = activity.getThreads();
         return updateInterval * threads;
     }
 ~~~
@@ -166,7 +166,7 @@ This is simply a loop that reads input and throws it away unless it is time to r
 ### DiagAction implements ActivityDefObserver
 ~~~
     @Override
-    public void onActivityDefUpdate(ActivityDef activityDef) {
+    public void onActivityDefUpdate(ActivityDef activity) {
         updateReportTime();
     }
 }

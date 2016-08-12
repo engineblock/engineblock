@@ -16,6 +16,7 @@ package io.engineblock.activityimpl;
 
 import com.codahale.metrics.Gauge;
 import com.google.common.util.concurrent.RateLimiter;
+import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.ActivityDefObserver;
 import io.engineblock.activityapi.ActivityMetrics;
 import io.engineblock.activityapi.Input;

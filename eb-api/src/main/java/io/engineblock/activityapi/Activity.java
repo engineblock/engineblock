@@ -1,6 +1,7 @@
 package io.engineblock.activityapi;
 
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityimpl.ParameterMap;
 
 /**
  * Provides the components needed to build and run an activity a runtime.
@@ -23,8 +24,12 @@ public interface Activity extends Comparable<Activity> {
         return getActivityDef().getAlias();
     }
 
+    default ParameterMap getParams() {
+        return getActivityDef().getParams();
+    }
+
     default void initActivity() {}
 
     default void shutdownActivity() {}
-    
+
 }

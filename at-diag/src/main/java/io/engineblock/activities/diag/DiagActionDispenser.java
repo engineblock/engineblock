@@ -16,7 +16,7 @@ package io.engineblock.activities.diag;
 
 import io.engineblock.activityapi.Action;
 import io.engineblock.activityapi.ActionDispenser;
-import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityapi.Activity;
 import org.slf4j.Logger;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -24,15 +24,15 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class DiagActionDispenser implements ActionDispenser {
 
     private final static Logger logger = getLogger(DiagActionDispenser.class);
-    private ActivityDef activityDef;
+    private Activity activity;
 
-    public DiagActionDispenser(ActivityDef activityDef) {
-        this.activityDef = activityDef;
+    public DiagActionDispenser(Activity activity) {
+        this.activity = activity;
     }
 
     @Override
     public Action getAction(int slot) {
-        logger.trace("creating new DiagAction instance for slot=" + slot +", activityDef=" + activityDef);
-        return new DiagAction(slot, activityDef);
+        logger.trace("creating new DiagAction instance for slot=" + slot +", activity=" + activity);
+        return new DiagAction(slot, activity.getActivityDef());
     }
 }

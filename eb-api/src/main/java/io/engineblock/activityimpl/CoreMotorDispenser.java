@@ -22,12 +22,14 @@ import io.engineblock.activityapi.*;
  */
 public class CoreMotorDispenser implements MotorDispenser {
 
+    private final Activity activity;
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
 
-    public CoreMotorDispenser(ActivityDef activityDef,
+    public CoreMotorDispenser(Activity activity,
                               InputDispenser inputDispenser,
                               ActionDispenser actionDispenser) {
+        this.activity = activity;
         this.inputDispenser = inputDispenser;
         this.actionDispenser = actionDispenser;
     }

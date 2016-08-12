@@ -24,11 +24,10 @@ import io.engineblock.activityimpl.*;
  * <p>An ActivityType is the central extension point in EngineBlock for new
  * activity types drivers. It is responsible for naming the activity type, as well as providing
  * the input, activity, and motor instances that will be assembled into an activity.</p>
- *
+ * <p>
  * <p>At the very minimum, a useful implementation of an activity type should provide
  * an action dispenser. Default implementations of input and motor dispensers are provided,
  * and by extension, default inputs and motors.</p>
- *
  */
 public interface ActivityType {
     /**
@@ -41,35 +40,40 @@ public interface ActivityType {
 
     /**
      * Create an instance of an activity from the activity type.
+     *
      * @param activityDef the definition that initializes and controls the activity.
      * @return a distinct Activity instance fr each call
      */
-     default Activity getActivity(ActivityDef activityDef) {
-         return new SimpleActivity(activityDef);
-     }
+    default Activity getActivity(ActivityDef activityDef) {
+        return new SimpleActivity(activityDef);
+    }
 
     /**
      * This method will be called <em>once</em> per action instance.
      *
-     * @param activityDef The activity definition instance that will parameterize the returned ActionDispenser instance.
+     * @param activity The activity instance that will parameterize the returned ActionDispenser instance.
      * @return an instance of ActionDispenser
      */
-    default ActionDispenser getActionDispenser(ActivityDef activityDef) {
-        return new CoreActionDispenser(activityDef);
+    default ActionDispenser getActionDispenser(Activity activity) {
+        return new CoreActionDispenser(activity);
     }
 
     /**
      * Return the InputDispenser instance that will be used by the associated activity to create Input factories
      * for each thread slot.
-     * @param activityDef an ActivityDef which will parameterize this InputDispenser
+     *
+     * @param activity the Activity instance which will parameterize this InputDispenser
      * @return the InputDispenser for the associated activity
      */
-     default InputDispenser getInputDispensor(ActivityDef activityDef) {
-         return new CoreInputDispenser(activityDef);
-     }
+    default InputDispenser getInputDispenser(Activity activity) {
+        return new CoreInputDispenser(activity);
+    }
 
-    default MotorDispenser getMotorDispenser(ActivityDef activityDef, InputDispenser inputDispenser, ActionDispenser actionDispenser) {
-        return new CoreMotorDispenser(activityDef, inputDispenser, actionDispenser);
+    default MotorDispenser getMotorDispenser(
+            Activity activity,
+            InputDispenser inputDispenser,
+            ActionDispenser actionDispenser) {
+        return new CoreMotorDispenser(activity, inputDispenser, actionDispenser);
     }
 
 
