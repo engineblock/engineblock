@@ -32,6 +32,6 @@ To be clear, cross-cutting build behavior and per-module dependencies are two se
 
 Modularity at runtime is enabled via the [ServiceLoader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html). The eb-core module uses the eb-api module to know the loadable activity types. ActivityType implementations use the eb-api module to implement the loadable activity types. In this way, they both depend on the eb-api module to provide the common types needed for this to work.
 
-The eb-runtime module allows the separate implementations of the core and the activity type implementations to exist together in the same classpath. This goes hand-in-hand with how the runtime jar is bundled. Said differently, the artifact produced by eb-runtime is a bundling of the things it depends on as a single application.
+The eb-runtime module allows the separate implementations of the core and the activity type implementations to exist together in the same classpath. This goes hand-in-hand with how the runtime jar is bundled. Said differently, the artifact produced by eb-runtime is a bundling of the things it depends on as a single application. eb-runtime consolidates dependencies and provides a proper place to do integration testing.
 
 Taking the API at the bottom, and the components that can be composed together at the middle, and the bundling project at the top, you'll see a not-uncommon project structure that looks like a diamond. Going from bottom to top, you can think of it as API, implementation, and packaging.

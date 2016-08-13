@@ -10,7 +10,6 @@ EngineBlock is licensed under the [Apache License, version 2.0](https://www.apac
 
 ## How to Contribute
 
-
 ### Issue Tracker
 
 There are multiple ways to contribute. This most direct and engaging way is to file an issue when you have requests for enhancements or bug fixes.
@@ -19,7 +18,7 @@ Tickets which may be suitable for newer contributes will be marked as **easy pic
 
 ### Project Site
 
-The project site at engineblock.io could use some help as well. This is in the codebase under the gh-pages branch. Consider this as part of the codebase in general. You can file issues against it, or submit pull requests as well.
+The project site at engineblock.io could use some help as well. This is in the codebase under the gh-pages branch. Consider this as part of the codebase in general. You can file issues against it, or submit pull requests.
 
 ### Pull Request
 
@@ -27,7 +26,7 @@ This project is eager to have contributors. To that end, pull requests which are
 
 ### Change Scoping
 
-Like with **easy pick** issues, those which are likely to be more effort will be marked as **needs design**. The goals of any **needs design** will be to propose in more detail the moving parts and user-facing ideas which might be too complex or opaque for a single coding and testing effort. Think of these as *epic* ideas, which will, by their nature, be required to have some design documentation submitted before they are merged.
+Like with **easy pick** issues, those which are likely to be more effort will be marked as **needs design**. The goals of any **needs design** will be to propose in more detail the moving parts and user-facing ideas which might be too complex or opaque for a single coding and testing effort. Think of these as *epic* ideas, which will, by their nature, be required to have some design and usage documentation submitted before they are merged.
 
 
 
