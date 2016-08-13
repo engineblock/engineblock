@@ -3,12 +3,12 @@
 
     <artifactId>eb-api</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.17</version>
+    <version>1.0.18-SNAPSHOT</version>
 
     <parent>
         <artifactId>project-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>1.0.17</version>
+        <version>1.0.18-SNAPSHOT</version>
         <relativePath>../project-defaults</relativePath>
     </parent>
 
