@@ -24,7 +24,8 @@
         <module>at-diag</module> <!-- ActivityType driver for diagnostics -->
         <module>eb-api</module> <!-- APIs needed to implement drivers to be loaded by the core -->
         <module>eb-core</module> <!-- Scripting harness and executive logic -->
-        <module>eb-runtime</module> <!-- Binds the core, drivers, and APIs into a single runtime artifact -->
+        <module>eb-runtime</module> <!-- Binds the core, drivers, and APIs into a single artifact -->
+        <module>eb-cli</module> <!-- restful server for EB runtime -->
         <module>eb-rest</module> <!-- restful server for EB runtime -->
     </modules>
 
