@@ -3,22 +3,22 @@ Engine Block for Developers
 
 ## Activity Internals
 
-Activities are a generalization of some type of client work that needs to occur to generate work against a test target. However, a purely abstract interface for activities would be so open-ended as to provide no useful common machinery at all. On the contrary, we do want some sense of isomorphism between activity types in terms of how they are implemented and reasoned about. After reading this document, you should now what it means to implement an activity properly-- building on the core machinery while adding in activity-type behavior appropriately. That is what an Activity Type is for -- filling in the difference between what the core machinery provides and what is needed to simulate a particular kind of application.
+Activities are a generalization of some type of client work that needs to occur to generate work against a test target. However, a purely abstract interface for activities would be so open-ended that it would provide no common scaffolding. On the contrary, we do want some sense of isomorphism between activity types in terms of how they are implemented and reasoned about. After reading this document, you should now what it means to implement an activity properly-- building on the core machinery while adding in activity-type behavior appropriately. That is what an Activity Type is for -- filling in the difference between what the core machinery provides and what is needed to simulate a particular kind of application workload.
 
 ### ActivityTypes
 
-Each activity that runs in EngineBlock is provided by an instance of an ActivityType. The first activity type that you will become familiar with is the ``diag`` activity type. An ActivityType is responsible for providing the application-like functionality that can be used in template form by activity instances. When you are ready, there is a section all about the basics of actually [implementing an activity type](dev_building_activities.md).
+Each activity that runs in EngineBlock is provided by an instance of an ActivityType. The first activity type that you will become familiar with is called ``diag``. An ActivityType is responsible for providing the application-like functionality that can be used in template form by activity instances. When you are ready, there is a section all about the basics of actually [implementing an activity type](dev_building_activities.md).
 
 ### Activity Parameters
 
-All activities are controlled at runtime with a _ParameterMap_. This is simply an observable thread-safe map of configuration values in string-string form, with type-specific getters. It also supports a rudimentary form of parameter and argument encoding that looks like this example:
+All activities are controlled at runtime with a _ParameterMap_. This is simply an observable thread-safe map of configuration values in string-string form, with type-specific getters. It also provides basic parsing and type checking for common parameters.
+
+On the command line, you can specify parameters for an activity in the form:
 ~~~
-alias=activity1;source=activity1_cql.yaml;cycles=1..100;threads=10;async=100;
+type=cql alias=activity1 yaml=inserts_cql.yaml cycles=1..1000 threads=10
 ~~~
-Sometimes, it is handy to have a shortened form of this, as long as you are familiar with the parameters. The canonical field names used above can be obviated as long as the values line up strictly. In other words, the following would be an equivalent specification for the above activity:
-~~~
-activity1;activity1_cql.yaml;1..100;10;100
-~~~
+
+Other convenient forms are available when needed -- a JSON map for example.
 
 ### Thread Controls
 
@@ -31,27 +31,33 @@ At runtime, an activity is driven by a dedicated thread pool harness -- the Acti
 ### From ActivityTypes to Threads
 
 There are a few lifetime scopes to keep in mind when a scenario is running. They are:
+
 ~~~
-scenario
-  control script
+  scenario (control script)
     activity
-      thread
+      motor thread
+      motor thread
+      ...
+    activity
+      motor thread
+      ...
+    ...
 ~~~
-These scopes nest strictly from outside to inside. Activity-specific threads, labeled `motors` in the API, run within the activity. Their executors run in their own thread per-activity, and so forth.
+
+These scopes nest strictly from outside to inside. Activity-specific threads, labeled `motor threads` above, run within the activity. Their executors run in their own thread per-activity, and so forth. The term `motor thread` is used here, but when working with EngineBlock you can generally think of them interchangeably, as all __Runnable__ threads within a running activity are implemented via the Motor API. It is the Motor and other interfaces which allows the EngineBlock runtime to easily drive the workloads for an activity in a modular way.
 
 The ActivityType interface, part of the core EngineBlock API, allows you to control how threads are created for activity instances, and how activity instances are created for an activity. This means that the API has two levels of instantiation and initialization, so some care has been taken to keep it as simple as possible, nonetheless. Here are the scoping layers above with some additional detail:
 
-~~~
-scenario has ActivityType instances
-                   \/ which can provide
-    activity has MotorDispensers
-                   \/ which can dispense
-      thread has Motors (Runnables)
-~~~
+- A Scenario has ActivityType instances.
+  - An ActivityType can create:
+    - Activity instances
+    - MotorDispenser instances
+    - InputDispenser instances
+    - ActionDispenser instances
 
-The same basic scope applies to Motors, Inputs, and Actions. The naming scheme *...DispenserProvider* is used at the ActivityType API level, and the naming scheme *Dispenser* is used at the Activity instance level. This may seem like a naming shell game, but with the need to control creation of instances at two levels, there is no simply way to avoid it. It's better than making everything *...Factory* for sure.
+When an activity is initialized, it is created from the ActivityType. As well, a dispenser for the three other types above is created from the ActivityType and these are installed into the activity.
 
-To be clear, ActivityTypes can implement ActionDispenserProvider, which allows them to provide an instance of an ActionDispenser, which is scoped to the activity instance. Each activity instance will have exactly one dispenser for actions, motors and inputs. When a new Runnable is needed for an activity thread, these dispensers are called. The MotorDispenser provides the Runnable, and the input and action dispensers provide the rest, as needed by the Motor.
+From this point forward, when a new thread needs to be created for an activity, the __Runnable__ is dispensed by the MotorDispenser on that activity. The Input and Action instances for that thread are also dispensed from the InputDispenser and ActionDispenser on that activity, respectively.
 
 In practice, you don't have to think about the API at this level of detail. Most new ActivityType implementations will simply implement the API just enough to provide an Action implementation and nothing more. A basic annotated example is shown under [dev_annotated_diag.md](dev_annotated_diag.md).
 
@@ -64,7 +70,7 @@ Each ActivityExecutor uses the _Motor_ API to manage activity threads. A Motor i
 3. Instrument said inputs and actions for metrics.
 4. Control the per-thread unit of work around longer-running, tighter iterations
 
-Motors lifetimes are not per-cycle. Motors can hang around in an activity executor, be stopped, started, etc. They keep the same input and action assignments that they were assembled with
+Motors lifetimes are not per-cycle. Motors can hang around in an activity executor, be stopped, started, etc. They keep the same input and action assignments that they were assembled with initially. You can think of motors as event pumps which are meant to keep running while there is data available. They aren't meant to cycle once for a lightweight task.
 
 While it is possible to implement your own Motors, this will almost never be necessary.
 

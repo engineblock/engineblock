@@ -9,6 +9,8 @@ node api as "eb-api"
 node core as "eb-core"
 node rest as "eb-rest"
 node runtime as "eb-runtime"
+node cli as "eb-cli"
+cli .. runtime
 rest .. runtime
 runtime .. core
 runtime .. diag

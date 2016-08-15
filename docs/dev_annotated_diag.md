@@ -13,10 +13,10 @@ Let's implement an ActivityType. Actually, let's make it useful for something be
 
 
 ~~~
-public class DiagActivityType implements ActivityType, ActionDispenserProvider {
+public class DiagActivityType implements ActivityType {
 ~~~
 
-All the *...DispenserProvider* types are decorator interfaces. You can choose to implement any or all of ActionDispenserProvider, InputDispenserProvider, and MotorDispenserProvider. Most ActivityType implementations will only care about ActionDispenserProvider.
+The ActivityType interface uses default methods for the *...DispenserProvider* methods. Most ActivityType implementations will only need ActionDispenser(...).
 
 ### DiagActivityType has a name
 
@@ -31,9 +31,9 @@ Each ActivityType implementation must provide a simple name by which it is known
 
 ~~~
 
-### DiagActivityType implements ActionDispenserProvider
+### ActionDispenser method
 
-Since we chose to implement ActionDispenserProvider, we must now provide its implementation. This method will be called exactly once per activity instance. The ActionDispenser that we provide here (per activity instance) will be used to create the per-thread actions for each per-thread Runnable (aka Motor). The ActivityDef is also our first chance to specialize the behavior of the ActivityType. This means that your primary input into the control of an activity's behavior is this activity definition. If you want your ActivityType to do something configurable, this is how you do it.
+We need to provide our own type of action for _diag_ in order to make it useful. getActionDispenser(...) will be called exactly once per activity instance. The ActionDispenser that we provide here (per activity instance) will be used to create the per-thread actions for each per-thread Runnable (aka Motor). The ActivityDef is also our first chance to specialize the behavior of the ActivityType. This means that your primary input into the control of an activity's behavior is this activity definition. If you want your ActivityType to do something configurable, this is how you do it.
 
 ~~~
     @Override
