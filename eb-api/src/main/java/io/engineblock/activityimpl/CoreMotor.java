@@ -129,9 +129,7 @@ public class CoreMotor implements ActivityDefObserver, Motor {
         long cyclenum;
         AtomicLong cycleMax = input.getMax();
 
-        if (action instanceof ActionInitializer) {
-            ((ActionInitializer) action).init();
-        }
+        action.init();
 
         while (slotState.get() == Started) {
             Timer.Context cycleTime = timer.time();

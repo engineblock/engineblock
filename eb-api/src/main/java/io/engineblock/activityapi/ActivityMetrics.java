@@ -86,4 +86,7 @@ public class ActivityMetrics {
     }
 
 
+    public static MetricRegistry getMetricRegistry() {
+        return get();
+    }
 }

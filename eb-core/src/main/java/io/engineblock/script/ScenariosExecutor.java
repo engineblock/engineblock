@@ -109,7 +109,9 @@ public class ScenariosExecutor {
             logger.info("scenarios executor shutdownActivity after " + (System.currentTimeMillis() - waitedAt) + "ms.");
         }
 
-        if (!isShutdown) {
+        if (isShutdown) {
+
+        } else {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
                     + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }

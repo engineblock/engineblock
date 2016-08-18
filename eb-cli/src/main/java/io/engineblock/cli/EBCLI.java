@@ -64,7 +64,7 @@ public class EBCLI {
         }
 
         ScenariosExecutor executor = new ScenariosExecutor("runat@"+String.valueOf(System.currentTimeMillis()),1);
-        Scenario scenario = new Scenario("cli");
+        Scenario scenario = new Scenario("cli-"+System.currentTimeMillis());
         String script = EBCLIScriptAssembly.assembleScript(options);
         scenario.addScriptText(script);
         executor.execute(scenario);

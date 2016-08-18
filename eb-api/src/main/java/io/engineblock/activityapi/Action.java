@@ -29,4 +29,7 @@ public interface Action extends LongConsumer {
      */
     @Override
     void accept(long value);
+
+    default void init() {
+    }
 }

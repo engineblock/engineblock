@@ -126,8 +126,11 @@ public class ActivityExecutor implements ParameterMap.Listener {
         boolean wasStopped = false;
         try {
             wasStopped = executorService.awaitTermination(secondsToWait, TimeUnit.SECONDS);
-        } catch (InterruptedException ignored) {
+        } catch (InterruptedException ie) {
             wasStopped = false;
+            logger.warn("while waiting termination of activity " + activity.getAlias() + ", " + ie.getMessage());
+        } finally {
+            activity.shutdownActivity();
         }
 
         return wasStopped;

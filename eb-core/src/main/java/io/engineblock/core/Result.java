@@ -20,7 +20,7 @@ package io.engineblock.core;
 
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricFilter;
-import io.engineblock.metrics.MetricsContext;
+import io.engineblock.activityapi.ActivityMetrics;
 
 import java.io.PrintStream;
 import java.util.Optional;
@@ -42,11 +42,11 @@ public class Result {
     public void reportTo(PrintStream out) {
         out.println("Control script IO Log begins on next line.");
         out.println("====================    BEGIN-IO-LOG    ====================");
-        out.println(iolog);
+        out.print(iolog);
         out.println("====================     END-IO-LOG     ====================");
 
         out.println("====================  BEGIN-METRIC-LOG  ====================");
-        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(MetricsContext.metrics())
+        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .filter(MetricFilter.ALL)
