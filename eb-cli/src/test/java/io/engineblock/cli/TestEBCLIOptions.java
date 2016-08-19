@@ -20,7 +20,7 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldParseLongActivityForm() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"activity","param1=param2","param3=param4","report-graphite-to","woot"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"activity", "param1=param2", "param3=param4", "report-graphite-to", "woot"});
         assertThat(opts.getCommands().size()).isEqualTo(1);
         assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("param1=param2;param3=param4;");
         assertThat(opts.wantsReportGraphiteTo()).isEqualTo("woot");
@@ -71,6 +71,36 @@ public class TestEBCLIOptions {
     @Test(expectedExceptions = {InvalidParameterException.class}, expectedExceptionsMessageRegExp = ".*unrecognized command.*")
     public void shouldErrorSanelyWhenNoMatch() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"unrecognizable command"});
+    }
+
+    @Test
+    public void testShouldRecognizeScriptParams() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"script", "ascript", "param1=value1"});
+        assertThat(opts.getCommands().size()).isEqualTo(1);
+        EBCLIOptions.Cmd cmd = opts.getCommands().get(0);
+        assertThat(cmd.getCmdArgs().size()).isEqualTo(1);
+        assertThat(cmd.getCmdArgs()).containsKey("param1");
+        assertThat(cmd.getCmdArgs().get("param1")).isEqualTo("value1");
+    }
+
+    @Test(expectedExceptions = {InvalidParameterException.class},
+            expectedExceptionsMessageRegExp = ".*script name must precede.*")
+    public void testShouldErrorSanelyWhenScriptNameSkipped() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"script", "param1=value1"});
+    }
+
+    @Test(expectedExceptions = {InvalidParameterException.class},
+    expectedExceptionsMessageRegExp = ".*missing script name.*")
+    public void testShouldErrorForMissingScriptName() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"script"});
+    }
+
+    @Test
+    public void testScriptInterpolation() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"script", "script_to_interpolate", "parameter1=replaced"});
+        String s = EBCLIScriptAssembly.assembleScript(opts);
+        assertThat(s).contains("var foo=replaced;");
+        assertThat(s).contains("var bar=UNSET:parameter2");
     }
 
 }

@@ -2,6 +2,7 @@ package io.engineblock.cli;
 
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.util.EngineBlockFiles;
+import io.engineblock.util.StrInterpolater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class EBCLIScriptAssembly {
                     sb.append("scenario.start(\"" + cmd.cmdSpec + "\");\n");
                     break;
                 case script:
-                    String scriptData = loadScript(cmd.cmdSpec);
+                    String scriptData = loadScript(cmd);
                     sb.append(scriptData);
                     break;
             }
@@ -30,21 +31,23 @@ public class EBCLIScriptAssembly {
 
     }
 
-    private static String loadScript(String cmdSpec) {
+    private static String loadScript(EBCLIOptions.Cmd cmd) {
         String scriptData;
 
         try {
-            logger.debug("Looking for " + new File(".").getCanonicalPath() + File.separator + cmdSpec);
+            logger.debug("Looking for " + new File(".").getCanonicalPath() + File.separator + cmd.cmdSpec);
         } catch (IOException ignored) {
         }
 
-        InputStream resourceAsStream = EngineBlockFiles.findRequiredStreamOrFile(cmdSpec, "js", "scripts");
+        InputStream resourceAsStream = EngineBlockFiles.findRequiredStreamOrFile(cmd.cmdSpec, "js", "scripts");
 
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(resourceAsStream))) {
             scriptData = buffer.lines().collect(Collectors.joining("\n"));
         } catch (Throwable t) {
-            throw new RuntimeException("Unable to buffer " + cmdSpec + ": " + t);
+            throw new RuntimeException("Unable to buffer " + cmd.cmdSpec + ": " + t);
         }
+        StrInterpolater interpolater = new StrInterpolater(cmd.getCmdArgs());
+        scriptData = interpolater.apply(scriptData);
         return scriptData;
     }
 }
