@@ -24,7 +24,6 @@ import io.engineblock.activityimpl.*;
  * <p>An ActivityType is the central extension point in EngineBlock for new
  * activity types drivers. It is responsible for naming the activity type, as well as providing
  * the input, activity, and motor instances that will be assembled into an activity.</p>
- * <p>
  * <p>At the very minimum, a useful implementation of an activity type should provide
  * an action dispenser. Default implementations of input and motor dispensers are provided,
  * and by extension, default inputs and motors.</p>

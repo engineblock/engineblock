@@ -77,7 +77,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
      * changes to threads.</p>
      */
     public synchronized void startActivity() {
-        logger.info("starting activity " + activity.getAlias());
+        logger.info("starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
         activity.initActivity();
         this.intendedState=SlotState.Started;
         adjustToActivityDef(activity.getActivityDef());
