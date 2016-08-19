@@ -47,7 +47,7 @@ public class Result {
 
         out.println("====================  BEGIN-METRIC-LOG  ====================");
         ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
-                .convertDurationsTo(TimeUnit.MILLISECONDS)
+                .convertDurationsTo(TimeUnit.MICROSECONDS)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .filter(MetricFilter.ALL)
                 .outputTo(out)

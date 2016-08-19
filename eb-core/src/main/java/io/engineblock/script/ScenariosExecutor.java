@@ -99,7 +99,7 @@ public class ScenariosExecutor {
                     try {
                         long timeRemaining = timeoutAt - System.currentTimeMillis();
                         logger.debug("Waiting for timeRemaining:" + timeRemaining + "ms for scenarios executor to shutdownActivity.");
-                        isShutdown = executor.awaitTermination(timeRemaining, TimeUnit.MILLISECONDS);
+                        isShutdown = executor.awaitTermination(timeRemaining, TimeUnit.MICROSECONDS);
                     } catch (InterruptedException ignored) {
                     }
                 }

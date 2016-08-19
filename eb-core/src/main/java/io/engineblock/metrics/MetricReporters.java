@@ -74,7 +74,7 @@ public class MetricReporters implements IShutdown {
 //    public MetricReporters addConsole(MetricRegistry registry) {
 //        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(registry)
 //                .convertRatesTo(TimeUnit.SECONDS)
-//                .convertDurationsTo(TimeUnit.MILLISECONDS)
+//                .convertDurationsTo(TimeUnit.MICROSECONDS)
 //                .filter(MetricFilter.ALL)
 //                .build();
 //
