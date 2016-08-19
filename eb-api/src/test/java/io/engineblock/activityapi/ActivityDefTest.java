@@ -30,10 +30,9 @@ public class ActivityDefTest {
 
         activityDef = ActivityDef.parseActivityDef("analias");
         assertThat(activityDef.getAlias()).isEqualTo("analias");
-        assertThat(activityDef.getActivityType()).isEqualTo("unknown-type");
-        assertThat(activityDef.getInterCycleDelay()).isEqualTo(0);
+        assertThat(activityDef.getActivityType()).isEqualTo("TYPE_UNSET");
         assertThat(activityDef.getStartCycle()).isEqualTo(0L);
-        assertThat(activityDef.getEndCycle()).isEqualTo(1L);
+        assertThat(activityDef.getEndCycle()).isEqualTo(0L);
         assertThat(activityDef.getThreads()).isEqualTo(1);
     }
 
@@ -86,19 +85,6 @@ public class ActivityDefTest {
         assertThat(activityDef.getEndCycle()).isEqualTo(5L);
         assertThat(activityDef.getThreads()).isEqualTo(100);
     }
-
-    @Test
-    public void testAndDemoPositionalAliasTypeCyclesRangeThreadsDelay() {
-
-        ActivityDef activityDef = ActivityDef.parseActivityDef("thealias;thetype;2..5;100;1000");
-        assertThat(activityDef.getAlias()).isEqualTo("thealias");
-        assertThat(activityDef.getActivityType()).isEqualTo("thetype");
-        assertThat(activityDef.getStartCycle()).isEqualTo(2L);
-        assertThat(activityDef.getEndCycle()).isEqualTo(5L);
-        assertThat(activityDef.getThreads()).isEqualTo(100);
-
-    }
-
 
     @Test
     public void testPositionalAliasAndParam() {
@@ -161,9 +147,9 @@ public class ActivityDefTest {
     }
 
     @Test
-    public void testPositionalAliasTypeCycleRangeThreadsDelayAndAParam() {
+    public void testPositionalAliasTypeCycleRangeAndAParam() {
 
-        ActivityDef activityDef = ActivityDef.parseActivityDef("thealias;thetype;2..5;100;1000;param1=val1;");
+        ActivityDef activityDef = ActivityDef.parseActivityDef("thealias;thetype;2..5;100;param1=val1;");
         assertThat(activityDef).isNotNull();
         assertThat(activityDef.getParams()).isNotNull();
         assertThat(activityDef.getParams().getStringOrDefault("param1", "invalid")).isEqualTo("val1");

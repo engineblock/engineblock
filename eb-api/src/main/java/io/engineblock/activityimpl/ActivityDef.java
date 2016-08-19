@@ -51,15 +51,12 @@ public class ActivityDef {
     private static final String FIELD_THREADS = "threads";
 
     // milliseconds between cycles per thread, for slow tests only
-    private static final String FIELD_DELAY = "delay";
-
-    private static final String DEFAULT_ALIAS = "unknown-alias";
-    private static final String DEFAULT_ATYPE = "unknown-type";
-    private static final String DEFAULT_CYCLES = "1";
-    private static final int DEFAULT_THREADS = 1;
-    private static final int DEFAULT_DELAY = 0;
+    public static final String DEFAULT_ALIAS = "ALIAS_UNSET";
+    public static final String DEFAULT_ATYPE = "TYPE_UNSET";
+    public static final String DEFAULT_CYCLES = "0";
+    public static final int DEFAULT_THREADS = 1;
     private static String[] field_list = new String[]{
-            FIELD_ALIAS, FIELD_ATYPE, FIELD_CYCLES, FIELD_THREADS, FIELD_DELAY
+            FIELD_ALIAS, FIELD_ATYPE, FIELD_CYCLES, FIELD_THREADS
     };
     // parameter map has its own internal atomic map
     private ParameterMap parameterMap;
@@ -168,15 +165,6 @@ public class ActivityDef {
     }
 
     /**
-     * The number of milliseconds to delay within each thread for each operation.
-     *
-     * @return ms delay
-     */
-    public int getInterCycleDelay() {
-        return parameterMap.getIntOrDefault(FIELD_DELAY, DEFAULT_DELAY);
-    }
-
-    /**
      * Get the parameter map, which is the backing-store for all data within an ActivityDef.
      *
      * @return the parameter map
@@ -193,8 +181,16 @@ public class ActivityDef {
         parameterMap.set(FIELD_CYCLES, cycles);
     }
 
-    public void setDelay(int delay) {
-        parameterMap.set(FIELD_DELAY, delay);
+    public String getCycleSummary() {
+        return "["
+                + getStartCycle()
+                + ".."
+                + getEndCycle()
+                + ")="
+                + getCycleCount();
     }
 
+    public long getCycleCount() {
+        return (getEndCycle() - getStartCycle());
+    }
 }
