@@ -59,13 +59,30 @@ public class EBCLIOptions {
             switch (word) {
                 case ACTIVITY:
                     List<String> activitydef = new ArrayList<String>();
-                    while (arglist.size()>0 && !reserved_words.contains(arglist.peekFirst()) && arglist.peekFirst().contains("=")) {
+                    while (arglist.size() > 0 && !reserved_words.contains(arglist.peekFirst()) && arglist.peekFirst().contains("=")) {
                         activitydef.add(arglist.removeFirst());
                     }
-                    cmdList.add(new Cmd(CmdType.activity, activitydef.stream().map(s -> s+";").collect(Collectors.joining())));
+                    cmdList.add(new Cmd(CmdType.activity, activitydef.stream().map(s -> s + ";").collect(Collectors.joining())));
                     break;
                 case SCRIPT:
-                    cmdList.add(new Cmd(CmdType.valueOf(word), arglist.removeFirst()));
+                    if (arglist.size() < 1) {
+                        throw new InvalidParameterException("missing script name after script command");
+                    }
+                    if (reserved_words.contains(arglist.peekFirst())) {
+                        throw new InvalidParameterException("script name may not be a reserved word, like '" + arglist.peekFirst() + "'");
+                    }
+                    if (arglist.peekFirst().contains("=")) {
+                        throw new InvalidParameterException("script name must precede script arguments such as '" + arglist.peekFirst() + "'");
+                    }
+
+                    String scriptName = arglist.removeFirst();
+                    Map<String, String> scriptParams = new LinkedHashMap<>();
+                    while (arglist.size() > 0 && !reserved_words.contains(arglist.peekFirst())
+                            && arglist.peekFirst().contains("=")) {
+                        String[] split = arglist.removeFirst().split("=", 2);
+                        scriptParams.put(split[0], split[1]);
+                    }
+                    cmdList.add(new Cmd(CmdType.valueOf(word), scriptName, scriptParams));
                     break;
                 case VERSION:
                     wantsVersion = true;
@@ -137,10 +154,16 @@ public class EBCLIOptions {
     public static class Cmd {
         public CmdType cmdType;
         public String cmdSpec;
+        public Map<String, String> cmdArgs;
 
         public Cmd(CmdType cmdType, String cmdSpec) {
             this.cmdSpec = cmdSpec;
             this.cmdType = cmdType;
+        }
+
+        public Cmd(CmdType cmdType, String cmdSpec, Map<String, String> cmdArgs) {
+            this(cmdType, cmdSpec);
+            this.cmdArgs = cmdArgs;
         }
 
         public String getCmdSpec() {
@@ -151,8 +174,13 @@ public class EBCLIOptions {
             return cmdType;
         }
 
+        public Map<String, String> getCmdArgs() {
+            return cmdArgs;
+        }
+
         public String toString() {
-            return "type:" + cmdType + ";spec=" + cmdSpec;
+            return "type:" + cmdType + ";spec=" + cmdSpec
+                    + ((cmdArgs != null) ? "cmdArgs" + cmdArgs.toString() : "");
         }
     }
 

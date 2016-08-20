@@ -65,6 +65,11 @@ public class ScenarioController {
         activityExecutor.awaitCompletion(timeout);
     }
 
+    public synchronized void run(int timeout, String activityDefString) {
+        ActivityDef activityDef = ActivityDef.parseActivityDef(activityDefString);
+        run(timeout,activityDef);
+    }
+
     /**
      * Start an activity, given the name by which it is known already in the scenario. This is useful if you have
      * stopped an activity and want to start it again.

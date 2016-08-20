@@ -37,6 +37,9 @@ public class StrInterpolater implements Function<String, String> {
                 .map(ad -> ad.getParams().getStringStringMap())
                 .forEach(multimap::add);
     }
+    public StrInterpolater(Map<String,String> basicMap) {
+        multimap.add(basicMap);
+    }
 
     // for testing
     protected StrInterpolater(List<Map<String, String>> maps) {
