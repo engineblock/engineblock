@@ -54,10 +54,11 @@ public class ActivityMetrics {
         return meter;
     }
 
-    public static <T> Gauge<T> gauge(ActivityDef activityDef, String name, Gauge<T> gauge) {
-        gauge = get().register(activityDef.getAlias() + "." + name, gauge); // use or replace gauge
-        return gauge;
-    }
+// TODO: https://github.com/engineblock/engineblock/issues/56
+//    public static <T> Gauge<T> gauge(ActivityDef activityDef, String name, Gauge<T> gauge) {
+//        gauge = get().register(activityDef.getAlias() + "." + name, gauge); // use or replace gauge
+//        return gauge;
+//    }
 
     private static MetricRegistry get() {
         if (registry != null) {
