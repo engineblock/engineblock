@@ -112,6 +112,7 @@ public class Scenario implements Callable<Result> {
                 throw new RuntimeException("Script error while running scenario:" + e.getMessage(), e);
             } catch (Exception o) {
                 scenarioController.forceStopScenario(5000);
+                o.printStackTrace();
                 throw new RuntimeException("Non-Script error while running scenario:" + o.getMessage(), o);
             }
         }

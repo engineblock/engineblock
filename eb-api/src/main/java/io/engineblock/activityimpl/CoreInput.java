@@ -16,9 +16,7 @@ package io.engineblock.activityimpl;
 
 import com.codahale.metrics.Gauge;
 import com.google.common.util.concurrent.RateLimiter;
-import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.ActivityDefObserver;
-import io.engineblock.activityapi.ActivityMetrics;
 import io.engineblock.activityapi.Input;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,7 +118,9 @@ public class CoreInput implements Input, ActivityDefObserver {
                     return rateLimiter.getRate();
                 }
             };
-            ActivityMetrics.gauge(activityDef,"targetrate",rateGauge);
+
+// TODO: https://github.com/engineblock/engineblock/issues/56
+//            ActivityMetrics.gauge(activityDef,"targetrate",rateGauge);
 
             logger.info("targetrate was set to:" + rate);
         }
