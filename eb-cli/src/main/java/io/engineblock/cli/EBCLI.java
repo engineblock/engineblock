@@ -68,7 +68,7 @@ public class EBCLI {
         }
 
         if (options.wantsConsoleLogging()) {
-            SessionLogger.enableConsoleLogging();
+            ConsoleLogging.enableConsoleLogging();
         }
 
         long sessionStart = System.currentTimeMillis();

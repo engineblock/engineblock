@@ -25,7 +25,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import org.slf4j.LoggerFactory;
 
-public class SessionLogger {
+public class ConsoleLogging {
 
     public static void enableConsoleLogging() {
 

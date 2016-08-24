@@ -18,6 +18,7 @@
 package io.engineblock.script;
 
 import io.engineblock.core.Result;
+import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ public class ScenariosExecutor {
     }
 
     public synchronized void execute(Scenario scenario) {
+        ScenarioLogger.start(scenario);
         if (submitted.get(scenario.getName())!=null) {
             throw new RuntimeException("Scenario " + scenario.getName() + " is already defined. Remove it first to reuse the name.");
         }
