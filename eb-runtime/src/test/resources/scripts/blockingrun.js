@@ -1,14 +1,14 @@
 activitydef1 = {
     "alias" : "blockingactivity1",
     "type" : "diag",
-    "cycles" : "1..100000",
+    "cycles" : "0..100000",
     "threads" : "1",
     "interval" : "2000"
 };
 activitydef2 = {
     "alias" : "blockingactivity2",
     "type" : "diag",
-    "cycles" : "1..100000",
+    "cycles" : "0..100000",
     "threads" : "1",
     "interval" : "2000"
 };

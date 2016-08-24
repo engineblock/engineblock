@@ -1,7 +1,7 @@
 activitydef = {
     "alias" : "teststartstopdiag",
     "type" : "diag",
-    "cycles" : "1..1000000000",
+    "cycles" : "0..1000000000",
     "threads" : "25",
     "interval" : "2000"
 };

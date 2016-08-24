@@ -1,7 +1,7 @@
 activitydef = {
     "alias" : "threadspeeds",
     "type" : "diag",
-    "cycles" : "1..4000000000000",
+    "cycles" : "0..4000000000000",
     "threads" : "1",
     "interval" : "10000",
     "targetrate" : "1000000"

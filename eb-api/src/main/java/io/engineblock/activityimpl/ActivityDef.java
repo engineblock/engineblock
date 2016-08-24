@@ -44,7 +44,7 @@ public class ActivityDef {
     // a file or URL containing the activity: statements, generator bindings, ...
     private static final String FIELD_ATYPE = "type";
 
-    // cycles for this activity in either "M" or "N..M" form. "M" form implies "1..M"
+    // cycles for this activity in either "M" or "N..M" form. "M" form implies "0..M"
     private static final String FIELD_CYCLES = "cycles";
 
     // initial thread concurrency for this activity

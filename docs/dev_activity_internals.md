@@ -15,7 +15,7 @@ All activities are controlled at runtime with a _ParameterMap_. This is simply a
 
 On the command line, you can specify parameters for an activity in the form:
 ~~~
-type=cql alias=activity1 yaml=inserts_cql.yaml cycles=1..1000 threads=10
+type=cql alias=activity1 yaml=inserts_cql.yaml cycles=0..1000 threads=10
 ~~~
 
 Other convenient forms are available when needed -- a JSON map for example.
