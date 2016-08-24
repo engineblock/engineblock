@@ -6,6 +6,8 @@ import io.engineblock.core.ActivityTypeFinder;
 import io.engineblock.core.ScenariosResults;
 import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -13,6 +15,8 @@ import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
 public class EBCLI {
+
+    private static final Logger logger = LoggerFactory.getLogger(EBCLI.class);
 
     private String commandName;
 
@@ -39,7 +43,7 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsBasicHelp()) {
+        if (options.wantsBasicHelp() || options.getCommands().size()==0) {
             String docoptFileName = "commandline.txt";
             ClassLoader cl = getClass().getClassLoader();
             InputStream resourceAsStream = cl.getResourceAsStream(docoptFileName);
@@ -52,7 +56,7 @@ public class EBCLI {
             } catch (Throwable t) {
                 throw new RuntimeException("Unable to buffer " + docoptFileName + ": " + t);
             }
-            basicHelp = basicHelp.replaceAll("PROG",commandName );
+            basicHelp = basicHelp.replaceAll("PROG", commandName);
             System.out.println(basicHelp);
             System.exit(0);
 
@@ -63,8 +67,13 @@ public class EBCLI {
             System.out.println(activityHelpMarkdown);
         }
 
-        ScenariosExecutor executor = new ScenariosExecutor("runat@"+String.valueOf(System.currentTimeMillis()),1);
-        Scenario scenario = new Scenario("cli-"+System.currentTimeMillis());
+        if (options.wantsConsoleLogging()) {
+            SessionLogger.enableConsoleLogging();
+        }
+
+        long sessionStart = System.currentTimeMillis();
+        ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionStart, 1);
+        Scenario scenario = new Scenario("scenario-" + sessionStart);
         String script = EBCLIScriptAssembly.assembleScript(options);
         scenario.addScriptText(script);
         executor.execute(scenario);

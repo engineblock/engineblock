@@ -34,7 +34,7 @@ public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRe
     private MetricMap metricMap = new MetricMap("ROOT");
     private boolean failfast = true;
 
-    private MetricRegistryBindings(MetricRegistry registry) {
+    public MetricRegistryBindings(MetricRegistry registry) {
         this.registry = registry;
     }
 
@@ -118,7 +118,7 @@ public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRe
                 Object o = m.map.get(edge);
                 if (o instanceof MetricMap) {
                     m = (MetricMap) m.map.get(edge);
-                    logger.info("traversing edge:" + edge + " while pathing to " + fullName);
+                    logger.trace("traversing edge:" + edge + " while pathing to " + fullName);
 
                 } else {
                     String error = "edge exists at level:" + i + ", while pathing to " + fullName;

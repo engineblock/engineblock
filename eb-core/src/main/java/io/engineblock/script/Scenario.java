@@ -15,9 +15,10 @@
 package io.engineblock.script;
 
 import ch.qos.logback.classic.Logger;
-import io.engineblock.metrics.MetricsContext;
+import io.engineblock.activityapi.ActivityMetrics;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
+import io.engineblock.metrics.MetricRegistryBindings;
 import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptEngine;
@@ -90,14 +91,7 @@ public class Scenario implements Callable<Result> {
 
         nashorn.put("activities", new ScenarioBindings(scenarioController));
 
-        nashorn.put("metrics", MetricsContext.getInstance().getScriptBindings());
-
-//        bufferAppender = new BufferAppender<ILoggingEvent>();
-//        bufferAppender.setName("scenario-" + getName());
-//        bufferAppender.setContext(scenarioLogger.getLoggerContext());
-//        scenarioLogger = (Logger) LoggerFactory.getLogger("scenario-" + getName());
-//        scenarioLogger.addAppender(bufferAppender);
-//        nashorn.put("logger", scenarioLogger);
+        nashorn.put("metrics", new MetricRegistryBindings(ActivityMetrics.getMetricRegistry()));
 
     }
 
@@ -108,11 +102,16 @@ public class Scenario implements Callable<Result> {
             try {
                 Object result = nashorn.eval(script);
             } catch (ScriptException e) {
+                String errorDesc = "Script error while running scenario:" + e.getMessage();
+                e.printStackTrace();
+                logger.error(errorDesc,e);
                 scenarioController.forceStopScenario(5000);
                 throw new RuntimeException("Script error while running scenario:" + e.getMessage(), e);
             } catch (Exception o) {
-                scenarioController.forceStopScenario(5000);
+                String errorDesc = "Non-Script error while running scenario:" + o.getMessage();
                 o.printStackTrace();
+                logger.error(errorDesc,o);
+                scenarioController.forceStopScenario(5000);
                 throw new RuntimeException("Non-Script error while running scenario:" + o.getMessage(), o);
             }
         }

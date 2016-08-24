@@ -28,7 +28,6 @@ public class MetricsContext implements MetricRegistryService {
 
     private MetricReporters metricReporters = MetricReporters.getInstance();
     private MetricRegistry metrics = new EBMetricsRegistry();
-    private MetricRegistryBindings bindings = MetricRegistryBindings.forRegistry(metrics);
 
     public static MetricsContext getInstance() {
         synchronized (MetricsContext.class) {
@@ -46,8 +45,6 @@ public class MetricsContext implements MetricRegistryService {
     public MetricRegistry getMetrics() {
         return metrics;
     }
-
-    public MetricRegistryBindings getScriptBindings() { return bindings; }
 
     /**
      * Convenience method to unclutter code. This will be used everywhere.

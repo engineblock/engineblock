@@ -40,10 +40,9 @@ public class Result {
     }
 
     public void reportTo(PrintStream out) {
-        out.println("Control script IO Log begins on next line.");
-        out.println("====================    BEGIN-IO-LOG    ====================");
+        out.println("===================   BEGIN-SCRIPT-LOG   ===================");
         out.print(iolog);
-        out.println("====================     END-IO-LOG     ====================");
+        out.println("===================   END-SCRIPT-LOG   =====================");
 
         out.println("====================  BEGIN-METRIC-LOG  ====================");
         ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())

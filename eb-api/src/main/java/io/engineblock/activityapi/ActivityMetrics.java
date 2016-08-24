@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 public class ActivityMetrics {
-    private final static Logger logger = LoggerFactory.getLogger(ActivityMetrics.class);
 
+    private final static Logger logger = LoggerFactory.getLogger(ActivityMetrics.class);
     private static MetricRegistry registry;
 
     private ActivityMetrics() {

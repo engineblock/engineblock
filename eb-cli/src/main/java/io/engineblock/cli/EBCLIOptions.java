@@ -22,6 +22,8 @@ public class EBCLIOptions {
     private static final String HELP = "help";
     private static final String METRICS_PREFIX = "metrics-prefix";
     private static final String REPORT_GRAPHITE_TO = "report-graphite-to";
+    private static final String WANTS_VERBOSE_LOGGING = "-v";
+    private static final String WANTS_VERBOSE_LOGGING_LONG = "--verbose";
     private static final Set<String> reserved_words = new HashSet<String>() {{
         addAll(
                 Arrays.asList(
@@ -38,6 +40,7 @@ public class EBCLIOptions {
     private boolean wantsBasicHelp = false;
     private String reportGraphiteTo = "";
     private String metricsPrefix = "engineblock.";
+    private boolean wantsConsoleLogging = false;
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -107,6 +110,10 @@ public class EBCLIOptions {
                 case ACTIVITY_TYPES:
                     wantsActivityTypes = true;
                     break;
+                case WANTS_VERBOSE_LOGGING:
+                case WANTS_VERBOSE_LOGGING_LONG:
+                    wantsConsoleLogging = true;
+                    break;
                 default:
                     throw new InvalidParameterException("unrecognized command:" + word);
 
@@ -144,6 +151,10 @@ public class EBCLIOptions {
 
     public String wantsMetricsPrefix() {
         return metricsPrefix;
+    }
+
+    public boolean wantsConsoleLogging() {
+        return wantsConsoleLogging;
     }
 
     public static enum CmdType {
