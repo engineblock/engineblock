@@ -29,14 +29,14 @@ print("running 5E5 cycles at 1E5 cps ~~ 5 seconds worth");
 scenario.start(activitydef);
 
 while (scenario.isRunningActivity(activitydef)) {
-    achievedRate = metrics.speedcheck.timer.meanRate;
-    currentCycle = metrics.speedcheck.timer.count;
+    achievedRate = metrics.speedcheck.cycles.meanRate;
+    currentCycle = metrics.speedcheck.cycles.count;
     print("currentCycle = " + currentCycle + ", mean rate = " + achievedRate);
     scenario.waitMillis(1000);
 }
 
-achievedRate = metrics.speedcheck.timer.meanRate;
-currentCycle = metrics.speedcheck.timer.count;
+achievedRate = metrics.speedcheck.cycles.meanRate;
+currentCycle = metrics.speedcheck.cycles.count;
 print("last update - currentCycle = " + currentCycle + ", mean rate = " + achievedRate);
 
 

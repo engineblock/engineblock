@@ -15,7 +15,7 @@ function aTestCycle(threads, index) {
     activities.threadspeeds.threads = threads; // dynamically adjust the active threads for this activity
     scenario.waitMillis(60000);                // wait for 1 minute to get a clean 1 minute average speed
 //     scenario.waitMillis(5000);                // wait for 1 minute to get a clean 1 minute average speed
-    speeds[threads]= metrics.threadspeeds.timer.oneMinuteRate; // record 1 minute avg speed
+    speeds[threads]= metrics.threadspeeds.cycles.oneMinuteRate; // record 1 minute avg speed
     print("speeds:" + speeds.toString());
 
 }

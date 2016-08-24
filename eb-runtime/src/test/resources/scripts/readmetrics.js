@@ -8,8 +8,8 @@ activitydef = {
 };
 scenario.start(activitydef);
 
-while (metrics.testactivity.timer.count < 10000) {
-    print('waiting 10ms because metrics.testactivity.cycles<10000 : ' + metrics.testactivity.timer.count);
+while (metrics.testactivity.cycles.count < 10000) {
+    print('waiting 10ms because metrics.testactivity.cycles<10000 : ' + metrics.testactivity.cycles.count);
     scenario.waitMillis(10);
 
 }
