@@ -36,12 +36,7 @@ public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRe
 
     public MetricRegistryBindings(MetricRegistry registry) {
         this.registry = registry;
-    }
-
-    public static MetricRegistryBindings forRegistry(MetricRegistry registry) {
-        MetricRegistryBindings mrb = new MetricRegistryBindings(registry);
-        registry.addListener(mrb);
-        return mrb;
+        registry.addListener(this);
     }
 
     @Override

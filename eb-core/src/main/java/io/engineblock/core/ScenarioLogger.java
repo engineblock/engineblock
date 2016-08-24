@@ -45,6 +45,7 @@ public class ScenarioLogger {
         ple.start();
 
         String scenarioLog = scenario.getName()+".log";
+        scenarioLog = scenarioLog.replaceAll("\\s","_");
         FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
         fileAppender.setFile(scenarioLog);
         fileAppender.setEncoder(ple);
