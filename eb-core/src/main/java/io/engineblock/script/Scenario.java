@@ -48,7 +48,6 @@ public class Scenario implements Callable<Result> {
     private ScenarioController scenarioController;
     private ScriptEnv scriptEnv;
     private String name;
-    private Logger scenarioLogger;
     private BufferAppender bufferAppender;
 
     public Scenario(String name) {

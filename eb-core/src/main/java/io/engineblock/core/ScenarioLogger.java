@@ -55,7 +55,8 @@ public class ScenarioLogger {
 
         Logger logger = (Logger) LoggerFactory.getLogger("ROOT");
         logger.addAppender(fileAppender);
-        logger.setLevel(Level.TRACE);
+
+        logger.setLevel(Level.INFO);
         logger.setAdditive(true); /* set to true if root should log too */
 
     }
