@@ -5,6 +5,7 @@ import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.CoreMotor;
 import io.engineblock.activityapi.Motor;
 import io.engineblock.activitycore.fortesting.BlockingCycleValueSupplier;
+import io.engineblock.activityimpl.SimpleActivity;
 import org.testng.annotations.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,7 +33,7 @@ public class CoreMotorTest {
     @Test(enabled=false)
     public void testBasicActivityMotor() {
         BlockingCycleValueSupplier lockstepper = new BlockingCycleValueSupplier();
-        Motor cm = new CoreMotor(ActivityDef.parseActivityDef("alias=foo"), 5L, lockstepper);
+        Motor cm = new CoreMotor(new SimpleActivity(ActivityDef.parseActivityDef("alias=foo")), 5L, lockstepper);
         AtomicLong observableAction = new AtomicLong(-3L);
         cm.setAction(getTestConsumer(observableAction));
         Thread t = new Thread(cm);

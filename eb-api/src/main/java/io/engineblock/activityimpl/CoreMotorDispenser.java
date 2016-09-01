@@ -38,7 +38,7 @@ public class CoreMotorDispenser implements MotorDispenser {
     public Motor getMotor(ActivityDef activityDef, int slotId) {
         Action action = actionDispenser.getAction(slotId);
         Input input = inputDispenser.getInput(slotId);
-        Motor am = new CoreMotor(activityDef, slotId, input, action);
+        Motor am = new CoreMotor(activity, slotId, input, action);
         return am;
     }
 }

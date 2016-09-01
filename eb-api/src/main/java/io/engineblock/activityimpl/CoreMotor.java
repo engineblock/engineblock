@@ -36,6 +36,7 @@ public class CoreMotor implements ActivityDefObserver, Motor {
 
     private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
     private final AtomicReference<SlotState> slotState = new AtomicReference<>(SlotState.Initialized);
+    private final Activity activity;
     private long slotId;
     private Input input;
     private Action action;
@@ -44,15 +45,16 @@ public class CoreMotor implements ActivityDefObserver, Motor {
 
     /**
      * Create an ActivityMotor.
-     * @param activityDef The activity definition that this motor is based on.
+     * @param activity The activity that this motor is based on.
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      */
     public CoreMotor(
-            ActivityDef activityDef,
+            Activity activity,
             long slotId,
             Input input) {
-        this.activityDef = activityDef;
+        this.activity = activity;
+        this.activityDef = activity.getActivityDef();
         this.slotId = slotId;
         setInput(input);
     }
@@ -60,18 +62,18 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     /**
      * Create an ActivityMotor.
      *
-     * @param activityDef The activity definition that this motor is based on.
+     * @param activity The activity that this motor is based on.
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      * @param action      An LongConsumer which is applied to the input for each cycle.
      */
     public CoreMotor(
-            ActivityDef activityDef,
+            Activity activity,
             long slotId,
             Input input,
             Action action
     ) {
-        this(activityDef, slotId, input);
+        this(activity, slotId, input);
         setAction(action);
     }
 
@@ -119,7 +121,7 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     @Override
     public void run() {
 
-        timer = ActivityMetrics.timer(activityDef,"cycles");
+        timer = ActivityMetrics.timer(activity,"cycles");
 
         if (slotState.get() == Finished) {
             logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
