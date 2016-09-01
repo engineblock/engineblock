@@ -19,6 +19,8 @@ package io.engineblock.activityapi;
 
 import com.codahale.metrics.*;
 import io.engineblock.activityimpl.ActivityDef;
+import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramReservoir;
+import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramResetOnSnapshotReservoir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,31 +36,111 @@ public class ActivityMetrics {
     private ActivityMetrics() {
     }
 
-    public static Timer timer(ActivityDef activityDef, String name) {
-        Timer timer = get().timer(activityDef.getAlias() + "." + name);
-        return timer;
+    /**
+     * Register a named metric for an activity, synchronized on the activity
+     *
+     * @param activity       The activity that the metric will be for
+     * @param name           The full metric name
+     * @param metricProvider A function to actually create the metric if needed
+     * @return a Metric, or null if the metric for the name was already present
+     */
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    private static Metric register(Activity activity, String name, MetricProvider metricProvider) {
+        String fullMetricName = activity.getAlias() + "." + name;
+        if (!get().getMetrics().containsKey(name)) {
+
+            synchronized (activity) {
+                if (!get().getMetrics().containsKey(name)) {
+                    Metric metric = metricProvider.getMetric();
+                    return get().register(name, metric);
+                }
+            }
+        }
+        return null;
     }
 
-    public static Histogram histogram(ActivityDef activityDef, String name) {
-        Histogram histogram = get().histogram(activityDef.getAlias() + "." + name);
-        return histogram;
+    /**
+     * <p>Create a timer associated with an activity.</p>
+     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
+     * that only one of them succeeds.</p>
+     *
+     * @param activity an associated activity
+     * @param name     a simple, descriptive name for the timer
+     * @return the timer, perhaps a different one if it has already been registered
+     */
+    public static Timer timer(Activity activity, String name) {
+        return (Timer) register(activity, name, () -> new Timer(new HdrHistogramReservoir()));
     }
 
-    public static Counter counter(ActivityDef activityDef, String name) {
-        Counter counter = get().counter(activityDef.getAlias() + "." + name);
-        return counter;
+    /**
+     * <p>Create a timer with a resetting histogram associated with an activity.</p>
+     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
+     * that only one of them succeeds.</p>
+     * <p>A resetting histogram is one that is reset to its initial state every time you take its snapshot.
+     * This is useful for gathering histograms for specific spans of time.</p>
+     *
+     * @param activity an associated activity
+     * @param name     a simple, descriptive name for the timer
+     * @return the timer, perhaps a different one if it has already been registered
+     */
+    public static Timer resettingTimer(Activity activity, String name) {
+        return (Timer) register(activity, name, () -> new Timer(new HdrHistogramResetOnSnapshotReservoir()));
     }
 
-    public static Meter meter(ActivityDef activityDef, String name) {
-        Meter meter = get().meter(activityDef.getAlias() + "." + name);
-        return meter;
+    /**
+     * <p>Create a histogram associated with an activity.</p>
+     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
+     * that only one of them succeeds.</p>
+     *
+     * @param activity an associated activity
+     * @param name     a simple, descriptive name for the histogram
+     * @return the histogram, perhaps a different one if it has already been registered
+     */
+    public static Histogram histogram(Activity activity, String name) {
+        return (Histogram) register(activity, name, () -> new Histogram(new HdrHistogramReservoir()));
     }
 
-// TODO: https://github.com/engineblock/engineblock/issues/56
-//    public static <T> Gauge<T> gauge(ActivityDef activityDef, String name, Gauge<T> gauge) {
-//        gauge = get().register(activityDef.getAlias() + "." + name, gauge); // use or replace gauge
-//        return gauge;
-//    }
+    /**
+     * <p>Create a resetting histogram associated with an activity.</p>
+     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
+     * that only one of them succeeds.</p>
+     * <p>A resetting histogram is one that is reset to its initial state every time you take its snapshot.
+     * This is useful for gathering histograms for specific spans of time.</p>
+     *
+     * @param activity an associated activity
+     * @param name     a simple, descriptive name for the resetting histogram
+     * @return the resetting histogram, perhaps a different one if it has already been registered
+     */
+
+    public static Histogram resettingHistogram(Activity activity, String name) {
+        return (Histogram) register(activity, name, () -> new Histogram(new HdrHistogramResetOnSnapshotReservoir()));
+    }
+
+    /**
+     * <p>Create a counter associated with an activity.</p>
+     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
+     * that only one of them succeeds.</p>
+     *
+     * @param activity an associated activity
+     * @param name     a simple, descriptive name for the counter
+     * @return the counter, perhaps a different one if it has already been registered
+     */
+    public static Counter counter(Activity activity, String name) {
+        return (Counter) register(activity, name, Counter::new);
+    }
+
+    /**
+     * <p>Create a meter associated with an activity.</p>
+     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
+     * that only one of them succeeds.</p>
+     *
+     * @param activity an associated activity
+     * @param name     a simple, descriptive name for the meter
+     * @return the meter, perhaps a different one if it has already been registered
+     */
+    public static Meter meter(Activity activity, String name) {
+        return (Meter) register(activity, name, Meter::new);
+    }
 
     private static MetricRegistry get() {
         if (registry != null) {
@@ -89,5 +171,9 @@ public class ActivityMetrics {
 
     public static MetricRegistry getMetricRegistry() {
         return get();
+    }
+
+    private static interface MetricProvider {
+        Metric getMetric();
     }
 }
