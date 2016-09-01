@@ -1,0 +1,138 @@
+{
+  "name": "engineblock/engineblock",
+  "version": "0.1.4",
+  "libraries": {
+    "xv": "^1.1.19"
+  },
+  "title": "EngineBlock",
+  "branch": "",
+  "style": {
+    "name": "Default",
+    "componentSet": {
+      "nav": "nav/BasicNav",
+      "header": "header/BannerHeader",
+      "article": "article/BasicArticle",
+      "footer": "footer/BasicFooter"
+    },
+    "fontFamily": "-apple-system, BlinkMacSystemFont, sans-serif",
+    "fontWeight": 400,
+    "bold": 600,
+    "lineHeight": 1.5,
+    "typeScale": [
+      72,
+      48,
+      24,
+      20,
+      16,
+      14,
+      12
+    ],
+    "monospace": "Menlo, monospace",
+    "heading": {
+      "fontFamily": null,
+      "fontStyle": null,
+      "fontWeight": 600,
+      "lineHeight": 1.25,
+      "textTransform": null,
+      "letterSpacing": null,
+      "h0": {},
+      "h1": {},
+      "h2": {},
+      "h3": {},
+      "h4": {},
+      "h5": {},
+      "h6": {}
+    },
+    "alternativeText": {},
+    "space": [
+      0,
+      8,
+      16,
+      32,
+      48,
+      64,
+      96
+    ],
+    "layout": {
+      "maxWidth": 1024,
+      "centered": false
+    },
+    "colors": {
+      "text": "#111",
+      "background": "#fff",
+      "primary": "#08e",
+      "secondary": "#059",
+      "highlight": "#e08",
+      "border": "#ddd",
+      "muted": "#eee"
+    },
+    "border": {
+      "width": 1,
+      "radius": 2
+    },
+    "link": {},
+    "button": {
+      "hover": {
+        "boxShadow": "inset 0 0 0 999px rgba(0, 0, 0, .125)"
+      }
+    },
+    "input": {},
+    "body": {
+      "margin": 0
+    },
+    "breakpoints": {
+      "xs": "@media screen and (max-width:40em)",
+      "sm": "@media screen and (min-width:40em)",
+      "md": "@media screen and (min-width:52em)",
+      "lg": "@media screen and (min-width:64em)"
+    }
+  },
+  "content": [
+    {
+      "component": "nav",
+      "links": [
+        {
+          "href": "https://github.com/engineblock/engineblock",
+          "text": "GitHub"
+        }
+      ]
+    },
+    {
+      "component": "header",
+      "heading": "engineblock",
+      "subhead": "Core EngineBlock libraries and runtime.",
+      "children": [
+        {
+          "component": "ui/TweetButton",
+          "text": "engineblock: Core EngineBlock libraries and runtime.",
+          "url": null
+        },
+        {
+          "component": "ui/GithubButton",
+          "user": "engineblock",
+          "repo": "engineblock"
+        }
+      ]
+    },
+    {
+      "component": "article",
+      "metadata": {
+        "source": "github.readme"
+      },
+      "html": "<h1>Status</h1>\n<p>This is in active development. Collaborators are welcome. However, there is still work to be done to groom the slope for new users.</p>\n<h2>Engine Block</h2>\n<p>This project aims to provide a missing power tool in the test tooling arsenal.</p>\n<p>The design goals:</p>\n<ol>\n<li>Provide a useful and intuitive Reusable Machine Pattern for constructing and reasoning about concurrent performance tests. To encourage this, the runtime machinery is based on <a href=\"docs/core_concepts.md\">simple and tangible core concepts</a>.</li>\n<li>Reduce testing time of complex scenarios with many variables. This is achieved by controlling tests from an <a href=\"docs/scripting.md\">open javascript sandbox</a>. This makes more sophisticated scenarios possible when needed.</li>\n<li>Minimize the amount of effort required to get empirical results from a test cycle. For this, <a href=\"docs/metrics.md\">metrics reporting</a> is baked in.</li>\n</ol>\n<p>In short, Engine Block wishes to be a programmable power tool for performance testing. However, it is somewhat generic. It doesn&apos;t know directly about a particular type of system, or protocol.\nIt simply provides a suitable machine harness in which to put your drivers and testing logic. If you know how to build a client for a particular kind of system, EB will let you load it like a plugin and control it dynamically.</p>\n<p>The most direct way to do this, if you are a tool developer, is to build your own activity type drivers and embed EB as the core runtime. You can always experiment with it and learn how it works by using the built-in diagnostic drivers.</p>\n<h2>Scale</h2>\n<p>For now, this is a single-instance client. For testing large clusters, you will still need to run multiple clients to provide adequate loading. Experience has shown that one client can adequately drive 3-5 target systems for typical workloads. As always, be sure to watch your metrics on both sides to ensure that your testing instrument isn&apos;t the thing being measured. A future enhancement may allow EB to be powered by multiple clients for greater load generating capacity.</p>\n<h2>Getting Started</h2>\n<p>You can begin at <a href=\"docs/quickstart.md\">Quick Start</a> or consult the full <a href=\"docs/usage_guide.md\">Usage Guide</a>. At least taking a glance at the guide is recommended.</p>\n<h2>Contributions</h2>\n<p>If you are interested in contributing to Engine Block, more information is available in the <a href=\"doc/developers.md\">Developer&apos;s section</a>.</p>\n<h2>History</h2>\n<p>The Engine Block project started as a branch of <a href=\"http://github.com/jshook/testclient\">test client</a>. It has since evolved to be more generic.</p>\n<h2>License</h2>\n<p>This is licensed under the Apache Public License 2.0</p>\n<p><a href=\"https://travis-ci.org/engineblock/engineblock\"></a></p>\n"
+    },
+    {
+      "component": "footer",
+      "links": [
+        {
+          "href": "https://github.com/engineblock/engineblock",
+          "text": "GitHub"
+        },
+        {
+          "href": "https://github.com/engineblock",
+          "text": "engineblock"
+        }
+      ]
+    }
+  ]
+}
