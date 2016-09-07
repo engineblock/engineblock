@@ -47,16 +47,19 @@ public class ActivityMetrics {
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private static Metric register(Activity activity, String name, MetricProvider metricProvider) {
         String fullMetricName = activity.getAlias() + "." + name;
-        if (!get().getMetrics().containsKey(name)) {
-
+        Metric metric = get().getMetrics().get(fullMetricName);
+        if (metric == null) {
             synchronized (activity) {
-                if (!get().getMetrics().containsKey(name)) {
-                    Metric metric = metricProvider.getMetric();
-                    return get().register(name, metric);
+                metric = get().getMetrics().get(fullMetricName);
+                if (metric == null) {
+                    metric = metricProvider.getMetric();
+                    return get().register(fullMetricName, metric);
+                } else {
+                    logger.warn("another thread has created this metric: " + fullMetricName);
                 }
             }
         }
-        return null;
+        return metric;
     }
 
     /**
@@ -69,7 +72,8 @@ public class ActivityMetrics {
      * @return the timer, perhaps a different one if it has already been registered
      */
     public static Timer timer(Activity activity, String name) {
-        return (Timer) register(activity, name, () -> new Timer(new HdrHistogramReservoir()));
+        Timer registeredTimer = (Timer) register(activity, name, () -> new Timer(new HdrHistogramReservoir()));
+        return registeredTimer;
     }
 
     /**
