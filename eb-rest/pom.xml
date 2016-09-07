@@ -3,12 +3,12 @@
 
     <artifactId>eb-rest</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.23</version>
+    <version>1.0.24-SNAPSHOT</version>
 
     <parent>
         <artifactId>project-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>1.0.23</version>
+        <version>1.0.24-SNAPSHOT</version>
         <relativePath>../project-defaults</relativePath>
     </parent>
 
@@ -24,17 +24,17 @@
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-runtime</artifactId>
-            <version>1.0.23</version>
+            <version>1.0.24-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-core</artifactId>
-            <version>1.0.23</version>
+            <version>1.0.24-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>at-diag</artifactId>
-            <version>1.0.23</version>
+            <version>1.0.24-SNAPSHOT</version>
         </dependency>
 
 
