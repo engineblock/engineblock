@@ -14,25 +14,24 @@
 */
 package io.engineblock.activities.diag;
 
-import io.engineblock.activityapi.Action;
-import io.engineblock.activityapi.ActionDispenser;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.Activity;
-import org.slf4j.Logger;
+import io.engineblock.activityapi.ActivityMetrics;
+import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityimpl.SimpleActivity;
 
-import static org.slf4j.LoggerFactory.getLogger;
+public class DiagActivity extends SimpleActivity implements Activity {
 
-public class DiagActionDispenser implements ActionDispenser {
+    protected Histogram delayHistogram;
 
-    private final static Logger logger = getLogger(DiagActionDispenser.class);
-    private DiagActivity activity;
-
-    public DiagActionDispenser(DiagActivity activity) {
-        this.activity = activity;
+    public DiagActivity(ActivityDef activityDef) {
+        super(activityDef);
     }
 
     @Override
-    public Action getAction(int slot) {
-        logger.trace("creating new DiagAction instance for slot=" + slot + ", activity=" + activity);
-        return new DiagAction(slot, activity.getActivityDef(), activity);
+    public void initActivity() {
+        delayHistogram = ActivityMetrics.histogram(this,"delay");
+
     }
 }

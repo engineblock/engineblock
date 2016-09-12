@@ -18,6 +18,7 @@ public class EBCLIOptions {
     private static final String ACTIVITY = "activity";
     private static final String VERSION = "version";
     private static final String SCRIPT = "script";
+    private static final String METRICS = "metrics";
     private static final String ACTIVITY_TYPES = "activitytypes";
     private static final String HELP = "help";
     private static final String METRICS_PREFIX = "metrics-prefix";
@@ -41,6 +42,7 @@ public class EBCLIOptions {
     private String reportGraphiteTo = "";
     private String metricsPrefix = "engineblock.";
     private boolean wantsConsoleLogging = false;
+    private String wantsMetricsForActivity;
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -101,6 +103,12 @@ public class EBCLIOptions {
                         wantsActivityHelpFor = arglist.removeFirst();
                     }
                     break;
+                case METRICS:
+                    if (arglist.peekFirst() == null) {
+                        throw new InvalidParameterException("activity type must follow metrics command");
+                    }
+                    wantsMetricsForActivity = arglist.removeFirst();
+                    break;
                 case REPORT_GRAPHITE_TO:
                     reportGraphiteTo = arglist.removeFirst();
                     break;
@@ -156,6 +164,8 @@ public class EBCLIOptions {
     public boolean wantsConsoleLogging() {
         return wantsConsoleLogging;
     }
+
+    public String wantsMetricsForActivity() { return wantsMetricsForActivity; }
 
     public static enum CmdType {
         activity,

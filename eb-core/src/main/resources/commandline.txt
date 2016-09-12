@@ -2,6 +2,7 @@ Usage:
   PROG <cmdSpec> ... [ -h | -v | -vv ]
   PROG activitytypes
   PROG help <activitytype>
+  PROG metrics <activitytype>
   PROG ( script <script> ) ...
   PROG ( activity <activity> ) ...
 
