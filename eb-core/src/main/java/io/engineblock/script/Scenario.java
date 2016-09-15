@@ -106,7 +106,7 @@ public class Scenario implements Callable<Result> {
             Object extensionObject = extensionDescriptor.getExtensionObject(extensionLogger, metricRegistry);
             logger.info("Adding extension object:  name=" + extensionDescriptor.getExtensionName() +
                     " class=" + extensionObject.getClass().getSimpleName());
-            nashorn.put(extensionDescriptor.getExtensionName(), extensionObject);
+            scriptEngine.put(extensionDescriptor.getExtensionName(), extensionObject);
         }
 
     }
