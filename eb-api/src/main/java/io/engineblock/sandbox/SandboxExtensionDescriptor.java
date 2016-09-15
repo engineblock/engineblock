@@ -54,5 +54,7 @@ public interface SandboxExtensionDescriptor<T> {
      * extension via some mechanism.
      * @return whether or not to auto inject this extension into each new scenario
      */
-    public boolean isAutoLoading();
+    public default boolean isAutoLoading() {
+        return true;
+    }
 }
