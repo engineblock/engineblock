@@ -15,7 +15,7 @@
 package io.engineblock.script;
 
 import ch.qos.logback.classic.Logger;
-import io.engineblock.activityapi.ActivityMetrics;
+import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
 import io.engineblock.metrics.MetricRegistryBindings;

@@ -18,17 +18,22 @@
 
 package io.engineblock.core;
 
-import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricFilter;
-import io.engineblock.activityapi.ActivityMetrics;
+import com.codahale.metrics.Slf4jReporter;
+import io.engineblock.metrics.ActivityMetrics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.PrintStream;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class Result {
+
+    private final static Logger logger = LoggerFactory.getLogger(Result.class);
+
     private Exception exception;
     private String iolog;
+    private String report;
 
     public Result(String iolog) {
         this.iolog = iolog;
@@ -39,22 +44,19 @@ public class Result {
         this.exception = e;
     }
 
-    public void reportTo(PrintStream out) {
-        out.println("===================   BEGIN-SCRIPT-LOG   ===================");
-        out.print(iolog);
-        out.println("===================   END-SCRIPT-LOG   =====================");
-
-        out.println("====================  BEGIN-METRIC-LOG  ====================");
-        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+    public void reportToLog() {
+        logger.info("-- BEGIN METRICS DETAIL --");
+        Slf4jReporter reporter = Slf4jReporter.forRegistry(ActivityMetrics.getMetricRegistry())
                 .convertDurationsTo(TimeUnit.MICROSECONDS)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .filter(MetricFilter.ALL)
-                .outputTo(out)
+                .outputTo(logger)
                 .build();
-        consoleReporter.report();
-        out.println("====================   END-METRIC-LOG   ====================");
+        reporter.report();
+        logger.info("-- END METRICS DETAIL --");
 
     }
+
 
     public Optional<Exception> getException() {
         return Optional.ofNullable(exception);

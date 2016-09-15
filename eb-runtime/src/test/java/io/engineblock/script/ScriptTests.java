@@ -34,7 +34,8 @@ public class ScriptTests {
         e.execute(s);
         ScenariosResults scenariosResults = e.awaitAllResults();
         Result result = scenariosResults.getOne();
-        result.reportTo(System.out);
+        result.reportToLog();
+//        result.reportTo(System.out);
 
         return result;
     }
@@ -67,7 +68,8 @@ public class ScriptTests {
     @Test
     public void testStartStop() {
         Result result = runScenario("startstopdiag");
-        result.reportTo(System.out);
+        result.reportToLog();
+//        result.reportTo(System.out);
     }
 
     @Test

@@ -19,12 +19,15 @@ package io.engineblock.core;
 
 import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.PrintStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ScenariosResults {
+
+    private static final Logger logger = LoggerFactory.getLogger(ScenariosResults.class);
 
     private String scenariosExecutorName;
     private Map<Scenario,Result> scenarioResultMap = new LinkedHashMap<>();
@@ -40,20 +43,21 @@ public class ScenariosResults {
         scenarioResultMap.putAll(map);
     }
 
-    public void reportSummaryTo(PrintStream out) {
-        for (Map.Entry<Scenario, Result> entry : this.scenarioResultMap.entrySet()) {
-            Scenario scenario = entry.getKey();
-            Result oresult = entry.getValue();
 
-            out.println("results for scenario: " + scenario);
-
-            if (oresult!=null) {
-                oresult.reportTo(out);
-            } else {
-                out.println(": incomplete (missing result)");
-            }
-        }
-    }
+//    public void reportSummaryTo(PrintStream out) {
+//        for (Map.Entry<Scenario, Result> entry : this.scenarioResultMap.entrySet()) {
+//            Scenario scenario = entry.getKey();
+//            Result oresult = entry.getValue();
+//
+//            out.println("results for scenario: " + scenario);
+//
+//            if (oresult!=null) {
+//                oresult.reportTo(out);
+//            } else {
+//                out.println(": incomplete (missing result)");
+//            }
+//        }
+//    }
 
     public Result getOne() {
         if (this.scenarioResultMap.size()!=1) {
@@ -61,5 +65,20 @@ public class ScenariosResults {
         }
         return scenarioResultMap.values().stream().findFirst().orElseThrow(
                 () -> new RuntimeException("Missing result."));
+    }
+
+    public void reportToLog() {
+        for (Map.Entry<Scenario, Result> entry : this.scenarioResultMap.entrySet()) {
+            Scenario scenario = entry.getKey();
+            Result oresult = entry.getValue();
+
+            logger.info("results for scenario: " + scenario);
+
+            if (oresult!=null) {
+                oresult.reportToLog();
+            } else {
+                logger.error(scenario.getName() + ": incomplete (missing result)");
+            }
+        }
     }
 }

@@ -78,6 +78,7 @@ public class EBCLI {
         scenario.addScriptText(script);
         executor.execute(scenario);
         ScenariosResults scenariosResults = executor.awaitAllResults();
-        scenariosResults.reportSummaryTo(System.out);
+        //scenariosResults.reportSummaryTo(System.out);
+        scenariosResults.reportToLog();
     }
 }
