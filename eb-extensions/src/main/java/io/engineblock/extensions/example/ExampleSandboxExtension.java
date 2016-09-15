@@ -15,10 +15,13 @@
  * /
  */
 
-package io.engineblock.sandbox;
+package io.engineblock.extensions.example;
 
-/**
- * Any object can be a sandbox extension. This is primarily a tagging interface.
- */
-public interface SandboxExtension {
+import io.engineblock.extensions.SandboxExtension;
+
+public class ExampleSandboxExtension implements SandboxExtension {
+
+    public long getSum(int addend1, int addend2) {
+        return addend1 + addend2;
+    }
 }

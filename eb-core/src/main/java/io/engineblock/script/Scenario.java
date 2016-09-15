@@ -20,7 +20,7 @@ import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
-import io.engineblock.sandbox.SandboxExtensionDescriptor;
+import io.engineblock.extensions.SandboxExtensionDescriptor;
 import org.slf4j.LoggerFactory;
 
 import javax.script.*;
