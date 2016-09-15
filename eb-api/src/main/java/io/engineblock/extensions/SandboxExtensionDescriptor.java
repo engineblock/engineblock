@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.sandbox;
+package io.engineblock.extensions;
 
 import com.codahale.metrics.MetricRegistry;
 import org.slf4j.Logger;

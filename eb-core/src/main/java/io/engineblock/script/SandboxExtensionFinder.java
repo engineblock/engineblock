@@ -17,7 +17,7 @@
 
 package io.engineblock.script;
 
-import io.engineblock.sandbox.SandboxExtensionDescriptor;
+import io.engineblock.extensions.SandboxExtensionDescriptor;
 
 import java.util.ArrayList;
 import java.util.Collections;

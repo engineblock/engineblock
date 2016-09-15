@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.sandbox;
+package io.engineblock.extensions;
 
 /**
  * Any object can be a sandbox extension. This is primarily a tagging interface.

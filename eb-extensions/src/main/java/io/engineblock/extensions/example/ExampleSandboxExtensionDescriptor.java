@@ -15,9 +15,10 @@
  * /
  */
 
-package io.engineblock.sandbox;
+package io.engineblock.extensions.example;
 
 import com.codahale.metrics.MetricRegistry;
+import io.engineblock.extensions.SandboxExtensionDescriptor;
 import org.slf4j.Logger;
 
 @com.google.auto.service.AutoService(SandboxExtensionDescriptor.class)

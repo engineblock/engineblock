@@ -15,7 +15,9 @@
  * /
  */
 
-package io.engineblock.sandbox;
+package io.engineblock.extensions.example;
+
+import io.engineblock.extensions.SandboxExtension;
 
 public class ExampleSandboxExtension implements SandboxExtension {
 
