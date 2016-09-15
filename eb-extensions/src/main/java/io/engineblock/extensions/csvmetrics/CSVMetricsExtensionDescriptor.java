@@ -15,34 +15,28 @@
  * /
  */
 
-package io.engineblock.sandbox.example;
+package io.engineblock.extensions.csvmetrics;
 
 import com.codahale.metrics.MetricRegistry;
-import io.engineblock.sandbox.SandboxExtensionDescriptor;
+import com.google.auto.service.AutoService;
+import io.engineblock.extensions.SandboxExtensionDescriptor;
 import org.slf4j.Logger;
 
-@com.google.auto.service.AutoService(SandboxExtensionDescriptor.class)
-public class ExampleSandboxExtensionDescriptor implements SandboxExtensionDescriptor<ExampleSandboxExtension> {
-
+@AutoService(SandboxExtensionDescriptor.class)
+public class CSVMetricsExtensionDescriptor implements SandboxExtensionDescriptor<CSVMetricsExtension> {
     @Override
     public String getDescription() {
-        return "This is an example of a dynamically loadable script extension. It just adds two ints when" +
-                "you call the getSum(...) method.";
+        return "Allows a script to log some or all metrics to CSV files";
     }
 
     @Override
-    public ExampleSandboxExtension getExtensionObject(Logger logger, MetricRegistry activityMetrics) {
-        logger.info("creating a new ExampleSandboxExtension");
-        return new ExampleSandboxExtension();
+    public CSVMetricsExtension getExtensionObject(Logger logger, MetricRegistry metricRegistry) {
+        return new CSVMetricsExtension(logger, metricRegistry);
     }
 
     @Override
     public String getExtensionName() {
-        return "summer";
+        return "csvmetrics";
     }
 
-    @Override
-    public boolean isAutoLoading() {
-        return true;
-    }
 }

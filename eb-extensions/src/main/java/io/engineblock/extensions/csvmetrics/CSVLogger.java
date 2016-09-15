@@ -15,13 +15,13 @@
  * /
  */
 
-package io.engineblock.sandbox.example;
+package io.engineblock.extensions.csvmetrics;
 
-import io.engineblock.sandbox.SandboxExtension;
+import com.codahale.metrics.MetricRegistry;
+import org.slf4j.Logger;
 
-public class ExampleSandboxExtension implements SandboxExtension {
+public class CSVLogger {
+    public CSVLogger(String filename, Logger logger, MetricRegistry metricRegistry) {
 
-    public long getSum(int addend1, int addend2) {
-        return addend1 + addend2;
     }
 }
