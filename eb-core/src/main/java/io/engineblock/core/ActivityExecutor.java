@@ -78,7 +78,12 @@ public class ActivityExecutor implements ParameterMap.Listener {
      */
     public synchronized void startActivity() {
         logger.info("starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
-        activity.initActivity();
+        try {
+            activity.initActivity();
+        } catch (Exception e) {
+            logger.error("There was an error starting activity:" + activityDef.getAlias(), e);
+            throw new RuntimeException(e);
+        }
         this.intendedState=SlotState.Started;
         adjustToActivityDef(activity.getActivityDef());
     }
