@@ -1,7 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>eb-runtime</artifactId>
+    <artifactId>eb-extensions</artifactId>
     <packaging>jar</packaging>
 
     <parent>
@@ -12,29 +13,26 @@
     </parent>
 
     <name>${project.artifactId}</name>
-    <description>Runtime component for engineblock.</description>
+    <description>Scripting extensions for engineblock.</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>io.engineblock</groupId>
-            <artifactId>at-diag</artifactId>
+            <artifactId>eb-api</artifactId>
             <version>1.0.25-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>io.engineblock</groupId>
-            <artifactId>eb-core</artifactId>
-            <version>1.0.25-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.engineblock</groupId>
-            <artifactId>eb-extensions</artifactId>
-            <version>1.0.25-SNAPSHOT</version>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>1.0-rc2</version>
+            <!--<optional>true</optional>-->
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -51,39 +49,10 @@
             <scope>test</scope>
         </dependency>
 
-
-
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.18.1</version>
-                <executions>
-                    <execution>
-                        <id>run-tests</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <includes>
-                        <include>**/*Tests.java</include>
-                    </includes>
-                    <properties>
-                        <property>
-                            <name>parallel</name>
-                            <value>methods</value>
-                        </property>
-                    </properties>
-                </configuration>
-
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -100,8 +69,8 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.10.3</version>
                 <configuration>
-                    <doctitle>EngineBlock Runtime</doctitle>
-                    <windowtitle>EngineBlock Runtime</windowtitle>
+                    <doctitle>EngineBlock Extensions</doctitle>
+                    <windowtitle>EngineBlock Extensions</windowtitle>
                 </configuration>
                 <executions>
                     <execution>
@@ -125,10 +94,8 @@
                         </goals>
                         <configuration>
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.engineblock.cli.EBCLI</mainClass>
-                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
                             <createSourcesJar>true</createSourcesJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>

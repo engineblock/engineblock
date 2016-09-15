@@ -27,6 +27,7 @@
         <module>eb-runtime</module> <!-- Binds the core, drivers, and APIs into a single artifact -->
         <module>eb-cli</module> <!-- restful server for EB runtime -->
         <module>eb-rest</module> <!-- restful server for EB runtime -->
+        <module>eb-extensions</module> <!-- scripting sandbox extensions for EB -->
     </modules>
 
     <licenses>
