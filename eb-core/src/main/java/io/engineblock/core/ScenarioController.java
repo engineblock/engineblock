@@ -14,6 +14,7 @@
 */
 package io.engineblock.core;
 
+import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityapi.ActivityType;
 import io.engineblock.activityimpl.ParameterMap;
@@ -295,5 +296,9 @@ public class ScenarioController {
      */
     public Map<String, ActivityExecutor> getActivityMap() {
         return Collections.unmodifiableMap(activityExecutors);
+    }
+
+    public void reportMetrics() {
+        ActivityMetrics.reportTo(System.out);
     }
 }
