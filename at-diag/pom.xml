@@ -3,7 +3,6 @@
 
     <artifactId>at-diag</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.25-SNAPSHOT</version>
 
     <parent>
         <artifactId>project-defaults</artifactId>
