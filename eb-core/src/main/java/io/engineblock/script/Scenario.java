@@ -23,9 +23,7 @@ import io.engineblock.metrics.MetricRegistryBindings;
 import io.engineblock.sandbox.SandboxExtensionDescriptor;
 import org.slf4j.LoggerFactory;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import javax.script.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -43,7 +41,7 @@ public class Scenario implements Callable<Result> {
     private static final Logger logger = (Logger) LoggerFactory.getLogger(Scenario.class);
     private static final ScriptEngineManager engineManager = new ScriptEngineManager();
     private final List<String> scripts = new ArrayList<>();
-    private ScriptEngine nashorn;
+    private ScriptEngine scriptEngine;
     private ScenarioController scenarioController;
     private ScriptEnv scriptEnv;
     private String name;
@@ -78,18 +76,18 @@ public class Scenario implements Callable<Result> {
     }
 
     private void init() {
-        nashorn = engineManager.getEngineByName("nashorn");
+        scriptEngine = engineManager.getEngineByName("nashorn");
 
         scriptEnv = new ScriptEnv(scenarioController);
-        nashorn.setContext(scriptEnv);
+        scriptEngine.setContext(scriptEnv);
 
         scenarioController = new ScenarioController();
 
-        nashorn.put("scenario", scenarioController);
+        scriptEngine.put("scenario", scenarioController);
 
-        nashorn.put("activities", new ScenarioBindings(scenarioController));
+        scriptEngine.put("activities", new ScenarioBindings(scenarioController));
 
-        nashorn.put("metrics", new MetricRegistryBindings(ActivityMetrics.getMetricRegistry()));
+        scriptEngine.put("metrics", new MetricRegistryBindings(ActivityMetrics.getMetricRegistry()));
 
         for (SandboxExtensionDescriptor extensionDescriptor : SandboxExtensionFinder.findAll()) {
             org.slf4j.Logger extensionLogger =
@@ -98,7 +96,7 @@ public class Scenario implements Callable<Result> {
             Object extensionObject = extensionDescriptor.getExtensionObject(extensionLogger, metricRegistry);
             logger.info("Adding extension object:  name=" + extensionDescriptor.getExtensionName() +
                     " class=" + extensionObject.getClass().getSimpleName());
-            nashorn.put(extensionDescriptor.getExtensionName(), extensionObject);
+            scriptEngine.put(extensionDescriptor.getExtensionName(), extensionObject);
         }
 
     }
@@ -108,7 +106,14 @@ public class Scenario implements Callable<Result> {
         logger.info("Running control script for " + getName() + ".");
         for (String script : scripts) {
             try {
-                Object result = nashorn.eval(script);
+                Object result = null;
+                if (scriptEngine instanceof Compilable) {
+                    logger.info("Using direct script compilation");
+                    Compilable compilableEngine = (Compilable) scriptEngine;
+                    CompiledScript compiled = compilableEngine.compile(script);
+                    result = compiled.eval();
+                }
+                result = scriptEngine.eval(script);
             } catch (ScriptException e) {
                 String errorDesc = "Script error while running scenario:" + e.getMessage();
                 e.printStackTrace();
