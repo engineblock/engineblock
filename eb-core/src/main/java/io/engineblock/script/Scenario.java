@@ -99,6 +99,16 @@ public class Scenario implements Callable<Result> {
             scriptEngine.put(extensionDescriptor.getExtensionName(), extensionObject);
         }
 
+        for (SandboxExtensionDescriptor extensionDescriptor : SandboxExtensionFinder.findAll()) {
+            org.slf4j.Logger extensionLogger =
+                    LoggerFactory.getLogger("extensions." + extensionDescriptor.getExtensionName());
+            MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
+            Object extensionObject = extensionDescriptor.getExtensionObject(extensionLogger, metricRegistry);
+            logger.info("Adding extension object:  name=" + extensionDescriptor.getExtensionName() +
+                    " class=" + extensionObject.getClass().getSimpleName());
+            nashorn.put(extensionDescriptor.getExtensionName(), extensionObject);
+        }
+
     }
 
     public void run() {
