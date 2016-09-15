@@ -57,6 +57,12 @@ public class ScriptTests {
     }
 
     @Test
+    public void testExtensionPoint() {
+        Result result = runScenario("extensions");
+        assertThat(result.getIOLog()).contains("sum is 46");
+    }
+
+    @Test
     public void testBlockingRun() {
         Result result = runScenario("blockingrun");
         int a1end = result.getIOLog().indexOf("blockingactivity1 finished");
