@@ -17,13 +17,12 @@
 
 package io.engineblock.metrics;
 
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Reservoir;
+import com.codahale.metrics.Timer;
+import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramResetOnSnapshotReservoir;
 
-public class NicerHistogram extends Histogram {
-
-    public NicerHistogram(Reservoir hdrHistogramReservoir) {
-        super(hdrHistogramReservoir);
+public class NicerTimer extends Timer {
+    public NicerTimer(HdrHistogramResetOnSnapshotReservoir hdrHistogramResetOnSnapshotReservoir) {
+        super(hdrHistogramResetOnSnapshotReservoir);
     }
 
     @Override

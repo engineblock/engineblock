@@ -50,19 +50,25 @@ public class MetricsMapper {
 
         Map<String, Metric> metricMap = metricRegistryBindings.getMetrics();
 
+//        Map<String, Map<String,String>> details = new LinkedHashMap<>();
+
         for (Map.Entry<String, Metric> metricEntry : metricMap.entrySet()) {
             String metricName = metricEntry.getKey();
             Metric metricValue = metricEntry.getValue();
 
             Map<String, String> getterSummary = getGetterSummary(metricValue);
+//            details.put(metricName,getterSummary);
             String getterText = getterSummary.entrySet().stream().map(
-                    es -> metricName + "." + es.getKey() + "  " + es.getValue()
+                    es -> metricName + es.getKey() + "  " + es.getValue()
             ).collect(Collectors.joining("\n"));
 
             metricsDetail.append(metricName).append("\n").append(getterText);
         }
+//        return details;
+
         return metricsDetail.toString();
     }
+
 
     private static Set<Class> metricsElements = new HashSet<Class>() {{
         add(Meter.class);
@@ -74,7 +80,7 @@ public class MetricsMapper {
     }};
 
     private static Map<String, String> getGetterSummary(Object o) {
-        return getGetterSummary(new HashMap<String, String>(), "M", o.getClass());
+        return getGetterSummary(new HashMap<String, String>(), "", o.getClass());
     }
 
     private static Map<String, String> getGetterSummary(Map<String, String> accumulator, String name, Class<?> objectType) {

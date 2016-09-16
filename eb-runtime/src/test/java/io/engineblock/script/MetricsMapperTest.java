@@ -21,10 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class MetricsMapperTest {
 
-    @Test(enabled=false)
+    @Test
     public void testDiagMetrics() {
         String diagMetrics = MetricsMapper.metricsDetail("diag");
-        assertThat(diagMetrics).contains("sdf");
+        assertThat(diagMetrics).contains("metrics.someactivity.delay.snapshot.p98ms");
     }
 
 }

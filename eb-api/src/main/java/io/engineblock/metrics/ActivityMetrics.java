@@ -91,7 +91,7 @@ public class ActivityMetrics {
      * @return the timer, perhaps a different one if it has already been registered
      */
     public static Timer resettingTimer(Activity activity, String name) {
-        return (Timer) register(activity, name, () -> new Timer(new HdrHistogramResetOnSnapshotReservoir()));
+        return (Timer) register(activity, name, () -> new NicerTimer(new HdrHistogramResetOnSnapshotReservoir()));
     }
 
     /**
@@ -104,7 +104,7 @@ public class ActivityMetrics {
      * @return the histogram, perhaps a different one if it has already been registered
      */
     public static Histogram histogram(Activity activity, String name) {
-        return (Histogram) register(activity, name, () -> new Histogram(new HdrHistogramReservoir()));
+        return (Histogram) register(activity, name, () -> new NicerHistogram(new HdrHistogramReservoir()));
     }
 
     /**

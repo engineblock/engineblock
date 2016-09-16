@@ -4,6 +4,7 @@ import io.engineblock.activityapi.ActivityType;
 import io.engineblock.core.ActivityDocInfo;
 import io.engineblock.core.ActivityTypeFinder;
 import io.engineblock.core.ScenariosResults;
+import io.engineblock.script.MetricsMapper;
 import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
 import org.slf4j.Logger;
@@ -43,27 +44,14 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsBasicHelp() || options.getCommands().size()==0) {
-            String docoptFileName = "commandline.txt";
-            ClassLoader cl = getClass().getClassLoader();
-            InputStream resourceAsStream = cl.getResourceAsStream(docoptFileName);
-            if (resourceAsStream == null) {
-                throw new RuntimeException("Unable to find " + docoptFileName + " in classpath.");
-            }
-            String basicHelp;
-            try (BufferedReader buffer = new BufferedReader(new InputStreamReader(resourceAsStream))) {
-                basicHelp = buffer.lines().collect(Collectors.joining("\n"));
-            } catch (Throwable t) {
-                throw new RuntimeException("Unable to buffer " + docoptFileName + ": " + t);
-            }
-            basicHelp = basicHelp.replaceAll("PROG", commandName);
-            System.out.println(basicHelp);
+        if (options.wantsBasicHelp()) {
+            System.out.println(getBasicHelp());
             System.exit(0);
-
         }
 
         if (options.wantsMetricsForActivity()!=null) {
             String metricsHelp = getMetricsHelpFor(options.wantsMetricsForActivity());
+            System.out.println("Available metric names for activity type " + options.wantsMetricsForActivity() + ":");
             System.out.println(metricsHelp);
             System.exit(0);
         }
@@ -77,6 +65,11 @@ public class EBCLI {
             ConsoleLogging.enableConsoleLogging();
         }
 
+        if (options.getCommands().size()==0) {
+            System.out.println(getBasicHelp());
+            System.exit(0);
+        }
+
         long sessionStart = System.currentTimeMillis();
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionStart, 1);
         Scenario scenario = new Scenario("scenario-" + sessionStart);
@@ -88,7 +81,25 @@ public class EBCLI {
         scenariosResults.reportToLog();
     }
 
-    private String getMetricsHelpFor(String activityType) {
-        throw new RuntimeException("No metrics help for " + activityType);
+    private String getBasicHelp() {
+        String docoptFileName = "commandline.txt";
+        ClassLoader cl = getClass().getClassLoader();
+        InputStream resourceAsStream = cl.getResourceAsStream(docoptFileName);
+        if (resourceAsStream == null) {
+            throw new RuntimeException("Unable to find " + docoptFileName + " in classpath.");
+        }
+        String basicHelp;
+        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(resourceAsStream))) {
+            basicHelp = buffer.lines().collect(Collectors.joining("\n"));
+        } catch (Throwable t) {
+            throw new RuntimeException("Unable to buffer " + docoptFileName + ": " + t);
+        }
+        basicHelp = basicHelp.replaceAll("PROG", commandName);
+        return basicHelp;
+
     }
+    private String getMetricsHelpFor(String activityType) {
+        String metrics = MetricsMapper.metricsDetail(activityType);
+        return metrics;
+   }
 }
