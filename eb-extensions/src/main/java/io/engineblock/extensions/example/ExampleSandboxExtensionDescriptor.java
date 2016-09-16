@@ -21,6 +21,8 @@ import com.codahale.metrics.MetricRegistry;
 import io.engineblock.extensions.SandboxExtensionDescriptor;
 import org.slf4j.Logger;
 
+import javax.script.ScriptContext;
+
 @com.google.auto.service.AutoService(SandboxExtensionDescriptor.class)
 public class ExampleSandboxExtensionDescriptor implements SandboxExtensionDescriptor<ExampleSandboxExtension> {
 
@@ -31,7 +33,7 @@ public class ExampleSandboxExtensionDescriptor implements SandboxExtensionDescri
     }
 
     @Override
-    public ExampleSandboxExtension getExtensionObject(Logger logger, MetricRegistry activityMetrics) {
+    public ExampleSandboxExtension getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         logger.info("creating a new ExampleSandboxExtension");
         return new ExampleSandboxExtension();
     }
@@ -41,8 +43,4 @@ public class ExampleSandboxExtensionDescriptor implements SandboxExtensionDescri
         return "summer";
     }
 
-    @Override
-    public boolean isAutoLoading() {
-        return true;
-    }
 }

@@ -63,6 +63,12 @@ public class ScriptTests {
     }
 
     @Test
+    public void testExtensionCsvLogger() {
+        Result result = runScenario("extension_csvmetrics");
+        assertThat(result.getIOLog()).contains("started new csvlogger: csvmetrics.log");
+    }
+
+    @Test
     public void testBlockingRun() {
         Result result = runScenario("blockingrun");
         int a1end = result.getIOLog().indexOf("blockingactivity1 finished");
