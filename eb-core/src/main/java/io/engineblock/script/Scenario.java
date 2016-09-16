@@ -18,9 +18,9 @@ import ch.qos.logback.classic.Logger;
 import com.codahale.metrics.MetricRegistry;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
+import io.engineblock.extensions.SandboxExtensionDescriptor;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
-import io.engineblock.extensions.SandboxExtensionDescriptor;
 import org.slf4j.LoggerFactory;
 
 import javax.script.*;
@@ -93,17 +93,26 @@ public class Scenario implements Callable<Result> {
             org.slf4j.Logger extensionLogger =
                     LoggerFactory.getLogger("extensions." + extensionDescriptor.getExtensionName());
             MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
-            Object extensionObject = extensionDescriptor.getExtensionObject(extensionLogger, metricRegistry);
+            Object extensionObject = extensionDescriptor.getExtensionObject(
+                    extensionLogger,
+                    metricRegistry,
+                    scriptEnv
+            );
             logger.info("Adding extension object:  name=" + extensionDescriptor.getExtensionName() +
                     " class=" + extensionObject.getClass().getSimpleName());
             scriptEngine.put(extensionDescriptor.getExtensionName(), extensionObject);
         }
 
         for (SandboxExtensionDescriptor extensionDescriptor : SandboxExtensionFinder.findAll()) {
+            if (!extensionDescriptor.isAutoLoading()) {
+                logger.info("Not loading " + extensionDescriptor + ", autoloading is false");
+                continue;
+            }
+
             org.slf4j.Logger extensionLogger =
                     LoggerFactory.getLogger("extensions." + extensionDescriptor.getExtensionName());
             MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
-            Object extensionObject = extensionDescriptor.getExtensionObject(extensionLogger, metricRegistry);
+            Object extensionObject = extensionDescriptor.getExtensionObject(extensionLogger, metricRegistry, scriptEnv);
             logger.info("Adding extension object:  name=" + extensionDescriptor.getExtensionName() +
                     " class=" + extensionObject.getClass().getSimpleName());
             scriptEngine.put(extensionDescriptor.getExtensionName(), extensionObject);
