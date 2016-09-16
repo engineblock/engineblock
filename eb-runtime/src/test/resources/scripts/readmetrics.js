@@ -1,4 +1,3 @@
-//logger.info("testing dynamically changing threads.");
 activitydef = {
     "alias" : "testactivity",
     "type" : "diag",
@@ -8,11 +7,10 @@ activitydef = {
 };
 scenario.start(activitydef);
 
-while (metrics.testactivity.cycles.count < 10000) {
+while (metrics.testactivity.cycles.count < 1000) {
     print('waiting 10ms because metrics.testactivity.cycles<10000 : ' + metrics.testactivity.cycles.count);
     scenario.waitMillis(10);
 
 }
 scenario.stop(activitydef);
-// print('stopping scenario because metrics.get("activity.testactivity.timer").getCount() == '
-//     + metrics.get("activity.testactivity.timer").getCount());
+print("count: " + metrics.testactivity.cycles.count);

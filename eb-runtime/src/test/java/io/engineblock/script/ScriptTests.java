@@ -19,7 +19,11 @@ package io.engineblock.script;
 
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenariosResults;
+import org.assertj.core.data.Offset;
 import org.testng.annotations.Test;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,9 +55,19 @@ public class ScriptTests {
     }
 
 
-    @Test
+    @Test(enabled=false)
     public void testRateLimiter() {
         Result result = runScenario("ratelimiter");
+        String iolog = result.getIOLog();
+        System.out.println("iolog\n"+iolog);
+        Pattern p = Pattern.compile("^.*?mean rate = (\\d[.\\d]+)$",Pattern.MULTILINE);
+        Matcher m = p.matcher(iolog);
+        assertThat(m.matches()).isTrue();
+
+        String digits = p.matcher(iolog).toMatchResult().group(1);
+        assertThat(digits).isNotEmpty();
+        double rate = Double.valueOf(digits);
+        assertThat(rate).isCloseTo(200.0, Offset.offset(20.0));
     }
 
     @Test
@@ -81,17 +95,25 @@ public class ScriptTests {
     public void testStartStop() {
         Result result = runScenario("startstopdiag");
         result.reportToLog();
-//        result.reportTo(System.out);
+        int startedAt = result.getIOLog().indexOf("starting activity teststartstopdiag");
+        int stoppedAt = result.getIOLog().indexOf("stopped activity teststartstopdiag");
+        assertThat(startedAt).isGreaterThan(0);
+        assertThat(stoppedAt).isGreaterThan(startedAt);
     }
 
     @Test
     public void testThreadChange() {
         Result result = runScenario("threadchange");
+        int changedTo1At = result.getIOLog().indexOf("threads now 1");
+        int changedTo5At = result.getIOLog().indexOf("threads now 5");
+        assertThat(changedTo1At).isGreaterThan(0);
+        assertThat(changedTo5At).isGreaterThan(changedTo1At);
     }
 
     @Test
     public void testReadMetric() {
         Result result = runScenario("readmetrics");
+        assertThat(result.getIOLog()).contains("count: ");
     }
 
 
