@@ -22,6 +22,8 @@ import com.google.auto.service.AutoService;
 import io.engineblock.extensions.SandboxExtensionDescriptor;
 import org.slf4j.Logger;
 
+import javax.script.ScriptContext;
+
 @AutoService(SandboxExtensionDescriptor.class)
 public class CSVMetricsExtensionDescriptor implements SandboxExtensionDescriptor<CSVMetricsExtension> {
     @Override
@@ -30,8 +32,8 @@ public class CSVMetricsExtensionDescriptor implements SandboxExtensionDescriptor
     }
 
     @Override
-    public CSVMetricsExtension getExtensionObject(Logger logger, MetricRegistry metricRegistry) {
-        return new CSVMetricsExtension(logger, metricRegistry);
+    public CSVMetricsExtension getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+        return new CSVMetricsExtension(logger, metricRegistry, scriptContext);
     }
 
     @Override

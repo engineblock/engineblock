@@ -20,6 +20,8 @@ package io.engineblock.extensions;
 import com.codahale.metrics.MetricRegistry;
 import org.slf4j.Logger;
 
+import javax.script.ScriptContext;
+
 /**
  * Any implementation of a SandboxExtension that is found in the runtime
  * can be automatically loaded into the scenario scripting sandbox.
@@ -41,12 +43,12 @@ public interface SandboxExtensionDescriptor<T> {
      * @param metricRegistry The main metric registry, in case the extension wants to track metrics internally
      * @return a new instance of an extension. The extension is given a logger if it desires.
      */
-    public T getExtensionObject(Logger logger, MetricRegistry metricRegistry);
+     T getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext);
 
     /**
      * @return a simple name at the root of the variable namespace to anchor this extension.
      */
-    public String getExtensionName();
+     String getExtensionName();
 
     /**
      * If auto loading is true, then the extension will be injected into every
@@ -54,7 +56,7 @@ public interface SandboxExtensionDescriptor<T> {
      * extension via some mechanism.
      * @return whether or not to auto inject this extension into each new scenario
      */
-    public default boolean isAutoLoading() {
+     default boolean isAutoLoading() {
         return true;
     }
 }

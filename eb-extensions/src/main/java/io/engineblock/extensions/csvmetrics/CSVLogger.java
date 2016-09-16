@@ -17,11 +17,61 @@
 
 package io.engineblock.extensions.csvmetrics;
 
+import com.codahale.metrics.CsvReporter;
 import com.codahale.metrics.MetricRegistry;
 import org.slf4j.Logger;
 
-public class CSVLogger {
-    public CSVLogger(String filename, Logger logger, MetricRegistry metricRegistry) {
+import java.io.File;
+import java.util.concurrent.TimeUnit;
 
+public class CSVLogger {
+
+    CsvReporter reporter;
+
+    /**
+     * Create a CSV reporter that is not automatically logging.
+     * @param directory a CSV logging filename
+     * @param logger an extension logger, to be used for logging extension-specific events
+     * @param registry a MetricRegistry to report
+     */
+    public CSVLogger(String directory, Logger logger, MetricRegistry registry) {
+        File reportTo = new File(directory);
+        if (!reportTo.exists()) {
+            if (!reportTo.mkdirs()) {
+                throw new RuntimeException("Unable to make directory: " + reportTo);
+            }
+        }
+
+        reporter = CsvReporter.forRegistry(registry)
+                .convertDurationsTo(TimeUnit.MILLISECONDS)
+                .convertRatesTo(TimeUnit.SECONDS)
+                .build(reportTo);
+
+    }
+
+    /**
+     * Create an autologging CSV Reporter with the specified period and time unit.
+     * @param csvFile a CSV logging filename
+     * @param logger an extension logger, to be used for logging extension-specific events
+     * @param registry a MetricRegistry to report
+     * @param period a period between reporting intervals
+     * @param timeUnit the actual timeunit for the period
+     */
+    public CSVLogger(String csvFile, Logger logger, MetricRegistry registry, long period, TimeUnit timeUnit) {
+        this(csvFile, logger, registry);
+        reporter.start(period, timeUnit);
+    }
+
+    public void start(long period, String timeUnitName) {
+        TimeUnit timeUnit = TimeUnit.valueOf(timeUnitName);
+        reporter.start(period, timeUnit);
+    }
+
+    public void stop() {
+        reporter.stop();
+    }
+
+    public void report() {
+        reporter.report();
     }
 }

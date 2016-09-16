@@ -20,17 +20,39 @@ package io.engineblock.extensions.csvmetrics;
 import com.codahale.metrics.MetricRegistry;
 import org.slf4j.Logger;
 
-public class CSVMetricsExtension {
-    private Logger logger;
-    private MetricRegistry metricRegistry;
+import javax.script.ScriptContext;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
-    public CSVMetricsExtension(Logger logger, MetricRegistry metricRegistry) {
+public class CSVMetricsExtension {
+    private final ScriptContext context;
+    private final Logger logger;
+    private final MetricRegistry metricRegistry;
+
+    public CSVMetricsExtension(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         this.logger = logger;
         this.metricRegistry = metricRegistry;
+        this.context = scriptContext;
     }
 
-    public CSVLogger logCsv(String filename) {
-        return new CSVLogger(filename, logger, metricRegistry);
+    public CSVLogger log(String filename) {
+        CSVLogger csvLogger = new CSVLogger(filename, logger, metricRegistry);
+        writeStdout("started new csvlogger: " + filename);
+        return csvLogger;
+    }
+
+    public CSVLogger log(String filename, long period, String timeUnit) {
+        TimeUnit mappedTimeUnit = TimeUnit.valueOf(timeUnit);
+        return new CSVLogger(filename, logger, metricRegistry, period, mappedTimeUnit);
+    }
+
+    private void writeStdout(String msg) {
+        try {
+            context.getWriter().write(msg);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
 }
