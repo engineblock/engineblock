@@ -131,8 +131,9 @@ public class Scenario implements Callable<Result> {
                     Compilable compilableEngine = (Compilable) scriptEngine;
                     CompiledScript compiled = compilableEngine.compile(script);
                     result = compiled.eval();
+                } else {
+                    result = scriptEngine.eval(script);
                 }
-                result = scriptEngine.eval(script);
             } catch (ScriptException e) {
                 String errorDesc = "Script error while running scenario:" + e.getMessage();
                 e.printStackTrace();
