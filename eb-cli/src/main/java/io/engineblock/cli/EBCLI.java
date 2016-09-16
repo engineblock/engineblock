@@ -62,6 +62,12 @@ public class EBCLI {
 
         }
 
+        if (options.wantsMetricsForActivity()!=null) {
+            String metricsHelp = getMetricsHelpFor(options.wantsMetricsForActivity());
+            System.out.println(metricsHelp);
+            System.exit(0);
+        }
+
         if (options.wantsActivityHelp()) {
             String activityHelpMarkdown = ActivityDocInfo.forActivityType(options.wantsActivityHelpFor());
             System.out.println(activityHelpMarkdown);
@@ -80,5 +86,9 @@ public class EBCLI {
         ScenariosResults scenariosResults = executor.awaitAllResults();
         //scenariosResults.reportSummaryTo(System.out);
         scenariosResults.reportToLog();
+    }
+
+    private String getMetricsHelpFor(String activityType) {
+        throw new RuntimeException("No metrics help for " + activityType);
     }
 }

@@ -43,7 +43,11 @@ public class DiagActivityType implements ActivityType {
 
     @Override
     public ActionDispenser getActionDispenser(Activity activity) {
-        return new DiagActionDispenser(activity);
+        return new DiagActionDispenser((DiagActivity)activity);
     }
 
+    @Override
+    public Activity getActivity(ActivityDef activityDef) {
+        return new DiagActivity(activityDef);
+    }
 }

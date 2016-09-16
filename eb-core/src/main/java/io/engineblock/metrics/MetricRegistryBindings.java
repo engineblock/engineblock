@@ -18,14 +18,12 @@
 package io.engineblock.metrics;
 
 import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
 import io.engineblock.script.ReadOnlyBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRegistryListener {
 
@@ -62,7 +60,7 @@ public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRe
     @Override
     public Object get(Object key) {
         Object o = metricMap.map.get(key);
-        if (o==null) {
+        if (o == null) {
             logger.info("fishing for a metric with '" + key + "'? we have:" + this.keySet());
         }
         return o;
@@ -95,10 +93,10 @@ public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRe
     }
 
     private synchronized void cleanEmptyMaps(MetricMap m) {
-        while (m.isEmpty() && m.parent!=null) {
+        while (m.isEmpty() && m.parent != null) {
             logger.debug("removing empty map:" + m.name);
             MetricMap parent = m.parent;
-            m.parent=null;
+            m.parent = null;
             parent.map.remove(m.name);
             m = parent;
         }
@@ -123,7 +121,7 @@ public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRe
                     }
                 }
             } else {
-                MetricMap newMap = new MetricMap(edge,m);
+                MetricMap newMap = new MetricMap(edge, m);
                 m.map.put(edge, newMap);
                 m = newMap;
                 logger.debug("adding edge:" + edge + " while pathing to " + fullName);
@@ -196,6 +194,25 @@ public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRe
         parent.map.remove(nodeNameOf(name));
         cleanEmptyMaps(parent);
 
+    }
+
+    public Map<String, Metric> getMetrics() {
+        return getMetrics(new LinkedHashMap<String, Metric>(), "metrics", metricMap);
+    }
+
+    private Map<String, Metric> getMetrics(Map<String, Metric> totalMap, String prefix, MetricMap map) {
+        for (Entry<String, Object> mEntry : map.entrySet()) {
+            Object o = mEntry.getValue();
+            String name = prefix + "." + mEntry.getKey();
+            if (o instanceof Metric) {
+                totalMap.put(name, (Metric) o);
+            } else if (o instanceof MetricMap) {
+                getMetrics(totalMap, name, (MetricMap) o);
+            } else {
+                throw new RuntimeException("entry value must be either a Metric or a MetricMap");
+            }
+        }
+        return totalMap;
     }
 
     private class MetricMap extends ReadOnlyBindings {
