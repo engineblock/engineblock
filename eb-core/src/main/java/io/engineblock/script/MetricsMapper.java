@@ -16,10 +16,10 @@ package io.engineblock.script;
 
 import com.codahale.metrics.*;
 import io.engineblock.activityapi.Activity;
-import io.engineblock.activityapi.ActivityMetrics;
 import io.engineblock.activityapi.ActivityType;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.core.ActivityTypeFinder;
+import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
 
 import java.lang.reflect.Method;
@@ -41,7 +41,7 @@ public class MetricsMapper {
             throw new RuntimeException("Activity type '" + activityTypeName + "' does not exist in this runtime.");
         }
         ActivityDef activityDef = ActivityDef.parseActivityDef("type=" + activityTypeName + ";alias=someactivity;");
-        Activity activity = activityType.get().getActivity(activityDef);
+        Activity activity = activityType.get().getAssembledActivity(activityDef);
         MetricRegistryBindings metricRegistryBindings = new MetricRegistryBindings(ActivityMetrics.getMetricRegistry());
         activity.initActivity();
         activity.getInputDispenser().getInput(0);

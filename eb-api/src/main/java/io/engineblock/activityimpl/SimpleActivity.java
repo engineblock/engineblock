@@ -13,10 +13,6 @@ public class SimpleActivity implements Activity {
     private ActivityDef activityDef;
 
     public SimpleActivity(ActivityDef activityDef) {
-
-        this.motorDispenser = motorDispenser;
-        this.inputDispenser = inputDispenser;
-        this.actionDispenser = actionDispenser;
         this.activityDef = activityDef;
     }
 

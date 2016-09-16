@@ -28,10 +28,10 @@ import javax.script.ScriptContext;
  * The descriptor type is used to flag the object type of the actual
  * instance to be used as the extension point.
  * <p>
- *     Each scenario gets
+ *     Each scenario gets its own instance of an object from this SandboxPlugin
  * </p>
  */
-public interface SandboxExtensionDescriptor<T> {
+public interface SandboxPluginData<T> {
 
     /**
      * @return a brief description of this extension.
@@ -41,6 +41,7 @@ public interface SandboxExtensionDescriptor<T> {
     /**
      * @param logger A logger named for the extension, in case the extension wants to log internally
      * @param metricRegistry The main metric registry, in case the extension wants to track metrics internally
+     * @param scriptContext The scripting context object, useful for interacting with the sandbox directly
      * @return a new instance of an extension. The extension is given a logger if it desires.
      */
      T getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext);
@@ -48,7 +49,7 @@ public interface SandboxExtensionDescriptor<T> {
     /**
      * @return a simple name at the root of the variable namespace to anchor this extension.
      */
-     String getExtensionName();
+     String getBaseVariableName();
 
     /**
      * If auto loading is true, then the extension will be injected into every

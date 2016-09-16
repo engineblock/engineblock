@@ -18,7 +18,7 @@ import ch.qos.logback.classic.Logger;
 import com.codahale.metrics.MetricRegistry;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
-import io.engineblock.extensions.SandboxExtensionDescriptor;
+import io.engineblock.extensions.SandboxPluginData;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
 import org.slf4j.LoggerFactory;
@@ -89,33 +89,33 @@ public class Scenario implements Callable<Result> {
 
         scriptEngine.put("metrics", new MetricRegistryBindings(ActivityMetrics.getMetricRegistry()));
 
-        for (SandboxExtensionDescriptor extensionDescriptor : SandboxExtensionFinder.findAll()) {
+        for (SandboxPluginData extensionDescriptor : SandboxExtensionFinder.findAll()) {
             org.slf4j.Logger extensionLogger =
-                    LoggerFactory.getLogger("extensions." + extensionDescriptor.getExtensionName());
+                    LoggerFactory.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
             MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
             Object extensionObject = extensionDescriptor.getExtensionObject(
                     extensionLogger,
                     metricRegistry,
                     scriptEnv
             );
-            logger.info("Adding extension object:  name=" + extensionDescriptor.getExtensionName() +
+            logger.info("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
                     " class=" + extensionObject.getClass().getSimpleName());
-            scriptEngine.put(extensionDescriptor.getExtensionName(), extensionObject);
+            scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
         }
 
-        for (SandboxExtensionDescriptor extensionDescriptor : SandboxExtensionFinder.findAll()) {
+        for (SandboxPluginData extensionDescriptor : SandboxExtensionFinder.findAll()) {
             if (!extensionDescriptor.isAutoLoading()) {
                 logger.info("Not loading " + extensionDescriptor + ", autoloading is false");
                 continue;
             }
 
             org.slf4j.Logger extensionLogger =
-                    LoggerFactory.getLogger("extensions." + extensionDescriptor.getExtensionName());
+                    LoggerFactory.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
             MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
             Object extensionObject = extensionDescriptor.getExtensionObject(extensionLogger, metricRegistry, scriptEnv);
-            logger.info("Adding extension object:  name=" + extensionDescriptor.getExtensionName() +
+            logger.info("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
                     " class=" + extensionObject.getClass().getSimpleName());
-            scriptEngine.put(extensionDescriptor.getExtensionName(), extensionObject);
+            scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
         }
 
     }

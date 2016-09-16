@@ -24,26 +24,26 @@ import javax.script.ScriptContext;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class CSVMetricsExtension {
+public class CSVMetricsPlugin {
     private final ScriptContext context;
     private final Logger logger;
     private final MetricRegistry metricRegistry;
 
-    public CSVMetricsExtension(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public CSVMetricsPlugin(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         this.logger = logger;
         this.metricRegistry = metricRegistry;
         this.context = scriptContext;
     }
 
-    public CSVLogger log(String filename) {
-        CSVLogger csvLogger = new CSVLogger(filename, logger, metricRegistry);
+    public CSVMetrics log(String filename) {
+        CSVMetrics csvMetrics = new CSVMetrics(filename, logger, metricRegistry);
         writeStdout("started new csvlogger: " + filename);
-        return csvLogger;
+        return csvMetrics;
     }
 
-    public CSVLogger log(String filename, long period, String timeUnit) {
+    public CSVMetrics log(String filename, long period, String timeUnit) {
         TimeUnit mappedTimeUnit = TimeUnit.valueOf(timeUnit);
-        return new CSVLogger(filename, logger, metricRegistry, period, mappedTimeUnit);
+        return new CSVMetrics(filename, logger, metricRegistry, period, mappedTimeUnit);
     }
 
     private void writeStdout(String msg) {

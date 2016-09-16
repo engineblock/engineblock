@@ -15,11 +15,10 @@
 package io.engineblock.activities.diag;
 
 import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.Activity;
-import io.engineblock.activityapi.ActivityMetrics;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SimpleActivity;
+import io.engineblock.metrics.ActivityMetrics;
 
 public class DiagActivity extends SimpleActivity implements Activity {
 

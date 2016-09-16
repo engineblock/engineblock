@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
-public class CSVLogger {
+public class CSVMetrics {
 
     CsvReporter reporter;
 
@@ -34,7 +34,7 @@ public class CSVLogger {
      * @param logger an extension logger, to be used for logging extension-specific events
      * @param registry a MetricRegistry to report
      */
-    public CSVLogger(String directory, Logger logger, MetricRegistry registry) {
+    public CSVMetrics(String directory, Logger logger, MetricRegistry registry) {
         File reportTo = new File(directory);
         if (!reportTo.exists()) {
             if (!reportTo.mkdirs()) {
@@ -57,7 +57,7 @@ public class CSVLogger {
      * @param period a period between reporting intervals
      * @param timeUnit the actual timeunit for the period
      */
-    public CSVLogger(String csvFile, Logger logger, MetricRegistry registry, long period, TimeUnit timeUnit) {
+    public CSVMetrics(String csvFile, Logger logger, MetricRegistry registry, long period, TimeUnit timeUnit) {
         this(csvFile, logger, registry);
         reporter.start(period, timeUnit);
     }
