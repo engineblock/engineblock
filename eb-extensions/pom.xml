@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>eb-cli</artifactId>
+    <artifactId>eb-extensions</artifactId>
     <packaging>jar</packaging>
 
     <parent>
@@ -12,17 +12,26 @@
     </parent>
 
     <name>${project.artifactId}</name>
-    <description>CLI for engineblock.</description>
+    <description>Scripting extensions for engineblock.</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>io.engineblock</groupId>
-            <artifactId>eb-runtime</artifactId>
+            <artifactId>eb-api</artifactId>
             <version>1.0.26-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>1.0-rc2</version>
+            <!--<optional>true</optional>-->
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -38,48 +47,11 @@
             <version>1.0.0m1</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>io.engineblock</groupId>
-            <artifactId>eb-core</artifactId>
-            <version>1.0.26-SNAPSHOT</version>
-        </dependency>
 
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.18.1</version>
-                <executions>
-                    <execution>
-                        <id>run-tests</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <includes>
-                        <include>**/*Tests.java</include>
-                    </includes>
-                    <properties>
-                        <property>
-                            <name>parallel</name>
-                            <value>methods</value>
-                        </property>
-                    </properties>
-                </configuration>
-
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -96,8 +68,8 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.10.3</version>
                 <configuration>
-                    <doctitle>EngineBlock CLI</doctitle>
-                    <windowtitle>EngineBlock CLI</windowtitle>
+                    <doctitle>EngineBlock Extensions</doctitle>
+                    <windowtitle>EngineBlock Extensions</windowtitle>
                 </configuration>
                 <executions>
                     <execution>
@@ -122,11 +94,8 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.engineblock.cli.EBCLI</mainClass>
-                                </transformer>
-
                             </transformers>
+                            <createSourcesJar>true</createSourcesJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
                     </execution>

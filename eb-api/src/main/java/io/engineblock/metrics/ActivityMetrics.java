@@ -15,18 +15,21 @@
  * /
  */
 
-package io.engineblock.activityapi;
+package io.engineblock.metrics;
 
 import com.codahale.metrics.*;
-import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.MetricRegistryService;
 import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramReservoir;
 import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramResetOnSnapshotReservoir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.concurrent.TimeUnit;
 
 public class ActivityMetrics {
 
@@ -88,7 +91,7 @@ public class ActivityMetrics {
      * @return the timer, perhaps a different one if it has already been registered
      */
     public static Timer resettingTimer(Activity activity, String name) {
-        return (Timer) register(activity, name, () -> new Timer(new HdrHistogramResetOnSnapshotReservoir()));
+        return (Timer) register(activity, name, () -> new NicerTimer(new HdrHistogramResetOnSnapshotReservoir()));
     }
 
     /**
@@ -101,7 +104,7 @@ public class ActivityMetrics {
      * @return the histogram, perhaps a different one if it has already been registered
      */
     public static Histogram histogram(Activity activity, String name) {
-        return (Histogram) register(activity, name, () -> new Histogram(new HdrHistogramReservoir()));
+        return (Histogram) register(activity, name, () -> new NicerHistogram(new HdrHistogramReservoir()));
     }
 
     /**
@@ -117,7 +120,7 @@ public class ActivityMetrics {
      */
 
     public static Histogram resettingHistogram(Activity activity, String name) {
-        return (Histogram) register(activity, name, () -> new Histogram(new HdrHistogramResetOnSnapshotReservoir()));
+        return (Histogram) register(activity, name, () -> new NicerHistogram(new HdrHistogramResetOnSnapshotReservoir()));
     }
 
     /**
@@ -180,4 +183,18 @@ public class ActivityMetrics {
     private static interface MetricProvider {
         Metric getMetric();
     }
+
+    public static void reportTo(PrintStream out) {
+        out.println("====================  BEGIN-METRIC-LOG  ====================");
+        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(ActivityMetrics.getMetricRegistry())
+                .convertDurationsTo(TimeUnit.MICROSECONDS)
+                .convertRatesTo(TimeUnit.SECONDS)
+                .filter(MetricFilter.ALL)
+                .outputTo(out)
+                .build();
+        consoleReporter.report();
+        out.println("====================   END-METRIC-LOG   ====================");
+
+    }
+
 }

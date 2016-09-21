@@ -25,16 +25,17 @@ public class DiagAction implements Action, ActivityDefObserver {
 
     private final static Logger logger = LoggerFactory.getLogger(DiagAction.class);
     private final ActivityDef activityDef;
+    private final DiagActivity diagActivity;
 
     private int slot;
     private long lastUpdate;
     private long quantizedInterval;
     private long reportModulo;
 
-
-    public DiagAction(int slot, ActivityDef activityDef) {
+    public DiagAction(int slot, ActivityDef activityDef, DiagActivity diagActivity) {
         this.activityDef = activityDef;
         this.slot = slot;
+        this.diagActivity = diagActivity;
 
         updateReportTime();
     }
@@ -43,8 +44,10 @@ public class DiagAction implements Action, ActivityDefObserver {
     public void accept(long value) {
         long now = System.currentTimeMillis();
         if ((now - lastUpdate) > quantizedInterval) {
-            logger.info("diag action interval, input=" + value + ", report delay=" + ((now - lastUpdate) - quantizedInterval));
+            long delay = ((now - lastUpdate) - quantizedInterval);
+            logger.info("diag action interval, input=" + value + ", report delay=" + delay);
             lastUpdate += quantizedInterval;
+            diagActivity.delayHistogram.update(delay);
         }
         if ((value % reportModulo) == 0) {
             logger.info("diag action   modulo, input=" + value);

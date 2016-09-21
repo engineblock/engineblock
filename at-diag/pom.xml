@@ -3,12 +3,11 @@
 
     <artifactId>at-diag</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.23-SNAPSHOT</version>
 
     <parent>
         <artifactId>project-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>1.0.23-SNAPSHOT</version>
+        <version>1.0.26-SNAPSHOT</version>
         <relativePath>../project-defaults</relativePath>
     </parent>
 
@@ -21,7 +20,7 @@
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-api</artifactId>
-            <version>1.0.23-SNAPSHOT</version>
+            <version>1.0.26-SNAPSHOT</version>
         </dependency>
 
         <dependency>

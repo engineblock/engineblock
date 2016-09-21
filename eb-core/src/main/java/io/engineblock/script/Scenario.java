@@ -15,15 +15,15 @@
 package io.engineblock.script;
 
 import ch.qos.logback.classic.Logger;
-import io.engineblock.activityapi.ActivityMetrics;
+import com.codahale.metrics.MetricRegistry;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
+import io.engineblock.extensions.SandboxPluginData;
+import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
 import org.slf4j.LoggerFactory;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import javax.script.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -40,11 +40,8 @@ public class Scenario implements Callable<Result> {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger(Scenario.class);
     private static final ScriptEngineManager engineManager = new ScriptEngineManager();
-
-    private ScriptEngine nashorn;
-
     private final List<String> scripts = new ArrayList<>();
-
+    private ScriptEngine scriptEngine;
     private ScenarioController scenarioController;
     private ScriptEnv scriptEnv;
     private String name;
@@ -79,18 +76,47 @@ public class Scenario implements Callable<Result> {
     }
 
     private void init() {
-        nashorn = engineManager.getEngineByName("nashorn");
+        scriptEngine = engineManager.getEngineByName("nashorn");
 
         scriptEnv = new ScriptEnv(scenarioController);
-        nashorn.setContext(scriptEnv);
+        scriptEngine.setContext(scriptEnv);
 
         scenarioController = new ScenarioController();
 
-        nashorn.put("scenario", scenarioController);
+        scriptEngine.put("scenario", scenarioController);
 
-        nashorn.put("activities", new ScenarioBindings(scenarioController));
+        scriptEngine.put("activities", new ScenarioBindings(scenarioController));
 
-        nashorn.put("metrics", new MetricRegistryBindings(ActivityMetrics.getMetricRegistry()));
+        scriptEngine.put("metrics", new MetricRegistryBindings(ActivityMetrics.getMetricRegistry()));
+
+        for (SandboxPluginData extensionDescriptor : SandboxExtensionFinder.findAll()) {
+            org.slf4j.Logger extensionLogger =
+                    LoggerFactory.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
+            MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
+            Object extensionObject = extensionDescriptor.getExtensionObject(
+                    extensionLogger,
+                    metricRegistry,
+                    scriptEnv
+            );
+            logger.info("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
+                    " class=" + extensionObject.getClass().getSimpleName());
+            scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
+        }
+
+        for (SandboxPluginData extensionDescriptor : SandboxExtensionFinder.findAll()) {
+            if (!extensionDescriptor.isAutoLoading()) {
+                logger.info("Not loading " + extensionDescriptor + ", autoloading is false");
+                continue;
+            }
+
+            org.slf4j.Logger extensionLogger =
+                    LoggerFactory.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
+            MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
+            Object extensionObject = extensionDescriptor.getExtensionObject(extensionLogger, metricRegistry, scriptEnv);
+            logger.info("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
+                    " class=" + extensionObject.getClass().getSimpleName());
+            scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
+        }
 
     }
 
@@ -99,17 +125,25 @@ public class Scenario implements Callable<Result> {
         logger.info("Running control script for " + getName() + ".");
         for (String script : scripts) {
             try {
-                Object result = nashorn.eval(script);
+                Object result = null;
+                if (scriptEngine instanceof Compilable) {
+                    logger.info("Using direct script compilation");
+                    Compilable compilableEngine = (Compilable) scriptEngine;
+                    CompiledScript compiled = compilableEngine.compile(script);
+                    result = compiled.eval();
+                } else {
+                    result = scriptEngine.eval(script);
+                }
             } catch (ScriptException e) {
                 String errorDesc = "Script error while running scenario:" + e.getMessage();
                 e.printStackTrace();
-                logger.error(errorDesc,e);
+                logger.error(errorDesc, e);
                 scenarioController.forceStopScenario(5000);
                 throw new RuntimeException("Script error while running scenario:" + e.getMessage(), e);
             } catch (Exception o) {
                 String errorDesc = "Non-Script error while running scenario:" + o.getMessage();
                 o.printStackTrace();
-                logger.error(errorDesc,o);
+                logger.error(errorDesc, o);
                 scenarioController.forceStopScenario(5000);
                 throw new RuntimeException("Non-Script error while running scenario:" + o.getMessage(), o);
             }

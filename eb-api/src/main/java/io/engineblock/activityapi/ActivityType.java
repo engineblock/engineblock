@@ -41,10 +41,32 @@ public interface ActivityType {
      * Create an instance of an activity from the activity type.
      *
      * @param activityDef the definition that initializes and controls the activity.
-     * @return a distinct Activity instance fr each call
+     * @return a distinct Activity instance for each call
      */
     default Activity getActivity(ActivityDef activityDef) {
-        return new SimpleActivity(activityDef);
+        SimpleActivity activity = new SimpleActivity(activityDef);
+        return activity;
+    }
+
+    /**
+     * Create an instance of an activity that ties together all the components into a usable
+     * activity instance. This is the method that should be called by executor classes.
+     * @param activityDef the definition that initializez and controlls the activity.
+     * @return a distinct activity instance for each call
+     */
+    default Activity getAssembledActivity(ActivityDef activityDef) {
+        Activity activity = getActivity(activityDef);
+
+        InputDispenser inputDispenser = getInputDispenser(activity);
+        activity.setInputDispenser(inputDispenser);
+
+        ActionDispenser actionDispenser = getActionDispenser(activity);
+        activity.setActionDispenser(actionDispenser);
+
+        MotorDispenser motorDispenser = getMotorDispenser(activity,inputDispenser, actionDispenser);
+        activity.setMotorDispenser(motorDispenser);
+
+        return activity;
     }
 
     /**
