@@ -1,0 +1,24 @@
+Usage:
+  PROG activitytypes
+  PROG help <activitytype>
+  PROG advanced-help
+  PROG metrics <activitytype> [ <activityname> ]
+  PROG <cmdSpec> ...
+
+<cmdSpec> can be any of:
+  script <script> [arg=value]...          Execute a scenario script, with named script arguments
+  activity <activity> [arg=value]...      Execute a single activity script, with named arguments
+
+  report-graphite-to <addr>[:<port>]      Specify the graphite destination and enable reporting
+  metrics-prefix <metrics-prefix>         Specify the metrics name prefix for graphite reporting
+  log-to <logfile>
+
+Options:
+  -h                               Show help.
+  -v | --verbose                   Show version, short form.
+  -V | --version                   Show version, long form, with artifact coordinates.
+  -l <logfile>, --log <logfile>    Set the script logfile  [default: console]
+
+
+
+

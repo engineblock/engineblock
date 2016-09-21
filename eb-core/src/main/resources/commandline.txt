@@ -1,16 +1,34 @@
-Usage:
-  PROG <cmdSpec> ... [ -h | -v | -vv ]
+Basic Usage:
+
+  PROG advanced-help
+      Provide advanced help that explains more than this screen.
   PROG activitytypes
+      List the available activity types
   PROG help <activitytype>
+      Provide specific help for the named activity type
   PROG metrics <activitytype> [ <activityname> ]
-  PROG ( script <script> [arg=value]... ) ...
-  PROG ( activity <activity> [arg=value]... ) ...
+      Provide the metrics that are available for scripting
+  PROG script <scriptfile> [arg=value]...
+      Execute the named scenario script, with zero or more named arguments
+  PROG (activity <activity> [arg=value]...) ...
+      Execute the named activities, each with zero or more named arguments
+
+General options:
+
+  --report-graphite-to <addr>[:<port>]
+      Specify the graphite destination and enable reporting
+  --metrics-prefix <metrics-prefix>
+      Specify the metrics name prefix for graphite reporting
+  --session-name <name>
+      Name the current session, for logfile naming, etc
+      By default, this will be "scenario-TIMESTAMP", and a logfile will be created
+      for this name.
 
 Options:
   -h                               Show help.
-  -v                               Show version, short form.
-  -vv                              Show version, long form, with artifact coordinates.
-  -l <logfile>, --log <logfile>    Set the script logfile  [default: console]
+  -v | --verbose                   Report internal session log to console at info level
+  -vv | --veryverbose              Report internal session log to console, at trace level
+  -V | --version                   Show version, long form, with artifact coordinates.
 
 
 

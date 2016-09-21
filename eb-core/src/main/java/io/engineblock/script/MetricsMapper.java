@@ -34,13 +34,13 @@ import java.util.stream.Collectors;
  */
 public class MetricsMapper {
 
-    public static String metricsDetail(String activityTypeName) {
+    public static String metricsDetail(String activityTypeName, String exampleActivityName) {
         StringBuilder metricsDetail = new StringBuilder();
         Optional<ActivityType> activityType = ActivityTypeFinder.instance().get(activityTypeName);
         if (!activityType.isPresent()) {
             throw new RuntimeException("Activity type '" + activityTypeName + "' does not exist in this runtime.");
         }
-        ActivityDef activityDef = ActivityDef.parseActivityDef("type=" + activityTypeName + ";alias=someactivity;");
+        ActivityDef activityDef = ActivityDef.parseActivityDef("type=" + activityTypeName + ";alias="+exampleActivityName+";");
         Activity activity = activityType.get().getAssembledActivity(activityDef);
         MetricRegistryBindings metricRegistryBindings = new MetricRegistryBindings(ActivityMetrics.getMetricRegistry());
         activity.initActivity();

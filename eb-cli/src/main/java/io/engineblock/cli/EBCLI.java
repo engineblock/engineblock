@@ -49,8 +49,11 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsMetricsForActivity()!=null) {
-            String metricsHelp = getMetricsHelpFor(options.wantsMetricsForActivity());
+        if (options.wantsMetricsForActivity() != null) {
+            String metricsHelp = getMetricsHelpFor(
+                    options.wantsMetricsForActivity(),
+                    options.wantsMetricsForActivityNamed()
+            );
             System.out.println("Available metric names for activity type " + options.wantsMetricsForActivity() + ":");
             System.out.println(metricsHelp);
             System.exit(0);
@@ -65,14 +68,20 @@ public class EBCLI {
             ConsoleLogging.enableConsoleLogging();
         }
 
-        if (options.getCommands().size()==0) {
+        if (options.getCommands().size() == 0) {
             System.out.println(getBasicHelp());
             System.exit(0);
         }
 
-        long sessionStart = System.currentTimeMillis();
-        ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionStart, 1);
-        Scenario scenario = new Scenario("scenario-" + sessionStart);
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String sessionName = "scenario-" + timestamp;
+        if (!options.getSessionName().isEmpty()) {
+            sessionName = options.getSessionName();
+        }
+
+        ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
+
+        Scenario scenario = new Scenario(sessionName);
         String script = EBCLIScriptAssembly.assembleScript(options);
         scenario.addScriptText(script);
         executor.execute(scenario);
@@ -98,8 +107,9 @@ public class EBCLI {
         return basicHelp;
 
     }
-    private String getMetricsHelpFor(String activityType) {
-        String metrics = MetricsMapper.metricsDetail(activityType);
+
+    private String getMetricsHelpFor(String activityType, String exampleActivityName) {
+        String metrics = MetricsMapper.metricsDetail(activityType, exampleActivityName);
         return metrics;
-   }
+    }
 }

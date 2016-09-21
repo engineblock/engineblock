@@ -16,19 +16,22 @@ public class EBCLIOptions {
     public static final String docoptFileName = "commandline.txt";
     private final static Logger logger = LoggerFactory.getLogger(EBCLIOptions.class);
     private static final String ACTIVITY = "activity";
-    private static final String VERSION = "version";
+    private static final String WANTS_VERSION = "-V";
     private static final String SCRIPT = "script";
     private static final String METRICS = "metrics";
     private static final String ACTIVITY_TYPES = "activitytypes";
     private static final String HELP = "help";
-    private static final String METRICS_PREFIX = "metrics-prefix";
-    private static final String REPORT_GRAPHITE_TO = "report-graphite-to";
-    private static final String WANTS_VERBOSE_LOGGING = "-v";
+    private static final String ADVANCED_HELP="advanced-help";
+    private static final String METRICS_PREFIX = "--metrics-prefix";
+    private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
+    private static final String WANTS_VERSION_LONG = "--version";
     private static final String WANTS_VERBOSE_LOGGING_LONG = "--verbose";
+    private static final String WANTS_VERBOSE_LOGGING = "-v";
+    private static final String SESSION_NAME = "session-name";
     private static final Set<String> reserved_words = new HashSet<String>() {{
         addAll(
                 Arrays.asList(
-                        ACTIVITY, VERSION, SCRIPT, ACTIVITY_TYPES, HELP, METRICS_PREFIX, REPORT_GRAPHITE_TO
+                        ACTIVITY, SCRIPT, ACTIVITY_TYPES, HELP, METRICS_PREFIX, REPORT_GRAPHITE_TO
                 )
         );
     }};
@@ -43,6 +46,9 @@ public class EBCLIOptions {
     private String metricsPrefix = "engineblock.";
     private boolean wantsConsoleLogging = false;
     private String wantsMetricsForActivity;
+    private String wantsMetricsForActivityExampleName;
+    private boolean wantsAdvancedHelp=false;
+    private String sessionName;
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -70,17 +76,13 @@ public class EBCLIOptions {
                     cmdList.add(new Cmd(CmdType.activity, activitydef.stream().map(s -> s + ";").collect(Collectors.joining())));
                     break;
                 case SCRIPT:
-                    if (arglist.size() < 1) {
-                        throw new InvalidParameterException("missing script name after script command");
-                    }
-                    if (reserved_words.contains(arglist.peekFirst())) {
+                    String scriptName = readWordOrThrow(arglist,word,"script name");
+                    if (reserved_words.contains(scriptName)) {
                         throw new InvalidParameterException("script name may not be a reserved word, like '" + arglist.peekFirst() + "'");
                     }
-                    if (arglist.peekFirst().contains("=")) {
+                    if (scriptName.contains("=")) {
                         throw new InvalidParameterException("script name must precede script arguments such as '" + arglist.peekFirst() + "'");
                     }
-
-                    String scriptName = arglist.removeFirst();
                     Map<String, String> scriptParams = new LinkedHashMap<>();
                     while (arglist.size() > 0 && !reserved_words.contains(arglist.peekFirst())
                             && arglist.peekFirst().contains("=")) {
@@ -89,8 +91,15 @@ public class EBCLIOptions {
                     }
                     cmdList.add(new Cmd(CmdType.valueOf(word), scriptName, scriptParams));
                     break;
-                case VERSION:
+                case SESSION_NAME:
+                    sessionName= readWordOrThrow(arglist,word, "a session name");
+                    break;
+                case WANTS_VERSION:
+                case WANTS_VERSION_LONG:
                     wantsVersion = true;
+                    break;
+                case ADVANCED_HELP:
+                    wantsAdvancedHelp=true;
                     break;
                 case HELP:
                 case "-h":
@@ -104,10 +113,13 @@ public class EBCLIOptions {
                     }
                     break;
                 case METRICS:
+                    wantsMetricsForActivity = readWordOrThrow(arglist,word,"activity type");
+                    wantsMetricsForActivityExampleName = readOptionally(arglist);
                     if (arglist.peekFirst() == null) {
                         throw new InvalidParameterException("activity type must follow metrics command");
                     }
                     wantsMetricsForActivity = arglist.removeFirst();
+                    wantsMetricsForActivityExampleName = arglist.peekFirst();
                     break;
                 case REPORT_GRAPHITE_TO:
                     reportGraphiteTo = arglist.removeFirst();
@@ -153,6 +165,10 @@ public class EBCLIOptions {
         return wantsBasicHelp;
     }
 
+    public boolean wantsAdvancedHelp() {
+        return wantsAdvancedHelp;
+    }
+
     public String wantsReportGraphiteTo() {
         return reportGraphiteTo;
     }
@@ -166,6 +182,14 @@ public class EBCLIOptions {
     }
 
     public String wantsMetricsForActivity() { return wantsMetricsForActivity; }
+
+    public String wantsMetricsForActivityNamed() {
+        return wantsMetricsForActivityExampleName;
+    }
+
+    public String getSessionName() {
+        return sessionName;
+    }
 
     public static enum CmdType {
         activity,
@@ -204,5 +228,18 @@ public class EBCLIOptions {
                     + ((cmdArgs != null) ? "cmdArgs" + cmdArgs.toString() : "");
         }
     }
+
+    private String readOptionally(LinkedList<String> argList) {
+        return argList.pollFirst();
+    }
+
+    private String readWordOrThrow(LinkedList<String> arglist, String word, String required) {
+        if (arglist.peekFirst()==null) {
+            throw new InvalidParameterException(required + " must follow '" + word + "'");
+        }
+        return arglist.removeFirst();
+    }
+
+
 
 }

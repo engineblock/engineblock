@@ -20,7 +20,7 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldParseLongActivityForm() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"activity", "param1=param2", "param3=param4", "report-graphite-to", "woot"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"activity", "param1=param2", "param3=param4", "--report-graphite-to", "woot"});
         assertThat(opts.getCommands().size()).isEqualTo(1);
         assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("param1=param2;param3=param4;");
         assertThat(opts.wantsReportGraphiteTo()).isEqualTo("woot");
@@ -28,7 +28,7 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldRecognizeVersion() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"version"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"--version"});
         assertThat(opts.wantsVersion()).isTrue();
     }
 
@@ -47,7 +47,7 @@ public class TestEBCLIOptions {
     public void shouldRecognizeWantsActivityTypes() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"activitytypes"});
         assertThat(opts.wantsActivityTypes()).isTrue();
-        opts = new EBCLIOptions(new String[]{"version"});
+        opts = new EBCLIOptions(new String[]{"--version"});
         assertThat(opts.wantsActivityTypes()).isFalse();
     }
 
@@ -55,7 +55,7 @@ public class TestEBCLIOptions {
     public void shouldRecognizeWantsBasicHelp() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"help"});
         assertThat(opts.wantsBasicHelp()).isTrue();
-        opts = new EBCLIOptions(new String[]{"version"});
+        opts = new EBCLIOptions(new String[]{"--version"});
         assertThat(opts.wantsActivityHelp()).isFalse();
     }
 
@@ -64,7 +64,7 @@ public class TestEBCLIOptions {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"help", "foo"});
         assertThat(opts.wantsActivityHelp()).isTrue();
         assertThat(opts.wantsActivityHelpFor()).isEqualTo("foo");
-        opts = new EBCLIOptions(new String[]{"version"});
+        opts = new EBCLIOptions(new String[]{"--version"});
         assertThat(opts.wantsActivityHelp()).isFalse();
     }
 
@@ -90,7 +90,7 @@ public class TestEBCLIOptions {
     }
 
     @Test(expectedExceptions = {InvalidParameterException.class},
-    expectedExceptionsMessageRegExp = ".*missing script name.*")
+    expectedExceptionsMessageRegExp = ".*script name must follow.*")
     public void testShouldErrorForMissingScriptName() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"script"});
     }
