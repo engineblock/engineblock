@@ -13,21 +13,27 @@ import java.util.stream.Collectors;
  */
 public class EBCLIOptions {
 
-    public static final String docoptFileName = "commandline.txt";
     private final static Logger logger = LoggerFactory.getLogger(EBCLIOptions.class);
-    private static final String ACTIVITY = "activity";
-    private static final String WANTS_VERSION = "-V";
-    private static final String SCRIPT = "script";
-    private static final String METRICS = "metrics";
-    private static final String ACTIVITY_TYPES = "activitytypes";
-    private static final String HELP = "help";
-    private static final String ADVANCED_HELP="advanced-help";
-    private static final String METRICS_PREFIX = "--metrics-prefix";
-    private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
+    public static final String docoptFileName = "commandline.txt";
+
+    // Discovery
+    private static final String HELP = "--help";
+    private static final String ADVANCED_HELP="--advanced-help";
+    private static final String METRICS = "--list-metrics";
+    private static final String ACTIVITY_TYPES = "--list-activity-types";
     private static final String WANTS_VERSION_LONG = "--version";
+
+    // Execution
+    private static final String ACTIVITY = "activity";
+
+    // Execution Options
+    private static final String SCRIPT = "script";
+    private static final String SESSION_NAME = "--session-name";
     private static final String WANTS_VERBOSE_LOGGING_LONG = "--verbose";
     private static final String WANTS_VERBOSE_LOGGING = "-v";
-    private static final String SESSION_NAME = "session-name";
+    private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
+    private static final String METRICS_PREFIX = "--metrics-prefix";
+
     private static final Set<String> reserved_words = new HashSet<String>() {{
         addAll(
                 Arrays.asList(
@@ -48,7 +54,7 @@ public class EBCLIOptions {
     private String wantsMetricsForActivity;
     private String wantsMetricsForActivityExampleName;
     private boolean wantsAdvancedHelp=false;
-    private String sessionName;
+    private String sessionName="";
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -94,7 +100,6 @@ public class EBCLIOptions {
                 case SESSION_NAME:
                     sessionName= readWordOrThrow(arglist,word, "a session name");
                     break;
-                case WANTS_VERSION:
                 case WANTS_VERSION_LONG:
                     wantsVersion = true;
                     break;
@@ -103,7 +108,6 @@ public class EBCLIOptions {
                     break;
                 case HELP:
                 case "-h":
-                case "--help":
                     if (arglist.peekFirst() == null) {
                         wantsBasicHelp = true;
                         logger.info("getting basic help");

@@ -45,7 +45,11 @@ public class EBCLI {
         }
 
         if (options.wantsBasicHelp()) {
-            System.out.println(getBasicHelp());
+            System.out.println(loadHelpFile("commandline.txt"));
+            System.exit(0);
+        }
+        if (options.wantsAdvancedHelp()) {
+            System.out.println(loadHelpFile("advancedhelp.txt"));
             System.exit(0);
         }
 
@@ -69,7 +73,7 @@ public class EBCLI {
         }
 
         if (options.getCommands().size() == 0) {
-            System.out.println(getBasicHelp());
+            System.out.println(loadHelpFile("commandline.txt"));
             System.exit(0);
         }
 
@@ -90,18 +94,17 @@ public class EBCLI {
         scenariosResults.reportToLog();
     }
 
-    private String getBasicHelp() {
-        String docoptFileName = "commandline.txt";
+    private String loadHelpFile(String filename) {
         ClassLoader cl = getClass().getClassLoader();
-        InputStream resourceAsStream = cl.getResourceAsStream(docoptFileName);
+        InputStream resourceAsStream = cl.getResourceAsStream(filename);
         if (resourceAsStream == null) {
-            throw new RuntimeException("Unable to find " + docoptFileName + " in classpath.");
+            throw new RuntimeException("Unable to find " + filename + " in classpath.");
         }
         String basicHelp;
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(resourceAsStream))) {
             basicHelp = buffer.lines().collect(Collectors.joining("\n"));
         } catch (Throwable t) {
-            throw new RuntimeException("Unable to buffer " + docoptFileName + ": " + t);
+            throw new RuntimeException("Unable to buffer " + filename + ": " + t);
         }
         basicHelp = basicHelp.replaceAll("PROG", commandName);
         return basicHelp;

@@ -45,7 +45,7 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldRecognizeWantsActivityTypes() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"activitytypes"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"--list-activity-types"});
         assertThat(opts.wantsActivityTypes()).isTrue();
         opts = new EBCLIOptions(new String[]{"--version"});
         assertThat(opts.wantsActivityTypes()).isFalse();
@@ -53,7 +53,7 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldRecognizeWantsBasicHelp() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"help"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"--help"});
         assertThat(opts.wantsBasicHelp()).isTrue();
         opts = new EBCLIOptions(new String[]{"--version"});
         assertThat(opts.wantsActivityHelp()).isFalse();
@@ -61,7 +61,7 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldRecognizeWantsActivityHelp() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"help", "foo"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"--help", "foo"});
         assertThat(opts.wantsActivityHelp()).isTrue();
         assertThat(opts.wantsActivityHelpFor()).isEqualTo("foo");
         opts = new EBCLIOptions(new String[]{"--version"});
