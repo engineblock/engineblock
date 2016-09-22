@@ -54,10 +54,7 @@ public class EBCLI {
         }
 
         if (options.wantsMetricsForActivity() != null) {
-            String metricsHelp = getMetricsHelpFor(
-                    options.wantsMetricsForActivity(),
-                    options.wantsMetricsForActivityNamed()
-            );
+            String metricsHelp = getMetricsHelpFor(options.wantsMetricsForActivity());
             System.out.println("Available metric names for activity type " + options.wantsMetricsForActivity() + ":");
             System.out.println(metricsHelp);
             System.exit(0);
@@ -111,8 +108,8 @@ public class EBCLI {
 
     }
 
-    private String getMetricsHelpFor(String activityType, String exampleActivityName) {
-        String metrics = MetricsMapper.metricsDetail(activityType, exampleActivityName);
+    private String getMetricsHelpFor(String activityType) {
+        String metrics = MetricsMapper.metricsDetail(activityType);
         return metrics;
     }
 }

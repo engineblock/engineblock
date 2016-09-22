@@ -23,7 +23,7 @@ public class MetricsMapperTest {
 
     @Test
     public void testDiagMetrics() {
-        String diagMetrics = MetricsMapper.metricsDetail("diag", "foo");
+        String diagMetrics = MetricsMapper.metricsDetail("type=diag;alias=foo");
         assertThat(diagMetrics).contains("metrics.foo.delay.snapshot.p98ms");
     }
 

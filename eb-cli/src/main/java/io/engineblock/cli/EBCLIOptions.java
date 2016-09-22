@@ -52,7 +52,6 @@ public class EBCLIOptions {
     private String metricsPrefix = "engineblock.";
     private boolean wantsConsoleLogging = false;
     private String wantsMetricsForActivity;
-    private String wantsMetricsForActivityExampleName;
     private boolean wantsAdvancedHelp=false;
     private String sessionName="";
 
@@ -118,7 +117,6 @@ public class EBCLIOptions {
                     break;
                 case METRICS:
                     wantsMetricsForActivity = readWordOrThrow(arglist,word,"activity type");
-                    wantsMetricsForActivityExampleName = readOptionally(arglist);
                     break;
                 case REPORT_GRAPHITE_TO:
                     reportGraphiteTo = arglist.removeFirst();
@@ -181,10 +179,6 @@ public class EBCLIOptions {
     }
 
     public String wantsMetricsForActivity() { return wantsMetricsForActivity; }
-
-    public String wantsMetricsForActivityNamed() {
-        return wantsMetricsForActivityExampleName;
-    }
 
     public String getSessionName() {
         return sessionName;
