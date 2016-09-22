@@ -119,11 +119,6 @@ public class EBCLIOptions {
                 case METRICS:
                     wantsMetricsForActivity = readWordOrThrow(arglist,word,"activity type");
                     wantsMetricsForActivityExampleName = readOptionally(arglist);
-                    if (arglist.peekFirst() == null) {
-                        throw new InvalidParameterException("activity type must follow metrics command");
-                    }
-                    wantsMetricsForActivity = arglist.removeFirst();
-                    wantsMetricsForActivityExampleName = arglist.peekFirst();
                     break;
                 case REPORT_GRAPHITE_TO:
                     reportGraphiteTo = arglist.removeFirst();
