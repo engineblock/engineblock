@@ -21,6 +21,8 @@ import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.core.ActivityTypeFinder;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -33,10 +35,13 @@ import java.util.stream.Collectors;
  * Find the metrics associated with an activity type by instantiating the activity in idle mode.
  */
 public class MetricsMapper {
+    private final static Logger logger = LoggerFactory.getLogger(MetricsMapper.class);
 
     public static String metricsDetail(String activitySpec) {
+
         StringBuilder metricsDetail = new StringBuilder();
         ActivityDef activityDef = ActivityDef.parseActivityDef(activitySpec);
+        logger.info("introspecting metric names for " +  activitySpec);
 
         Optional<ActivityType> activityType = ActivityTypeFinder.instance().get(activityDef.getActivityType());
 
