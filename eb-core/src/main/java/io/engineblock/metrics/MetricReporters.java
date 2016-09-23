@@ -71,7 +71,7 @@ public class MetricReporters implements IShutdown {
             GraphiteReporter graphiteReporter = GraphiteReporter.forRegistry(prefixedRegistry.metricRegistry)
                     .prefixedWith(prefixedRegistry.prefix != null ? (!prefixedRegistry.prefix.isEmpty() ? prefix + "." + prefixedRegistry.prefix : prefix) : prefix)
                     .convertRatesTo(TimeUnit.SECONDS)
-                    .convertDurationsTo(TimeUnit.MICROSECONDS)
+                    .convertDurationsTo(TimeUnit.NANOSECONDS)
                     .filter(ActivityMetrics.METRIC_FILTER)
                     .build(graphite);
 
