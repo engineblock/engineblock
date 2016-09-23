@@ -45,12 +45,12 @@ public class EBCLI {
         }
 
         if (options.wantsBasicHelp()) {
-            System.out.println(loadHelpFile("commandline.txt"));
+            System.out.println(loadHelpFile("commandline.md"));
             System.exit(0);
         }
 
         if (options.wantsAdvancedHelp()) {
-            System.out.println(loadHelpFile("advancedhelp.txt"));
+            System.out.println(loadHelpFile("advancedhelp.md"));
             System.exit(0);
         }
 
@@ -71,7 +71,7 @@ public class EBCLI {
         }
 
         if (options.getCommands().size() == 0) {
-            System.out.println(loadHelpFile("commandline.txt"));
+            System.out.println(loadHelpFile("commandline.md"));
             System.exit(0);
         }
 
