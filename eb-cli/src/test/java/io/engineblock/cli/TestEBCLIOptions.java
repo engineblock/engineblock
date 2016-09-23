@@ -3,6 +3,7 @@ package io.engineblock.cli;
 import org.testng.annotations.Test;
 
 import java.security.InvalidParameterException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,7 +12,7 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldRecognizeActivities() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"activity", "foo=wan", "activity", "bar=lan"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"start", "foo=wan", "start", "bar=lan"});
         assertThat(opts.getCommands()).isNotNull();
         assertThat(opts.getCommands().size()).isEqualTo(2);
         assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("foo=wan;");
@@ -20,7 +21,7 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldParseLongActivityForm() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"activity", "param1=param2", "param3=param4", "--report-graphite-to", "woot"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"start", "param1=param2", "param3=param4", "--report-graphite-to", "woot"});
         assertThat(opts.getCommands().size()).isEqualTo(1);
         assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("param1=param2;param3=param4;");
         assertThat(opts.wantsReportGraphiteTo()).isEqualTo("woot");
@@ -45,7 +46,7 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldRecognizeWantsActivityTypes() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"--list-activity-types"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"--list-start-types"});
         assertThat(opts.wantsActivityTypes()).isTrue();
         opts = new EBCLIOptions(new String[]{"--version"});
         assertThat(opts.wantsActivityTypes()).isFalse();
@@ -108,6 +109,72 @@ public class TestEBCLIOptions {
         EBCLIOptions opts = new EBCLIOptions(new String[]{ "acommand" });
         String s = EBCLIScriptAssembly.assembleScript(opts);
         assertThat(s).contains("acommand script text");
+    }
+
+    @Test
+    public void shouldRecognizeStartActivityCmd() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{ "start", "type=woot" });
+        List<EBCLIOptions.Cmd> cmds = opts.getCommands();
+        assertThat(cmds).hasSize(1);
+        assertThat(cmds.get(0).cmdType).isEqualTo(EBCLIOptions.CmdType.start);
+
+    }
+
+    @Test
+    public void shouldRecognizeRunActivityCmd() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{ "run", "type=runwoot" });
+        List<EBCLIOptions.Cmd> cmds = opts.getCommands();
+        assertThat(cmds).hasSize(1);
+        assertThat(cmds.get(0).cmdType).isEqualTo(EBCLIOptions.CmdType.run);
+
+    }
+
+    @Test
+    public void shouldRecognizeStopActivityCmd() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{ "stop", "woah" });
+        List<EBCLIOptions.Cmd> cmds = opts.getCommands();
+        assertThat(cmds).hasSize(1);
+        assertThat(cmds.get(0).cmdType).isEqualTo(EBCLIOptions.CmdType.stop);
+        assertThat(cmds.get(0).cmdSpec).isEqualTo("woah");
+
+    }
+
+    @Test(expectedExceptions = InvalidParameterException.class)
+    public void shouldThrowErrorForInvalidStopActivity() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{ "stop", "woah=woah" });
+        List<EBCLIOptions.Cmd> cmds = opts.getCommands();
+    }
+
+    @Test
+    public void shouldRecognizeAwaitActivityCmd() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{ "await", "awaitme" });
+        List<EBCLIOptions.Cmd> cmds = opts.getCommands();
+        assertThat(cmds.get(0).cmdType).isEqualTo(EBCLIOptions.CmdType.await);
+        assertThat(cmds.get(0).cmdSpec).isEqualTo("awaitme");
+
+    }
+
+    @Test(expectedExceptions = InvalidParameterException.class)
+    public void shouldThrowErrorForInvalidAwaitActivity() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{ "await", "awaitme=notvalid" });
+        List<EBCLIOptions.Cmd> cmds = opts.getCommands();
+
+    }
+
+    @Test
+    public void shouldRecognizewaitMillisCmd() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{ "waitmillis", "23234" });
+        List<EBCLIOptions.Cmd> cmds = opts.getCommands();
+        assertThat(cmds.get(0).cmdType).isEqualTo(EBCLIOptions.CmdType.waitmillis);
+        assertThat(cmds.get(0).cmdSpec).isEqualTo("23234");
+
+    }
+
+    @Test(expectedExceptions = NumberFormatException.class)
+    public void shouldThrowErrorForInvalidWaitMillisOperand() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{ "waitmillis", "noway" });
+        List<EBCLIOptions.Cmd> cmds = opts.getCommands();
+
     }
 
 }

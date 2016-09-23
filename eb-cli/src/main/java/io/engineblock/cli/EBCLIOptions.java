@@ -22,11 +22,17 @@ public class EBCLIOptions {
     private static final String HELP = "--help";
     private static final String ADVANCED_HELP = "--advanced-help";
     private static final String METRICS = "--list-metrics";
-    private static final String ACTIVITY_TYPES = "--list-activity-types";
+    private static final String ACTIVITY_TYPES = "--list-start-types";
     private static final String WANTS_VERSION_LONG = "--version";
+    private static final String SHOW_SCRIPT = "--show-script";
 
     // Execution
     private static final String ACTIVITY = "activity";
+    private static final String RUN_ACTIVITY = "run";
+    private static final String START_ACTIVITY = "start";
+    private static final String STOP_ACTIVITY = "stop";
+    private static final String AWAIT_ACTIVITY = "await";
+    private static final String WAIT_MILLIS = "waitmillis";
 
     // Execution Options
     private static final String SCRIPT = "script";
@@ -56,6 +62,7 @@ public class EBCLIOptions {
     private String wantsMetricsForActivity;
     private boolean wantsAdvancedHelp = false;
     private String sessionName = "";
+    private boolean showScript = false;
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -75,9 +82,37 @@ public class EBCLIOptions {
         while (arglist.peekFirst() != null) {
             String word = arglist.peekFirst();
             switch (word) {
+                case SHOW_SCRIPT:
+                    showScript =true;
+                    break;
                 case ACTIVITY:
+                case START_ACTIVITY:
+                case RUN_ACTIVITY:
                     Cmd activity = parseActivityCmd(arglist);
                     cmdList.add(activity);
+                    break;
+                case AWAIT_ACTIVITY:
+                    String awaitCmdType = arglist.removeFirst();
+                    String activityToAwait = readWordOrThrow(arglist,"activity alias to await");
+                    assertNotParameter(activityToAwait);
+                    assertNotReserved(activityToAwait);
+                    Cmd awaitActivityCmd = new Cmd(CmdType.valueOf(awaitCmdType),activityToAwait);
+                    cmdList.add(awaitActivityCmd);
+                    break;
+                case STOP_ACTIVITY:
+                    String stopCmdType = readWordOrThrow(arglist,"stop command");
+                    String activityToStop = readWordOrThrow(arglist,"activity alias to await");
+                    assertNotParameter(activityToStop);
+                    assertNotReserved(activityToStop);
+                    Cmd stopActivityCmd = new Cmd(CmdType.valueOf(stopCmdType),activityToStop);
+                    cmdList.add(stopActivityCmd);
+                    break;
+                case WAIT_MILLIS:
+                    String waitMillisCmdType = readWordOrThrow(arglist,"wait millis");
+                    String millisCount = readWordOrThrow(arglist, "millis count");
+                    Long.parseLong(millisCount);
+                    Cmd awaitMillisCmd = new Cmd(CmdType.valueOf(waitMillisCmdType),millisCount);
+                    cmdList.add(awaitMillisCmd);
                     break;
                 case SCRIPT:
                     Cmd cmd = parseScriptCmd(arglist);
@@ -108,7 +143,7 @@ public class EBCLIOptions {
                     break;
                 case METRICS:
                     arglist.removeFirst();
-                    wantsMetricsForActivity = readWordOrThrow(arglist, "activity type");
+                    wantsMetricsForActivity = readWordOrThrow(arglist, "start type");
                     break;
                 case REPORT_GRAPHITE_TO:
                     arglist.removeFirst();
@@ -147,6 +182,10 @@ public class EBCLIOptions {
 
     public List<Cmd> getCommands() {
         return cmdList;
+    }
+
+    public boolean wantsShowScript() {
+        return showScript;
     }
 
     public boolean wantsVersion() {
@@ -194,8 +233,11 @@ public class EBCLIOptions {
     }
 
     public static enum CmdType {
-        activity,
-        script
+        start,
+        run,
+        stop,
+        await,
+        script, waitmillis,
     }
 
     public static class Cmd {
@@ -277,7 +319,7 @@ public class EBCLIOptions {
                 && arglist.peekFirst().contains("=")) {
             activitydef.add(arglist.removeFirst());
         }
-        return new Cmd(CmdType.activity, activitydef.stream().map(s -> s + ";").collect(Collectors.joining()));
+        return new Cmd(CmdType.valueOf(cmdType), activitydef.stream().map(s -> s + ";").collect(Collectors.joining()));
     }
 
 

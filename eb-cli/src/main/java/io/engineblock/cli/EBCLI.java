@@ -56,7 +56,7 @@ public class EBCLI {
 
         if (options.wantsMetricsForActivity() != null) {
             String metricsHelp = getMetricsHelpFor(options.wantsMetricsForActivity());
-            System.out.println("Available metric names for activity type " + options.wantsMetricsForActivity() + ":");
+            System.out.println("Available metric names for start type " + options.wantsMetricsForActivity() + ":");
             System.out.println(metricsHelp);
             System.exit(0);
         }
@@ -85,6 +85,12 @@ public class EBCLI {
 
         Scenario scenario = new Scenario(sessionName);
         String script = EBCLIScriptAssembly.assembleScript(options);
+        if (options.wantsShowScript()) {
+            System.out.println("// Script");
+            System.out.print(script);
+            System.exit(0);
+        }
+
         scenario.addScriptText(script);
         executor.execute(scenario);
         ScenariosResults scenariosResults = executor.awaitAllResults();

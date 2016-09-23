@@ -16,16 +16,31 @@ public class EBCLIScriptAssembly {
         StringBuilder sb = new StringBuilder();
         for (EBCLIOptions.Cmd cmd : options.getCommands()) {
             switch (cmd.cmdType) {
-                case activity:
+                case script:
+                    String scriptData = loadScript(cmd);
+                    sb.append("// from CLI as ").append(cmd).append("\n");
+                    sb.append(scriptData);
+                    break;
+                case start: // start activity
+                case run: // run activity
                     // Sanity check that this can parse before using it
                     ActivityDef activityDef = ActivityDef.parseActivityDef(cmd.cmdSpec);
-                    sb.append("scenario.start(\"")
+                    sb.append("// from CLI as ").append(cmd).append("\n")
+                            .append("scenario.").append(cmd.cmdType.toString()).append("(\"")
                             .append(cmd.cmdSpec)
                             .append("\");\n");
                     break;
-                case script:
-                    String scriptData = loadScript(cmd);
-                    sb.append(scriptData);
+                case await: // await activity
+                    sb.append("// from CLI as ").append(cmd).append("\n");
+                    sb.append("scenario.await(\"").append(cmd.cmdSpec).append("\");\n");
+                    break;
+                case stop: // stop activity
+                    sb.append("// from CLI as ").append(cmd).append("\n");
+                    sb.append("scenario.stop(\"").append(cmd.cmdSpec).append("\");\n");
+                    break;
+                case waitmillis:
+                    sb.append("// from CLI as ").append(cmd).append("\n");
+                    sb.append("scenario.waitMillis(").append(cmd.cmdSpec).append(");\n");
                     break;
             }
         }
