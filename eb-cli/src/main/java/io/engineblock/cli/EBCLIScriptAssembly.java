@@ -32,7 +32,7 @@ public class EBCLIScriptAssembly {
                     break;
                 case await: // await activity
                     sb.append("// from CLI as ").append(cmd).append("\n");
-                    sb.append("scenario.await(\"").append(cmd.cmdSpec).append("\");\n");
+                    sb.append("scenario.awaitActivity(\"").append(cmd.cmdSpec).append("\");\n");
                     break;
                 case stop: // stop activity
                     sb.append("// from CLI as ").append(cmd).append("\n");

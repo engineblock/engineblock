@@ -83,6 +83,7 @@ public class EBCLIOptions {
             String word = arglist.peekFirst();
             switch (word) {
                 case SHOW_SCRIPT:
+                    arglist.removeFirst();
                     showScript =true;
                     break;
                 case ACTIVITY:
@@ -132,6 +133,7 @@ public class EBCLIOptions {
                     break;
                 case HELP:
                 case "-h":
+                case "help":
                     arglist.removeFirst();
                     if (arglist.peekFirst() == null) {
                         wantsBasicHelp = true;
@@ -174,8 +176,6 @@ public class EBCLIOptions {
                     } else {
                         throw new InvalidParameterException("unrecognized command:" + word);
                     }
-
-
             }
         }
     }

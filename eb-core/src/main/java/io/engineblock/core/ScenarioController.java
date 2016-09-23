@@ -41,7 +41,7 @@ public class ScenarioController {
      * @param activityDef string in alias=value1;type=value2;... format
      */
     public synchronized void start(ActivityDef activityDef) {
-        getActivityExecutor(activityDef).startActivity();
+        getActivityExecutor(activityDef,true).startActivity();
     }
 
     /**
@@ -55,22 +55,6 @@ public class ScenarioController {
         start(ad);
     }
 
-    public synchronized void run(int timeout, Map<String, String> activityDefMap) {
-        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
-        run(timeout, ad);
-    }
-
-    public synchronized void run(int timeout, ActivityDef activityDef) {
-        ActivityExecutor activityExecutor = getActivityExecutor(activityDef);
-        activityExecutor.startActivity();
-        activityExecutor.awaitCompletion(timeout);
-    }
-
-    public synchronized void run(int timeout, String activityDefString) {
-        ActivityDef activityDef = ActivityDef.parseActivityDef(activityDefString);
-        run(timeout,activityDef);
-    }
-
     /**
      * Start an activity, given the name by which it is known already in the scenario. This is useful if you have
      * stopped an activity and want to start it again.
@@ -81,12 +65,31 @@ public class ScenarioController {
         start(ActivityDef.parseActivityDef(alias));
     }
 
+    public synchronized void run(int timeout, Map<String, String> activityDefMap) {
+        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
+        run(timeout, ad);
+    }
+
+    public synchronized void run(int timeout, ActivityDef activityDef) {
+        ActivityExecutor activityExecutor = getActivityExecutor(activityDef,true);
+        activityExecutor.startActivity();
+        activityExecutor.awaitCompletion(timeout);
+    }
+
+    public synchronized void run(int timeout, String activityDefString) {
+        ActivityDef activityDef = ActivityDef.parseActivityDef(activityDefString);
+        run(timeout,activityDef);
+    }
+
+
     public boolean isRunningActivity(String alias) {
-        return isRunningActivity(ActivityDef.parseActivityDef(alias));
+        return isRunningActivity(aliasToDef(alias));
     }
 
     public boolean isRunningActivity(ActivityDef activityDef) {
-        return getActivityExecutor(activityDef).isRunning();
+
+        ActivityExecutor activityExecutor = getActivityExecutor(activityDef, false);
+        return activityExecutor != null && activityExecutor.isRunning();
     }
 
     public boolean isRunningActivity(Map<String, String> activityDefMap) {
@@ -102,7 +105,11 @@ public class ScenarioController {
      * @param activityDef An activity def, including at least the alias parameter.
      */
     public synchronized void stop(ActivityDef activityDef) {
-        getActivityExecutor(activityDef).stopActivity();
+        ActivityExecutor activityExecutor = getActivityExecutor(activityDef, false);
+        if (activityExecutor==null) {
+            throw new RuntimeException("could not stop missing activity:" + activityDef);
+        }
+        activityExecutor.stopActivity();
     }
 
     /**
@@ -124,7 +131,7 @@ public class ScenarioController {
      * @param alias The name of the activity that is already known to the scenario
      */
     public synchronized void stop(String alias) {
-        stop(ActivityDef.parseActivityDef(alias));
+        stop(aliasToDef(alias));
     }
 
     /**
@@ -197,11 +204,11 @@ public class ScenarioController {
 
     }
 
-    private ActivityExecutor getActivityExecutor(ActivityDef activityDef) {
+    private ActivityExecutor getActivityExecutor(ActivityDef activityDef, boolean createIfMissing) {
         synchronized (activityExecutors) {
             ActivityExecutor executor = activityExecutors.get(activityDef.getAlias());
 
-            if (executor == null) {
+            if (executor == null && createIfMissing) {
                 String activityTypeName = activityDef.getParams().getStringOrDefault("type", "diag");
                 ActivityType activityType = ActivityTypeFinder.instance().getOrThrow(activityTypeName);
                 executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef));
@@ -288,6 +295,32 @@ public class ScenarioController {
                 return false;
         }
         return true;
+    }
+
+    private ActivityDef aliasToDef(String alias) {
+        if (alias.contains("=")) {
+            return ActivityDef.parseActivityDef(alias);
+        } else {
+            return ActivityDef.parseActivityDef("alias="+alias+";");
+        }
+    }
+
+    public boolean awaitActivity(Map<String, String> activityDefMap) {
+        ActivityDef ad = new ActivityDef(new ParameterMap(activityDefMap));
+        return awaitActivity(ad);
+    }
+
+    public boolean awaitActivity(String alias) {
+        ActivityDef toAwait = aliasToDef(alias);
+        return awaitActivity(toAwait);
+    }
+
+    public boolean awaitActivity(ActivityDef activityDef) {
+        ActivityExecutor activityExecutor = getActivityExecutor(activityDef, false);
+        if (activityExecutor==null) {
+            throw new RuntimeException("Could not await missing activity: " + activityDef);
+        }
+        return activityExecutor.awaitFinish(Integer.MAX_VALUE);
     }
 
     /**
