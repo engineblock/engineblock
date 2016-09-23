@@ -11,7 +11,7 @@ java -jar eb-cli.jar
 The latest release can always be run with this simple script: [run-eb](https://raw.githubusercontent.com/engineblock/engineblock/master/eb-cli/bin/run-eb). You can use the commands below to get it. 
 
 ~~~
-curl -O [run-eb](https://raw.githubusercontent.com/engineblock/engineblock/master/eb-cli/bin/run-eb)
+curl -O https://raw.githubusercontent.com/engineblock/engineblock/master/eb-cli/bin/run-eb
 chmod u+x run-eb
 ~~~
 
