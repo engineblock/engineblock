@@ -9,6 +9,8 @@ activitydef = {
     "targetrate" : "10000.0"
 };
 scenario.start(activitydef);
+csvlogger.add(metrics.speedcheck.cycles);
+
 scenario.waitMillis(1000);
 scenario.stop(activitydef);
 

@@ -18,6 +18,8 @@
 package io.engineblock.extensions.csvmetrics;
 
 import com.codahale.metrics.CsvReporter;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import org.slf4j.Logger;
 
@@ -26,6 +28,8 @@ import java.util.concurrent.TimeUnit;
 
 public class CSVMetrics {
 
+    private final MetricRegistry registry;
+    private final File reportTo;
     CsvReporter reporter;
 
     /**
@@ -41,10 +45,18 @@ public class CSVMetrics {
                 throw new RuntimeException("Unable to make directory: " + reportTo);
             }
         }
+        this.reportTo = reportTo;
+        this.registry = registry;
+    }
 
+    private void initReporter() {
+        if (reporter!=null) {
+            return;
+        }
         reporter = CsvReporter.forRegistry(registry)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .convertRatesTo(TimeUnit.SECONDS)
+                .filter(filter)
                 .build(reportTo);
 
     }
@@ -63,15 +75,23 @@ public class CSVMetrics {
     }
 
     public void start(long period, String timeUnitName) {
+        initReporter();
         TimeUnit timeUnit = TimeUnit.valueOf(timeUnitName);
         reporter.start(period, timeUnit);
     }
+
+    public void add(Metric metric) {
+        filter.add(metric);
+    }
+
+    private MetricInstanceFilter filter = new MetricInstanceFilter();
 
     public void stop() {
         reporter.stop();
     }
 
     public void report() {
+        initReporter();
         reporter.report();
     }
 }
