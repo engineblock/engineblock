@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Test
 public class ScriptTests {
 
-    private Result runScenario(String scriptname) {
+    public static Result runScenario(String scriptname) {
         String scenarioName = "testing activity" + scriptname;
         ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName);
@@ -39,35 +39,22 @@ public class ScriptTests {
         ScenariosResults scenariosResults = e.awaitAllResults();
         Result result = scenariosResults.getOne();
         result.reportToLog();
-//        result.reportTo(System.out);
-
         return result;
     }
 
-    @Test(enabled = false)
-    public void testSpeedSanity() {
-        Result result = runScenario("speedcheck");
-    }
-
-    @Test(enabled = false)
-    public void testThreadSpeeds() {
-        Result result = runScenario("threadspeeds");
-    }
-
-
-    @Test(enabled=false)
+    @Test
     public void testRateLimiter() {
         Result result = runScenario("ratelimiter");
         String iolog = result.getIOLog();
         System.out.println("iolog\n"+iolog);
-        Pattern p = Pattern.compile("^.*?mean rate = (\\d[.\\d]+)$",Pattern.MULTILINE);
+        Pattern p = Pattern.compile(".*mean rate = (\\d[.\\d]+).*",Pattern.DOTALL);
         Matcher m = p.matcher(iolog);
         assertThat(m.matches()).isTrue();
 
-        String digits = p.matcher(iolog).toMatchResult().group(1);
+        String digits = m.group(1);
         assertThat(digits).isNotEmpty();
         double rate = Double.valueOf(digits);
-        assertThat(rate).isCloseTo(200.0, Offset.offset(20.0));
+        assertThat(rate).isCloseTo(100.0, Offset.offset(10.0));
     }
 
     @Test
@@ -88,7 +75,6 @@ public class ScriptTests {
         int a1end = result.getIOLog().indexOf("blockingactivity1 finished");
         int a2start = result.getIOLog().indexOf("running blockingactivity2");
         assertThat(a1end).isLessThan(a2start);
-
     }
 
     @Test
