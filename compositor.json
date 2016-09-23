@@ -94,6 +94,14 @@
         {
           "href": "https://github.com/engineblock/engineblock",
           "text": "GitHub"
+        },
+        {
+          "href": "https://github.com/engineblock/engineblock/issues",
+          "text": "Issues Tracker"
+        },
+        {
+          "href": "https://travis-ci.org/engineblock/engineblock.svg?branch=master",
+          "text": "CI"
         }
       ]
     },
