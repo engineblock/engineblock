@@ -18,15 +18,25 @@
 package io.engineblock.metrics;
 
 import com.codahale.metrics.Timer;
-import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramResetOnSnapshotReservoir;
 
 public class NicerTimer extends Timer {
-    public NicerTimer(HdrHistogramResetOnSnapshotReservoir hdrHistogramResetOnSnapshotReservoir) {
-        super(hdrHistogramResetOnSnapshotReservoir);
+    private DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
+
+    public NicerTimer(DeltaHdrHistogramReservoir deltaHdrHistogramReservoir) {
+        super(deltaHdrHistogramReservoir);
+        this.deltaHdrHistogramReservoir = deltaHdrHistogramReservoir;
     }
 
     @Override
     public ConvenientSnapshot getSnapshot() {
         return new ConvenientSnapshot(super.getSnapshot());
+    }
+
+    public ConvenientSnapshot getDeltaSnapshot() {
+        return new ConvenientSnapshot(deltaHdrHistogramReservoir.getDeltaSnapshot());
+    }
+
+    public ConvenientSnapshot getTotalSnapshot() {
+        return new ConvenientSnapshot(deltaHdrHistogramReservoir.getTotalSnapshot());
     }
 }

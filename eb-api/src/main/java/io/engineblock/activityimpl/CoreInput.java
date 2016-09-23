@@ -16,8 +16,10 @@ package io.engineblock.activityimpl;
 
 import com.codahale.metrics.Gauge;
 import com.google.common.util.concurrent.RateLimiter;
+import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.ActivityDefObserver;
 import io.engineblock.activityapi.Input;
+import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +49,11 @@ public class CoreInput implements Input, ActivityDefObserver {
     private final AtomicLong max = new AtomicLong(Long.MAX_VALUE);
     // TODO: Consider a similar approach to this: http://blog.nirav.name/2015/02/a-simple-rate-limiter-using-javas.html
     private RateLimiter rateLimiter;
+    private Activity activity;
 
-    public CoreInput(ActivityDef activityDef) {
-        onActivityDefUpdate(activityDef);
+    public CoreInput(Activity activity) {
+        this.activity = activity;
+        onActivityDefUpdate(activity.getActivityDef());
     }
 
 
@@ -119,8 +123,7 @@ public class CoreInput implements Input, ActivityDefObserver {
                 }
             };
 
-// TODO: https://github.com/engineblock/engineblock/issues/56
-//            ActivityMetrics.gauge(activityDef,"targetrate",rateGauge);
+            ActivityMetrics.gauge(activity,"targetrate",rateGauge);
 
             logger.info("targetrate was set to:" + rate);
         }

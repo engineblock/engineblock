@@ -18,16 +18,27 @@
 package io.engineblock.metrics;
 
 import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Reservoir;
+
 
 public class NicerHistogram extends Histogram {
 
-    public NicerHistogram(Reservoir hdrHistogramReservoir) {
+    private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
+
+    public NicerHistogram(DeltaHdrHistogramReservoir hdrHistogramReservoir) {
         super(hdrHistogramReservoir);
+        this.hdrDeltaReservoir = hdrHistogramReservoir;
     }
 
     @Override
     public ConvenientSnapshot getSnapshot() {
         return new ConvenientSnapshot(super.getSnapshot());
+    }
+
+    public ConvenientSnapshot getDeltaSnapshot() {
+        return new ConvenientSnapshot(hdrDeltaReservoir.getDeltaSnapshot());
+    }
+
+    public ConvenientSnapshot getTotalSnapshot() {
+        return new ConvenientSnapshot(hdrDeltaReservoir.getTotalSnapshot());
     }
 }

@@ -21,10 +21,10 @@ import com.codahale.metrics.*;
 import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.MetricRegistryService;
 import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramReservoir;
-import org.mpierce.metrics.reservoir.hdrhistogram.HdrHistogramResetOnSnapshotReservoir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.script.ScriptContext;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +35,14 @@ public class ActivityMetrics {
 
     private final static Logger logger = LoggerFactory.getLogger(ActivityMetrics.class);
     private static MetricRegistry registry;
+
+    public static MetricFilter METRIC_FILTER = new MetricFilter() {
+        @Override
+        public boolean matches(String name, Metric metric) {
+            return true;
+//            return !(metric instanceof LocalOnlyMetric);
+        }
+    };
 
     private ActivityMetrics() {
     }
@@ -65,6 +73,24 @@ public class ActivityMetrics {
         return metric;
     }
 
+    private static Metric register(ScriptContext context, String name, MetricProvider metricProvider) {
+        Metric metric = get().getMetrics().get(name);
+        if (metric == null) {
+            synchronized (context) {
+                metric = get().getMetrics().get(name);
+                if (metric == null) {
+                    metric = metricProvider.getMetric();
+                    Metric registered = get().register(name, metric);
+                    logger.info("registered scripting metric: " + name);
+                    return registered;
+                } else {
+                    logger.warn("another thread has created this metric: " + name);
+                }
+            }
+        }
+        return metric;
+
+    }
     /**
      * <p>Create a timer associated with an activity.</p>
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
@@ -90,8 +116,8 @@ public class ActivityMetrics {
      * @param name     a simple, descriptive name for the timer
      * @return the timer, perhaps a different one if it has already been registered
      */
-    public static Timer resettingTimer(Activity activity, String name) {
-        return (Timer) register(activity, name, () -> new NicerTimer(new HdrHistogramResetOnSnapshotReservoir()));
+    public static Timer deltaTimer(Activity activity, String name) {
+        return (Timer) register(activity, name, () -> new NicerTimer(new DeltaHdrHistogramReservoir()));
     }
 
     /**
@@ -104,7 +130,7 @@ public class ActivityMetrics {
      * @return the histogram, perhaps a different one if it has already been registered
      */
     public static Histogram histogram(Activity activity, String name) {
-        return (Histogram) register(activity, name, () -> new NicerHistogram(new HdrHistogramReservoir()));
+        return (Histogram) register(activity, name, () -> new NicerHistogram(new DeltaHdrHistogramReservoir()));
     }
 
     /**
@@ -119,8 +145,8 @@ public class ActivityMetrics {
      * @return the resetting histogram, perhaps a different one if it has already been registered
      */
 
-    public static Histogram resettingHistogram(Activity activity, String name) {
-        return (Histogram) register(activity, name, () -> new NicerHistogram(new HdrHistogramResetOnSnapshotReservoir()));
+    public static Histogram deltaHistogram(Activity activity, String name) {
+        return (Histogram) register(activity, name, () -> new NicerHistogram(new DeltaHdrHistogramReservoir()));
     }
 
     /**
@@ -160,6 +186,15 @@ public class ActivityMetrics {
         }
         return registry;
     }
+
+    public static Gauge<?> gauge(Activity activity, String name, Gauge<?> gauge) {
+        return (Gauge<?>) register(activity, name, () -> gauge);
+    }
+
+    public static Gauge<?> gauge(ScriptContext scriptContext, String name, Gauge<?> gauge) {
+        return (Gauge<?>) register(scriptContext, name, () -> gauge);
+    }
+
 
     private static MetricRegistry lookupRegistry() {
         ServiceLoader<MetricRegistryService> metricRegistryServices =

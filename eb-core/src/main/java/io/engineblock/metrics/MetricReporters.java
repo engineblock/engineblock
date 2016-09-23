@@ -72,7 +72,7 @@ public class MetricReporters implements IShutdown {
                     .prefixedWith(prefixedRegistry.prefix != null ? (!prefixedRegistry.prefix.isEmpty() ? prefix + "." + prefixedRegistry.prefix : prefix) : prefix)
                     .convertRatesTo(TimeUnit.SECONDS)
                     .convertDurationsTo(TimeUnit.MICROSECONDS)
-                    .filter(MetricFilter.ALL)
+                    .filter(ActivityMetrics.METRIC_FILTER)
                     .build(graphite);
 
             scheduledReporters.add(graphiteReporter);
@@ -102,7 +102,7 @@ public class MetricReporters implements IShutdown {
             Slf4jReporter loggerReporter = Slf4jReporter.forRegistry(prefixedRegistry.metricRegistry)
                     .convertRatesTo(TimeUnit.SECONDS)
                     .convertDurationsTo(TimeUnit.MICROSECONDS)
-                    .filter(MetricFilter.ALL)
+                    .filter(ActivityMetrics.METRIC_FILTER)
                     .outputTo(logger)
                     .build();
             scheduledReporters.add(loggerReporter);
@@ -110,13 +110,13 @@ public class MetricReporters implements IShutdown {
         return this;
     }
 
-    public MetricReporters start() {
+    public MetricReporters start(int consoleIntervalSeconds, int remoteIntervalSeconds) {
         for (ScheduledReporter scheduledReporter : scheduledReporters) {
             logger.info("starting reporter: " + scheduledReporter);
             if (scheduledReporter instanceof ConsoleReporter) {
-                scheduledReporter.start(10, TimeUnit.SECONDS);
+                scheduledReporter.start(consoleIntervalSeconds, TimeUnit.SECONDS);
             } else {
-                scheduledReporter.start(1, TimeUnit.MINUTES);
+                scheduledReporter.start(remoteIntervalSeconds, TimeUnit.SECONDS);
             }
         }
         return this;

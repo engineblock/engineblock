@@ -30,7 +30,6 @@ public class DiagActivity extends SimpleActivity implements Activity {
 
     @Override
     public void initActivity() {
-        delayHistogram = ActivityMetrics.histogram(this,"delay");
-
+        delayHistogram = ActivityMetrics.deltaHistogram(this,"delay");
     }
 }

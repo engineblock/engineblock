@@ -58,9 +58,9 @@ public class EBCLI {
 
         if (options.wantsReportGraphiteTo()!=null) {
             MetricReporters reporters = MetricReporters.getInstance();
-            reporters.addRegistry(options.wantsMetricsPrefix(),ActivityMetrics.getMetricRegistry());
+            reporters.addRegistry("workloads",ActivityMetrics.getMetricRegistry());
             reporters.addGraphite(options.wantsReportGraphiteTo(),options.wantsMetricsPrefix());
-            reporters.start();
+            reporters.start(10,10);
         }
 
         if (options.wantsMetricsForActivity() != null) {

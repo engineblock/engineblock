@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import java.util.Optional;
+
 /*
 *   Copyright 2015 jshook
 *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,8 +31,10 @@ public class ActivityExecutorTest {
 
     @Test(enabled=false)
     public void testNewActivityExecutor() {
-        ActivityDef ad = ActivityDef.parseActivityDef("alias=test");
-        Input longSupplier = new CoreInput(ad);
+        ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test");
+        Optional<ActivityType> activityType = ActivityTypeFinder.instance().get(ad.getActivityType());
+        Activity activity = activityType.get().getActivity(ad);
+        Input longSupplier = new CoreInput(activity);
         MotorDispenser cmf = getActivityMotorFactory(
                 ad, motorActionDelay(999), longSupplier
         );

@@ -81,6 +81,16 @@ public class ScenarioController {
         run(timeout,activityDef);
     }
 
+    public synchronized void run(Map<String,String> activityDefMap) {
+        run(Integer.MAX_VALUE,activityDefMap);
+    }
+    public synchronized void run(String activityDefString) {
+        run(Integer.MAX_VALUE,activityDefString);
+    }
+    public synchronized void run(ActivityDef activityDef) {
+        run(Integer.MAX_VALUE, activityDef);
+    }
+
 
     public boolean isRunningActivity(String alias) {
         return isRunningActivity(aliasToDef(alias));

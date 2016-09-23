@@ -30,7 +30,7 @@ public class CoreInputDispenser implements InputDispenser {
     private final CoreInput input;
 
     public CoreInputDispenser(Activity activity) {
-        this.input = new CoreInput(activity.getActivityDef());
+        this.input = new CoreInput(activity);
     }
 
     @Override
