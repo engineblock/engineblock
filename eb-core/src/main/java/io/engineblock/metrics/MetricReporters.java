@@ -49,6 +49,15 @@ public class MetricReporters implements IShutdown {
         this.metricRegistries.add(new PrefixedRegistry(registryPrefix, metricsRegistry));
         return this;
     }
+    public MetricReporters addGraphite(String dest, String prefix) {
+        if (dest.indexOf(":")>=0) {
+            String[] split = dest.split(":");
+            addGraphite(split[0],Integer.valueOf(split[1]),prefix);
+        } else {
+            addGraphite(dest, 2003, prefix);
+        }
+        return this;
+    }
 
     public MetricReporters addGraphite(String host, int graphitePort, String prefix) {
 

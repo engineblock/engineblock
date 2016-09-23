@@ -4,6 +4,8 @@ import io.engineblock.activityapi.ActivityType;
 import io.engineblock.core.ActivityDocInfo;
 import io.engineblock.core.ActivityTypeFinder;
 import io.engineblock.core.ScenariosResults;
+import io.engineblock.metrics.ActivityMetrics;
+import io.engineblock.metrics.MetricReporters;
 import io.engineblock.script.MetricsMapper;
 import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
@@ -52,6 +54,13 @@ public class EBCLI {
         if (options.wantsAdvancedHelp()) {
             System.out.println(loadHelpFile("advancedhelp.txt"));
             System.exit(0);
+        }
+
+        if (options.wantsReportGraphiteTo()!=null) {
+            MetricReporters reporters = MetricReporters.getInstance();
+            reporters.addRegistry(options.wantsMetricsPrefix(),ActivityMetrics.getMetricRegistry());
+            reporters.addGraphite(options.wantsReportGraphiteTo(),options.wantsMetricsPrefix());
+            reporters.start();
         }
 
         if (options.wantsMetricsForActivity() != null) {
