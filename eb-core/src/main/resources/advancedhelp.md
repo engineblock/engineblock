@@ -31,7 +31,7 @@ You can build up a complex scenario by combining scripts and activities.
 If this scenario needs to have some cross-shared logic, that is up to you,
 the scenario designer.
 
-## Script Parameters
+## Script Parameters    
 
 Any arguments following a script in name=value form will be used to parameterize
 the script. Script parameters are simply macro tokens in the form <<NAME:default>>.
@@ -43,7 +43,7 @@ so parameters may be dropped into scripts ad-hoc.
 By using the option --session-name <name>, you can name the session logfile
 that will be (over)written with execution details.
 
-## Metric Names
+## Metric Name
 
 If you need to see what metrics are available for a particular activity type,
 you can ask PROG to instantiate an activity of that type and discover the
@@ -55,4 +55,43 @@ PROG --metrics diag anexample
 This will dump a list of metric names in the shortened format that is most suitable
 for scenario script development.
 
+## Scripting on the command line
+
+There are a few commands available on the command line to allow for basic control
+of activities without having to edit the scenario script directly:
+
+To start an activity without waiting for it to complete:
+~~~
+start <param>=<val> ...
+~~~
+
+To start an activity and then wait for it to complete before continuing:
+~~~
+run <pram>=<value> ...
+~~~
+
+To stop an activity by its alias:
+~~~
+stop <activity alias>
+~~~
+
+To wait for a particular activity that has been started to complete before continuing:
+~~~
+await <activity alias>
+~~~
+
+To wait for a number of milliseconds before continuing:
+~~~
+waitmills <milliseconds>
+~~~
+
+These can all be used on the command line in any order. The scenario script is assembled
+from them before it is executed. If you want to see the resulting script, use the
+ --show-script option to dump the script to the console instead of running it.
+ 
+By combining these activity commands on the command line, you can construct a non-trivial
+scenario from other snippets, control activity sequencing and concurrency, etc. This does
+not replace what is possible for direct scripting, but it does allow for many custom
+test scenarios without it. If you want to do more advanced scripting, please consult
+the scenario designers guide.
 

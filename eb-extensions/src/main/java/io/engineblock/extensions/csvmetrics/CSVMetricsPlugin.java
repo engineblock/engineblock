@@ -43,7 +43,9 @@ public class CSVMetricsPlugin {
 
     public CSVMetrics log(String filename, long period, String timeUnit) {
         TimeUnit mappedTimeUnit = TimeUnit.valueOf(timeUnit);
-        return new CSVMetrics(filename, logger, metricRegistry, period, mappedTimeUnit);
+        CSVMetrics csvMetrics = new CSVMetrics(filename, logger, metricRegistry, period, mappedTimeUnit);
+        writeStdout("started new csvlogger: " + filename);
+        return csvMetrics;
     }
 
     private void writeStdout(String msg) {

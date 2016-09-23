@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class EBCLIOptions {
 
     private final static Logger logger = LoggerFactory.getLogger(EBCLIOptions.class);
-    public static final String docoptFileName = "commandline.txt";
+    public static final String docoptFileName = "commandline.md";
 
     // Discovery
     private static final String HELP = "--help";
