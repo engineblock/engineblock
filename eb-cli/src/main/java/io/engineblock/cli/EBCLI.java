@@ -48,6 +48,7 @@ public class EBCLI {
             System.out.println(loadHelpFile("commandline.txt"));
             System.exit(0);
         }
+
         if (options.wantsAdvancedHelp()) {
             System.out.println(loadHelpFile("advancedhelp.txt"));
             System.exit(0);

@@ -90,7 +90,7 @@ public class TestEBCLIOptions {
     }
 
     @Test(expectedExceptions = {InvalidParameterException.class},
-    expectedExceptionsMessageRegExp = ".*script name must follow.*")
+    expectedExceptionsMessageRegExp = ".*script name not found.*")
     public void testShouldErrorForMissingScriptName() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"script"});
     }
@@ -101,6 +101,13 @@ public class TestEBCLIOptions {
         String s = EBCLIScriptAssembly.assembleScript(opts);
         assertThat(s).contains("var foo=replaced;");
         assertThat(s).contains("var bar=UNSET:parameter2");
+    }
+
+    @Test
+    public void testAutoScriptCommand() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{ "acommand" });
+        String s = EBCLIScriptAssembly.assembleScript(opts);
+        assertThat(s).contains("acommand script text");
     }
 
 }

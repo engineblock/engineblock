@@ -1,8 +1,10 @@
 package io.engineblock.cli;
 
+import io.engineblock.util.EngineBlockFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,7 +20,7 @@ public class EBCLIOptions {
 
     // Discovery
     private static final String HELP = "--help";
-    private static final String ADVANCED_HELP="--advanced-help";
+    private static final String ADVANCED_HELP = "--advanced-help";
     private static final String METRICS = "--list-metrics";
     private static final String ACTIVITY_TYPES = "--list-activity-types";
     private static final String WANTS_VERSION_LONG = "--version";
@@ -52,8 +54,8 @@ public class EBCLIOptions {
     private String metricsPrefix = "engineblock.";
     private boolean wantsConsoleLogging = false;
     private String wantsMetricsForActivity;
-    private boolean wantsAdvancedHelp=false;
-    private String sessionName="";
+    private boolean wantsAdvancedHelp = false;
+    private String sessionName = "";
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -71,42 +73,31 @@ public class EBCLIOptions {
         }
 
         while (arglist.peekFirst() != null) {
-            String word = arglist.removeFirst();
+            String word = arglist.peekFirst();
             switch (word) {
                 case ACTIVITY:
-                    List<String> activitydef = new ArrayList<String>();
-                    while (arglist.size() > 0 && !reserved_words.contains(arglist.peekFirst()) && arglist.peekFirst().contains("=")) {
-                        activitydef.add(arglist.removeFirst());
-                    }
-                    cmdList.add(new Cmd(CmdType.activity, activitydef.stream().map(s -> s + ";").collect(Collectors.joining())));
+                    Cmd activity = parseActivityCmd(arglist);
+                    cmdList.add(activity);
                     break;
                 case SCRIPT:
-                    String scriptName = readWordOrThrow(arglist,word,"script name");
-                    if (reserved_words.contains(scriptName)) {
-                        throw new InvalidParameterException("script name may not be a reserved word, like '" + arglist.peekFirst() + "'");
-                    }
-                    if (scriptName.contains("=")) {
-                        throw new InvalidParameterException("script name must precede script arguments such as '" + arglist.peekFirst() + "'");
-                    }
-                    Map<String, String> scriptParams = new LinkedHashMap<>();
-                    while (arglist.size() > 0 && !reserved_words.contains(arglist.peekFirst())
-                            && arglist.peekFirst().contains("=")) {
-                        String[] split = arglist.removeFirst().split("=", 2);
-                        scriptParams.put(split[0], split[1]);
-                    }
-                    cmdList.add(new Cmd(CmdType.valueOf(word), scriptName, scriptParams));
+                    Cmd cmd = parseScriptCmd(arglist);
+                    cmdList.add(cmd);
                     break;
                 case SESSION_NAME:
-                    sessionName= readWordOrThrow(arglist,word, "a session name");
+                    arglist.removeFirst();
+                    sessionName = readWordOrThrow(arglist, "a session name");
                     break;
                 case WANTS_VERSION_LONG:
+                    arglist.removeFirst();
                     wantsVersion = true;
                     break;
                 case ADVANCED_HELP:
-                    wantsAdvancedHelp=true;
+                    arglist.removeFirst();
+                    wantsAdvancedHelp = true;
                     break;
                 case HELP:
                 case "-h":
+                    arglist.removeFirst();
                     if (arglist.peekFirst() == null) {
                         wantsBasicHelp = true;
                         logger.info("getting basic help");
@@ -116,23 +107,39 @@ public class EBCLIOptions {
                     }
                     break;
                 case METRICS:
-                    wantsMetricsForActivity = readWordOrThrow(arglist,word,"activity type");
+                    arglist.removeFirst();
+                    wantsMetricsForActivity = readWordOrThrow(arglist, "activity type");
                     break;
                 case REPORT_GRAPHITE_TO:
+                    arglist.removeFirst();
                     reportGraphiteTo = arglist.removeFirst();
                     break;
                 case METRICS_PREFIX:
+                    arglist.removeFirst();
                     metricsPrefix = arglist.removeFirst();
                     break;
                 case ACTIVITY_TYPES:
+                    arglist.removeFirst();
                     wantsActivityTypes = true;
                     break;
                 case WANTS_VERBOSE_LOGGING:
                 case WANTS_VERBOSE_LOGGING_LONG:
+                    arglist.removeFirst();
                     wantsConsoleLogging = true;
                     break;
                 default:
-                    throw new InvalidParameterException("unrecognized command:" + word);
+                    Optional<InputStream> optionalScript =
+                            EngineBlockFiles.findOptionalStreamOrFile(word, "js", "scripts/auto");
+                    if (optionalScript.isPresent()) {
+                        arglist.removeFirst();
+                        arglist.addFirst("scripts/auto/" + word);
+                        arglist.addFirst("script");
+                        Cmd script = parseScriptCmd(arglist);
+                        cmdList.add(script);
+                    } else {
+                        throw new InvalidParameterException("unrecognized command:" + word);
+                    }
+
 
             }
         }
@@ -178,7 +185,9 @@ public class EBCLIOptions {
         return wantsConsoleLogging;
     }
 
-    public String wantsMetricsForActivity() { return wantsMetricsForActivity; }
+    public String wantsMetricsForActivity() {
+        return wantsMetricsForActivity;
+    }
 
     public String getSessionName() {
         return sessionName;
@@ -222,17 +231,54 @@ public class EBCLIOptions {
         }
     }
 
+    private void assertNotParameter(String scriptName) {
+        if (scriptName.contains("=")) {
+            throw new InvalidParameterException("script name must precede script arguments");
+        }
+
+    }
+
+    private void assertNotReserved(String name) {
+        if (reserved_words.contains(name)) {
+            throw new InvalidParameterException(name + " is a reserved word and may not be used here.");
+        }
+    }
+
     private String readOptionally(LinkedList<String> argList) {
         return argList.pollFirst();
     }
 
-    private String readWordOrThrow(LinkedList<String> arglist, String word, String required) {
-        if (arglist.peekFirst()==null) {
-            throw new InvalidParameterException(required + " must follow '" + word + "'");
+    private String readWordOrThrow(LinkedList<String> arglist, String required) {
+        if (arglist.peekFirst() == null) {
+            throw new InvalidParameterException(required + " not found");
         }
         return arglist.removeFirst();
     }
 
+    private Cmd parseScriptCmd(LinkedList<String> arglist) {
+        String cmdType = arglist.removeFirst();
+        String scriptName = readWordOrThrow(arglist, "script name");
+        assertNotReserved(scriptName);
+        assertNotParameter(scriptName);
+        Map<String, String> scriptParams = new LinkedHashMap<>();
+        while (arglist.size() > 0 && !reserved_words.contains(arglist.peekFirst())
+                && arglist.peekFirst().contains("=")) {
+            String[] split = arglist.removeFirst().split("=", 2);
+            scriptParams.put(split[0], split[1]);
+        }
+        return new Cmd(CmdType.script, scriptName, scriptParams);
+    }
+
+    private Cmd parseActivityCmd(LinkedList<String> arglist) {
+        String cmdType = arglist.removeFirst();
+        List<String> activitydef = new ArrayList<String>();
+        while (arglist.size() > 0 &&
+                !reserved_words.contains(arglist.peekFirst())
+                && arglist.peekFirst().contains("=")) {
+            activitydef.add(arglist.removeFirst());
+        }
+        return new Cmd(CmdType.activity, activitydef.stream().map(s -> s + ";").collect(Collectors.joining()));
+    }
 
 
 }
