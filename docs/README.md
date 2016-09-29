@@ -6,6 +6,7 @@ The EB User's Guide is organized in order of increasing detail. Simply read thro
 2. [Understanding Core Concepts](core_concepts.md)
 3. [Using the Command Line](command_line.md)
 4. [Wiring up Metrics](metrics.md)
+5. [Creating ad-hoc CLI Scripts](cli_scripting.md)
 5. [Writing Scenario Scripts](scripting.md)
 6. [Development - Building Activity Types](dev_building_activities.md)
 7. [Development - Activity Internals](dev_activity_internals.md)

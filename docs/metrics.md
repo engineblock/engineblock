@@ -2,20 +2,24 @@
 
 If you like to have all of your testing data in one place, then you may be interested in reporting your measurements to a monitoring system. For this, EB includes a [Metrics Library](https://github.com/dropwizard/metrics). Graphite reporting is baked in as the default reporter.
 
+## Metrics Units of Measure
+
+All metrics collected from activities are recorded in nanoseconds and ops per second.
+
 In order to enable graphite reporting, use
-
-    report-graphite-to <host>
-    
+~~~
+    --report-graphite-to <host>
+~~~    
 or
-
-    report-graphite-to <host>:<port>
-
+~~~
+    --report-graphite-to <host>:<port>
+~~~
 ## Metric Naming
 
 ### Prefix
-Core metrics use the prefix _em_ by default. You can override this with the --prefix option:
+Core metrics use the prefix _engineblock_ by default. You can override this with the --metrics-prefix option:
 
-    --prefix myclient.group5
+    --metrics-prefix myclient.group5
 
 ### Identifiers
 

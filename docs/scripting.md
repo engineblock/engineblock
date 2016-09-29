@@ -29,6 +29,20 @@ Interaction with the EB runtime and the activities therein is made easy by the a
 
 You can make use of more extensive Java or Javascript libraries as needed, mixing then with the runtime controls provided above.
 
+## Enhanced Metrics for Scripting
+
+The metrics available in engineblock are slightly different than the standard kit with dropwizard metrics. The key differenes are:
+
+### HDR Histograms
+
+All histograms use HDR histograms with two significant digits.
+
+Additional metric types, namely *deltaTimer* and *deltaHistogram* provide histogram snapshots that are reset in between calls to the deltaSnapshot(), while using the last one for any metrics reporting. This allows you to have precise and discrete histogram data, even for very short sampling periods. It also means that any local script output will match what you see on your metrics dashboard.
+
+The primary caveat for this, is that when you don't call deltaSnapshot(), the reported histogram data will be for the whole runtime.
+
+All histogram snapshots have additional convenience methods for accessing every percentile in (P50, P75, P90, P95, P98, P99, P999, P9999) and every time unit in (s, ms, us, ns). For example, getP99ms() is supported, as is getP50ns(), and every other possible combination. This means that you can access the 99th percentile metric value in your scripts for activity _foo_ as _metrics.foo.cycles.snapshot.p99ms_.
+
 ## Control Flow
 
 When a script is run, it has absolute control over the scenario runtime while it is active. Once the script reaches its end, however, it will only exit if all activities have completed. If you want to explicitly stop a script, you must stop all activities.
