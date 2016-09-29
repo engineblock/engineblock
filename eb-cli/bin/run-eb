@@ -3,6 +3,7 @@
 export AUTO_INSTALL=${AUTO_INSTALL:-"true"}
 export FORCE_INSTALL=${FORCE_INSTALL:-"false"}
 export FETCH_ONLY=${FETCH_ONLY:-"false"}
+export STALE_DAYS=${STALE_DAYS:-"2"}
 
 if ! which curl >> /dev/null 2>&1
 then
@@ -17,6 +18,11 @@ if [ ! -f "${EB_JARNAME}" -a "${AUTO_INSTALL}" = "true" ]
 then DOINSTALL="true"
 elif [ "${FORCE_INSTALL}" = "true" ]
 then DOINSTALL="true"
+elif find ${EB_JARNAME} -mtime ${STALE_DAYS} | grep ${EB_JARNAME}
+# 2>&1 >>/dev/null
+then
+ DOINSTALL="true"
+ printf "forcing download because the jar is more than %s days old\n" ${STALE_DAYS}
 fi
 
 if [ "${DOINSTALL}" = "true" ]
@@ -47,13 +53,6 @@ then
  printf "fetching client only, exiting\n" 1>&2
  exit 0;
 fi;
-
-if [ -z "$*" ]
-then
-  printf "Pass additional arguments to this script, and they will be passed to eb.jar\n" 1>&2
-  printf "For more details, consult http://engineblock.io/ or http://github.com/engineblock/engineblock\n" 1>&2
-  exit 2
-fi
 
 java -jar ${EB_JARNAME} \
  $*
