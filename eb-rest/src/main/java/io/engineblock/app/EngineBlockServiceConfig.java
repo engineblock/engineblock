@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock;
+package io.engineblock.app;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
