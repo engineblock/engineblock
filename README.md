@@ -1,3 +1,6 @@
+
+[![Latest Release](https://maven-badges.herokuapp.com/maven-central/io.engineblock/eb-api/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.engineblock/engineblock/) [![Build Status](https://travis-ci.org/engineblock/engineblock.svg?branch=master)](https://travis-ci.org/engineblock/engineblock)
+
 # Status
 This is in active development. Collaborators are welcome. However, there is still work to be done to groom the slope for new users.
 
@@ -34,7 +37,4 @@ The Engine Block project started as a branch of [test client](http://github.com/
 ## License
 
 This is licensed under the Apache Public License 2.0
-
-
-[![Build Status](https://travis-ci.org/engineblock/engineblock.svg?branch=master)](https://travis-ci.org/engineblock/engineblock)
 
