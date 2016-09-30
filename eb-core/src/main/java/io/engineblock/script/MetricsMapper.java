@@ -48,7 +48,7 @@ public class MetricsMapper {
         if (!activityType.isPresent()) {
             throw new RuntimeException("Activity type '" + activityDef.getActivityType() + "' does not exist in this runtime.");
         }
-        Activity activity = activityType.get().getAssembledActivity(activityDef);
+        Activity activity = activityType.get().getAssembledActivity(activityDef,new HashMap<>());
         MetricRegistryBindings metricRegistryBindings = new MetricRegistryBindings(ActivityMetrics.getMetricRegistry());
         activity.initActivity();
         activity.getInputDispenser().getInput(0);

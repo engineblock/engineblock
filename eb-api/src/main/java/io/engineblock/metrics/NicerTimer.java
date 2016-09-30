@@ -33,7 +33,7 @@ public class NicerTimer extends Timer {
     }
 
     public ConvenientSnapshot getDeltaSnapshot() {
-        return new ConvenientSnapshot(deltaHdrHistogramReservoir.getDeltaSnapshot());
+        return new ConvenientSnapshot(deltaHdrHistogramReservoir.getSnapshot());
     }
 
     public ConvenientSnapshot getTotalSnapshot() {

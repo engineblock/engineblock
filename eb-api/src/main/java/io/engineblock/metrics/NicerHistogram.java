@@ -23,19 +23,36 @@ import com.codahale.metrics.Histogram;
 public class NicerHistogram extends Histogram {
 
     private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
+    private long cacheExpiryMillis = 0L;
+    private long cacheTimeMillis = 0L;
 
     public NicerHistogram(DeltaHdrHistogramReservoir hdrHistogramReservoir) {
         super(hdrHistogramReservoir);
         this.hdrDeltaReservoir = hdrHistogramReservoir;
     }
 
-    @Override
-    public ConvenientSnapshot getSnapshot() {
-        return new ConvenientSnapshot(super.getSnapshot());
+    public DeltaSnapshotReader getAttachedHistogram() {
+        return new DeltaSnapshotReader(this);
     }
 
-    public ConvenientSnapshot getDeltaSnapshot() {
-        return new ConvenientSnapshot(hdrDeltaReservoir.getDeltaSnapshot());
+
+    /**
+     * Only return a new snapshot form current reservoir data if the cached one has expired.
+     * @return a new delta snapshot, or the cached one
+     */
+    @Override
+    public ConvenientSnapshot getSnapshot() {
+        if (System.currentTimeMillis()<cacheExpiryMillis) {
+            return new ConvenientSnapshot(hdrDeltaReservoir.getLastSnapshot());
+        } else {
+            return new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());
+        }
+    }
+
+    public ConvenientSnapshot getDeltaSnapshot(long cacheTimeMillis) {
+        this.cacheTimeMillis= cacheTimeMillis;
+        cacheExpiryMillis = System.currentTimeMillis() + cacheTimeMillis;
+        return new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());
     }
 
     public ConvenientSnapshot getTotalSnapshot() {

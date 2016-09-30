@@ -1,24 +1,26 @@
 /*
-*   Copyright 2015 jshook
-*   Licensed under the Apache License, Version 2.0 (the "License");
-*   you may not use this file except in compliance with the License.
-*   You may obtain a copy of the License at
-*
-*       http://www.apache.org/licenses/LICENSE-2.0
-*
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-*/
-package io.engineblock.activityimpl;
+ *
+ *    Copyright 2016 jshook
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ * /
+ */
+package io.engineblock.activityimpl.input;
 
 import com.codahale.metrics.Gauge;
 import com.google.common.util.concurrent.RateLimiter;
-import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.ActivityDefObserver;
 import io.engineblock.activityapi.Input;
+import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,23 +43,23 @@ import java.util.concurrent.atomic.AtomicLong;
  * after the max value. They simply expose it to callers. It is up to the
  * caller to check the value to determine when the input is deemed "used up."</p>
  */
-public class CoreInput implements Input, ActivityDefObserver {
-    private final static Logger logger = LoggerFactory.getLogger(CoreInput.class);
+public class TargetRateInput implements Input, ActivityDefObserver {
+    private final static Logger logger = LoggerFactory.getLogger(TargetRateInput.class);
 
     private final AtomicLong cycleValue = new AtomicLong(0L);
     private final AtomicLong min = new AtomicLong(0L);
     private final AtomicLong max = new AtomicLong(Long.MAX_VALUE);
     // TODO: Consider a similar approach to this: http://blog.nirav.name/2015/02/a-simple-rate-limiter-using-javas.html
     private RateLimiter rateLimiter;
-    private Activity activity;
+    private ActivityDef activityDef;
 
-    public CoreInput(Activity activity) {
-        this.activity = activity;
-        onActivityDefUpdate(activity.getActivityDef());
+    public TargetRateInput(ActivityDef activityDef) {
+        this.activityDef = activityDef;
+        onActivityDefUpdate(activityDef);
     }
 
 
-    public CoreInput setNextValue(long newValue) {
+    public TargetRateInput setNextValue(long newValue) {
         if (newValue < min.get() || newValue > max.get()) {
             throw new RuntimeException(
                     "new value (" + newValue + ") must be within min..max range: [" + min + ".." + max + "]"
@@ -83,6 +85,11 @@ public class CoreInput implements Input, ActivityDefObserver {
     @Override
     public AtomicLong getMax() {
         return max;
+    }
+
+    @Override
+    public long getCurrent() {
+        return cycleValue.get();
     }
 
     @Override
@@ -123,7 +130,7 @@ public class CoreInput implements Input, ActivityDefObserver {
                 }
             };
 
-            ActivityMetrics.gauge(activity,"targetrate",rateGauge);
+            ActivityMetrics.gauge(activityDef,"targetrate",rateGauge);
 
             logger.info("targetrate was set to:" + rate);
         }

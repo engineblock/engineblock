@@ -122,7 +122,7 @@ public class ScenarioResources {
 //    @ApiOperation("Get details for a named activity")
 //    public List<ActivityData> getActivityData(@PathParam("scenario") String scenarioName) {
 //        Scenario scenario = scenarioFor(scenarioName);
-//        return scenario.getScenarioController().getActivityMap().entrySet().stream()
+//        return scenario.getScenarioController().getActivityExecutorMap().entrySet().stream()
 //                .map(e -> new ActivityData(e.getValue()))
 //                .collect(Collectors.toCollection(ArrayList::new));
 //    }

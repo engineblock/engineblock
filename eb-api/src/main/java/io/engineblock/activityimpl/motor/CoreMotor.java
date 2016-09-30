@@ -1,21 +1,24 @@
 /*
-*   Copyright 2015 jshook
-*   Licensed under the Apache License, Version 2.0 (the "License");
-*   you may not use this file except in compliance with the License.
-*   You may obtain a copy of the License at
-*
-*       http://www.apache.org/licenses/LICENSE-2.0
-*
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-*/
-package io.engineblock.activityimpl;
+ *
+ *    Copyright 2016 jshook
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ * /
+ */
+package io.engineblock.activityimpl.motor;
 
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.*;
+import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +36,10 @@ import static io.engineblock.activityapi.SlotState.*;
  * input and action, respectively.
  * </p>
  */
-public class CoreMotor implements ActivityDefObserver, Motor {
+public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
     private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
     private final AtomicReference<SlotState> slotState = new AtomicReference<>(SlotState.Initialized);
-    private final Activity activity;
     private long slotId;
     private Input input;
     private Action action;
@@ -46,16 +48,16 @@ public class CoreMotor implements ActivityDefObserver, Motor {
 
     /**
      * Create an ActivityMotor.
-     * @param activity The activity that this motor is based on.
+     *
+     * @param activityDef The activity def that this motor will be associated with.
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      */
     public CoreMotor(
-            Activity activity,
+            ActivityDef activityDef,
             long slotId,
             Input input) {
-        this.activity = activity;
-        this.activityDef = activity.getActivityDef();
+        this.activityDef = activityDef;
         this.slotId = slotId;
         setInput(input);
     }
@@ -63,18 +65,18 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     /**
      * Create an ActivityMotor.
      *
-     * @param activity The activity that this motor is based on.
+     * @param activityDef The activity def that this motor is based on.
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      * @param action      An LongConsumer which is applied to the input for each cycle.
      */
     public CoreMotor(
-            Activity activity,
+            ActivityDef activityDef,
             long slotId,
             Input input,
             Action action
     ) {
-        this(activity, slotId, input);
+        this(activityDef, slotId, input);
         setAction(action);
     }
 
@@ -122,7 +124,7 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     @Override
     public void run() {
 
-        timer = ActivityMetrics.timer(activity,"cycles");
+        timer = ActivityMetrics.timer(activityDef, "cycles");
 
         if (slotState.get() == Finished) {
             logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
@@ -135,17 +137,24 @@ public class CoreMotor implements ActivityDefObserver, Motor {
         action.init();
 
         while (slotState.get() == Started) {
-            Timer.Context cycleTime = timer.time();
+            try (Timer.Context cycleTime = timer.time()) {
 
-            cyclenum = input.getAsLong();
-            if (cyclenum >= cycleMax.get()) {
-                logger.trace("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
-                enterState(Finished);
-                continue;
+                cyclenum = input.getAsLong();
+                if (cyclenum >= cycleMax.get()) {
+                    logger.trace("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
+                    enterState(Finished);
+                    continue;
+                }
+
+                if (slotState.get() != Started) {
+                    logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
+                    continue;
+                }
+
+
+                logger.trace("cycle " + cyclenum);
+                action.accept(cyclenum);
             }
-            logger.trace("cycle " + cyclenum);
-            action.accept(cyclenum);
-            cycleTime.stop();
         }
 
         //MetricsContext.getInstance().getMetrics().getTimers().get("foo").getMeanRate();
@@ -173,6 +182,12 @@ public class CoreMotor implements ActivityDefObserver, Motor {
     @Override
     public synchronized void requestStop() {
         if (slotState.get() == Started) {
+            if (input instanceof Stoppable) {
+                ((Stoppable) input).requestStop();
+            }
+            if (action instanceof Stoppable) {
+                ((Stoppable) action).requestStop();
+            }
             enterState(SlotState.Stopping);
         } else {
             logger.warn("attempted to stop motor " + this.getSlotId() + ": from non Started state:" + slotState.get());

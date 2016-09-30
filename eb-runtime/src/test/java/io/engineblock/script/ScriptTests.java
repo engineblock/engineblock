@@ -64,6 +64,14 @@ public class ScriptTests {
     }
 
     @Test
+    public void testLinkedInput() {
+        Result result = runScenario("linkedinput");
+        Pattern p = Pattern.compile(".*started leader.*started follower.*stopped leader.*stopped follower.*",
+                Pattern.DOTALL);
+        assertThat(p.matcher(result.getIOLog()).matches()).isTrue();
+    }
+
+    @Test
     public void testExtensionCsvLogger() {
         Result result = runScenario("extension_csvmetrics");
         assertThat(result.getIOLog()).contains("started new csvlogger: csvmetricstestdir");

@@ -18,7 +18,7 @@ package io.engineblock.activityapi;
 /**
  * The core threading harness within an activity.
  */
-public interface Motor extends Runnable {
+public interface Motor extends Runnable, Stoppable {
 
     /**
      * Set the input on this motor. It will be read from each cycle before applying the action.
@@ -45,12 +45,6 @@ public interface Motor extends Runnable {
      * @return long slot id
      */
     long getSlotId();
-
-    /**
-     * Ask this motor to stop cycling. This is an asynchronous request. Once the current active cycle
-     * completes, the request will cause the motor to stop cooperatively.
-     */
-    void requestStop();
 
     /**
      * Get a description of the current slot run status.
