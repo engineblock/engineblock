@@ -14,10 +14,11 @@
 */
 package io.engineblock.core;
 
-import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.ActivityType;
+import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
+import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -221,7 +222,7 @@ public class ScenarioController {
             if (executor == null && createIfMissing) {
                 String activityTypeName = activityDef.getParams().getStringOrDefault("type", "diag");
                 ActivityType activityType = ActivityTypeFinder.instance().getOrThrow(activityTypeName);
-                executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef));
+                executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef,getActivityMap()));
                 activityExecutors.put(activityDef.getAlias(), executor);
             }
             return executor;
@@ -336,11 +337,19 @@ public class ScenarioController {
     /**
      * @return an unmodifyable String to executor map of all activities known to this scenario
      */
-    public Map<String, ActivityExecutor> getActivityMap() {
+    public Map<String, ActivityExecutor> getActivityExecutorMap() {
         return Collections.unmodifiableMap(activityExecutors);
     }
 
     public void reportMetrics() {
         ActivityMetrics.reportTo(System.out);
+    }
+
+    private Map<String,Activity> getActivityMap() {
+        Map<String,Activity> activityMap = new HashMap<String,Activity>();
+        for (Map.Entry<String, ActivityExecutor> entry : activityExecutors.entrySet()) {
+            activityMap.put(entry.getKey(),entry.getValue().getActivity());
+        }
+        return activityMap;
     }
 }

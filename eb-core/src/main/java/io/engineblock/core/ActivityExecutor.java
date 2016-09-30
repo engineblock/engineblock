@@ -339,4 +339,8 @@ public class ActivityExecutor implements ParameterMap.Listener {
     public boolean isRunning() {
         return motors.stream().anyMatch(m -> m.getSlotState() == SlotState.Started);
     }
+
+    public Activity getActivity() {
+        return activity;
+    }
 }

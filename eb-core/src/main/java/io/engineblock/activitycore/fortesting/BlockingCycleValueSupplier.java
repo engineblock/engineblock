@@ -45,6 +45,11 @@ public class BlockingCycleValueSupplier implements Input {
     }
 
     @Override
+    public long getCurrent() {
+        return cycle.get();
+    }
+
+    @Override
     public long getAsLong() {
         synchronized (this) {
             try {

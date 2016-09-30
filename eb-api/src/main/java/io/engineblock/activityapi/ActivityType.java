@@ -18,7 +18,13 @@
 
 package io.engineblock.activityapi;
 
-import io.engineblock.activityimpl.*;
+import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityimpl.SimpleActivity;
+import io.engineblock.activityimpl.action.CoreActionDispenser;
+import io.engineblock.activityimpl.input.CoreInputDispenser;
+import io.engineblock.activityimpl.motor.CoreMotorDispenser;
+
+import java.util.Map;
 
 /**
  * <p>An ActivityType is the central extension point in EngineBlock for new
@@ -52,18 +58,28 @@ public interface ActivityType {
      * Create an instance of an activity that ties together all the components into a usable
      * activity instance. This is the method that should be called by executor classes.
      * @param activityDef the definition that initializez and controlls the activity.
+     * @param activities a map of existing activities
      * @return a distinct activity instance for each call
      */
-    default Activity getAssembledActivity(ActivityDef activityDef) {
+    default Activity getAssembledActivity(ActivityDef activityDef, Map<String,Activity> activities) {
         Activity activity = getActivity(activityDef);
 
         InputDispenser inputDispenser = getInputDispenser(activity);
+        if (inputDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware) inputDispenser).setActivitiesMap(activities);
+        }
         activity.setInputDispenser(inputDispenser);
 
         ActionDispenser actionDispenser = getActionDispenser(activity);
+        if (actionDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware) actionDispenser).setActivitiesMap(activities);
+        }
         activity.setActionDispenser(actionDispenser);
 
         MotorDispenser motorDispenser = getMotorDispenser(activity,inputDispenser, actionDispenser);
+        if (motorDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware) motorDispenser).setActivitiesMap(activities);
+        }
         activity.setMotorDispenser(motorDispenser);
 
         return activity;

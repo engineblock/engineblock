@@ -10,7 +10,7 @@ public class SimpleActivity implements Activity {
     private MotorDispenser motorDispenser;
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
-    private ActivityDef activityDef;
+    protected ActivityDef activityDef;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;

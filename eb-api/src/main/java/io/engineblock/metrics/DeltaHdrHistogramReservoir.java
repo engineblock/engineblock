@@ -84,17 +84,27 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
     }
 
     /**
-     * @return the data accumulated since the reservoir was created
+     * @return the data accumulated since the reservoir was created, or since the last call to this method
      */
     @Override
     public Snapshot getSnapshot() {
+        Histogram delta = getDataSinceLastSnapshotAndUpdate();
+        lastHistogram = delta;
+        DeltaHistogramSnapshot snapshot = new DeltaHistogramSnapshot(delta);
+        return snapshot;
+    }
+    
+    /**
+     * @return last histogram snapshot that was provided by {@link #getSnapshot()}
+     */
+    public Snapshot getLastSnapshot() {
         return new DeltaHistogramSnapshot(lastHistogram);
     }
 
-    public Snapshot getDeltaSnapshot() {
-        return new DeltaHistogramSnapshot(getDataSinceLastSnapshotAndUpdate());
-    }
-
+    /**
+     * Get a histogram snapshot that spans the whole lifetime of this reservoir.
+     * @return a histogram snapshot
+     */
     public Snapshot getTotalSnapshot() {
         return new DeltaHistogramSnapshot(runningTotals);
     }

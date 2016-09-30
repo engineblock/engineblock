@@ -35,10 +35,16 @@ public interface Input extends LongSupplier {
     AtomicLong getMax();
 
     /**
+     * @return the current value of the atomic register used by this input.
+     */
+    long getCurrent();
+
+    /**
      * For the sake of efficiency, ActivityMotors that consume values from this interface should do a range check
      * after getting the value. When the value exceeds the the value provided by {@link #getMax}, the motor should
      * take this as a signal to terminate gracefully with a log line indicating why.
      * @return The next long value in the sequence
      */
     long getAsLong();
+
 }
