@@ -46,7 +46,7 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldRecognizeWantsActivityTypes() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"--list-start-types"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"--list-activity-types"});
         assertThat(opts.wantsActivityTypes()).isTrue();
         opts = new EBCLIOptions(new String[]{"--version"});
         assertThat(opts.wantsActivityTypes()).isFalse();

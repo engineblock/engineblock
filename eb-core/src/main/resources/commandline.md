@@ -1,55 +1,93 @@
-Basic Usage:
+### Basic Command-Line Options ###
 
-Discovery options:
+Help ( You're looking at it. )
 
-  These options help you learn more about running PROG, and
-  about the plugins that are present in your particular version.
+    --help
 
-  --help
-      Basic help ( You're looking at it. )
-  --help <activity type>
-      Provide specific help for the named activity type
-  --advanced-help
-      Provide advanced help that explains more than this screen.
-  --list-activity-types
-      List the available activity types
-  --list-metrics <activity type> [ <activity name> ]
-      Provide the metrics that are available for scripting
+Short options, like '-v' represent simple options, like verbosity.
+Using multiples increases the level of the option, like '-vvv'.
 
-Execution Options:
+Long options, like '--help' are top-level options that may only be
+used once. These modify general behavior, or allow you to get more
+details on how to use PROG.
 
-  This is how you actually tell PROG what scenario to run. Each of these
-  commands appends script logic to the scenario that will be executed.
-  These are considered as commands, can occur in any order and quantity.
-  The only rule is that arguments in the arg=value form will apply to
-  the preceding script or activity.
+All other options are either commands, or named arguments to commands.
+Any single word without dashes is a command that will be converted
+into script form. Any option that includes an equals sign is a
+named argument to the previous command. The following example
+is a commandline with a command *start*, and two named arguments
+to that command.
 
-  script <script file> [arg=value]...
-      Add the named script file to the scenario, interpolating named parameters
+    PROG start type=diag alias=example    
 
-  activity [arg=value]...
-      Add the named activity to the scenario, interpolating named parameters
+### Discovery options ###
 
-General options:
+These options help you learn more about running PROG, and
+about the plugins that are present in your particular version.
 
-  These options modify how the scenario is run.
+Provide specific help for the named activity type:
 
-  --report-graphite-to <addr>[:<port>]
-      Specify the graphite destination and enable reporting
+    --help <activity type>
 
-  --metrics-prefix <metrics-prefix>
-      Specify the metrics name prefix for graphite reporting
+Provide advanced help that explains more than this screen.
 
-  --session-name <name>
-      Name the current session, for logfile naming, etc
-      By default, this will be "scenario-TIMESTAMP", and a logfile will be created
-      for this name.
+    --advanced-help
 
-Options:
-  -h                               Show help.
-  -v | --verbose                   Report internal session log to console at info level
-  -vv | --veryverbose              Report internal session log to console, at trace level
-  -V | --version                   Show version, long form, with artifact coordinates.
+List the available activity types
+
+    --list-activity-types
+
+Provide the metrics that are available for scripting
+
+    --list-metrics <activity type> [ <activity name> ]
+
+### Execution Options ###
+
+This is how you actually tell PROG what scenario to run. Each of these
+commands appends script logic to the scenario that will be executed.
+These are considered as commands, can occur in any order and quantity.
+The only rule is that arguments in the arg=value form will apply to
+the preceding script or activity.
+
+Add the named script file to the scenario, interpolating named parameters:
+
+    script <script file> [arg=value]...
+
+Add the named activity to the scenario, interpolating named parameters
+
+    activity [arg=value]...
+
+### General options ###
+
+These options modify how the scenario is run.
+
+Specify the graphite destination and enable reporting
+
+    --report-graphite-to <addr>[:<port>]
+
+Specify the metrics name prefix for graphite reporting
+
+    --metrics-prefix <metrics-prefix>
+
+Name the current session, for logfile naming, etc
+By default, this will be "scenario-TIMESTAMP", and a logfile will be created
+for this name.
+
+    --session-name <name>
+
+### Console Options ###
+
+Increase console logging levels: (Default console logging level is *warning*)
+
+    -v         (info)         
+    -vv        (debug)
+    -vvv       (trace)
+    
+Show version, long form, with artifact coordinates.
+
+    --version
+
+
 
 
 

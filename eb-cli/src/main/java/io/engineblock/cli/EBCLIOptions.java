@@ -1,5 +1,6 @@
 package io.engineblock.cli;
 
+import ch.qos.logback.classic.Level;
 import io.engineblock.util.EngineBlockFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class EBCLIOptions {
     private static final String HELP = "--help";
     private static final String ADVANCED_HELP = "--advanced-help";
     private static final String METRICS = "--list-metrics";
-    private static final String ACTIVITY_TYPES = "--list-start-types";
+    private static final String ACTIVITY_TYPES = "--list-activity-types";
     private static final String WANTS_VERSION_LONG = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
 
@@ -37,8 +38,9 @@ public class EBCLIOptions {
     // Execution Options
     private static final String SCRIPT = "script";
     private static final String SESSION_NAME = "--session-name";
-    private static final String WANTS_VERBOSE_LOGGING_LONG = "--verbose";
-    private static final String WANTS_VERBOSE_LOGGING = "-v";
+    private static final String WANTS_INFO_CONSOLE_LOGGING = "-v";
+    private static final String WANTS_DEBUG_CONSOLE_LOGGING = "-vv";
+    private static final String WANTS_TRACE_CONSOLE_LOGGING = "-vvv";
     private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
     private static final String METRICS_PREFIX = "--metrics-prefix";
 
@@ -63,6 +65,7 @@ public class EBCLIOptions {
     private boolean wantsAdvancedHelp = false;
     private String sessionName = "";
     private boolean showScript = false;
+    private Level consoleLevel = Level.WARN;
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -159,11 +162,14 @@ public class EBCLIOptions {
                     arglist.removeFirst();
                     wantsActivityTypes = true;
                     break;
-                case WANTS_VERBOSE_LOGGING:
-                case WANTS_VERBOSE_LOGGING_LONG:
-                    arglist.removeFirst();
-                    wantsConsoleLogging = true;
+                case WANTS_DEBUG_CONSOLE_LOGGING:
+                    consoleLevel = Level.DEBUG;
                     break;
+                case WANTS_INFO_CONSOLE_LOGGING:
+                    consoleLevel = Level.INFO;
+                    break;
+                case WANTS_TRACE_CONSOLE_LOGGING:
+                    consoleLevel = Level.TRACE;
                 default:
                     Optional<InputStream> optionalScript =
                             EngineBlockFiles.findOptionalStreamOrFile(word, "js", "scripts/auto");
@@ -230,6 +236,10 @@ public class EBCLIOptions {
 
     public String getSessionName() {
         return sessionName;
+    }
+
+    public Level wantsConsoleLogLevel() {
+        return consoleLevel;
     }
 
     public static enum CmdType {

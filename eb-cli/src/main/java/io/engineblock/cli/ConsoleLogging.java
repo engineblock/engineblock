@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConsoleLogging {
 
-    public static void enableConsoleLogging() {
+    public static void enableConsoleLogging(Level level) {
 
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         //List<LoggerContextListener> copyOfListenerList = loggerContext.getCopyOfListenerList();

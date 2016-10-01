@@ -73,11 +73,10 @@ public class EBCLI {
         if (options.wantsActivityHelp()) {
             String activityHelpMarkdown = ActivityDocInfo.forActivityType(options.wantsActivityHelpFor());
             System.out.println(activityHelpMarkdown);
+            System.exit(0);
         }
 
-        if (options.wantsConsoleLogging()) {
-            ConsoleLogging.enableConsoleLogging();
-        }
+        ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel());
 
         if (options.getCommands().size() == 0) {
             System.out.println(loadHelpFile("commandline.md"));
