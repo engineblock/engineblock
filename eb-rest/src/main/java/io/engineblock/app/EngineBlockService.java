@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock;
+package io.engineblock.app;
 
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
@@ -33,6 +33,9 @@ public class EngineBlockService extends Application<EngineBlockServiceConfig> {
     private ScenariosExecutor executor;
 
     public static void main(String[] args) throws Exception {
+        if (args.length==0) {
+            args = new String[]{ "server", "eb-rest.yaml" };
+        }
         new EngineBlockService().run(args);
     }
 
