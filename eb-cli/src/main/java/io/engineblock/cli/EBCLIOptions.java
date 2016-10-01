@@ -186,10 +186,6 @@ public class EBCLIOptions {
         }
     }
 
-    public boolean wantsVeryVerboseLogging() {
-        return wantsVeryVerboseLogging;
-    }
-
     public List<Cmd> getCommands() {
         return cmdList;
     }
@@ -243,18 +239,7 @@ public class EBCLIOptions {
     }
 
     public Level wantsConsoleLogLevel() {
-
-        if (wantsConsoleLogging) {
-            return Level.INFO;
-        }
-        if (wantsVeryVerboseLogging) {
-            return Level.DEBUG;
-        }
-
-        if (wantsVeryVeryVerboseLogging) {
-            return Level.TRACE
-        }
-        return Level.WARN;
+        return consoleLevel;
     }
 
     public static enum CmdType {
