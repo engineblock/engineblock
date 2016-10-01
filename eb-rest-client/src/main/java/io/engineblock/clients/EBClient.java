@@ -1,32 +1,29 @@
 package io.engineblock.clients;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
-
-import java.util.List;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class EBClient {
 
+    private String baseUrl;
 
-    public enum Path {
-        activitytypes
-    }
 
     public EBClient(String baseUrl) {
-        this.endpoints = new Endpoints(baseUrl);
         Unirest.setObjectMapper(getObjectMapper());
+        this.baseUrl = baseUrl;
     }
 
-    public List<String> getActivityTypes() {
+    public HttpResponse<JsonNode> getActivityTypes() throws UnirestException {
         return Unirest.get(pathOf(Path.activitytypes))
-                .asObject(List.class);
-
+                .asJson();
     }
 
     private ObjectMapper getObjectMapper() {
-        Gson gson = new GSON();
+        Gson gson = new Gson();
 
         return new ObjectMapper() {
             @Override
@@ -43,5 +40,9 @@ public class EBClient {
 
     private String pathOf(Path paths) {
         return baseUrl + "/" + paths.name();
+    }
+
+    public enum Path {
+        activitytypes
     }
 }
