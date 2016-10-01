@@ -101,7 +101,7 @@ public class MetricReporters implements IShutdown {
 
             Slf4jReporter loggerReporter = Slf4jReporter.forRegistry(prefixedRegistry.metricRegistry)
                     .convertRatesTo(TimeUnit.SECONDS)
-                    .convertDurationsTo(TimeUnit.MICROSECONDS)
+                    .convertDurationsTo(TimeUnit.NANOSECONDS)
                     .filter(ActivityMetrics.METRIC_FILTER)
                     .outputTo(logger)
                     .build();
