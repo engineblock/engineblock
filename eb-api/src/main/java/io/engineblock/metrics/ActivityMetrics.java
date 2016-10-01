@@ -102,21 +102,6 @@ public class ActivityMetrics {
         return registeredTimer;
     }
 
-//    /**
-//     * <p>Create a timer with a resetting histogram associated with an activity.</p>
-//     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
-//     * that only one of them succeeds.</p>
-//     * <p>A resetting histogram is one that is reset to its initial state every time you take its snapshot.
-//     * This is useful for gathering histograms for specific spans of time.</p>
-//     *
-//     * @param activityDef  an associated activity def
-//     * @param name     a simple, descriptive name for the timer
-//     * @return the timer, perhaps a different one if it has already been registered
-//     */
-//    public static Timer deltaTimer(ActivityDef activityDef, String name) {
-//        return (Timer) register(activityDef, name, () -> new NicerTimer(new DeltaHdrHistogramReservoir()));
-//    }
-
     /**
      * <p>Create a histogram associated with an activity.</p>
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
@@ -131,22 +116,6 @@ public class ActivityMetrics {
                 new NicerHistogram(new DeltaHdrHistogramReservoir(new Recorder(3))));
     }
 
-//    /**
-//     * <p>Create a resetting histogram associated with an activity.</p>
-//     * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,
-//     * that only one of them succeeds.</p>
-//     * <p>A resetting histogram is one that is reset to its initial state every time you take its snapshot.
-//     * This is useful for gathering histograms for specific spans of time.</p>
-//     *
-//     * @param activityDef an associated activity def
-//     * @param name     a simple, descriptive name for the resetting histogram
-//     * @return the resetting histogram, perhaps a different one if it has already been registered
-//     */
-//
-//    public static Histogram deltaHistogram(ActivityDef activityDef, String name) {
-//        return (Histogram) register(activityDef, name, () -> new NicerHistogram(new DeltaHdrHistogramReservoir()));
-//    }
-//
     /**
      * <p>Create a counter associated with an activity.</p>
      * <p>This method ensures that if multiple threads attempt to create the same-named metric on a given activity,

@@ -31,15 +31,24 @@ You can make use of more extensive Java or Javascript libraries as needed, mixin
 
 ## Enhanced Metrics for Scripting
 
-The metrics available in engineblock are slightly different than the standard kit with dropwizard metrics. The key differenes are:
+The metrics available in engineblock are slightly different than the standard kit with dropwizard metrics. The key differences are:
 
 ### HDR Histograms
 
-All histograms use HDR histograms with two significant digits.
+All histograms use HDR histograms with *three* significant digits.
 
-Additional metric types, namely *deltaTimer* and *deltaHistogram* provide histogram snapshots that are reset in between calls to the deltaSnapshot(), while using the last one for any metrics reporting. This allows you to have precise and discrete histogram data, even for very short sampling periods. It also means that any local script output will match what you see on your metrics dashboard.
+All histograms are the resettingOnSnapshot forms, which automatically keep all data until you report the snapshot or access the snapshot via scripting. (see below).
 
-The primary caveat for this, is that when you don't call deltaSnapshot(), the reported histogram data will be for the whole runtime.
+The metric types that use histograms have been replaced with nicer version for scripting. You dont' have to do anything differently in your reporter configs to use them. However, if you need to use the enhanced versions in your local scripting, you can. This means that Timer and Histogram types are enchanced. If you do not use the scripting extensions, then you will automatically get the standard behavior that you are used to, only with higher-resolution HDR and full snapshots for each report to your downstream metrics systems.
+
+### Scripting with Delta Snapshots
+
+For both the timer and the histogram types, you can call
+getDeltaReader(), or access it simply &lt;metric&gt;.deltaReader. When you do this, the delta snapshotting behavior is maintained until you use the deltaReader to access it. You can get a snapshot from the deltaReader by calling getDeltaSnapshot(10000), which causes the snapshot to be reset for collection, but retains a cache of the snapshot for any other consumer of getSnapshot() for that duration in milliseconds. If, for example, metrics reporters access the snapshot in the next 10 seconds, the reported snapshot will be exactly what was used in the script. 
+
+This is important for using local scripting methods and calculations with aggregate views downstream. It means that the histograms will match up between your local script output and your downstream dashboards, as they will both be using the same frame of data, when done properly.
+
+## Histogram Convenience Methods
 
 All histogram snapshots have additional convenience methods for accessing every percentile in (P50, P75, P90, P95, P98, P99, P999, P9999) and every time unit in (s, ms, us, ns). For example, getP99ms() is supported, as is getP50ns(), and every other possible combination. This means that you can access the 99th percentile metric value in your scripts for activity _foo_ as _metrics.foo.cycles.snapshot.p99ms_.
 

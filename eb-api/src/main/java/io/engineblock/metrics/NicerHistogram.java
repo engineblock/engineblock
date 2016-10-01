@@ -20,7 +20,7 @@ package io.engineblock.metrics;
 import com.codahale.metrics.Histogram;
 
 
-public class NicerHistogram extends Histogram {
+public class NicerHistogram extends Histogram implements DeltaSnapshotter {
 
     private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
     private long cacheExpiryMillis = 0L;
@@ -31,7 +31,8 @@ public class NicerHistogram extends Histogram {
         this.hdrDeltaReservoir = hdrHistogramReservoir;
     }
 
-    public DeltaSnapshotReader getAttachedHistogram() {
+    @Override
+    public DeltaSnapshotReader getDeltaReader() {
         return new DeltaSnapshotReader(this);
     }
 

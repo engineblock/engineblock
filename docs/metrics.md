@@ -14,6 +14,11 @@ or
 ~~~
     --report-graphite-to <host>:<port>
 ~~~
+
+## Scripting with Metrics
+
+There are enhancements to the metrics bundled with EngineBlock to support advanced scripting. See the relevant section in the scripting guide for more details.
+
 ## Metric Naming
 
 ### Prefix

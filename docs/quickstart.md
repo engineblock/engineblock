@@ -2,12 +2,6 @@
 
 ## Getting EngineBlock
 
-EngineBlock is released as an executable jar. To use a specific release, simply download it and run it like this:
-~~~
-curl -o eb-cli.jar https://repo1.maven.org/maven2/io/engineblock/eb-cli/1.0.17/eb-cli-1.0.17.jar
-java -jar eb-cli.jar
-~~~
-
 The latest release can always be run with this simple script: [run-eb](https://raw.githubusercontent.com/engineblock/engineblock/master/eb-cli/bin/run-eb). You can use the commands below to get it. 
 
 ~~~
@@ -18,7 +12,12 @@ chmod u+x run-eb
 
 This script demonstrates how to fetch the version of the latest published artifact via maven central search. It also downloads that artifact if it doesn't find it locally cached within the last 2 days.
 
-**A cautionary word**: As always, blindly running scripts from the web is not a good idea. Look at this script before you run it. Make sure you are comfortable with what it does.
+**A cautionary word**: As always, blindly running scripts from the web is not a good idea. Look at this script before you run it. Make sure you are comfortable with what it does. If you want, you can always download the jar directly:
+
+~~~
+curl -o eb-cli.jar https://repo1.maven.org/maven2/io/engineblock/eb-cli/1.0.17/eb-cli-1.0.17.jar
+java -jar eb-cli.jar
+~~~
 
 The run-eb script may be used in place of:
 

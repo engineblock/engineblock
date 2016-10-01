@@ -17,10 +17,13 @@
 
 package io.engineblock.metrics;
 
+import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 
-public class NicerTimer extends Timer {
+public class NicerTimer extends Timer implements DeltaSnapshotter {
     private DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
+    private long cacheExpiry=0L;
+    private ConvenientSnapshot lastSnapshot;
 
     public NicerTimer(DeltaHdrHistogramReservoir deltaHdrHistogramReservoir) {
         super(deltaHdrHistogramReservoir);
@@ -29,14 +32,24 @@ public class NicerTimer extends Timer {
 
     @Override
     public ConvenientSnapshot getSnapshot() {
-        return new ConvenientSnapshot(super.getSnapshot());
-    }
-
-    public ConvenientSnapshot getDeltaSnapshot() {
-        return new ConvenientSnapshot(deltaHdrHistogramReservoir.getSnapshot());
+        if (System.currentTimeMillis()>=cacheExpiry) {
+            return new ConvenientSnapshot(deltaHdrHistogramReservoir.getSnapshot());
+        } else {
+            return new ConvenientSnapshot(deltaHdrHistogramReservoir.getLastSnapshot());
+        }
     }
 
     public ConvenientSnapshot getTotalSnapshot() {
         return new ConvenientSnapshot(deltaHdrHistogramReservoir.getTotalSnapshot());
+    }
+
+    public DeltaSnapshotReader getDeltaReader() {
+        return new DeltaSnapshotReader(this);
+    }
+
+    @Override
+    public Snapshot getDeltaSnapshot(long cacheTimeMillis) {
+        this.cacheExpiry = System.currentTimeMillis() + cacheTimeMillis;
+        return new ConvenientSnapshot(deltaHdrHistogramReservoir.getSnapshot());
     }
 }
