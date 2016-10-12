@@ -17,7 +17,6 @@
 
 package io.engineblock.metrics;
 
-import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 
 public class NicerTimer extends Timer implements DeltaSnapshotter {
@@ -48,7 +47,7 @@ public class NicerTimer extends Timer implements DeltaSnapshotter {
     }
 
     @Override
-    public Snapshot getDeltaSnapshot(long cacheTimeMillis) {
+    public ConvenientSnapshot getDeltaSnapshot(long cacheTimeMillis) {
         this.cacheExpiry = System.currentTimeMillis() + cacheTimeMillis;
         return new ConvenientSnapshot(deltaHdrHistogramReservoir.getSnapshot());
     }

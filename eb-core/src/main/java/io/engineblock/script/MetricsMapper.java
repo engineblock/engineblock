@@ -39,7 +39,9 @@ public class MetricsMapper {
 
     public static String metricsDetail(String activitySpec) {
 
-        StringBuilder metricsDetail = new StringBuilder();
+        //StringBuilder metricsDetail = new StringBuilder();
+        List<String> metricsDetails = new ArrayList<String>();
+
         ActivityDef activityDef = ActivityDef.parseActivityDef(activitySpec);
         logger.info("introspecting metric names for " +  activitySpec);
 
@@ -65,15 +67,17 @@ public class MetricsMapper {
 
             Map<String, String> getterSummary = getGetterSummary(metricValue);
 //            details.put(metricName,getterSummary);
-            String getterText = getterSummary.entrySet().stream().map(
-                    es -> metricName + es.getKey() + "  " + es.getValue()
-            ).collect(Collectors.joining("\n"));
 
-            metricsDetail.append(metricName).append("\n").append(getterText);
+            List<String> methodDetails = getterSummary.entrySet().stream().map(
+                    es -> metricName + es.getKey() + "  " + es.getValue()
+            ).collect(Collectors.toList());
+            methodDetails.sort(String::compareTo);
+            String getterText = methodDetails.stream().collect(Collectors.joining("\n"));
+            metricsDetails.add(metricName + "\n" + getterText);
         }
 //        return details;
 
-        return metricsDetail.toString();
+        return metricsDetails.stream().collect(Collectors.joining("\n"));
     }
 
 

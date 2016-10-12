@@ -65,7 +65,7 @@ public class EBCLI {
 
         if (options.wantsMetricsForActivity() != null) {
             String metricsHelp = getMetricsHelpFor(options.wantsMetricsForActivity());
-            System.out.println("Available metric names for start type " + options.wantsMetricsForActivity() + ":");
+            System.out.println("Available metric names for activity:" + options.wantsMetricsForActivity() + ":");
             System.out.println(metricsHelp);
             System.exit(0);
         }

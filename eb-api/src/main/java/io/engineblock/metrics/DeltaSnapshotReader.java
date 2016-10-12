@@ -17,8 +17,6 @@
 
 package io.engineblock.metrics;
 
-import com.codahale.metrics.Snapshot;
-
 public class DeltaSnapshotReader {
 
     private final DeltaSnapshotter deltaSnapshotter;
@@ -28,12 +26,12 @@ public class DeltaSnapshotReader {
         this.deltaSnapshotter = nicerHistogram;
     }
 
-    public Snapshot getDeltaSnapshot(long cacheTimeMillis) {
+    public ConvenientSnapshot getDeltaSnapshot(long cacheTimeMillis) {
         defaultInterval = cacheTimeMillis;
         return deltaSnapshotter.getDeltaSnapshot(cacheTimeMillis);
     }
 
-    public Snapshot getDeltaSnapshot() {
+    public ConvenientSnapshot getDeltaSnapshot() {
         return deltaSnapshotter.getDeltaSnapshot(defaultInterval);
     }
 

@@ -95,6 +95,12 @@ public class EBCLIOptions {
                     Cmd activity = parseActivityCmd(arglist);
                     cmdList.add(activity);
                     break;
+                case METRICS:
+                    arglist.removeFirst();
+                    arglist.addFirst("start");
+                    Cmd introspectActivity = parseActivityCmd(arglist);
+                    wantsMetricsForActivity=introspectActivity.cmdSpec;
+                    break;
                 case AWAIT_ACTIVITY:
                     String awaitCmdType = arglist.removeFirst();
                     String activityToAwait = readWordOrThrow(arglist,"activity alias to await");
@@ -145,10 +151,6 @@ public class EBCLIOptions {
                         wantsActivityHelp = true;
                         wantsActivityHelpFor = arglist.removeFirst();
                     }
-                    break;
-                case METRICS:
-                    arglist.removeFirst();
-                    wantsMetricsForActivity = readWordOrThrow(arglist, "start type");
                     break;
                 case REPORT_GRAPHITE_TO:
                     arglist.removeFirst();
@@ -247,7 +249,8 @@ public class EBCLIOptions {
         run,
         stop,
         await,
-        script, waitmillis,
+        script,
+        waitmillis,
     }
 
     public static class Cmd {
