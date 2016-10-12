@@ -113,7 +113,7 @@ public class Scenario implements Callable<Result> {
                     LoggerFactory.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
             MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
             Object extensionObject = extensionDescriptor.getExtensionObject(extensionLogger, metricRegistry, scriptEnv);
-            logger.info("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
+            logger.debug("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
                     " class=" + extensionObject.getClass().getSimpleName());
             scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
         }

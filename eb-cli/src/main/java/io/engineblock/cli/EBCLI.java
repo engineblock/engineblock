@@ -77,6 +77,8 @@ public class EBCLI {
         }
 
         ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel());
+        // intentionally not shown for warn-only
+        logger.info("console logging level is " + options.wantsConsoleLogLevel());
 
         if (options.getCommands().size() == 0) {
             System.out.println(loadHelpFile("commandline.md"));

@@ -60,7 +60,6 @@ public class EBCLIOptions {
     private boolean wantsBasicHelp = false;
     private String reportGraphiteTo = "";
     private String metricsPrefix = "engineblock.";
-    private boolean wantsConsoleLogging = false;
     private String wantsMetricsForActivity;
     private boolean wantsAdvancedHelp = false;
     private String sessionName = "";
@@ -90,6 +89,8 @@ public class EBCLIOptions {
                     showScript =true;
                     break;
                 case ACTIVITY:
+                    arglist.removeFirst();
+                    arglist.addFirst("run");
                 case START_ACTIVITY:
                 case RUN_ACTIVITY:
                     Cmd activity = parseActivityCmd(arglist);
@@ -166,12 +167,16 @@ public class EBCLIOptions {
                     break;
                 case WANTS_DEBUG_CONSOLE_LOGGING:
                     consoleLevel = Level.DEBUG;
+                    arglist.removeFirst();
                     break;
                 case WANTS_INFO_CONSOLE_LOGGING:
                     consoleLevel = Level.INFO;
+                    arglist.removeFirst();
                     break;
                 case WANTS_TRACE_CONSOLE_LOGGING:
                     consoleLevel = Level.TRACE;
+                    arglist.removeFirst();
+                    break;
                 default:
                     Optional<InputStream> optionalScript =
                             EngineBlockFiles.findOptionalStreamOrFile(word, "js", "scripts/auto");
@@ -226,10 +231,6 @@ public class EBCLIOptions {
 
     public String wantsMetricsPrefix() {
         return metricsPrefix;
-    }
-
-    public boolean wantsConsoleLogging() {
-        return wantsConsoleLogging;
     }
 
     public String wantsMetricsForActivity() {
