@@ -17,9 +17,7 @@
 
 package io.engineblock.metrics;
 
-import com.codahale.metrics.Snapshot;
-
 public interface DeltaSnapshotter {
     DeltaSnapshotReader getDeltaReader();
-    Snapshot getDeltaSnapshot(long cacheTimeMillis);
+    ConvenientSnapshot getDeltaSnapshot(long cacheTimeMillis);
 }
