@@ -19,10 +19,6 @@ It simply provides a suitable machine harness in which to put your drivers and t
 
 The most direct way to do this, if you are a tool developer, is to build your own activity type drivers and embed EB as the core runtime. You can always experiment with it and learn how it works by using the built-in diagnostic drivers.
 
-## Scale
-
-For now, this is a single-instance client. For testing large clusters, you will still need to run multiple clients to provide adequate loading. Experience has shown that one client can adequately drive 3-5 target systems for typical workloads. As always, be sure to watch your metrics on both sides to ensure that your testing instrument isn't the thing being measured. A future enhancement may allow EB to be powered by multiple clients for greater load generating capacity.
-
 ## Getting Started
 
 You can begin at [Quick Start](https://github.com/engineblock/engineblock/blob/master/docs/quickstart.md) or consult the full [Usage Guide](https://github.com/engineblock/engineblock/blob/master/docs/usage_guide.md). At least taking a glance at the guide is recommended.
