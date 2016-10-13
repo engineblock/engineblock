@@ -25,7 +25,7 @@ For now, this is a single-instance client. For testing large clusters, you will 
 
 ## Getting Started
 
-You can begin at [Quick Start](docs/quickstart.md) or consult the full [Usage Guide](https://github.com/engineblock/engineblock/blob/master/docs/usage_guide.md). At least taking a glance at the guide is recommended.
+You can begin at [Quick Start](https://github.com/engineblock/engineblock/blob/master/docs/quickstart.md) or consult the full [Usage Guide](https://github.com/engineblock/engineblock/blob/master/docs/usage_guide.md). At least taking a glance at the guide is recommended.
 
 ## Contributions
 If you are interested in contributing to Engine Block, more information is available in the [Developer's section](https://github.com/engineblock/engineblock/blob/master/docs/developers.md).
