@@ -10,9 +10,9 @@ This project aims to provide a missing power tool in the test tooling arsenal.
 
 The design goals:
 
-1. Provide a useful and intuitive Reusable Machine Pattern for constructing and reasoning about concurrent performance tests. To encourage this, the runtime machinery is based on [simple and tangible core concepts](docs/core_concepts.md).
-2. Reduce testing time of complex scenarios with many variables. This is achieved by controlling tests from an [open javascript sandbox](docs/scripting.md). This makes more sophisticated scenarios possible when needed.
-3. Minimize the amount of effort required to get empirical results from a test cycle. For this, [metrics reporting](docs/metrics.md) is baked in.
+1. Provide a useful and intuitive Reusable Machine Pattern for constructing and reasoning about concurrent performance tests. To encourage this, the runtime machinery is based on [simple and tangible core concepts](https://github.com/engineblock/engineblock/blob/master/docs/core_concepts.md).
+2. Reduce testing time of complex scenarios with many variables. This is achieved by controlling tests from an [open javascript sandbox](https://github.com/engineblock/engineblock/blob/master/docs/scripting.md). This makes more sophisticated scenarios possible when needed.
+3. Minimize the amount of effort required to get empirical results from a test cycle. For this, [metrics reporting](https://github.com/engineblock/engineblock/blob/master/docs/metrics.md) is baked in.
 
 In short, Engine Block wishes to be a programmable power tool for performance testing. However, it is somewhat generic. It doesn't know directly about a particular type of system, or protocol.
 It simply provides a suitable machine harness in which to put your drivers and testing logic. If you know how to build a client for a particular kind of system, EB will let you load it like a plugin and control it dynamically.
@@ -25,10 +25,10 @@ For now, this is a single-instance client. For testing large clusters, you will 
 
 ## Getting Started
 
-You can begin at [Quick Start](docs/quickstart.md) or consult the full [Usage Guide](docs/usage_guide.md). At least taking a glance at the guide is recommended.
+You can begin at [Quick Start](docs/quickstart.md) or consult the full [Usage Guide](https://github.com/engineblock/engineblock/blob/master/docs/usage_guide.md). At least taking a glance at the guide is recommended.
 
 ## Contributions
-If you are interested in contributing to Engine Block, more information is available in the [Developer's section](doc/developers.md).
+If you are interested in contributing to Engine Block, more information is available in the [Developer's section](https://github.com/engineblock/engineblock/blob/master/docs/developers.md).
 
 ## History
 
