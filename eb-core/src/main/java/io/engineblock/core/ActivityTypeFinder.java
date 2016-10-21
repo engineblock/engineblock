@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Convenient singleton for accessing all loadable ActivityType instances.
@@ -59,7 +60,8 @@ public class ActivityTypeFinder {
     public ActivityType getOrThrow(String activityType) {
         Optional<ActivityType> at = Optional.ofNullable(getTypes().get(activityType));
         return at.orElseThrow(
-                () -> new RuntimeException("ActivityType '" + activityType + "' not found.")
+                () -> new RuntimeException("ActivityType '" + activityType + "' not found. Available types:" +
+                this.getTypes().keySet().stream().collect(Collectors.joining(",")))
         );
     }
 

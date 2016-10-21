@@ -69,7 +69,7 @@ public class TestEBCLIOptions {
         assertThat(opts.wantsActivityHelp()).isFalse();
     }
 
-    @Test(expectedExceptions = {InvalidParameterException.class}, expectedExceptionsMessageRegExp = ".*unrecognized command.*")
+    @Test(expectedExceptions = {InvalidParameterException.class}, expectedExceptionsMessageRegExp = ".*unrecognized option.*")
     public void shouldErrorSanelyWhenNoMatch() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"unrecognizable command"});
     }

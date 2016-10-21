@@ -84,7 +84,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
             logger.error("There was an error starting activity:" + activityDef.getAlias(), e);
             throw new RuntimeException(e);
         }
-        this.intendedState=SlotState.Started;
+        this.intendedState=SlotState.Running;
         adjustToActivityDef(activity.getActivityDef());
     }
 
@@ -178,7 +178,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
 
     private String getSlotStatus() {
         return motors.stream()
-                .map(m -> m.getSlotState().getCode())
+                .map(m -> m.getSlotStateTracker().getSlotState().getCode())
                 .collect(Collectors.joining(",", "[", "]"));
     }
 
@@ -190,12 +190,13 @@ public class ActivityExecutor implements ParameterMap.Listener {
     private synchronized void adjustToActivityDef(ActivityDef activityDef) {
         logger.trace(">-pre-adjust->" + getSlotStatus());
 
-        adjustToIntendedState();
+        adjustToIntendedActivityState();
 
         // Stop and remove extra motor slots
         while (motors.size() > activityDef.getThreads()) {
             Motor motor = motors.get(motors.size() - 1);
             logger.trace("Stopping cycle motor thread:" + motor);
+            motor.requestStop();
             motors.remove(motors.size() - 1);
         }
 
@@ -209,32 +210,56 @@ public class ActivityExecutor implements ParameterMap.Listener {
             motors.add(motor);
         }
 
-        adjustToIntendedState();
-
-        // Await all motors to be in started or finished state
-        motors.forEach(m -> awaitRequiredMotorState(m, 5000, 50, SlotState.Started, SlotState.Finished));
+        adjustToIntendedActivityState();
+        awaitActivityAndMotorStateAlignment();
 
         logger.trace(">post-adjust->" + getSlotStatus());
 
     }
 
-    private void adjustToIntendedState() {
+    private void adjustToIntendedActivityState() {
         switch (intendedState) {
-            case Started:
+            case Starting:
+                break;
+            case Running:
                 motors.stream()
-                        .filter(m -> m.getSlotState() != SlotState.Started)
-                        .forEach(executorService::execute);
+                        .filter(m -> m.getSlotStateTracker().getSlotState() != SlotState.Running)
+                        .forEach(m -> {
+                            m.getSlotStateTracker().enterState(SlotState.Starting);
+                            executorService.execute(m);
+                        });
                 break;
             case Stopped:
                 motors.stream()
-                        .filter(m -> m.getSlotState() != SlotState.Stopped)
+                        .filter(m -> m.getSlotStateTracker().getSlotState() != SlotState.Stopped)
                         .forEach(Motor::requestStop);
                 break;
             case Initialized:
+                break;
             case Finished:
             case Stopping:
                 throw new RuntimeException("Invalid requested state in activity executor:" + intendedState);
         }
+    }
+
+    private void awaitActivityAndMotorStateAlignment() {
+
+        switch (intendedState) {
+            case Running:
+                motors.forEach(m -> awaitRequiredMotorState(m, 5000, 50, SlotState.Running, SlotState.Finished));
+                break;
+            case Stopped:
+                motors.forEach(m -> awaitRequiredMotorState(m, 5000, 50, SlotState.Stopped, SlotState.Finished));
+                break;
+            case Initialized:
+                break;
+            case Finished:
+                motors.forEach(m -> awaitRequiredMotorState(m, 5000, 50, SlotState.Finished));
+                break;
+            case Stopping:
+                throw new RuntimeException("Invalid requested state in activity executor:" + intendedState);
+        }
+
     }
 
     /**
@@ -250,8 +275,8 @@ public class ActivityExecutor implements ParameterMap.Listener {
         long startedAt = System.currentTimeMillis();
         while (System.currentTimeMillis() < (startedAt + waitTime)) {
             for (SlotState state : slotState) {
-                if (m.getSlotState() == state) {
-                    logger.trace(activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now in state " + m.getSlotState());
+                if (m.getSlotStateTracker().getSlotState() == state) {
+                    logger.trace(activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now in state " + m.getSlotStateTracker().getSlotState());
                     return true;
                 }
             }
@@ -260,7 +285,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
             } catch (InterruptedException ignored) {
             }
         }
-        logger.trace(activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now in state " + m.getSlotState());
+        logger.trace(activityDef.getAlias() + "/Motor[" + m.getSlotId() + "] is now in state " + m.getSlotStateTracker().getSlotState());
         return false;
     }
 
@@ -291,8 +316,8 @@ public class ActivityExecutor implements ParameterMap.Listener {
         while (System.currentTimeMillis() < (startedAt + waitTime)) {
             for (Motor motor : motors) {
                 for (SlotState state : awaitingState) {
-                    if (motor.getSlotState() == state) {
-                        logger.trace("at least one 'any' of " + activityDef.getAlias() + "/Motor[" + motor.getSlotId() + "] is now in state " + motor.getSlotState());
+                    if (motor.getSlotStateTracker().getSlotState() == state) {
+                        logger.trace("at least one 'any' of " + activityDef.getAlias() + "/Motor[" + motor.getSlotId() + "] is now in state " + motor.getSlotStateTracker().getSlotState());
                         return true;
                     }
                 }
@@ -317,11 +342,11 @@ public class ActivityExecutor implements ParameterMap.Listener {
      * @throws RuntimeException if the waitTime is used up and the desired state is not reached
      */
     private void awaitRequiredMotorState(Motor m, int waitTime, int pollTime, SlotState... awaitingState) {
-        SlotState startingState = m.getSlotState();
+        SlotState startingState = m.getSlotStateTracker().getSlotState();
         boolean awaitedRequiredState = awaitMotorState(m, waitTime, pollTime, awaitingState);
         if (!awaitedRequiredState) {
             String error = "Unable to await " + activityDef.getAlias() +
-                    "/Motor[" + m.getSlotId() + "]: from state " + startingState + " to " + m.getSlotState();
+                    "/Motor[" + m.getSlotId() + "]: from state " + startingState + " to " + m.getSlotStateTracker().getSlotState();
             RuntimeException e = new RuntimeException(error);
             logger.error(error);
             throw e;
@@ -337,7 +362,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
 
 
     public boolean isRunning() {
-        return motors.stream().anyMatch(m -> m.getSlotState() == SlotState.Started);
+        return motors.stream().anyMatch(m -> m.getSlotStateTracker().getSlotState() == SlotState.Running);
     }
 
     public Activity getActivity() {

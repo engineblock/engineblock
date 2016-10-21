@@ -21,15 +21,18 @@ package io.engineblock.activityapi;
 public enum SlotState {
 
     // Initial state after creation of this control
-    Initialized("I>"),
+    Initialized("i⌀"),
+    // This thread has been queued to run, but hasn't signaled yet that it is full started
+    // This must be set by the executor before executing the slot runnable
+    Starting("s⏫"),
     // This thread is running. This should only be set by the controlled thread
-    Started("S>"),
+    Running("R\u23F5"),
     // This thread has completed all of its activity, and will do no further work without new input
-    Finished("F."),
+    Finished("F⏯"),
     // The thread has been requested to stop. This says nothing of the internal state.
-    Stopping("-\\"),
+    Stopping("s⏬"),
     // The thread has stopped. This should only be set by the controlled thread
-    Stopped("_.");
+    Stopped("_\u23F9");
 
     private String runcode;
 
@@ -47,12 +50,20 @@ public enum SlotState {
                 return false;
             case Initialized: // A motor was just created. This is its initial state.
                 switch (to) {
-                    case Started: // a motor has been executed after being initialized
+                    case Starting: // a motor has been reserved for an execution command
                         return true;
                     default:
                         return false;
                 }
-            case Started:
+            case Starting:
+                switch (to) {
+                    case Running: // a motor has indicated that is in the run() method
+                    case Finished: // a motor has exhausted its input, and has declined to go into started mode
+                        return true;
+                    default:
+                        return false;
+                }
+            case Running:
                 switch (to) {
                     case Stopping: // A request was made to stop the motor before it finished
                     case Finished: // A motor has exhausted its input, and is finished with its work
@@ -69,14 +80,14 @@ public enum SlotState {
                 }
             case Stopped:
                 switch (to) {
-                    case Started: // A motor was restarted after being stopped
+                    case Running: // A motor was restarted after being stopped
                         return true;
                     default:
                         return false;
                 }
             case Finished:
                 switch (to) {
-                    case Started:
+                    case Running: // A motor was restarted?
                         return true;
                     // not useful as of yet.
                     // Perhaps this will be allowed via explicit reset of input stream.
