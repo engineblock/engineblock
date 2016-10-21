@@ -39,12 +39,13 @@ import static io.engineblock.activityapi.SlotState.*;
 public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
     private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
-    private final AtomicReference<SlotState> slotState = new AtomicReference<>(SlotState.Initialized);
     private long slotId;
     private Input input;
     private Action action;
     private Timer timer;
     private ActivityDef activityDef;
+    private SlotStateTracker slotStateTracker = new SlotStateTracker();
+    private AtomicReference<SlotState> slotState = slotStateTracker.getAtomicSlotState();
 
     /**
      * Create an ActivityMotor.
@@ -120,6 +121,11 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         return this.slotId;
     }
 
+    @Override
+    public SlotStateTracker getSlotStateTracker() {
+        return slotStateTracker;
+    }
+
 
     @Override
     public void run() {
@@ -130,23 +136,23 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
         }
 
-        enterState(Started);
+        slotStateTracker.enterState(Running);
         long cyclenum;
         AtomicLong cycleMax = input.getMax();
 
         action.init();
 
-        while (slotState.get() == Started) {
+        while (slotState.get() == Running) {
             try (Timer.Context cycleTime = timer.time()) {
 
                 cyclenum = input.getAsLong();
                 if (cyclenum >= cycleMax.get()) {
                     logger.trace("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
-                    enterState(Finished);
+                    slotStateTracker.enterState(Finished);
                     continue;
                 }
 
-                if (slotState.get() != Started) {
+                if (slotState.get() != Running) {
                     logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
                     continue;
                 }
@@ -159,7 +165,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
         //MetricsContext.getInstance().getMetrics().getTimers().get("foo").getMeanRate();
         if (slotState.get() == Stopping) {
-            enterState(Stopped);
+            slotStateTracker.enterState(Stopped);
         }
     }
 
@@ -181,36 +187,22 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
     @Override
     public synchronized void requestStop() {
-        if (slotState.get() == Started) {
+        if (slotState.get() == Running) {
             if (input instanceof Stoppable) {
                 ((Stoppable) input).requestStop();
             }
             if (action instanceof Stoppable) {
                 ((Stoppable) action).requestStop();
             }
-            enterState(SlotState.Stopping);
+            slotStateTracker.enterState(SlotState.Stopping);
         } else {
-            logger.warn("attempted to stop motor " + this.getSlotId() + ": from non Started state:" + slotState.get());
+            logger.warn("attempted to stop motor " + this.getSlotId() + ": from non Running state:" + slotState.get());
         }
     }
 
-    @Override
-    public SlotState getSlotState() {
-        return slotState.get();
-    }
+//    public SlotState getSlotState() {
+//        return slotState.get();
+//    }
 
-    /**
-     * <p>Transition the thread slot to a new state. only accepting valid transitions.</p>
-     * <p>The valid slot states will be moved to a data type eventually, simplifying this method.</p>
-     *
-     * @param to The next SlotState for this thread/slot/motor
-     */
-    private synchronized void enterState(SlotState to) {
-        SlotState from = slotState.get();
-        if (!from.canTransitionTo(to)) {
-            throw new RuntimeException("Invalid transition from " + from + " to " + to);
-        }
-        slotState.compareAndSet(from, to);
-    }
 
 }

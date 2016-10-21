@@ -187,7 +187,7 @@ public class EBCLIOptions {
                         Cmd script = parseScriptCmd(arglist);
                         cmdList.add(script);
                     } else {
-                        throw new InvalidParameterException("unrecognized command:" + word);
+                        throw new InvalidParameterException("unrecognized option:" + word);
                     }
             }
         }

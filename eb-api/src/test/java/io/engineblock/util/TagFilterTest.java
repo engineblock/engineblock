@@ -41,7 +41,7 @@ public class TagFilterTest {
             put("a","tag");
         }};
         TagFilter tf = new TagFilter("");
-        assertThat(tf.matches(itemtags)).isTrue();
+        assertThat(tf.matches(itemtags).matched()).isTrue();
     }
 
     @Test
@@ -49,7 +49,7 @@ public class TagFilterTest {
         Map<String,String> itemtags = new HashMap<String,String>() {{
         }};
         TagFilter tf = new TagFilter("tag=foo");
-        assertThat(tf.matches(itemtags)).isFalse();
+        assertThat(tf.matches(itemtags).matched()).isFalse();
 
     }
 
@@ -59,7 +59,7 @@ public class TagFilterTest {
             put("one","two");
         }};
         TagFilter tf = new TagFilter("");
-        assertThat(tf.matches(itemtags)).isTrue();
+        assertThat(tf.matches(itemtags).matched()).isTrue();
 
     }
 
@@ -69,12 +69,13 @@ public class TagFilterTest {
             put("one","two");
         }};
         TagFilter tf = new TagFilter("one");
-        assertThat(tf.matches(itemtags)).isTrue();
+        TagFilter.Result result = tf.matches(itemtags);
+        assertThat(result.matched()).isTrue();
 
         Map<String,String> itemtags2 = new HashMap<String,String>() {{
             put("one",null);
         }};
-        assertThat(tf.matches(itemtags2)).isTrue();
+        assertThat(tf.matches(itemtags2).matched()).isTrue();
     }
 
 
@@ -84,7 +85,8 @@ public class TagFilterTest {
             put("one","four");
         }};
         TagFilter tf = new TagFilter("one:two");
-        assertThat(tf.matches(itemtags)).isFalse();
+        TagFilter.Result result = tf.matches(itemtags);
+        assertThat(result.matched()).isFalse();
     }
 
     @Test
@@ -93,7 +95,7 @@ public class TagFilterTest {
             put("one","four");
         }};
         TagFilter tf = new TagFilter("one:four");
-        assertThat(tf.matches(itemtags)).isTrue();
+        assertThat(tf.matches(itemtags).matched()).isTrue();
     }
 
     @Test
@@ -102,11 +104,35 @@ public class TagFilterTest {
             put("one","four-five-six");
         }};
         TagFilter tfLeft = new TagFilter("one:'four-.*'");
-        assertThat(tfLeft.matches(itemtags)).isTrue();
+        assertThat(tfLeft.matches(itemtags).matched()).isTrue();
         TagFilter tfInner = new TagFilter("one:'.*-five-.*'");
-        assertThat(tfInner.matches(itemtags)).isTrue();
+        assertThat(tfInner.matches(itemtags).matched()).isTrue();
         TagFilter tfRight = new TagFilter("one:'.*-six'");
-        assertThat(tfRight.matches(itemtags)).isTrue();
+        assertThat(tfRight.matches(itemtags).matched()).isTrue();
+    }
+
+    public void testMatchingDetails() {
+        Tagged tagged = new Tagged() {
+            @Override
+            public Map<String, String> getTags() {
+                return new HashMap<String,String>() {{
+                    put("one","four-five-six");
+                    put("two","three-seven-nine");
+                    put("five",null);
+                    put("six", null);
+                }};
+            }
+        };
+
+        TagFilter tfLeft = new TagFilter("one:'four-.*' five two seven six=again ");
+        TagFilter.Result result = tfLeft.matchesTaggedResult(tagged);
+        assertThat(result.matched()).isFalse();
+        System.out.println(result.getLog());
+        assertThat(result.getLog()).contains("filter(one:four-.*) tag(one:four-five-six): matched pattern");
+        assertThat(result.getLog()).contains("filter(five) tag(five): matched names");
+        assertThat(result.getLog()).contains("filter(seven) tag(): did not match");
+        assertThat(result.getLog()).contains("filter(six:again) tag(six): null tag value did not match");
+
     }
 
     @Test
@@ -115,7 +141,7 @@ public class TagFilterTest {
             put("one","four-five-six");
         }};
         TagFilter tf = new TagFilter("one:'five'");
-        assertThat(tf.matches(itemtags)).isFalse();
+        assertThat(tf.matches(itemtags).matched()).isFalse();
     }
 
 }

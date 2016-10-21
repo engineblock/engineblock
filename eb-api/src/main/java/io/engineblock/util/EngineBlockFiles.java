@@ -32,7 +32,7 @@ public class EngineBlockFiles {
         Optional<InputStream> optionalStreamOrFile = findOptionalStreamOrFile(basename, extension, searchPaths);
         return optionalStreamOrFile.orElseThrow(() -> new RuntimeException(
                 "Unable to find " + basename + " with extension " + extension + " in file system or in classpath, with"
-                + "search paths: " + Arrays.stream(searchPaths).collect(Collectors.joining(","))
+                + " search paths: " + Arrays.stream(searchPaths).collect(Collectors.joining(","))
         ));
     }
 

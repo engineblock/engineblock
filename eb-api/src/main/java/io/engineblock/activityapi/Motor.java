@@ -50,6 +50,7 @@ public interface Motor extends Runnable, Stoppable {
      * Get a description of the current slot run status.
      * @return - a value from the {@link SlotState} enum
      */
-    SlotState getSlotState();
+    SlotStateTracker getSlotStateTracker();
 
+//    SlotState getSlotState();
 }
