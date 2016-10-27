@@ -17,6 +17,9 @@
 
 package io.engineblock.activityapi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -25,6 +28,12 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class SlotStateTracker {
     private final AtomicReference<SlotState> slotState = new AtomicReference<>(SlotState.Initialized);
+    private final static Logger logger = LoggerFactory.getLogger(SlotStateTracker.class);
+    private final long slotId;
+
+    public SlotStateTracker(long slotId) {
+        this.slotId = slotId;
+    }
 
     public SlotState getSlotState() {
         return slotState.get();
@@ -51,7 +60,11 @@ public class SlotStateTracker {
         if (!from.canTransitionTo(to)) {
             throw new RuntimeException("Invalid transition from " + from + " to " + to);
         }
-        slotState.compareAndSet(from, to);
+        while (!slotState.compareAndSet(from, to)) {
+            logger.trace("retrying transition from:" + from + " to:" + to);
+        }
+        logger.trace("TRANSITION[" + slotId + "]: " + from + " ==> " + to);
+
     }
 
 

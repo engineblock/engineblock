@@ -148,8 +148,8 @@ public class Scenario implements Callable<Result> {
                 throw new RuntimeException("Non-Script error while running scenario:" + o.getMessage(), o);
             }
         }
-        logger.info("Shutting down scenario executors.");
-        scenarioController.awaitCompletion(864000000);
+        logger.info("Awaiting completion of scenario for a very long time.");
+        scenarioController.awaitCompletion(86400*365*1000);
 
     }
 

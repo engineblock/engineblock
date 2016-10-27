@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.extensions.example;
+package io.engineblock.extensions.fileaccess;
 
 import com.codahale.metrics.MetricRegistry;
 import io.engineblock.extensions.SandboxPluginData;
@@ -24,23 +24,19 @@ import org.slf4j.Logger;
 import javax.script.ScriptContext;
 
 @com.google.auto.service.AutoService(SandboxPluginData.class)
-public class ExamplePluginData implements SandboxPluginData<ExamplePlugin> {
-
+public class FileAccessPluginData implements SandboxPluginData<FileAccessPluginData> {
     @Override
     public String getDescription() {
-        return "This is an example of a dynamically loadable script extension. It just adds two ints when" +
-                "you call the getSum(...) method.";
+        return "Allows for convenient access to local files.";
     }
 
     @Override
-    public ExamplePlugin getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
-        logger.info("creating a new ExampleSandboxExtension");
-        return new ExamplePlugin();
+    public FileAccessPluginData getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+        return new FileAccess();
     }
 
     @Override
     public String getBaseVariableName() {
-        return "adder";
+        return "files";
     }
-
 }

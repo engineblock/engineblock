@@ -1,2 +1,2 @@
-var sum= summer.getSum(12,34);
+var sum= adder.getSum(12,34);
 print('sum is ' + sum);
