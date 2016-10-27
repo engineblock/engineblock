@@ -79,4 +79,10 @@ public class StrInterpolaterTest {
         assertThat(a).isEqualTo("bval1");
     }
 
+    @Test
+    public void shouldWorkWithOddCharacters() {
+        String a = interp.apply("<<unchanged:{'parm1':'val1',parm2:val2, parm3: 'val3'}>>");
+        assertThat(a).isEqualTo("{'parm1':'val1',parm2:val2, parm3: 'val3'}");
+    }
+
 }

@@ -30,7 +30,7 @@ import java.util.function.Function;
 public class StrInterpolater implements Function<String, String> {
 
     private MultiMap multimap = new MultiMap();
-    private StrSubstitutor substitutor= new StrSubstitutor(multimap,"<<",">>",'\\',",");
+    private StrSubstitutor substitutor= new StrSubstitutor(multimap,"<<",">>",'\\');
 
     public StrInterpolater(ActivityDef... activityDefs) {
         Arrays.asList(activityDefs).stream()
