@@ -144,4 +144,13 @@ public class TagFilterTest {
         assertThat(tf.matches(itemtags).matched()).isFalse();
     }
 
+    @Test
+    public void testAlternation() {
+        Map<String,String> itemtags = new HashMap<String,String>() {{
+            put("one","four-five-six");
+        }};
+        TagFilter tf = new TagFilter("one:'four.*|seven'");
+        assertThat(tf.matches(itemtags).matched()).isTrue();
+    }
+
 }

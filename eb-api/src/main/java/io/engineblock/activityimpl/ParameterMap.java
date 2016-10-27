@@ -281,7 +281,6 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
         String[] splitAtSemi = encodedParams.split(";");
 
-
         for (int wordidx = 0; wordidx < splitAtSemi.length; wordidx++) {
 
             if (!splitAtSemi[wordidx].contains("=")) {
