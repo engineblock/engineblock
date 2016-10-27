@@ -17,10 +17,7 @@
 
 package io.engineblock.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
@@ -32,13 +29,14 @@ public class EngineBlockFiles {
         Optional<InputStream> optionalStreamOrFile = findOptionalStreamOrFile(basename, extension, searchPaths);
         return optionalStreamOrFile.orElseThrow(() -> new RuntimeException(
                 "Unable to find " + basename + " with extension " + extension + " in file system or in classpath, with"
-                + " search paths: " + Arrays.stream(searchPaths).collect(Collectors.joining(","))
+                        + " search paths: " + Arrays.stream(searchPaths).collect(Collectors.joining(","))
         ));
     }
 
     public static Optional<InputStream> findOptionalStreamOrFile(String basename, String extension, String... searchPaths) {
 
-        String filename = (basename.endsWith("." + extension)) ? basename : basename + "." + extension;
+        boolean needsExtension = (extension != null && !extension.isEmpty() && !basename.endsWith("." + extension));
+        String filename = basename + (needsExtension ? "." + extension : "" );
 
         ArrayList<String> paths = new ArrayList<String>() {{
             add(filename);
@@ -61,6 +59,15 @@ public class EngineBlockFiles {
         }
 
         return Optional.ofNullable(stream);
+    }
 
+    public static String readFile(String basename) {
+        InputStream requiredStreamOrFile = findRequiredStreamOrFile(basename, "");
+        try (BufferedReader buffer = new BufferedReader((new InputStreamReader(requiredStreamOrFile)))) {
+            String filedata = buffer.lines().collect(Collectors.joining("\n"));
+            return filedata;
+        } catch (IOException ioe) {
+            throw new RuntimeException("Error while reading required file to string", ioe);
+        }
     }
 }

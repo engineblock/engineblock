@@ -58,7 +58,7 @@ public class EBCLIOptions {
     private String wantsActivityHelpFor;
     private boolean wantsActivityTypes = false;
     private boolean wantsBasicHelp = false;
-    private String reportGraphiteTo = "";
+    private String reportGraphiteTo = null;
     private String metricsPrefix = "engineblock.";
     private String wantsMetricsForActivity;
     private boolean wantsAdvancedHelp = false;
@@ -283,7 +283,7 @@ public class EBCLIOptions {
 
         public String toString() {
             return "type:" + cmdType + ";spec=" + cmdSpec
-                    + ((cmdArgs != null) ? "cmdArgs" + cmdArgs.toString() : "");
+                    + ((cmdArgs != null) ? ";cmdArgs=" + cmdArgs.toString() : "");
         }
     }
 

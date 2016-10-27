@@ -35,6 +35,16 @@ public class EBCLI {
     public void run(String[] args) {
         EBCLIOptions options = new EBCLIOptions(args);
 
+        if (options.wantsBasicHelp()) {
+            System.out.println(loadHelpFile("commandline.md"));
+            System.exit(0);
+        }
+
+        if (options.wantsAdvancedHelp()) {
+            System.out.println(loadHelpFile("advancedhelp.md"));
+            System.exit(0);
+        }
+
         if (options.wantsVersion()) {
             System.out.println(new VersionInfo().getVersion());
             System.out.println(new VersionInfo().getArtifactCoordinates());
@@ -46,21 +56,10 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsBasicHelp()) {
-            System.out.println(loadHelpFile("commandline.md"));
+        if (options.wantsActivityHelp()) {
+            String activityHelpMarkdown = ActivityDocInfo.forActivityType(options.wantsActivityHelpFor());
+            System.out.println(activityHelpMarkdown);
             System.exit(0);
-        }
-
-        if (options.wantsAdvancedHelp()) {
-            System.out.println(loadHelpFile("advancedhelp.md"));
-            System.exit(0);
-        }
-
-        if (options.wantsReportGraphiteTo()!=null) {
-            MetricReporters reporters = MetricReporters.getInstance();
-            reporters.addRegistry("workloads",ActivityMetrics.getMetricRegistry());
-            reporters.addGraphite(options.wantsReportGraphiteTo(),options.wantsMetricsPrefix());
-            reporters.start(10,10);
         }
 
         if (options.wantsMetricsForActivity() != null) {
@@ -70,10 +69,11 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsActivityHelp()) {
-            String activityHelpMarkdown = ActivityDocInfo.forActivityType(options.wantsActivityHelpFor());
-            System.out.println(activityHelpMarkdown);
-            System.exit(0);
+        if (options.wantsReportGraphiteTo()!=null) {
+            MetricReporters reporters = MetricReporters.getInstance();
+            reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
+            reporters.addGraphite(options.wantsReportGraphiteTo(),options.wantsMetricsPrefix());
+            reporters.start(10,10);
         }
 
         ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel());
@@ -97,7 +97,7 @@ public class EBCLI {
         String script = EBCLIScriptAssembly.assembleScript(options);
         if (options.wantsShowScript()) {
             System.out.println("// Script");
-            System.out.print(script);
+            System.out.println(script);
             System.exit(0);
         }
 

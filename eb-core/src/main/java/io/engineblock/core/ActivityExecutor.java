@@ -43,31 +43,21 @@ public class ActivityExecutor implements ParameterMap.Listener {
     private final List<Motor> motors = new ArrayList<>();
     private final Activity activity;
     private final ActivityDef activityDef;
-    //    private ActivityDef activityDef;
     private ExecutorService executorService;
-//    private MotorDispenser activityMotorDispenser;
     private SlotState intendedState = SlotState.Initialized;
 
     public ActivityExecutor(Activity activity) {
         this.activity = activity;
         this.activityDef = activity.getActivityDef();
-//        this.activityMotorDispenser = activity.getMotorDispenser();
         executorService = new ThreadPoolExecutor(
                 0, Integer.MAX_VALUE,
                 0L, TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
                 new IndexedThreadFactory(activity.getAlias())
         );
-//        ScopedCachingGeneratorSource gi = new ScopedGeneratorCache(
-//                new GeneratorInstantiator(), RuntimeScope.activity
-//        );
         activity.getActivityDef().getParams().addListener(this);
     }
 
-//    public void setActivityMotorDispenser(MotorDispenser activityMotorDispenser) {
-//        this.activityMotorDispenser = activityMotorDispenser;
-//    }
-//
     /**
      * <p>True-up the number of motor instances known to the executor. Start all non-running motors.
      * The protocol between the motors and the executor should be safe as long as each state change
@@ -81,7 +71,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
         try {
             activity.initActivity();
         } catch (Exception e) {
-            logger.error("There was an error starting activity:" + activityDef.getAlias(), e);
+            logger.error("There was an error starting activity:" + activityDef.getAlias());
             throw new RuntimeException(e);
         }
         this.intendedState=SlotState.Running;
@@ -190,7 +180,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
     private synchronized void adjustToActivityDef(ActivityDef activityDef) {
         logger.trace(">-pre-adjust->" + getSlotStatus());
 
-        adjustToIntendedActivityState();
+//        adjustToIntendedActivityState();
 
         // Stop and remove extra motor slots
         while (motors.size() > activityDef.getThreads()) {
@@ -218,6 +208,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
     }
 
     private void adjustToIntendedActivityState() {
+//        logger.info("ADJUSTING to INTENDED " + intendedState);
         switch (intendedState) {
             case Starting:
                 break;

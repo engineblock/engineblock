@@ -44,8 +44,8 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private Action action;
     private Timer timer;
     private ActivityDef activityDef;
-    private SlotStateTracker slotStateTracker = new SlotStateTracker();
-    private AtomicReference<SlotState> slotState = slotStateTracker.getAtomicSlotState();
+    private SlotStateTracker slotStateTracker;
+    private AtomicReference<SlotState> slotState;
 
     /**
      * Create an ActivityMotor.
@@ -61,6 +61,8 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         this.activityDef = activityDef;
         this.slotId = slotId;
         setInput(input);
+        slotStateTracker = new SlotStateTracker(slotId);
+        slotState = slotStateTracker.getAtomicSlotState();
     }
 
     /**

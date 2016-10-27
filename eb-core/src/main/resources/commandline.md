@@ -76,7 +76,6 @@ for this name.
     --session-name <name>
 
 ### Console Options ###
-
 Increase console logging levels: (Default console logging level is *warning*)
 
     -v         (info)         
@@ -86,9 +85,3 @@ Increase console logging levels: (Default console logging level is *warning*)
 Show version, long form, with artifact coordinates.
 
     --version
-
-
-
-
-
-

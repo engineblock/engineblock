@@ -140,7 +140,7 @@ public class TagFilter {
                 } else if (filterpattern.matcher(itemval).matches()) {
                     log.add("(☑,☑) " + detail + ": matched pattern '" + filterpattern + "'");
                 } else {
-                    log.add("(☑,☐) " + detail + ": did not match   '" + filterpattern + "'");
+                    log.add("(☑,☐) " + detail + ": did not match '" + filterpattern + "'");
                     matched = false;
                 }
 
