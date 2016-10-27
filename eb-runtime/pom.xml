@@ -7,7 +7,7 @@
     <parent>
         <artifactId>project-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>1.0.33</version>
+        <version>1.0.34-SNAPSHOT</version>
         <relativePath>../project-defaults</relativePath>
     </parent>
 
@@ -22,13 +22,13 @@
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>at-diag</artifactId>
-            <version>1.0.33</version>
+            <version>1.0.34-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-extensions</artifactId>
-            <version>1.0.33</version>
+            <version>1.0.34-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -47,7 +47,7 @@
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-core</artifactId>
-            <version>1.0.33</version>
+            <version>1.0.34-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
