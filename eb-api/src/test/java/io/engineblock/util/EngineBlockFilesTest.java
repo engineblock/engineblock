@@ -30,7 +30,13 @@ public class EngineBlockFilesTest {
     @Test
     public void testNestedClasspathLoading() {
         Optional<InputStream> optionalStreamOrFile = EngineBlockFiles.findOptionalStreamOrFile("nested/testfile", "txt", "activities");
-        assertThat(optionalStreamOrFile.isPresent()).isTrue();
+        assertThat(optionalStreamOrFile).isPresent();
     }
 
+    @Test
+    public void testUrlResourceLoading() {
+        String url="https://google.com/";
+        Optional<InputStream> inputStream = EngineBlockFiles.getInputStream(url);
+        assertThat(inputStream).isPresent();
+    }
 }
