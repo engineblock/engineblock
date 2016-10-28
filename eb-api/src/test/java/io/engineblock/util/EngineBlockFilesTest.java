@@ -34,6 +34,13 @@ public class EngineBlockFilesTest {
     }
 
     @Test
+    public void testUrlResourceSearchSanity() {
+        String url="https://google.com/robots";
+        Optional<InputStream> inputStream = EngineBlockFiles.findOptionalStreamOrFile(url,"txt","activity");
+        assertThat(inputStream).isPresent();
+    }
+
+    @Test
     public void testUrlResourceLoading() {
         String url="https://google.com/";
         Optional<InputStream> inputStream = EngineBlockFiles.getInputStream(url);

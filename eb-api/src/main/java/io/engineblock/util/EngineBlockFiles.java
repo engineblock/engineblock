@@ -41,8 +41,11 @@ public class EngineBlockFiles {
 
         ArrayList<String> paths = new ArrayList<String>() {{
             add(filename);
+            if (!isRemote(basename)) {
             addAll(Arrays.stream(searchPaths).map(s -> s + File.separator + filename)
                     .collect(Collectors.toCollection(ArrayList::new)));
+            }
+
         }};
 
         for (String path : paths) {
@@ -55,10 +58,15 @@ public class EngineBlockFiles {
         return Optional.empty();
     }
 
+    private static boolean isRemote(String path) {
+        return (path.toLowerCase().startsWith("http:")
+                || path.toLowerCase().startsWith("https:"));
+    }
+
     public static Optional<InputStream> getInputStream(String path) {
 
         // URLs, if http: or https:
-        if (path.toLowerCase().startsWith("http:") || path.toLowerCase().startsWith("https:")) {
+        if (isRemote(path)) {
             URL url;
             try {
                 url = new URL(path);
