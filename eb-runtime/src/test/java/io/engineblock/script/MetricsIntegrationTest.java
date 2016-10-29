@@ -33,10 +33,10 @@ public class MetricsIntegrationTest {
     public void testHistogramLogger() {
         ActivityDef ad = ActivityDef.parseActivityDef("alias=foo;type=diag");
         Histogram testhistogram = ActivityMetrics.histogram(ad, "testhistogram");
-        ActivityMetrics.addHistoLogger("testsession", ".*","testhistolog");
+        ActivityMetrics.addHistoLogger("testsession", ".*","testhisto.log");
         testhistogram.update(400);
         testhistogram.getSnapshot();
-        File logfile = new File("testhistolog");
+        File logfile = new File("testhisto.log");
         assertThat(logfile).exists();
         assertThat(logfile.lastModified()).isGreaterThan(System.currentTimeMillis()-10000);
 

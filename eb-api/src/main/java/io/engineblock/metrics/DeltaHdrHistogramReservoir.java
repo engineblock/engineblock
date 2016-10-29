@@ -98,6 +98,7 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, HistoLogger 
         DeltaHistogramSnapshot snapshot = new DeltaHistogramSnapshot(delta);
 
         if (attachedLoggers != null) {
+            delta.setTag(metricName);
             for (HistogramLogWriter attachedLogger : attachedLoggers) {
                 attachedLogger.outputIntervalHistogram(delta);
             }
