@@ -69,6 +69,10 @@ Specify the metrics name prefix for graphite reporting
 
     --metrics-prefix <metrics-prefix>
 
+Log all HDR histogram data to a file
+
+    --log-histograms histodata.log
+
 Name the current session, for logfile naming, etc
 By default, this will be "scenario-TIMESTAMP", and a logfile will be created
 for this name.
