@@ -159,6 +159,7 @@ public class EBCLIOptions {
                     arglist.removeFirst();
                     String logto = arglist.removeFirst();
                     histoLoggerConfigs.add(logto);
+                    break;
                 case REPORT_GRAPHITE_TO:
                     arglist.removeFirst();
                     reportGraphiteTo = arglist.removeFirst();
