@@ -19,6 +19,8 @@ package io.engineblock.activityimpl.motor;
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.*;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityapi.Stoppable;
+import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

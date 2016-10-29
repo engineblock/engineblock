@@ -60,10 +60,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.mpierce.metrics.reservoir</groupId>
-            <artifactId>hdrhistogram-metrics-reservoir</artifactId>
-            <version>1.1.0</version>
-            <type>jar</type>
+            <groupId>org.hdrhistogram</groupId>
+            <artifactId>HdrHistogram</artifactId>
+            <version>2.1.9</version>
         </dependency>
 
         <dependency>

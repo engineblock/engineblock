@@ -15,6 +15,8 @@
 
 package io.engineblock.activityapi;
 
+import io.engineblock.activityimpl.SlotStateTracker;
+
 /**
  * The core threading harness within an activity.
  */

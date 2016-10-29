@@ -18,7 +18,6 @@
 package io.engineblock.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,11 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 @Api("/scenarios")
 @Path("/scenarios")

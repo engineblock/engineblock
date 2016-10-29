@@ -25,11 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptContext;
+import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 public class ActivityMetrics {
 
@@ -97,8 +99,9 @@ public class ActivityMetrics {
      * @return the timer, perhaps a different one if it has already been registered
      */
     public static Timer timer(ActivityDef activityDef, String name) {
+        String fullMetricName = activityDef.getAlias() + "." + name;
         Timer registeredTimer = (Timer) register(activityDef, name, () ->
-                new NicerTimer(new DeltaHdrHistogramReservoir(new Recorder(3))));
+                new NicerTimer(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, new Recorder(4))));
         return registeredTimer;
     }
 
@@ -112,8 +115,9 @@ public class ActivityMetrics {
      * @return the histogram, perhaps a different one if it has already been registered
      */
     public static Histogram histogram(ActivityDef activityDef, String name) {
+        String fullMetricName = activityDef.getAlias() + "." + name;
         return (Histogram) register(activityDef, name, () ->
-                new NicerHistogram(new DeltaHdrHistogramReservoir(new Recorder(3))));
+                new NicerHistogram(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, new Recorder(4))));
     }
 
     /**
@@ -180,6 +184,24 @@ public class ActivityMetrics {
 
     public static MetricRegistry getMetricRegistry() {
         return get();
+    }
+
+    /**
+     * Add a histogram logger to matching metrics in this JVM instance.
+     * @param sessionName The name for the session to be annotated in the histogram log
+     * @param pattern A regular expression pattern to filter out metric names for logging
+     * @param filename A file to log the histgram data in
+     */
+    public static void addHistoLogger(String sessionName, String pattern, String filename) {
+        if (filename.contains("_SESSION_")) {
+            filename = filename.replace("_SESSION_",sessionName);
+        }
+        Pattern compiledPattern = Pattern.compile(pattern);
+        File logfile = new File(filename);
+
+        HistoLoggerConfig histoLoggerConfig = new HistoLoggerConfig(sessionName, logfile, compiledPattern);
+        logger.debug("attaching " + histoLoggerConfig + " to the metrics registry.");
+        get().addListener(histoLoggerConfig);
     }
 
     private static interface MetricProvider {

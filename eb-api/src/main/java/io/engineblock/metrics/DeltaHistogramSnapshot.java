@@ -21,7 +21,6 @@ import com.codahale.metrics.Snapshot;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramIterationValue;
 
-import javax.annotation.Nonnull;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -31,7 +30,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 final class DeltaHistogramSnapshot extends Snapshot {
     private final Histogram histogram;
 
-    DeltaHistogramSnapshot(@Nonnull Histogram histogram) {
+    DeltaHistogramSnapshot(Histogram histogram) {
         this.histogram = histogram;
     }
 

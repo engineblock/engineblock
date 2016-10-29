@@ -31,9 +31,4 @@ public class ScenarioTest {
         assertThat(env.getIOLog().get().get(0)).contains("loaded script environment...");
     }
 
-    @Test
-    public void shouldUseEnvAdapter() {
-
-    }
-
 }

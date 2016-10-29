@@ -6,8 +6,8 @@ import io.engineblock.core.ActivityTypeFinder;
 import io.engineblock.core.ScenariosResults;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricReporters;
-import io.engineblock.script.MetricsMapper;
 import io.engineblock.script.Scenario;
+import io.engineblock.script.MetricsMapper;
 import io.engineblock.script.ScenariosExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +76,16 @@ public class EBCLI {
             reporters.start(10,10);
         }
 
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String sessionName = "scenario-" + timestamp;
+        if (!options.getSessionName().isEmpty()) {
+            sessionName = options.getSessionName();
+        }
+
+        for (EBCLIOptions.HistoConfig histoConfig : options.getHistoLoggerConfigs()) {
+            ActivityMetrics.addHistoLogger(sessionName, histoConfig.pattern, histoConfig.file);
+        }
+
         ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel());
         // intentionally not shown for warn-only
         logger.info("console logging level is " + options.wantsConsoleLogLevel());
@@ -85,11 +95,6 @@ public class EBCLI {
             System.exit(0);
         }
 
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        String sessionName = "scenario-" + timestamp;
-        if (!options.getSessionName().isEmpty()) {
-            sessionName = options.getSessionName();
-        }
 
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
