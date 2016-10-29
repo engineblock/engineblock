@@ -18,20 +18,23 @@
 package io.engineblock.metrics;
 
 import com.codahale.metrics.Timer;
+import org.HdrHistogram.HistogramLogWriter;
 
-public class NicerTimer extends Timer implements DeltaSnapshotter {
+public class NicerTimer extends Timer implements DeltaSnapshotter, HistoLogger {
+    private final String metricName;
     private DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
-    private long cacheExpiry=0L;
+    private long cacheExpiry = 0L;
     private ConvenientSnapshot lastSnapshot;
 
-    public NicerTimer(DeltaHdrHistogramReservoir deltaHdrHistogramReservoir) {
+    public NicerTimer(String metricName, DeltaHdrHistogramReservoir deltaHdrHistogramReservoir) {
         super(deltaHdrHistogramReservoir);
+        this.metricName = metricName;
         this.deltaHdrHistogramReservoir = deltaHdrHistogramReservoir;
     }
 
     @Override
     public ConvenientSnapshot getSnapshot() {
-        if (System.currentTimeMillis()>=cacheExpiry) {
+        if (System.currentTimeMillis() >= cacheExpiry) {
             return new ConvenientSnapshot(deltaHdrHistogramReservoir.getSnapshot());
         } else {
             return new ConvenientSnapshot(deltaHdrHistogramReservoir.getLastSnapshot());
@@ -50,5 +53,15 @@ public class NicerTimer extends Timer implements DeltaSnapshotter {
     public ConvenientSnapshot getDeltaSnapshot(long cacheTimeMillis) {
         this.cacheExpiry = System.currentTimeMillis() + cacheTimeMillis;
         return new ConvenientSnapshot(deltaHdrHistogramReservoir.getSnapshot());
+    }
+
+    @Override
+    public synchronized void attachLogWriter(HistogramLogWriter logger) {
+        deltaHdrHistogramReservoir.attachLogWriter(logger);
+    }
+
+    @Override
+    public synchronized void detachLogWriter(HistogramLogWriter logger) {
+        deltaHdrHistogramReservoir.detachLogWriter(logger);
     }
 }

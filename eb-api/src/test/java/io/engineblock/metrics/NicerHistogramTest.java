@@ -17,7 +17,6 @@
 
 package io.engineblock.metrics;
 
-import org.HdrHistogram.Recorder;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +25,7 @@ public class NicerHistogramTest {
 
     @Test
     public void testNicerHistogramValues() {
-        NicerHistogram nh = new NicerHistogram(new DeltaHdrHistogramReservoir(new Recorder(3)));
+        NicerHistogram nh = new NicerHistogram("testhisto",new DeltaHdrHistogramReservoir("testhisto"));
         for (int i = 1; i <= 100; i++) {
             nh.update(i);
         }

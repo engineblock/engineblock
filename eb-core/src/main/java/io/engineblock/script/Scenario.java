@@ -76,23 +76,22 @@ public class Scenario implements Callable<Result> {
     }
 
     private void init() {
-        scriptEngine = engineManager.getEngineByName("nashorn");
 
+        MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
+
+        scriptEngine = engineManager.getEngineByName("nashorn");
         scriptEnv = new ScriptEnv(scenarioController);
         scriptEngine.setContext(scriptEnv);
-
         scenarioController = new ScenarioController();
 
         scriptEngine.put("scenario", scenarioController);
-
         scriptEngine.put("activities", new ScenarioBindings(scenarioController));
-
-        scriptEngine.put("metrics", new MetricRegistryBindings(ActivityMetrics.getMetricRegistry()));
+        scriptEngine.put("metrics", new MetricRegistryBindings(metricRegistry));
 
         for (SandboxPluginData extensionDescriptor : SandboxExtensionFinder.findAll()) {
             org.slf4j.Logger extensionLogger =
                     LoggerFactory.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
-            MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
+
             Object extensionObject = extensionDescriptor.getExtensionObject(
                     extensionLogger,
                     metricRegistry,
@@ -111,8 +110,11 @@ public class Scenario implements Callable<Result> {
 
             org.slf4j.Logger extensionLogger =
                     LoggerFactory.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
-            MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
-            Object extensionObject = extensionDescriptor.getExtensionObject(extensionLogger, metricRegistry, scriptEnv);
+            Object extensionObject = extensionDescriptor.getExtensionObject(
+                    extensionLogger,
+                    metricRegistry,
+                    scriptEnv
+            );
             logger.debug("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
                     " class=" + extensionObject.getClass().getSimpleName());
             scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
@@ -148,8 +150,9 @@ public class Scenario implements Callable<Result> {
                 throw new RuntimeException("Non-Script error while running scenario:" + o.getMessage(), o);
             }
         }
-        logger.info("Awaiting completion of scenario for a very long time.");
-        scenarioController.awaitCompletion(86400*365*1000);
+        int awaitCompletionTime = 86400*365*1000;
+        logger.info("Awaiting completion of scenario for " + awaitCompletionTime + " millis.");
+        scenarioController.awaitCompletion(awaitCompletionTime);
 
     }
 

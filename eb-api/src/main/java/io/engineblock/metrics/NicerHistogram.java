@@ -18,16 +18,19 @@
 package io.engineblock.metrics;
 
 import com.codahale.metrics.Histogram;
+import org.HdrHistogram.HistogramLogWriter;
 
 
-public class NicerHistogram extends Histogram implements DeltaSnapshotter {
+public class NicerHistogram extends Histogram implements DeltaSnapshotter, HistoLogger {
 
     private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
     private long cacheExpiryMillis = 0L;
     private long cacheTimeMillis = 0L;
+    private String metricName;
 
-    public NicerHistogram(DeltaHdrHistogramReservoir hdrHistogramReservoir) {
+    public NicerHistogram(String metricName, DeltaHdrHistogramReservoir hdrHistogramReservoir) {
         super(hdrHistogramReservoir);
+        this.metricName = metricName;
         this.hdrDeltaReservoir = hdrHistogramReservoir;
     }
 
@@ -35,7 +38,6 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter {
     public DeltaSnapshotReader getDeltaReader() {
         return new DeltaSnapshotReader(this);
     }
-
 
     /**
      * Only return a new snapshot form current reservoir data if the cached one has expired.
@@ -46,17 +48,27 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter {
         if (System.currentTimeMillis()<cacheExpiryMillis) {
             return new ConvenientSnapshot(hdrDeltaReservoir.getLastSnapshot());
         } else {
-            return new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());
-        }
+            return new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());        }
     }
 
     public ConvenientSnapshot getDeltaSnapshot(long cacheTimeMillis) {
         this.cacheTimeMillis= cacheTimeMillis;
-        cacheExpiryMillis = System.currentTimeMillis() + cacheTimeMillis;
-        return new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());
+        cacheExpiryMillis = System.currentTimeMillis() + this.cacheTimeMillis;
+        ConvenientSnapshot convenientSnapshot = new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());
+        return convenientSnapshot;
     }
 
     public ConvenientSnapshot getTotalSnapshot() {
         return new ConvenientSnapshot(hdrDeltaReservoir.getTotalSnapshot());
+    }
+
+    @Override
+    public synchronized void attachLogWriter(HistogramLogWriter logger) {
+        hdrDeltaReservoir.attachLogWriter(logger);
+    }
+
+    @Override
+    public synchronized void detachLogWriter(HistogramLogWriter logger) {
+        hdrDeltaReservoir.detachLogWriter(logger);
     }
 }

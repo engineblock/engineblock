@@ -125,17 +125,4 @@ public class MetricsMapper {
         }
     };
 
-//    private static String getObjectSummary(Object o) {
-//        StringBuilder sb = new StringBuilder();
-//        String methodSummary = Arrays.stream(o.getClass().getMethods())
-//                .filter(m -> m.getName().startsWith("get"))
-//                .filter(m -> m.getParameterCount() == 0)
-////                .filter(m -> metricsElements.contains(m.getReturnType()))
-//                .map(Method::getName)
-//                .map(mn -> mn.substring(3, 4).toLowerCase() + mn.substring(4))
-//                .filter(s -> !s.equals("class"))
-//                .collect(Collectors.joining(","));
-//        sb.append(methodSummary);
-//        return sb.toString();
-//    }
 }

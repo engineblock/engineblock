@@ -18,6 +18,7 @@
 package io.engineblock.util;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
@@ -36,29 +37,63 @@ public class EngineBlockFiles {
     public static Optional<InputStream> findOptionalStreamOrFile(String basename, String extension, String... searchPaths) {
 
         boolean needsExtension = (extension != null && !extension.isEmpty() && !basename.endsWith("." + extension));
-        String filename = basename + (needsExtension ? "." + extension : "" );
+        String filename = basename + (needsExtension ? "." + extension : "");
 
         ArrayList<String> paths = new ArrayList<String>() {{
             add(filename);
+            if (!isRemote(basename)) {
             addAll(Arrays.stream(searchPaths).map(s -> s + File.separator + filename)
                     .collect(Collectors.toCollection(ArrayList::new)));
+            }
+
         }};
 
-        InputStream stream = null;
         for (String path : paths) {
-            try {
-                stream = new FileInputStream(path);
-                break;
-            } catch (FileNotFoundException ignored) {
-            }
-            ClassLoader classLoader = EngineBlockFiles.class.getClassLoader();
-            stream = classLoader.getResourceAsStream(path);
-            if (stream != null) {
-                break;
+            Optional<InputStream> stream = getInputStream(path);
+            if (stream.isPresent()) {
+                return stream;
             }
         }
 
-        return Optional.ofNullable(stream);
+        return Optional.empty();
+    }
+
+    private static boolean isRemote(String path) {
+        return (path.toLowerCase().startsWith("http:")
+                || path.toLowerCase().startsWith("https:"));
+    }
+
+    public static Optional<InputStream> getInputStream(String path) {
+
+        // URLs, if http: or https:
+        if (isRemote(path)) {
+            URL url;
+            try {
+                url = new URL(path);
+                InputStream inputStream = url.openStream();
+                if (inputStream!=null) {
+                    return Optional.of(inputStream);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        // Files
+        try {
+            InputStream stream = new FileInputStream(path);
+            return Optional.of(stream);
+        } catch (FileNotFoundException ignored) {
+        }
+
+        // Classpath
+        ClassLoader classLoader = EngineBlockFiles.class.getClassLoader();
+        InputStream stream = classLoader.getResourceAsStream(path);
+        if (stream != null) {
+            return Optional.of(stream);
+        }
+
+        return Optional.empty();
     }
 
     public static String readFile(String basename) {

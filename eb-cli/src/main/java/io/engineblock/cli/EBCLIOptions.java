@@ -26,6 +26,7 @@ public class EBCLIOptions {
     private static final String ACTIVITY_TYPES = "--list-activity-types";
     private static final String WANTS_VERSION_LONG = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
+    private static final String LOG_HISTO = "--log-histograms";
 
     // Execution
     private static final String ACTIVITY = "activity";
@@ -65,6 +66,7 @@ public class EBCLIOptions {
     private String sessionName = "";
     private boolean showScript = false;
     private Level consoleLevel = Level.WARN;
+    private List<String> histoLoggerConfigs = new ArrayList<String>();
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -153,6 +155,10 @@ public class EBCLIOptions {
                         wantsActivityHelpFor = arglist.removeFirst();
                     }
                     break;
+                case LOG_HISTO:
+                    arglist.removeFirst();
+                    String logto = arglist.removeFirst();
+                    histoLoggerConfigs.add(logto);
                 case REPORT_GRAPHITE_TO:
                     arglist.removeFirst();
                     reportGraphiteTo = arglist.removeFirst();
@@ -191,6 +197,10 @@ public class EBCLIOptions {
                     }
             }
         }
+    }
+
+    public List<HistoConfig> getHistoLoggerConfigs() {
+        return histoLoggerConfigs.stream().map(HistoConfig::new).collect(Collectors.toList());
     }
 
     public List<Cmd> getCommands() {
@@ -336,5 +346,28 @@ public class EBCLIOptions {
         return new Cmd(CmdType.valueOf(cmdType), activitydef.stream().map(s -> s + ";").collect(Collectors.joining()));
     }
 
+    public static class HistoConfig {
+        public String pattern;
+        public String file;
+        public HistoConfig(String histoLoggerSpec) {
+            String[] words = histoLoggerSpec.split(":");
+            switch (words.length) {
+                case 1:
+                    pattern = ".*";
+                    file = words[0];
+                    break;
+                case 2:
+                    pattern = words[0];
+                    file = words[1];
+                    break;
+                default:
+                    throw new RuntimeException(
+                            LOG_HISTO +
+                                    " options must be in either 'regex:filename' or 'filename' format"
+                    );
+            }
+        }
+
+    }
 
 }

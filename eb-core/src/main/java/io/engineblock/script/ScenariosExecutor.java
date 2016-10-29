@@ -25,10 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.security.InvalidParameterException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class ScenariosExecutor {
@@ -40,7 +37,9 @@ public class ScenariosExecutor {
 //    private LinkedHashMap<String, Future<Result>> submittedFutures = new LinkedHashMap<>();
 //    private LinkedHashMap<String, Scenario> submittedScenarios = new LinkedHashMap<>();
 
-    private ExecutorService executor = Executors.newFixedThreadPool(1);
+    private ExecutorService executor = new ThreadPoolExecutor(1,1,
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>());
     private String name;
 
     public ScenariosExecutor(String name) {

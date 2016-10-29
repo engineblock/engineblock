@@ -81,8 +81,8 @@ public class LinkedInputTest {
     public void microBenchDiffRate() {
         TargetRateInput fastInput = new TargetRateInput(ActivityDef.parseActivityDef("targetrate=10000000"));
         LinkedInput slowInput = new LinkedInput(ActivityDef.parseActivityDef("alias=asfast"),fastInput);
-        Timer fastInputTimer = new NicerTimer(new DeltaHdrHistogramReservoir());
-        Timer slowInputTimer = new NicerTimer(new DeltaHdrHistogramReservoir());
+        Timer fastInputTimer = new NicerTimer("fastinput", new DeltaHdrHistogramReservoir("fastinput"));
+        Timer slowInputTimer = new NicerTimer("slowinput", new DeltaHdrHistogramReservoir("slowinput"));
 
         long cycles=1000000;
         long updateAt=cycles / 10;

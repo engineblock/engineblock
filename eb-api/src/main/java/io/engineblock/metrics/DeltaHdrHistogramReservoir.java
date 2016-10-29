@@ -20,11 +20,13 @@ package io.engineblock.metrics;
 import com.codahale.metrics.Reservoir;
 import com.codahale.metrics.Snapshot;
 import org.HdrHistogram.Histogram;
+import org.HdrHistogram.HistogramLogWriter;
 import org.HdrHistogram.Recorder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.ThreadSafe;
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * A custom wrapping of snapshotting logic on the HdrHistogram. This histogram will always report the last histogram
@@ -32,32 +34,35 @@ import javax.annotation.concurrent.ThreadSafe;
  * This provides local snapshot timing, but with a consistent view for reporting channels about what those snapshots
  * most recently looked like.
  */
-@ThreadSafe
-public final class DeltaHdrHistogramReservoir implements Reservoir {
+public final class DeltaHdrHistogramReservoir implements Reservoir, HistoLogger {
+    private final static Logger logger = LoggerFactory.getLogger(DeltaHdrHistogramReservoir.class);
 
     private final Recorder recorder;
 
-    @GuardedBy("this")
     private Histogram runningTotals;
     private Histogram lastHistogram;
 
-    @GuardedBy("this")
-    @Nonnull
     private Histogram intervalHistogram;
+    private long intervalHistogramStartTime = System.currentTimeMillis();
+    private long intervalHistogramEndTime = System.currentTimeMillis();
+    private ArrayList<HistogramLogWriter> attachedLoggers;
+    private String metricName;
 
     /**
      * Create a reservoir with a default recorder. This recorder should be suitable for most usage.
+     * @param name the name to give to the reservoir, for logging purposes
      */
-    public DeltaHdrHistogramReservoir() {
-        this(new Recorder(2));
+    public DeltaHdrHistogramReservoir(String name) {
+        this(name, new Recorder(4));
     }
 
     /**
      * Create a reservoir with a user-specified recorder.
-     *
+     * @param name the name to give to the reservoir for logging purposes
      * @param recorder Recorder to use
      */
-    public DeltaHdrHistogramReservoir(Recorder recorder) {
+    public DeltaHdrHistogramReservoir(String name, Recorder recorder) {
+        this.metricName = name;
         this.recorder = recorder;
 
         /*
@@ -91,9 +96,22 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
         Histogram delta = getDataSinceLastSnapshotAndUpdate();
         lastHistogram = delta;
         DeltaHistogramSnapshot snapshot = new DeltaHistogramSnapshot(delta);
+
+        if (attachedLoggers != null) {
+            for (HistogramLogWriter attachedLogger : attachedLoggers) {
+                attachedLogger.outputIntervalHistogram(delta);
+            }
+            logger.trace(
+                    "wrote log histogram data for " + this.metricName + ": [" +
+                            new Date(intervalHistogramStartTime) + " - " +
+                            new Date(intervalHistogramEndTime) +
+                            " to " + attachedLoggers.size() + " loggers"
+            );
+
+        }
         return snapshot;
     }
-    
+
     /**
      * @return last histogram snapshot that was provided by {@link #getSnapshot()}
      */
@@ -103,6 +121,7 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
 
     /**
      * Get a histogram snapshot that spans the whole lifetime of this reservoir.
+     *
      * @return a histogram snapshot
      */
     public Snapshot getTotalSnapshot() {
@@ -112,12 +131,29 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
     /**
      * @return a copy of the accumulated state since the reservoir last had a snapshot
      */
-    @Nonnull
     private synchronized Histogram getDataSinceLastSnapshotAndUpdate() {
         intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
+        intervalHistogramStartTime = intervalHistogramEndTime;
+        intervalHistogramEndTime = System.currentTimeMillis();
+
         lastHistogram = intervalHistogram.copy();
         runningTotals.add(lastHistogram);
         return lastHistogram;
     }
 
+    @Override
+    public synchronized void attachLogWriter(HistogramLogWriter logger) {
+        if (attachedLoggers == null) {
+            attachedLoggers = new ArrayList<>();
+        }
+        attachedLoggers.add(logger);
+    }
+
+    @Override
+    public synchronized void detachLogWriter(HistogramLogWriter logger) {
+        attachedLoggers.remove(logger);
+        if (attachedLoggers.size() == 0) {
+            attachedLoggers = null;
+        }
+    }
 }
