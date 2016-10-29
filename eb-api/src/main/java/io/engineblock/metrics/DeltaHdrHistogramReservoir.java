@@ -99,6 +99,7 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, HistoLogger 
 
         if (attachedLoggers != null) {
             for (HistogramLogWriter attachedLogger : attachedLoggers) {
+                delta.setTag(metricName);
                 attachedLogger.outputIntervalHistogram(delta);
             }
             logger.trace(
