@@ -1,15 +1,13 @@
 @startuml
-[*] --> Initialized
+[*] -> Initialized
 
-state Cycling {
-Initialized --> Started : Run Thread
- Started --> Stopping : End of Input
- Started --> Stopping : Requested Stop
-
-}
-Started --> Stopped : No Remaining Input
-Stopping --> Stopped : Cycle Complete
-Stopped --> Finished : No Remaining Input Ever
-Finished -> [*]
+Initialized --> Starting : Stop Requested\n(set by executor)
+Starting --> Started : Executor started thread\n(signaled by Motor)
+Stopping --> Stopped : Cycle Complete\n(signaled by Motor)
+Started --> Stopping : Stop Requested\n(set by executor)
+Started --> Finished : No Remaining Input\n(signaled by Motor)
+Finished --> [*]
+Stopped --> Starting
+Stopped -> [*]
 
 @enduml

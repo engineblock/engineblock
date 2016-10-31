@@ -10,6 +10,7 @@ For more basic setup and sequencing needs, you can achive a fair degree of flexi
 As the command line is parsed, from left to right, the scenario script is built in an internal scripting buffer. Once the command line is fully parsed, this script is executed. Each of the commands below is effectively a macro for a snippet of script. It is important to remember that order is important.
 
 ## Command line format
+
 Newlines are not allowed when building scripts from the command line. As long as you follow the allowed forms below, you can simply string multiple commands together with spaces between. As usual, single word options without double dashes are commands, key=value style parameters apply to the previous command, and all other commands with --this-style are non-scripting options.
 
 ## Concurrency & Control

@@ -1,4 +1,7 @@
-# Understanding Slot Assembly
+# This is superceded with recent changes and needs to be rewritten
+## It is currently inaccurate and will be rewritten shortly
+
+### Understanding Slot Assembly
 
 If you are building new ActionType implementations for EngineBlock, it can help to understand the creational patterns used for slot assembly.
 

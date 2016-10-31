@@ -10,10 +10,13 @@ node core as "eb-core"
 node rest as "eb-rest"
 node runtime as "eb-runtime"
 node cli as "eb-cli"
+node extensions as "eb-extensions"
 cli .. runtime
 rest .. runtime
 runtime .. core
 runtime .. diag
+runtime .. extensions
+extensions .. api
 core .. api
 diag .. api
 }

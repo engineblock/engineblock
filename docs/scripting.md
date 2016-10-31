@@ -35,16 +35,16 @@ The metrics available in engineblock are slightly different than the standard ki
 
 ### HDR Histograms
 
-All histograms use HDR histograms with *three* significant digits.
+All histograms use HDR histograms with *four* significant digits.
 
-All histograms are the resettingOnSnapshot forms, which automatically keep all data until you report the snapshot or access the snapshot via scripting. (see below).
+All histograms reset on snapshot, automatically keeping all data until you report the snapshot or access the snapshot via scripting. (see below).
 
 The metric types that use histograms have been replaced with nicer version for scripting. You dont' have to do anything differently in your reporter configs to use them. However, if you need to use the enhanced versions in your local scripting, you can. This means that Timer and Histogram types are enchanced. If you do not use the scripting extensions, then you will automatically get the standard behavior that you are used to, only with higher-resolution HDR and full snapshots for each report to your downstream metrics systems.
 
 ### Scripting with Delta Snapshots
 
 For both the timer and the histogram types, you can call
-getDeltaReader(), or access it simply &lt;metric&gt;.deltaReader. When you do this, the delta snapshotting behavior is maintained until you use the deltaReader to access it. You can get a snapshot from the deltaReader by calling getDeltaSnapshot(10000), which causes the snapshot to be reset for collection, but retains a cache of the snapshot for any other consumer of getSnapshot() for that duration in milliseconds. If, for example, metrics reporters access the snapshot in the next 10 seconds, the reported snapshot will be exactly what was used in the script. 
+getDeltaReader(), or access it simply as &lt;metric&gt;.deltaReader. When you do this, the delta snapshotting behavior is maintained until you use the deltaReader to access it. You can get a snapshot from the deltaReader by calling getDeltaSnapshot(10000), which causes the snapshot to be reset for collection, but retains a cache of the snapshot for any other consumer of getSnapshot() for that duration in milliseconds. If, for example, metrics reporters access the snapshot in the next 10 seconds, the reported snapshot will be exactly what was used in the script. 
 
 This is important for using local scripting methods and calculations with aggregate views downstream. It means that the histograms will match up between your local script output and your downstream dashboards, as they will both be using the same frame of data, when done properly.
 
