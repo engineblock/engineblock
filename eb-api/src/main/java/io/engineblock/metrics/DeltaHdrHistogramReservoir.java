@@ -136,6 +136,8 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, HistoLogger 
         intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
         intervalHistogramStartTime = intervalHistogramEndTime;
         intervalHistogramEndTime = System.currentTimeMillis();
+        intervalHistogram.setStartTimeStamp(intervalHistogramStartTime);
+        intervalHistogram.setEndTimeStamp(intervalHistogramEndTime);
 
         lastHistogram = intervalHistogram.copy();
         runningTotals.add(lastHistogram);
