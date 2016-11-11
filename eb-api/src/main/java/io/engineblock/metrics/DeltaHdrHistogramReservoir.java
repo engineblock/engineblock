@@ -25,39 +25,42 @@ import org.HdrHistogram.Recorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Date;
-
 /**
  * A custom wrapping of snapshotting logic on the HdrHistogram. This histogram will always report the last histogram
  * since it was most recently asked for with the getDeltaSnapshot(...) method.
  * This provides local snapshot timing, but with a consistent view for reporting channels about what those snapshots
  * most recently looked like.
+ *
+ * <p>This implementation also supports attaching a single log writer. If a log writer is attached, each
+ * time an interval is snapshotted internally, the data will also be written to an hdr log via the writer.</p>
+ *
  */
-public final class DeltaHdrHistogramReservoir implements Reservoir, HistoLogger {
+public final class DeltaHdrHistogramReservoir implements Reservoir {
     private final static Logger logger = LoggerFactory.getLogger(DeltaHdrHistogramReservoir.class);
 
     private final Recorder recorder;
-
-    private Histogram runningTotals;
     private Histogram lastHistogram;
+    private int signifantDigits;
 
     private Histogram intervalHistogram;
-    private long intervalHistogramStartTime = System.currentTimeMillis();
     private long intervalHistogramEndTime = System.currentTimeMillis();
-    private ArrayList<HistogramLogWriter> attachedLoggers;
     private String metricName;
+    private HistogramLogWriter writer;
 
     /**
      * Create a reservoir with a default recorder. This recorder should be suitable for most usage.
+     *
      * @param name the name to give to the reservoir, for logging purposes
+     * @param signifantDigits how many significant digits to track in the reservoir
      */
-    public DeltaHdrHistogramReservoir(String name) {
-        this(name, new Recorder(4));
+    public DeltaHdrHistogramReservoir(String name, int signifantDigits) {
+        this(name, new Recorder(signifantDigits));
+        this.signifantDigits = signifantDigits;
     }
 
     /**
      * Create a reservoir with a user-specified recorder.
+     *
      * @param name the name to give to the reservoir for logging purposes
      * @param recorder Recorder to use
      */
@@ -73,7 +76,6 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, HistoLogger 
          * - it lets us figure out the number of significant digits to use in runningTotals.
          */
         intervalHistogram = recorder.getIntervalHistogram();
-        runningTotals = new Histogram(intervalHistogram.getNumberOfSignificantValueDigits());
         lastHistogram = new Histogram(intervalHistogram.getNumberOfSignificantValueDigits());
     }
 
@@ -93,25 +95,15 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, HistoLogger 
      */
     @Override
     public Snapshot getSnapshot() {
-        Histogram delta = getDataSinceLastSnapshotAndUpdate();
-        lastHistogram = delta;
-        DeltaHistogramSnapshot snapshot = new DeltaHistogramSnapshot(delta);
-
-        if (attachedLoggers != null) {
-            delta.setTag(metricName);
-            for (HistogramLogWriter attachedLogger : attachedLoggers) {
-                attachedLogger.outputIntervalHistogram(delta);
-            }
-            logger.trace(
-                    "wrote log histogram data for " + this.metricName + ": [" +
-                            new Date(intervalHistogramStartTime) + " - " +
-                            new Date(intervalHistogramEndTime) +
-                            " to " + attachedLoggers.size() + " loggers"
-            );
-
-        }
+        lastHistogram = getNextHdrHistogram();
+        DeltaHistogramSnapshot snapshot = new DeltaHistogramSnapshot(lastHistogram);
         return snapshot;
     }
+
+    public Histogram getNextHdrHistogram() {
+        return getDataSinceLastSnapshotAndUpdate();
+    }
+
 
     /**
      * @return last histogram snapshot that was provided by {@link #getSnapshot()}
@@ -121,42 +113,43 @@ public final class DeltaHdrHistogramReservoir implements Reservoir, HistoLogger 
     }
 
     /**
-     * Get a histogram snapshot that spans the whole lifetime of this reservoir.
-     *
-     * @return a histogram snapshot
-     */
-    public Snapshot getTotalSnapshot() {
-        return new DeltaHistogramSnapshot(runningTotals);
-    }
-
-    /**
      * @return a copy of the accumulated state since the reservoir last had a snapshot
      */
     private synchronized Histogram getDataSinceLastSnapshotAndUpdate() {
         intervalHistogram = recorder.getIntervalHistogram(intervalHistogram);
-        intervalHistogramStartTime = intervalHistogramEndTime;
+        long intervalHistogramStartTime = intervalHistogramEndTime;
         intervalHistogramEndTime = System.currentTimeMillis();
+
+        intervalHistogram.setTag(metricName);
         intervalHistogram.setStartTimeStamp(intervalHistogramStartTime);
         intervalHistogram.setEndTimeStamp(intervalHistogramEndTime);
 
         lastHistogram = intervalHistogram.copy();
-        runningTotals.add(lastHistogram);
+        lastHistogram.setTag(metricName);
+
+        if (writer!=null) {
+            writer.outputIntervalHistogram(lastHistogram);
+        }
         return lastHistogram;
     }
 
-    @Override
-    public synchronized void attachLogWriter(HistogramLogWriter logger) {
-        if (attachedLoggers == null) {
-            attachedLoggers = new ArrayList<>();
-        }
-        attachedLoggers.add(logger);
+    /**
+     * Write the last results via the log writer.
+     * @param writer the log writer to use
+     */
+    public void write(HistogramLogWriter writer) {
+        writer.outputIntervalHistogram(lastHistogram);
     }
 
-    @Override
-    public synchronized void detachLogWriter(HistogramLogWriter logger) {
-        attachedLoggers.remove(logger);
-        if (attachedLoggers.size() == 0) {
-            attachedLoggers = null;
-        }
+    public DeltaHdrHistogramReservoir copySettings() {
+        return new DeltaHdrHistogramReservoir(this.metricName, new Recorder(signifantDigits));
+    }
+
+    public void attachLogWriter(HistogramLogWriter logWriter) {
+        this.writer = logWriter;
+    }
+
+    public Histogram getLastHistogram() {
+        return lastHistogram;
     }
 }

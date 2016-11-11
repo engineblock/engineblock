@@ -191,17 +191,20 @@ public class ActivityMetrics {
      * @param sessionName The name for the session to be annotated in the histogram log
      * @param pattern A regular expression pattern to filter out metric names for logging
      * @param filename A file to log the histgram data in
+     * @param interval How many seconds to wait between writing each interval histogram
      */
-    public static void addHistoLogger(String sessionName, String pattern, String filename) {
+    public static void addHistoLogger(String sessionName, String pattern, String filename, String interval) {
         if (filename.contains("_SESSION_")) {
             filename = filename.replace("_SESSION_",sessionName);
         }
         Pattern compiledPattern = Pattern.compile(pattern);
         File logfile = new File(filename);
+        Double seconds = Double.valueOf(interval);
+        long intervalMillis = (long) (1000 * seconds);
 
-        HistoLoggerConfig histoLoggerConfig = new HistoLoggerConfig(sessionName, logfile, compiledPattern);
-        logger.debug("attaching " + histoLoggerConfig + " to the metrics registry.");
-        get().addListener(histoLoggerConfig);
+        HistoIntervalLogger histoIntervalLogger = new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
+        logger.debug("attaching " + histoIntervalLogger + " to the metrics registry.");
+        get().addListener(histoIntervalLogger);
     }
 
     private static interface MetricProvider {
