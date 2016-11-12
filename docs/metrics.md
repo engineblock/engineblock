@@ -50,7 +50,7 @@ As well, each metric can only be included in a single log. If multiple logs are 
 ~~~
 --log-histograms '.*ABC:hdr1.log' --log-histograms '.*BC:hdr2.log'
 ~~~
-will cause anything that matches '.*ABC' to be logged in hdr1.log only, even though it would normally be matched by the second option. The reason for this requirement is that marking histogram intervals at arbitrary intervals can become expensive, so each logger config actually has a shadow copy of a histogram that it uses for its own scheduling. This method allows us to have a combination of accuracy as well as flexibility for logging, scripting, and downstream reporting.
+will cause anything that matches '.*ABC' to be logged in hdr1.log only, even though it would normally be matched by the second option.
 
 If you want to specify the recording interval, use this form:
 ~~~
