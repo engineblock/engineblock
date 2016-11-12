@@ -20,6 +20,7 @@ package io.engineblock.metrics;
 import com.codahale.metrics.*;
 import io.engineblock.activityapi.MetricRegistryService;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.util.Unit;
 import org.HdrHistogram.Recorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,18 +191,21 @@ public class ActivityMetrics {
      * Add a histogram logger to matching metrics in this JVM instance.
      * @param sessionName The name for the session to be annotated in the histogram log
      * @param pattern A regular expression pattern to filter out metric names for logging
-     * @param filename A file to log the histgram data in
+     * @param filename A file to log the histogram data in
+     * @param interval How many seconds to wait between writing each interval histogram
      */
-    public static void addHistoLogger(String sessionName, String pattern, String filename) {
+    public static void addHistoLogger(String sessionName, String pattern, String filename, String interval) {
         if (filename.contains("_SESSION_")) {
             filename = filename.replace("_SESSION_",sessionName);
         }
         Pattern compiledPattern = Pattern.compile(pattern);
         File logfile = new File(filename);
+        long intervalMillis = Unit.msFor(interval);
 
-        HistoLoggerConfig histoLoggerConfig = new HistoLoggerConfig(sessionName, logfile, compiledPattern);
-        logger.debug("attaching " + histoLoggerConfig + " to the metrics registry.");
-        get().addListener(histoLoggerConfig);
+        HistoIntervalLogger histoIntervalLogger =
+                new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
+        logger.debug("attaching " + histoIntervalLogger + " to the metrics registry.");
+        get().addListener(histoIntervalLogger);
     }
 
     private static interface MetricProvider {

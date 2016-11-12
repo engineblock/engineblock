@@ -25,7 +25,7 @@ public class NicerHistogramTest {
 
     @Test
     public void testNicerHistogramValues() {
-        NicerHistogram nh = new NicerHistogram("testhisto",new DeltaHdrHistogramReservoir("testhisto"));
+        NicerHistogram nh = new NicerHistogram("testhisto",new DeltaHdrHistogramReservoir("testhisto",4));
         for (int i = 1; i <= 100; i++) {
             nh.update(i);
         }

@@ -16,9 +16,8 @@ import java.util.stream.Collectors;
  */
 public class EBCLIOptions {
 
-    private final static Logger logger = LoggerFactory.getLogger(EBCLIOptions.class);
     public static final String docoptFileName = "commandline.md";
-
+    private final static Logger logger = LoggerFactory.getLogger(EBCLIOptions.class);
     // Discovery
     private static final String HELP = "--help";
     private static final String ADVANCED_HELP = "--advanced-help";
@@ -201,7 +200,9 @@ public class EBCLIOptions {
     }
 
     public List<HistoConfig> getHistoLoggerConfigs() {
-        return histoLoggerConfigs.stream().map(HistoConfig::new).collect(Collectors.toList());
+        List<HistoConfig> configs = histoLoggerConfigs.stream().map(HistoConfig::new).collect(Collectors.toList());
+        checkHistoFiles(configs);
+        return configs;
     }
 
     public List<Cmd> getCommands() {
@@ -256,48 +257,6 @@ public class EBCLIOptions {
         return consoleLevel;
     }
 
-    public static enum CmdType {
-        start,
-        run,
-        stop,
-        await,
-        script,
-        waitmillis,
-    }
-
-    public static class Cmd {
-        public CmdType cmdType;
-        public String cmdSpec;
-        public Map<String, String> cmdArgs;
-
-        public Cmd(CmdType cmdType, String cmdSpec) {
-            this.cmdSpec = cmdSpec;
-            this.cmdType = cmdType;
-        }
-
-        public Cmd(CmdType cmdType, String cmdSpec, Map<String, String> cmdArgs) {
-            this(cmdType, cmdSpec);
-            this.cmdArgs = cmdArgs;
-        }
-
-        public String getCmdSpec() {
-            return cmdSpec;
-        }
-
-        public CmdType getCmdType() {
-            return cmdType;
-        }
-
-        public Map<String, String> getCmdArgs() {
-            return cmdArgs;
-        }
-
-        public String toString() {
-            return "type:" + cmdType + ";spec=" + cmdSpec
-                    + ((cmdArgs != null) ? ";cmdArgs=" + cmdArgs.toString() : "");
-        }
-    }
-
     private void assertNotParameter(String scriptName) {
         if (scriptName.contains("=")) {
             throw new InvalidParameterException("script name must precede script arguments");
@@ -347,28 +306,85 @@ public class EBCLIOptions {
         return new Cmd(CmdType.valueOf(cmdType), activitydef.stream().map(s -> s + ";").collect(Collectors.joining()));
     }
 
+    public static enum CmdType {
+        start,
+        run,
+        stop,
+        await,
+        script,
+        waitmillis,
+    }
+
+    public static class Cmd {
+        public CmdType cmdType;
+        public String cmdSpec;
+        public Map<String, String> cmdArgs;
+
+        public Cmd(CmdType cmdType, String cmdSpec) {
+            this.cmdSpec = cmdSpec;
+            this.cmdType = cmdType;
+        }
+
+        public Cmd(CmdType cmdType, String cmdSpec, Map<String, String> cmdArgs) {
+            this(cmdType, cmdSpec);
+            this.cmdArgs = cmdArgs;
+        }
+
+        public String getCmdSpec() {
+            return cmdSpec;
+        }
+
+        public CmdType getCmdType() {
+            return cmdType;
+        }
+
+        public Map<String, String> getCmdArgs() {
+            return cmdArgs;
+        }
+
+        public String toString() {
+            return "type:" + cmdType + ";spec=" + cmdSpec
+                    + ((cmdArgs != null) ? ";cmdArgs=" + cmdArgs.toString() : "");
+        }
+    }
+
+    private void checkHistoFiles(List<HistoConfig> configs) {
+        Set<String> files =new HashSet<>();
+        configs.stream().map(HistoConfig::getFilename).forEach(s -> {
+            if (files.contains(s)) {
+                logger.warn(s + " is included in hdr log configs more than once. It will only be included " +
+                        "in the first matching config. Reorder your hdr logging options if  you need to control this.");
+            }
+            files.add(s);
+        });
+    }
+
     public static class HistoConfig {
-        public String pattern;
-        public String file;
+        public String pattern = ".*";
+        public String file = "";
+        public String interval = "";
+
         public HistoConfig(String histoLoggerSpec) {
             String[] words = histoLoggerSpec.split(":");
             switch (words.length) {
-                case 1:
-                    pattern = ".*";
-                    file = words[0];
-                    break;
+                case 3:
+                    interval = words[2];
                 case 2:
-                    pattern = words[0];
                     file = words[1];
+                case 1:
+                    file = words[0];
                     break;
                 default:
                     throw new RuntimeException(
                             LOG_HISTO +
-                                    " options must be in either 'regex:filename' or 'filename' format"
+                                    " options must be in either 'regex:filename:interval' or 'regex:filename' or 'filename' format"
                     );
             }
         }
 
+        public String getFilename() {
+            return file;
+        }
     }
 
 }

@@ -33,7 +33,7 @@ public class MetricsIntegrationTest {
     public void testHistogramLogger() {
         ActivityDef ad = ActivityDef.parseActivityDef("alias=foo;type=diag");
         Histogram testhistogram = ActivityMetrics.histogram(ad, "testhistogram");
-        ActivityMetrics.addHistoLogger("testsession", ".*","testhisto.log");
+        ActivityMetrics.addHistoLogger("testsession", ".*","testhisto.log","1s");
         testhistogram.update(400);
         testhistogram.getSnapshot();
         File logfile = new File("testhisto.log");
