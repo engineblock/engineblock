@@ -44,7 +44,20 @@ If you want to record only certain metrics in this way, then use this form:
 ~~~
 --log-histograms '.*suffix:hdrdata.log'
 ~~~
-Notice that the option is enclosed in single quotes. This is because the first part of the option value is a regex. The '.*suffix' pattern matches any metric name that ends with "suffix". Effectively, leaving out the pattern is the same as using '.\*', which matches all metrics. 
+Notice that the option is enclosed in single quotes. This is because the first part of the option value is a regex. The '.*suffix' pattern matches any metric name that ends with "suffix". Effectively, leaving out the pattern is the same as using '.\*', which matches all metrics.
+
+As well, each metric can only be included in a single log. If multiple logs are specified that match a set of overlapping metric names, then only the first match will be honored. This makes the configuration order-specific. For example,
+~~~
+--log-histograms '.*ABC:hdr1.log' --log-histograms '.*BC:hdr2.log'
+~~~
+will cause anything that matches '.*ABC' to be logged in hdr1.log only, even though it would normally be matched by the second option. The reason for this requirement is that marking histogram intervals at arbitrary intervals can become expensive, so each logger config actually has a shadow copy of a histogram that it uses for its own scheduling. This method allows us to have a combination of accuracy as well as flexibility for logging, scripting, and downstream reporting.
+
+If you want to specify the recording interval, use this form:
+~~~
+--log-histograms '.*suffix:hdrdata.log:5s'
+~~~
+If you want to specify the interval, you must use the third form.
+
 
 ## LICENSE
 

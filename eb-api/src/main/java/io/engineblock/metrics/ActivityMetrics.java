@@ -191,7 +191,7 @@ public class ActivityMetrics {
      * Add a histogram logger to matching metrics in this JVM instance.
      * @param sessionName The name for the session to be annotated in the histogram log
      * @param pattern A regular expression pattern to filter out metric names for logging
-     * @param filename A file to log the histgram data in
+     * @param filename A file to log the histogram data in
      * @param interval How many seconds to wait between writing each interval histogram
      */
     public static void addHistoLogger(String sessionName, String pattern, String filename, String interval) {
