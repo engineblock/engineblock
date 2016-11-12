@@ -35,9 +35,9 @@ public class HistoIntervalLoggerTest {
 
     @Test
     public void testBasicLogger() throws IOException {
-        File tempFile = new File("/tmp/testhistointlog.hdr");
-//        File tempFile = File.createTempFile("testhistointlog", "hdr", new File("/tmp"));
-//        tempFile.deleteOnExit();
+//        File tempFile = new File("/tmp/testhistointlog.hdr");
+        File tempFile = File.createTempFile("testhistointlog", "hdr", new File("/tmp"));
+        tempFile.deleteOnExit();
 
         HistoIntervalLogger hil = new HistoIntervalLogger("loggertest", tempFile, Pattern.compile(".*"), 1000);
 

@@ -20,6 +20,7 @@ package io.engineblock.metrics;
 import com.codahale.metrics.*;
 import io.engineblock.activityapi.MetricRegistryService;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.util.Unit;
 import org.HdrHistogram.Recorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,10 +200,10 @@ public class ActivityMetrics {
         }
         Pattern compiledPattern = Pattern.compile(pattern);
         File logfile = new File(filename);
-        Double seconds = Double.valueOf(interval);
-        long intervalMillis = (long) (1000 * seconds);
+        long intervalMillis = Unit.msFor(interval);
 
-        HistoIntervalLogger histoIntervalLogger = new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
+        HistoIntervalLogger histoIntervalLogger =
+                new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
         logger.debug("attaching " + histoIntervalLogger + " to the metrics registry.");
         get().addListener(histoIntervalLogger);
     }

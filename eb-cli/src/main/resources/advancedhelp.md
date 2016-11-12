@@ -34,7 +34,7 @@ the scenario designer.
 ## Script Parameters    
 
 Any arguments following a script in name=value form will be used to parameterize
-the script. Script parameters are simply macro tokens in the form <<NAME:default>>.
+the script. Script parameters are simply macro tokens in the form &lt;&lt;NAME:default&gt;&gt;.
 All such parameters in the script will be substituted before the script executes,
 so parameters may be dropped into scripts ad-hoc.
 
@@ -42,13 +42,18 @@ so parameters may be dropped into scripts ad-hoc.
 
 By using the option --session-name <name>, you can name the session logfile
 that will be (over)written with execution details.
+~~~
+PROG --session-name testsession42
+~~~
 
 ## Metric Name
 
 If you need to see what metrics are available for a particular activity type,
 you can ask PROG to instantiate an activity of that type and discover the
 metrics, dumping out a list. The following form of the command shows you how
-to make a copy-and-pastable list:
+to make a list that you can copy metric names from for scripting. If you provide
+an example activity alias that matches one of your scripts, you can use it exactly
+as it appears.
 ~~~
 PROG --metrics diag anexample
 ~~~
