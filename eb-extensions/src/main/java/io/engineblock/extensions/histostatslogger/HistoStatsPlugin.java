@@ -36,6 +36,6 @@ public class HistoStatsPlugin {
     }
 
     public void logHistoStats(String sessionComment, String pattern, String filename , String interval) {
-        ActivityMetrics.addHistoLogger(sessionComment, pattern, filename, interval);
+        ActivityMetrics.addStatsLogger(sessionComment, pattern, filename, interval);
     }
 }

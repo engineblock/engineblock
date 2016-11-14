@@ -88,6 +88,7 @@ public class ScriptTests {
         assertThat(result.getIOLog()).contains("stdout started logging to histostats.csv");
         List<String> strings = Files.readAllLines(Paths.get("histostats.csv"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
+        assertThat(logdata).contains("min,p25,p50,p75,p90,p95,");
         assertThat(logdata.split("Tag=testhistostatslogger.cycles,").length).isGreaterThanOrEqualTo(3);
     }
 
@@ -97,6 +98,7 @@ public class ScriptTests {
         assertThat(result.getIOLog()).contains("stdout started logging to hdrhistolog.hdrlog");
         List<String> strings = Files.readAllLines(Paths.get("hdrhistolog.hdrlog"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
+        assertThat(logdata).contains(",HIST");
         assertThat(logdata.split("Tag=testhistologger.cycles,").length).isGreaterThanOrEqualTo(3);
     }
 

@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.extensions.fileaccess;
+package io.engineblock.extensions.files;
 
 import com.codahale.metrics.MetricRegistry;
 import io.engineblock.extensions.ScriptingPluginInfo;

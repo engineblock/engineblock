@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.extensions.fileaccess;
+package io.engineblock.extensions.files;
 
 import io.engineblock.util.EngineBlockFiles;
 

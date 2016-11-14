@@ -10,8 +10,9 @@ activitydef = {
 };
 scenario.start(activitydef);
 csvlogger.add(metrics.csvmetrics.cycles);
+csvlogger.start(500,"MILLISECONDS");
 
-scenario.waitMillis(1000);
+scenario.waitMillis(2000);
 scenario.stop(activitydef);
 
 csvlogger.report();
