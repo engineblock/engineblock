@@ -47,7 +47,6 @@ class PeriodicRunnable<T extends Runnable> implements Runnable {
         while (true) {
             nextEventTime = awaitTime(intervalMillis, nextEventTime);
             logger.trace("invoking interval runnable " + action);
-            System.out.println("running action: " + action);
             action.run();
         }
     }

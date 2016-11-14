@@ -16,11 +16,11 @@ package io.engineblock.script;
 
 import io.engineblock.core.ScenarioController;
 
-public class ScriptEnv extends ScriptEnvBuffer {
+public class ScenarioContext extends ScriptEnvBuffer {
 
-    private final ScenarioController sc;
+    private ScenarioController sc;
 
-    public ScriptEnv(ScenarioController sc) {
+    public ScenarioContext(ScenarioController sc) {
         this.sc = sc;
     }
 
@@ -40,4 +40,5 @@ public class ScriptEnv extends ScriptEnvBuffer {
     public void setAttribute(String name, Object value, int scope) {
         super.setAttribute(name, value, scope);
     }
+
 }

@@ -18,7 +18,7 @@ import ch.qos.logback.classic.Logger;
 import com.codahale.metrics.MetricRegistry;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
-import io.engineblock.extensions.SandboxPluginData;
+import io.engineblock.extensions.ScriptingPluginInfo;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ public class Scenario implements Callable<Result> {
     private final List<String> scripts = new ArrayList<>();
     private ScriptEngine scriptEngine;
     private ScenarioController scenarioController;
-    private ScriptEnv scriptEnv;
+    private ScenarioContext scriptEnv;
     private String name;
     private BufferAppender bufferAppender;
 
@@ -80,7 +80,7 @@ public class Scenario implements Callable<Result> {
         MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
 
         scriptEngine = engineManager.getEngineByName("nashorn");
-        scriptEnv = new ScriptEnv(scenarioController);
+        scriptEnv = new ScenarioContext(scenarioController);
         scriptEngine.setContext(scriptEnv);
         scenarioController = new ScenarioController();
 
@@ -88,7 +88,7 @@ public class Scenario implements Callable<Result> {
         scriptEngine.put("activities", new ScenarioBindings(scenarioController));
         scriptEngine.put("metrics", new MetricRegistryBindings(metricRegistry));
 
-        for (SandboxPluginData extensionDescriptor : SandboxExtensionFinder.findAll()) {
+        for (ScriptingPluginInfo extensionDescriptor : SandboxExtensionFinder.findAll()) {
             org.slf4j.Logger extensionLogger =
                     LoggerFactory.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
 
@@ -102,7 +102,7 @@ public class Scenario implements Callable<Result> {
             scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
         }
 
-        for (SandboxPluginData extensionDescriptor : SandboxExtensionFinder.findAll()) {
+        for (ScriptingPluginInfo extensionDescriptor : SandboxExtensionFinder.findAll()) {
             if (!extensionDescriptor.isAutoLoading()) {
                 logger.info("Not loading " + extensionDescriptor + ", autoloading is false");
                 continue;

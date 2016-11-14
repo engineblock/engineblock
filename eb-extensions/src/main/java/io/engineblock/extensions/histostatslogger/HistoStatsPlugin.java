@@ -15,28 +15,27 @@
  * /
  */
 
-package io.engineblock.extensions.scriptingmetrics;
+package io.engineblock.extensions.histostatslogger;
 
 import com.codahale.metrics.MetricRegistry;
-import io.engineblock.extensions.ScriptingPluginInfo;
+import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 
 import javax.script.ScriptContext;
 
-@com.google.auto.service.AutoService(ScriptingPluginInfo.class)
-public class ScriptingMetricsPluginData implements ScriptingPluginInfo<ScriptingMetrics> {
-    @Override
-    public String getDescription() {
-        return "Allows you to create and update metrics within your scenario scripts";
+public class HistoStatsPlugin {
+
+    private Logger logger;
+    private MetricRegistry metricRegistry;
+    private ScriptContext scriptContext;
+
+    public HistoStatsPlugin(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+        this.logger = logger;
+        this.metricRegistry = metricRegistry;
+        this.scriptContext = scriptContext;
     }
 
-    @Override
-    public ScriptingMetrics getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
-        return new ScriptingMetrics(logger,metricRegistry,scriptContext);
-    }
-
-    @Override
-    public String getBaseVariableName() {
-        return "scriptingmetrics";
+    public void logHistoStats(String sessionComment, String pattern, String filename , String interval) {
+        ActivityMetrics.addHistoLogger(sessionComment, pattern, filename, interval);
     }
 }

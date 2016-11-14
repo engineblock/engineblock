@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.extensions.scriptingmetrics;
+package io.engineblock.extensions.histostatslogger;
 
 import com.codahale.metrics.MetricRegistry;
 import io.engineblock.extensions.ScriptingPluginInfo;
@@ -24,19 +24,20 @@ import org.slf4j.Logger;
 import javax.script.ScriptContext;
 
 @com.google.auto.service.AutoService(ScriptingPluginInfo.class)
-public class ScriptingMetricsPluginData implements ScriptingPluginInfo<ScriptingMetrics> {
+public class HistoStatsPluginData implements ScriptingPluginInfo<HistoStatsPlugin> {
+
     @Override
     public String getDescription() {
-        return "Allows you to create and update metrics within your scenario scripts";
+        return "allows script control of histogram stats logging in CSV files.";
     }
 
     @Override
-    public ScriptingMetrics getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
-        return new ScriptingMetrics(logger,metricRegistry,scriptContext);
+    public HistoStatsPlugin getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+        return new HistoStatsPlugin(logger,metricRegistry,scriptContext);
     }
 
     @Override
     public String getBaseVariableName() {
-        return "scriptingmetrics";
+        return "histostatslogger";
     }
 }

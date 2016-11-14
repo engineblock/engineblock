@@ -19,8 +19,8 @@ package io.engineblock.metrics;
 
 import com.codahale.metrics.Histogram;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDeltaHistogramAttachment {
@@ -66,7 +66,7 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDe
     @Override
     public synchronized NicerHistogram attach() {
         if (mirrors == null) {
-            mirrors = new ArrayList<NicerHistogram>();
+            mirrors = new CopyOnWriteArrayList<>();
         }
         DeltaHdrHistogramReservoir mirrorReservoir = this.hdrDeltaReservoir.copySettings();
         NicerHistogram mirror = new NicerHistogram("mirror-" + this.metricName, mirrorReservoir);

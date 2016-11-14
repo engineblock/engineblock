@@ -17,7 +17,7 @@
 
 package io.engineblock.script;
 
-import io.engineblock.extensions.SandboxPluginData;
+import io.engineblock.extensions.ScriptingPluginInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,14 +26,14 @@ import java.util.ServiceLoader;
 
 public class SandboxExtensionFinder {
 
-    private final static List<SandboxPluginData<?>> extensionDescriptors = new ArrayList<>();
+    private final static List<ScriptingPluginInfo<?>> extensionDescriptors = new ArrayList<>();
 
-    public static List<SandboxPluginData<?>> findAll() {
+    public static List<ScriptingPluginInfo<?>> findAll() {
         if (extensionDescriptors.isEmpty()) {
             synchronized (SandboxExtensionFinder.class) {
                 if (extensionDescriptors.isEmpty()) {
-                    ServiceLoader<SandboxPluginData> loader =
-                            ServiceLoader.load(SandboxPluginData.class);
+                    ServiceLoader<ScriptingPluginInfo> loader =
+                            ServiceLoader.load(ScriptingPluginInfo.class);
                     loader.iterator().forEachRemaining(extensionDescriptors::add);
                 }
             }

@@ -31,7 +31,7 @@ import javax.script.ScriptContext;
  *     Each scenario gets its own instance of an object from this SandboxPlugin
  * </p>
  */
-public interface SandboxPluginData<T> {
+public interface ScriptingPluginInfo<T> {
 
     /**
      * @return a brief description of this extension.

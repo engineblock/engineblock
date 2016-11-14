@@ -20,8 +20,8 @@ package io.engineblock.metrics;
 import com.codahale.metrics.Timer;
 import org.HdrHistogram.Histogram;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class NicerTimer extends Timer implements DeltaSnapshotter, HdrDeltaHistogramAttachment {
@@ -61,7 +61,7 @@ public class NicerTimer extends Timer implements DeltaSnapshotter, HdrDeltaHisto
         DeltaHdrHistogramReservoir sameConfigReservoir = this.deltaHdrHistogramReservoir.copySettings();
         NicerTimer mirror = new NicerTimer(this.metricName, sameConfigReservoir);
         if (mirrors==null) {
-            mirrors = new ArrayList<>();
+            mirrors = new CopyOnWriteArrayList<>();
         }
         mirrors.add(mirror);
         return mirror;

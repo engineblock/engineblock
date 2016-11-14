@@ -18,13 +18,13 @@
 package io.engineblock.extensions.fileaccess;
 
 import com.codahale.metrics.MetricRegistry;
-import io.engineblock.extensions.SandboxPluginData;
+import io.engineblock.extensions.ScriptingPluginInfo;
 import org.slf4j.Logger;
 
 import javax.script.ScriptContext;
 
-@com.google.auto.service.AutoService(SandboxPluginData.class)
-public class FileAccessPluginData implements SandboxPluginData<FileAccessPluginData> {
+@com.google.auto.service.AutoService(ScriptingPluginInfo.class)
+public class FileAccessPluginData implements ScriptingPluginInfo<FileAccessPluginData> {
     @Override
     public String getDescription() {
         return "Allows for convenient access to local files.";

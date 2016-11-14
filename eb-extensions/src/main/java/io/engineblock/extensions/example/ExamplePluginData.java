@@ -18,13 +18,13 @@
 package io.engineblock.extensions.example;
 
 import com.codahale.metrics.MetricRegistry;
-import io.engineblock.extensions.SandboxPluginData;
+import io.engineblock.extensions.ScriptingPluginInfo;
 import org.slf4j.Logger;
 
 import javax.script.ScriptContext;
 
-@com.google.auto.service.AutoService(SandboxPluginData.class)
-public class ExamplePluginData implements SandboxPluginData<ExamplePlugin> {
+@com.google.auto.service.AutoService(ScriptingPluginInfo.class)
+public class ExamplePluginData implements ScriptingPluginInfo<ExamplePlugin> {
 
     @Override
     public String getDescription() {

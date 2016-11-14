@@ -22,8 +22,13 @@ import io.engineblock.core.ScenariosResults;
 import org.assertj.core.data.Offset;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -75,6 +80,24 @@ public class ScriptTests {
     public void testExtensionCsvLogger() {
         Result result = runScenario("extension_csvmetrics");
         assertThat(result.getIOLog()).contains("started new csvlogger: csvmetricstestdir");
+    }
+
+    @Test
+    public void testExtensionHistoStatsLogger() throws IOException {
+        Result result = runScenario("extension_histostatslogger");
+        assertThat(result.getIOLog()).contains("stdout started logging to histostats.csv");
+        List<String> strings = Files.readAllLines(Paths.get("histostats.csv"));
+        String logdata = strings.stream().collect(Collectors.joining("\n"));
+        assertThat(logdata.split("Tag=testhistostatslogger.cycles,").length).isGreaterThanOrEqualTo(3);
+    }
+
+    @Test
+    public void testExtensionHistogramLogger() throws IOException {
+        Result result = runScenario("extension_histologger");
+        assertThat(result.getIOLog()).contains("stdout started logging to hdrhistolog.hdrlog");
+        List<String> strings = Files.readAllLines(Paths.get("hdrhistolog.hdrlog"));
+        String logdata = strings.stream().collect(Collectors.joining("\n"));
+        assertThat(logdata.split("Tag=testhistologger.cycles,").length).isGreaterThanOrEqualTo(3);
     }
 
     @Test
