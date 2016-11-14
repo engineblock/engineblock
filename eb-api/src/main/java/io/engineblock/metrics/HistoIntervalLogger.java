@@ -18,15 +18,14 @@
 package io.engineblock.metrics;
 
 import org.HdrHistogram.EncodableHistogram;
-import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 /**
@@ -45,7 +44,7 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
     private HistogramLogWriter writer;
     private Pattern pattern;
 
-    private Map<String, HdrDeltaHistogramProvider> histoMetrics = new LinkedHashMap<>();
+    private List<WriterTarget> targets = new CopyOnWriteArrayList<>();
     private PeriodicRunnable<HistoIntervalLogger> executor;
 
     public HistoIntervalLogger(String sessionName, File file, Pattern pattern, long intervalLength) {
@@ -94,15 +93,15 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
     }
 
     @Override
-    public void onCapableAdded(String name, HdrDeltaHistogramAttachment chainedHistogram) {
+    public synchronized void onCapableAdded(String name, HdrDeltaHistogramAttachment chainedHistogram) {
         if (pattern.matcher(name).matches()) {
-            this.histoMetrics.put(name,chainedHistogram.attach());
+            this.targets.add(new WriterTarget(name,chainedHistogram.attach()));
         }
     }
 
     @Override
-    public void onCapableRemoved(String name, HdrDeltaHistogramAttachment capable) {
-        this.histoMetrics.remove(name);
+    public synchronized void onCapableRemoved(String name, HdrDeltaHistogramAttachment capable) {
+        this.targets.remove(new WriterTarget(name,null));
     }
 
     @Override
@@ -112,12 +111,30 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
 
     @Override
     public void run() {
-        for (Map.Entry<String, HdrDeltaHistogramProvider> histMetrics : histoMetrics.entrySet()) {
-            String metricName = histMetrics.getKey();
-            HdrDeltaHistogramProvider hdrDeltaHistoProvider = histMetrics.getValue();
-            Histogram nextHdrHistogram = hdrDeltaHistoProvider.getNextHdrDeltaHistogram();
-            writer.outputIntervalHistogram(nextHdrHistogram);
+        for (WriterTarget target : targets) {
+            writer.outputIntervalHistogram(target.histoProvider.getNextHdrDeltaHistogram());
+        }
+    }
+
+    private static class WriterTarget implements Comparable<WriterTarget> {
+
+        public String name;
+        public HdrDeltaHistogramProvider histoProvider;
+
+        public WriterTarget(String name, HdrDeltaHistogramProvider attach) {
+            this.name = name;
+            this.histoProvider = attach;
         }
 
+        @Override
+        public boolean equals(Object obj) {
+            return name.equals(((WriterTarget)obj).name);
+        }
+
+        @Override
+        public int compareTo(WriterTarget obj) {
+            return name.compareTo(obj.name);
+        }
     }
+
 }
