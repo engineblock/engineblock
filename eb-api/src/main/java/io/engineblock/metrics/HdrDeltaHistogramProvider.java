@@ -19,7 +19,7 @@ package io.engineblock.metrics;
 
 import org.HdrHistogram.Histogram;
 
-public interface HdrDeltaHistoProvider {
+public interface HdrDeltaHistogramProvider {
 
     /**
      * Create a new interval histogram from the current data, then reset the histogram reservoir.

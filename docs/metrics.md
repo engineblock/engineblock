@@ -64,17 +64,18 @@ HDR histogram logs. The option to do this is:
 Everything works the same as for hdr histogram logging, except that the format is in
 CSV as shown in the example below:
 ~~~
-# logging histograms for session scenario-1479087336599
-# log-format-version: 1
-# start-time: 1479087336621
-# TAG,INTERVALSTART,INTERVALEND,DURATION,min,p25,p50,p75,p90,p95,p98,p99,p999,p9999,max
-Tag=diag1.delay,1479087337070,1479087337121,51,8,15,15,15,15,15,15,15,15,15,15
-Tag=diag1.cycles,1479087337087,1479087337123,36,256,511,511,511,511,511,511,511,511,511,4194303
-Tag=diag1.delay,1479087337121,1479087337221,100,0,0,0,0,0,0,0,0,0,0,0
-Tag=diag1.cycles,1479087337123,1479087337221,98,64,127,127,127,127,127,127,127,127,127,524287
+#logging stats for session scenario-1479089852022
+#[Histogram log format version 1.0]
+#[StartTime: 1479089852.046 (seconds since epoch), Sun Nov 13 20:17:32 CST 2016]
+#Tag,Interval_Start,Interval_Length,count,min,p25,p50,p75,p90,p95,p98,p99,p999,p9999,max
+Tag=diag1.delay,0.457,0.044,1,16,31,31,31,31,31,31,31,31,31,31
+Tag=diag1.cycles,0.48,0.021,31,4096,8191,8191,8191,8191,8191,8191,8191,8191,8191,2097151
+Tag=diag1.delay,0.501,0.499,1,1,1,1,1,1,1,1,1,1,1,1
+Tag=diag1.cycles,0.501,0.499,498,1024,2047,2047,4095,4095,4095,4095,4095,4095,4095,4194303
+...
 ~~~
 
-Notice that the same 
+Notice that the format used is similar to that of the HDR logging.
 
 ## LICENSE
 

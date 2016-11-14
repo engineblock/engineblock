@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class NicerTimer extends Timer implements DeltaSnapshotter, AttachingHdrDeltaHistoProvider {
+public class NicerTimer extends Timer implements DeltaSnapshotter, HdrDeltaHistogramAttachment {
     private final String metricName;
     private DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
     private long cacheExpiry = 0L;

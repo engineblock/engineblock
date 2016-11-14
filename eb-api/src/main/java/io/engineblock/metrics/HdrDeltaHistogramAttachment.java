@@ -41,10 +41,10 @@ package io.engineblock.metrics;
  * <p>Implementations should ensure that any naming fields are marked differently so that
  * the attached metric does not have the exact same name as the attaching metric.</p>
  */
-public interface AttachingHdrDeltaHistoProvider extends HdrDeltaHistoProvider {
+public interface HdrDeltaHistogramAttachment extends HdrDeltaHistogramProvider {
     /**
      * Attach a metric.
      * @return the attached metric, after adding to the mirrors for the metric.
      */
-    public HdrDeltaHistoProvider attach();
+    public HdrDeltaHistogramProvider attach();
 }

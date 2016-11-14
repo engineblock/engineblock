@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class NicerHistogram extends Histogram implements DeltaSnapshotter, AttachingHdrDeltaHistoProvider {
+public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDeltaHistogramAttachment {
 
     private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
     private long cacheExpiryMillis = 0L;

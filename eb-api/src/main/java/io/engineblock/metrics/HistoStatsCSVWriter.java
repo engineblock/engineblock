@@ -21,38 +21,28 @@ import org.HdrHistogram.Histogram;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.Date;
+import java.util.Locale;
 
 public class HistoStatsCSVWriter {
     private final static Logger logger = LoggerFactory.getLogger(HistoStatsCSVWriter.class);
+    private final static String logFormatVersion = "1.0";
     private final File csvfile;
-    FileWriter writer;
-    private final static long logFormatVersion=1L;
+    //    FileWriter writer;
+    PrintStream writer;
     private long baseTime;
 
     public HistoStatsCSVWriter(File csvFile) {
         this.csvfile = csvFile;
-        initFile(csvFile);
+        writer = initFile(csvFile);
     }
 
-    private FileWriter initFile(File logfile) {
+    private PrintStream initFile(File logfile) {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(logfile);
-            writer = new FileWriter(logfile);
+            PrintStream writer = new PrintStream(logfile);
             return writer;
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void write(String filedata) {
-        try {
-            writer.write(filedata);
-            writer.flush();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -63,42 +53,49 @@ public class HistoStatsCSVWriter {
         this.baseTime = baseTime;
     }
 
-    public void outputComment(String s) {
-            write("# " + s + "\n");
+    public void outputComment(String comment) {
+        writer.format(Locale.US, "#%s\n", comment);
     }
 
     public void outputLogFormatVersion() {
-        write("# log-format-version: " + logFormatVersion + "\n");
+        writer.format(Locale.US, "#[Histogram log format version %s]\n", logFormatVersion);
     }
 
     public void outputStartTime(long startTime) {
-        write("# start-time: " + startTime + "\n");
+        writer.format(
+                Locale.US,
+                "#[StartTime: %.3f (seconds since epoch), %s]\n",
+                startTime / 1000.0,
+                new Date(startTime).toString()
+        );
+        writer.flush();
     }
 
     public void outputLegend() {
-        write("# TAG,INTERVALSTART,INTERVALLENGTH,DURATION,min,p25,p50,p75,p90,p95,p98,p99,p999,p9999,max\n");
+        writer.format(Locale.US, "#Tag,Interval_Start,Interval_Length,count,min,p25,p50,p75,p90,p95,p98,p99,p999,p9999,max\n");
     }
 
     public void writeInterval(Histogram h) {
         StringBuilder csvLine = new StringBuilder(1024);
         csvLine.append("Tag=").append(h.getTag()).append(",");
-        Double start = ((double) h.getStartTimeStamp()-baseTime) / 1000.0D;
-        Double end = ((double) h.getEndTimeStamp()-baseTime) / 1000.0D;
-        Double len = end-start;
-        csvLine.append(start).append(",");
-        csvLine.append(len).append(",");
-        csvLine.append(h.getMinValue()).append(",");
-        csvLine.append(h.getValueAtPercentile(0.25D)).append(",");
-        csvLine.append(h.getValueAtPercentile(0.50D)).append(",");
-        csvLine.append(h.getValueAtPercentile(0.75D)).append(",");
-        csvLine.append(h.getValueAtPercentile(0.90D)).append(",");
-        csvLine.append(h.getValueAtPercentile(0.95D)).append(",");
-        csvLine.append(h.getValueAtPercentile(0.98D)).append(",");
-        csvLine.append(h.getValueAtPercentile(0.99D)).append(",");
-        csvLine.append(h.getValueAtPercentile(0.999D)).append(",");
-        csvLine.append(h.getValueAtPercentile(0.9999D)).append(",");
-        csvLine.append(h.getMaxValue()).append("\n");
-        write(csvLine.toString());
+        Double start = ((double) h.getStartTimeStamp() - baseTime) / 1000.0D;
+        Double end = ((double) h.getEndTimeStamp() - baseTime) / 1000.0D;
+        String len = String.format(Locale.US, "%.3f", (end - start));
+        csvLine.append(start);
+        csvLine.append(",").append(len);
+        csvLine.append(",").append(h.getTotalCount());
+        csvLine.append(",").append(h.getMinValue());
+        csvLine.append(",").append(h.getValueAtPercentile(0.25D));
+        csvLine.append(",").append(h.getValueAtPercentile(0.50D));
+        csvLine.append(",").append(h.getValueAtPercentile(0.75D));
+        csvLine.append(",").append(h.getValueAtPercentile(0.90D));
+        csvLine.append(",").append(h.getValueAtPercentile(0.95D));
+        csvLine.append(",").append(h.getValueAtPercentile(0.98D));
+        csvLine.append(",").append(h.getValueAtPercentile(0.99D));
+        csvLine.append(",").append(h.getValueAtPercentile(0.999D));
+        csvLine.append(",").append(h.getValueAtPercentile(0.9999D));
+        csvLine.append(",").append(h.getMaxValue());
+        writer.println(csvLine.toString());
 
     }
 }

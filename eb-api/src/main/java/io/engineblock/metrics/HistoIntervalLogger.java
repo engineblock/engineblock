@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  * which both match the pattern and which are {@link EncodableHistogram}s are written the configured
  * logfile at the configured interval.
  */
-public class HistoIntervalLogger extends  CapabilityHook<AttachingHdrDeltaHistoProvider> implements Runnable  {
+public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttachment> implements Runnable  {
     private final static Logger logger = LoggerFactory.getLogger(HistoIntervalLogger.class);
 
     private final String sessionName;
@@ -45,7 +45,7 @@ public class HistoIntervalLogger extends  CapabilityHook<AttachingHdrDeltaHistoP
     private HistogramLogWriter writer;
     private Pattern pattern;
 
-    private Map<String, HdrDeltaHistoProvider> histoMetrics = new LinkedHashMap<>();
+    private Map<String, HdrDeltaHistogramProvider> histoMetrics = new LinkedHashMap<>();
     private PeriodicRunnable<HistoIntervalLogger> executor;
 
     public HistoIntervalLogger(String sessionName, File file, Pattern pattern, long intervalLength) {
@@ -94,27 +94,27 @@ public class HistoIntervalLogger extends  CapabilityHook<AttachingHdrDeltaHistoP
     }
 
     @Override
-    public void onCapableAdded(String name, AttachingHdrDeltaHistoProvider chainedHistogram) {
+    public void onCapableAdded(String name, HdrDeltaHistogramAttachment chainedHistogram) {
         if (pattern.matcher(name).matches()) {
             this.histoMetrics.put(name,chainedHistogram.attach());
         }
     }
 
     @Override
-    public void onCapableRemoved(String name, AttachingHdrDeltaHistoProvider capable) {
+    public void onCapableRemoved(String name, HdrDeltaHistogramAttachment capable) {
         this.histoMetrics.remove(name);
     }
 
     @Override
-    protected Class<AttachingHdrDeltaHistoProvider> getCapabilityClass() {
-        return AttachingHdrDeltaHistoProvider.class;
+    protected Class<HdrDeltaHistogramAttachment> getCapabilityClass() {
+        return HdrDeltaHistogramAttachment.class;
     }
 
     @Override
     public void run() {
-        for (Map.Entry<String, HdrDeltaHistoProvider> histMetrics : histoMetrics.entrySet()) {
+        for (Map.Entry<String, HdrDeltaHistogramProvider> histMetrics : histoMetrics.entrySet()) {
             String metricName = histMetrics.getKey();
-            HdrDeltaHistoProvider hdrDeltaHistoProvider = histMetrics.getValue();
+            HdrDeltaHistogramProvider hdrDeltaHistoProvider = histMetrics.getValue();
             Histogram nextHdrHistogram = hdrDeltaHistoProvider.getNextHdrDeltaHistogram();
             writer.outputIntervalHistogram(nextHdrHistogram);
         }
