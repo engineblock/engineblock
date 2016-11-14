@@ -20,12 +20,16 @@ package io.engineblock.metrics;
 import com.codahale.metrics.Timer;
 import org.HdrHistogram.Histogram;
 
-public class NicerTimer extends Timer implements DeltaSnapshotter, AttachingDeltaHdrHistogram {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+public class NicerTimer extends Timer implements DeltaSnapshotter, AttachingHdrDeltaHistoProvider {
     private final String metricName;
     private DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
     private long cacheExpiry = 0L;
     private ConvenientSnapshot lastSnapshot;
-    private DeltaHdrHistogram mirror;
+    private List<NicerTimer> mirrors;
 
     public NicerTimer(String metricName, DeltaHdrHistogramReservoir deltaHdrHistogramReservoir) {
         super(deltaHdrHistogramReservoir);
@@ -53,17 +57,29 @@ public class NicerTimer extends Timer implements DeltaSnapshotter, AttachingDelt
     }
 
     @Override
-    public DeltaHdrHistogram attach() {
-        if (mirror!=null) {
-            DeltaHdrHistogramReservoir withSameSettings = this.deltaHdrHistogramReservoir.copySettings();
-            mirror = new NicerTimer(this.metricName, withSameSettings);
+    public synchronized NicerTimer attach() {
+        DeltaHdrHistogramReservoir sameConfigReservoir = this.deltaHdrHistogramReservoir.copySettings();
+        NicerTimer mirror = new NicerTimer(this.metricName, sameConfigReservoir);
+        if (mirrors==null) {
+            mirrors = new ArrayList<>();
         }
+        mirrors.add(mirror);
         return mirror;
     }
 
 
     @Override
-    public Histogram getNextHdrHistogram() {
+    public Histogram getNextHdrDeltaHistogram() {
         return this.deltaHdrHistogramReservoir.getNextHdrHistogram();
+    }
+
+    @Override
+    public void update(long duration, TimeUnit unit) {
+        super.update(duration, unit);
+        if (mirrors!=null) {
+            for (NicerTimer mirror : mirrors) {
+                mirror.update(duration,unit);
+            }
+        }
     }
 }

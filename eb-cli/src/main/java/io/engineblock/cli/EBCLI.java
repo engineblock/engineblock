@@ -82,8 +82,11 @@ public class EBCLI {
             sessionName = options.getSessionName();
         }
 
-        for (EBCLIOptions.HistoConfig histoConfig : options.getHistoLoggerConfigs()) {
-            ActivityMetrics.addHistoLogger(sessionName, histoConfig.pattern, histoConfig.file, histoConfig.interval);
+        for (EBCLIOptions.LoggerConfig histoLogger : options.getHistoLoggerConfigs()) {
+            ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
+        }
+        for (EBCLIOptions.LoggerConfig statsLogger : options.getStatsLoggerConfigs()) {
+            ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
         }
 
         ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel());

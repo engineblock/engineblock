@@ -36,14 +36,14 @@ public class UnitParserTests {
 
     @Test
     public void testBytesParser() {
-        assertThat(Unit.convertBytes(Unit.Bytes.KIB,"1 byte")).isCloseTo((1.0/1024.0), Offset.offset(0.000001D));
-        assertThat(Unit.convertBytes(Unit.Bytes.GB,"1 megabyte")).isCloseTo((1/1000.0),Offset.offset(0.000001D));
-        assertThat(Unit.convertBytes(Unit.Bytes.GB,"1 GiB"))
+        assertThat(Unit.convertBytes(Unit.Bytes.KIB,"1 byte").get()).isCloseTo((1.0/1024.0), Offset.offset(0.000001D));
+        assertThat(Unit.convertBytes(Unit.Bytes.GB,"1 megabyte").get()).isCloseTo((1/1000.0),Offset.offset(0.000001D));
+        assertThat(Unit.convertBytes(Unit.Bytes.GB,"1 GiB").get())
                 .isCloseTo(
                         ((1024.0D*1024.0D*1024.0D)/(1000.0D*1000.0D*1000.0D)),
                         Offset.offset(0.0000001D));
-        assertThat(Unit.bytesFor("1.43 MB")).isCloseTo(1430000.0D,Offset.offset(0.00001D));
-        assertThat(Unit.bytesFor("1KiB")).isCloseTo(1024.0D,Offset.offset(0.00001D));
+        assertThat(Unit.bytesFor("1.43 MB").get()).isCloseTo(1430000.0D,Offset.offset(0.00001D));
+        assertThat(Unit.bytesFor("1KiB").get()).isCloseTo(1024.0D,Offset.offset(0.00001D));
     }
 
 }

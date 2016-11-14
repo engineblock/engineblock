@@ -19,12 +19,10 @@ package io.engineblock.metrics;
 
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
-import org.HdrHistogram.HistogramLogWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -35,20 +33,20 @@ import java.util.regex.Pattern;
  * which both match the pattern and which are {@link EncodableHistogram}s are written the configured
  * logfile at the configured interval.
  */
-public class HistoIntervalLogger extends  CapabilityHook<AttachingHdrDeltaHistoProvider> implements Runnable  {
-    private final static Logger logger = LoggerFactory.getLogger(HistoIntervalLogger.class);
+public class StatsIntervalLogger extends CapabilityHook<AttachingHdrDeltaHistoProvider> implements Runnable {
+    private final static Logger logger = LoggerFactory.getLogger(StatsIntervalLogger.class);
 
     private final String sessionName;
     //    private final long intervalMillis;
     private long intervalLength;
     private File logfile;
-    private HistogramLogWriter writer;
+    private HistoStatsCSVWriter writer;
     private Pattern pattern;
 
     private Map<String, HdrDeltaHistoProvider> histoMetrics = new LinkedHashMap<>();
-    private PeriodicRunnable<HistoIntervalLogger> executor;
+    private PeriodicRunnable<StatsIntervalLogger> executor;
 
-    public HistoIntervalLogger(String sessionName, File file, Pattern pattern, long intervalLength) {
+    public StatsIntervalLogger(String sessionName, File file, Pattern pattern, long intervalLength) {
         this.sessionName = sessionName;
         this.logfile = file;
         this.pattern = pattern;
@@ -67,19 +65,15 @@ public class HistoIntervalLogger extends  CapabilityHook<AttachingHdrDeltaHistoP
      * and a legend (in that order).
      */
     public void startLogging() {
-        try {
-            writer = new HistogramLogWriter(logfile);
-            writer.outputComment("logging histograms for session " + sessionName);
-            writer.outputLogFormatVersion();
-            long currentTimeMillis = System.currentTimeMillis();
-            writer.outputStartTime(currentTimeMillis);
-            writer.setBaseTime(currentTimeMillis);
-            writer.outputLegend();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("Error while starting histogram log writer", e);
-        }
+        writer = new HistoStatsCSVWriter(logfile);
+        writer.outputComment("logging histograms for session " + sessionName);
+        writer.outputLogFormatVersion();
+        long currentTimeMillis = System.currentTimeMillis();
+        writer.outputStartTime(currentTimeMillis);
+        writer.setBaseTime(currentTimeMillis);
+        writer.outputLegend();
 
-        this.executor = new PeriodicRunnable<HistoIntervalLogger>(this.getInterval(),this);
+        this.executor = new PeriodicRunnable<StatsIntervalLogger>(this.getInterval(), this);
         executor.startThread();
     }
 
@@ -96,7 +90,7 @@ public class HistoIntervalLogger extends  CapabilityHook<AttachingHdrDeltaHistoP
     @Override
     public void onCapableAdded(String name, AttachingHdrDeltaHistoProvider chainedHistogram) {
         if (pattern.matcher(name).matches()) {
-            this.histoMetrics.put(name,chainedHistogram.attach());
+            this.histoMetrics.put(name, chainedHistogram.attach());
         }
     }
 
@@ -116,7 +110,7 @@ public class HistoIntervalLogger extends  CapabilityHook<AttachingHdrDeltaHistoP
             String metricName = histMetrics.getKey();
             HdrDeltaHistoProvider hdrDeltaHistoProvider = histMetrics.getValue();
             Histogram nextHdrHistogram = hdrDeltaHistoProvider.getNextHdrDeltaHistogram();
-            writer.outputIntervalHistogram(nextHdrHistogram);
+            writer.writeInterval(nextHdrHistogram);
         }
 
     }

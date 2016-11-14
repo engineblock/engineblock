@@ -42,22 +42,39 @@ You can record details of histograms from any compatible metric (histograms and 
 ~~~
 If you want to record only certain metrics in this way, then use this form:
 ~~~
---log-histograms '.*suffix:hdrdata.log'
+--log-histograms 'hdrdata.log:.*suffix'
 ~~~
-Notice that the option is enclosed in single quotes. This is because the first part of the option value is a regex. The '.*suffix' pattern matches any metric name that ends with "suffix". Effectively, leaving out the pattern is the same as using '.\*', which matches all metrics.
+Notice that the option is enclosed in single quotes. This is because the second part of the option value is a regex. The '.*suffix' pattern matches any metric name that ends with "suffix". Effectively, leaving out the pattern is the same as using '.\*', which matches all metrics.
 
-As well, each metric can only be included in a single log. If multiple logs are specified that match a set of overlapping metric names, then only the first match will be honored. This makes the configuration order-specific. For example,
-~~~
---log-histograms '.*ABC:hdr1.log' --log-histograms '.*BC:hdr2.log'
-~~~
-will cause anything that matches '.*ABC' to be logged in hdr1.log only, even though it would normally be matched by the second option.
+Metrics may be included in multiple logs, but care should be taken not to overdo this. Keeping higher fidelity histogram reservoirs does come with a cost, so be sure to be specific in what you record as much as possible.
 
 If you want to specify the recording interval, use this form:
 ~~~
---log-histograms '.*suffix:hdrdata.log:5s'
+--log-histograms 'hdrdata.log:.*suffix:5s'
 ~~~
-If you want to specify the interval, you must use the third form.
+If you want to specify the interval, you must use the third form, although it is valid to leave
+the pattern empty, such as 'hdrdata.log::5s'.
 
+### Recording HDR Histogram Stats
+You can also record basic snapshots of histogram data on a periodic interval just like above with
+HDR histogram logs. The option to do this is:
+~~~
+--log-histostats 'hdrstats.log:.*suffix:10s'
+~~~
+Everything works the same as for hdr histogram logging, except that the format is in
+CSV as shown in the example below:
+~~~
+# logging histograms for session scenario-1479087336599
+# log-format-version: 1
+# start-time: 1479087336621
+# TAG,INTERVALSTART,INTERVALEND,DURATION,min,p25,p50,p75,p90,p95,p98,p99,p999,p9999,max
+Tag=diag1.delay,1479087337070,1479087337121,51,8,15,15,15,15,15,15,15,15,15,15
+Tag=diag1.cycles,1479087337087,1479087337123,36,256,511,511,511,511,511,511,511,511,511,4194303
+Tag=diag1.delay,1479087337121,1479087337221,100,0,0,0,0,0,0,0,0,0,0,0
+Tag=diag1.cycles,1479087337123,1479087337221,98,64,127,127,127,127,127,127,127,127,127,524287
+~~~
+
+Notice that the same 
 
 ## LICENSE
 

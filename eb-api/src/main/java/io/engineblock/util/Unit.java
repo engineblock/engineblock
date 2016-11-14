@@ -17,59 +17,71 @@
 
 package io.engineblock.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Unit {
 
+    private final static Logger logger = LoggerFactory.getLogger(Unit.class);
+
     private static Pattern numberFmtPattern = Pattern.compile(" *(?<number>[0-9]+(\\.[0-9]+)?) *(?<unit>[^ ]+?)? *");
     private static long nanoPerSecond = 1000000000;
+    private static long bytesPerGB = 1000000000;
+    private static long BytesPerGiB = 1024 * 1024 * 1024;
 
-    public static long msFor(String duration) {
-        return durationFor(Duration.ms, duration);
+    public static Optional<Long> msFor(String duration) {
+        return durationFor(Duration.MS, duration);
     }
-    public static long microsecondsFor(String duration) {
-        return durationFor(Duration.us, duration);
+
+    public static Optional<Long> microsecondsFor(String duration) {
+        return durationFor(Duration.US, duration);
     }
-    public static long nanosecondsFor(String duration) {
-        return durationFor(Duration.ns, duration);
+
+    public static Optional<Long> nanosecondsFor(String duration) {
+        return durationFor(Duration.NS, duration);
     }
-    public static long secondsFor(String duration) {
+
+    public static Optional<Long> secondsFor(String duration) {
         return durationFor(Duration.SECOND, duration);
     }
-    public static long minutesFor(String duration) {
+
+    public static Optional<Long> minutesFor(String duration) {
         return durationFor(Duration.MINUTE, duration);
     }
 
-
-    public static long durationFor(Duration resultUnit, String spec) {
+    public static Optional<Long> durationFor(Duration resultUnit, String spec) {
         Matcher m = numberFmtPattern.matcher(spec);
         if (m.matches()) {
             String numberpart = m.group("number");
-            Long base = Long.valueOf(numberpart);
+            Double base = Double.valueOf(numberpart);
             String unitpart = m.group("unit");
             if (unitpart != null) {
                 Duration durationDuration = Duration.valueOfSuffix(unitpart);
                 if (durationDuration == null) {
                     throw new RuntimeException("Unable to recognized duration unit:" + unitpart);
                 }
-                long specnanos= durationDuration.getNanos();
+                long specnanos = durationDuration.getNanos();
                 long resultnanos = resultUnit.getNanos();
                 double multiplier = (double) specnanos / (double) resultnanos;
-                base = (long) ((double)base * multiplier);
+                base = base * multiplier;
             }
-            return base;
+            return Optional.of(base.longValue());
         } else {
-            throw new RuntimeException("Unable to match duration specifier:'" + spec + "'");
+            logger.error("Parsing error for specifier: '" + spec + "'");
+            return Optional.empty();
+
         }
     }
 
-
-    public static double bytesFor(String spec) {
-        return convertBytes(Bytes.BYTE,spec);
+    public static Optional<Double> bytesFor(String spec) {
+        return convertBytes(Bytes.BYTE, spec);
     }
 
-    public static double convertBytes(Bytes resultUnit, String spec) {
+    public static Optional<Double> convertBytes(Bytes resultUnit, String spec) {
         Matcher m = numberFmtPattern.matcher(spec);
         if (m.matches()) {
             String numberpart = m.group("number");
@@ -83,37 +95,35 @@ public class Unit {
                 long specifierScale = specifierUnit.getBytes();
                 long resultScale = resultUnit.getBytes();
                 double multiplier = (double) specifierScale / (double) resultScale;
-                base*=multiplier;
+                base *= multiplier;
             }
-            return base;
+            return Optional.of(base);
         } else {
-            throw new RuntimeException("Unable to match duration specifier:'" + spec + "'");
+            logger.error("Parsing error for specifier:'" + spec + "'");
+            return Optional.empty();
         }
 
     }
 
-    private static long bytesPerGB=1000000000;
-    private static long BytesPerGiB=1024*1024*1024;
-
     public static enum Bytes {
-        BYTE("B","byte",1),
-        KB("KB","kilobyte", 1000),
-        MB("MB","megabyte", 1000000),
-        GB("GB","gigabyte", bytesPerGB),
-        TB("TB","terabyte", bytesPerGB*1000),
-        PB("PB","petabyte", bytesPerGB*1000000),
-        EB("EB","exabyte", bytesPerGB*bytesPerGB),
-        ZB("ZB","zettabyte", bytesPerGB*bytesPerGB*1000),
-        YB("YB","yottabyte", bytesPerGB*bytesPerGB*1000000),
+        BYTE("B", "byte", 1),
+        KB("KB", "kilobyte", 1000),
+        MB("MB", "megabyte", 1000000),
+        GB("GB", "gigabyte", bytesPerGB),
+        TB("TB", "terabyte", bytesPerGB * 1000),
+        PB("PB", "petabyte", bytesPerGB * 1000000),
+        EB("EB", "exabyte", bytesPerGB * bytesPerGB),
+        ZB("ZB", "zettabyte", bytesPerGB * bytesPerGB * 1000),
+        YB("YB", "yottabyte", bytesPerGB * bytesPerGB * 1000000),
 
-        KIB("KiB","kibibyte",1024),
-        MIB("MiB","mebibyte",1024*1024),
-        GIB("GiB","gibibyte",BytesPerGiB),
-        TIB("TiB","tebibyte",BytesPerGiB*1024),
-        PIB("PIB","pebibyte",BytesPerGiB*1024*1024),
-        EIB("EiB","exbibyte",BytesPerGiB*BytesPerGiB),
-        ZIB("ZiB","zebibyte",BytesPerGiB*BytesPerGiB*1024),
-        YIB("YiB","yobibyte",BytesPerGiB*BytesPerGiB*1024*1024);
+        KIB("KiB", "kibibyte", 1024),
+        MIB("MiB", "mebibyte", 1024 * 1024),
+        GIB("GiB", "gibibyte", BytesPerGiB),
+        TIB("TiB", "tebibyte", BytesPerGiB * 1024),
+        PIB("PIB", "pebibyte", BytesPerGiB * 1024 * 1024),
+        EIB("EiB", "exbibyte", BytesPerGiB * BytesPerGiB),
+        ZIB("ZiB", "zebibyte", BytesPerGiB * BytesPerGiB * 1024),
+        YIB("YiB", "yobibyte", BytesPerGiB * BytesPerGiB * 1024 * 1024);
 
         private final String name;
         private final long bytes;
@@ -133,7 +143,7 @@ public class Unit {
                 if (byteUnit.name.toLowerCase().equals(unitpart.toLowerCase())) {
                     return byteUnit;
                 }
-                if ((byteUnit.name.toLowerCase()+"s").equals(unitpart.toLowerCase())) {
+                if ((byteUnit.name.toLowerCase() + "s").equals(unitpart.toLowerCase())) {
                     return byteUnit;
                 }
                 if (byteUnit.toString().toLowerCase().equals(unitpart.toLowerCase())) {
@@ -149,10 +159,10 @@ public class Unit {
     }
 
     public static enum Duration {
-        SECOND("s", "SECOND", nanoPerSecond),
-        ms("ms", "milliseconds", 1000000),
-        us("µs", "microseconds", 1000),
-        ns("ns", "nanoseconds", 1),
+        SECOND("s", "seconds", nanoPerSecond),
+        MS("ms", "milliseconds", 1000000),
+        US("µs", "microseconds", 1000),
+        NS("ns", "nanoseconds", 1),
         MINUTE("M", "minutes", nanoPerSecond * 60),
         HOUR("H", "hours", nanoPerSecond * 60 * 60),
         DAY("D", "days", nanoPerSecond * 60 * 60 * 24),

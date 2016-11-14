@@ -18,23 +18,13 @@
 package io.engineblock.metrics;
 
 import org.HdrHistogram.Histogram;
-import org.HdrHistogram.HistogramLogWriter;
 
-public interface DeltaHdrHistogram {
+public interface HdrDeltaHistoProvider {
 
     /**
      * Create a new interval histogram from the current data, then reset the histogram reservoir.
      * @return the new interval histogram
      */
-    Histogram getNextHdrHistogram();
-
-    /**
-     * Create a new interval histogram from the current data, reset the histogram reservoir,
-     * and write the new interval histgram to a log
-     * @param writer the HDR histogram log writer to use
-     */
-    default void writeNewInterval(HistogramLogWriter writer) {
-        writer.outputIntervalHistogram(getNextHdrHistogram());
-    }
+    Histogram getNextHdrDeltaHistogram();
 
 }

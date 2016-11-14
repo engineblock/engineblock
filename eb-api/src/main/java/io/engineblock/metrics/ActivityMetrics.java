@@ -188,7 +188,7 @@ public class ActivityMetrics {
     }
 
     /**
-     * Add a histogram logger to matching metrics in this JVM instance.
+     * Add a histogram interval logger to matching metrics in this JVM instance.
      * @param sessionName The name for the session to be annotated in the histogram log
      * @param pattern A regular expression pattern to filter out metric names for logging
      * @param filename A file to log the histogram data in
@@ -200,12 +200,34 @@ public class ActivityMetrics {
         }
         Pattern compiledPattern = Pattern.compile(pattern);
         File logfile = new File(filename);
-        long intervalMillis = Unit.msFor(interval);
+        long intervalMillis = Unit.msFor(interval).orElseThrow(()->new RuntimeException("Unable to parse interval spec:'" + interval + "'"));
 
         HistoIntervalLogger histoIntervalLogger =
                 new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
         logger.debug("attaching " + histoIntervalLogger + " to the metrics registry.");
         get().addListener(histoIntervalLogger);
+    }
+
+    /**
+     * Add a histogram stats logger to matching metrics in this JVM instance.
+     * @param sessionName The name for the session to be annotated in the histogram log
+     * @param pattern A regular expression pattern to filter out metric names for logging
+     * @param filename A file to log the histogram data in
+     * @param interval How many seconds to wait between writing each interval histogram
+     */
+    public static void addStatsLogger(String sessionName, String pattern, String filename, String interval) {
+        if (filename.contains("_SESSION_")) {
+            filename = filename.replace("_SESSION_",sessionName);
+        }
+        Pattern compiledPattern = Pattern.compile(pattern);
+        File logfile = new File(filename);
+        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + "'"));
+
+        StatsIntervalLogger statsIntervalLogger =
+                new StatsIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
+        logger.debug("attaching " + statsIntervalLogger + " to the metrics registry.");
+        get().addListener(statsIntervalLogger);
+
     }
 
     private static interface MetricProvider {

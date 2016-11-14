@@ -26,6 +26,7 @@ public class EBCLIOptions {
     private static final String WANTS_VERSION_LONG = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
     private static final String LOG_HISTO = "--log-histograms";
+    private static final String LOG_STATS = "--log-histostats";
 
     // Execution
     private static final String ACTIVITY = "activity";
@@ -65,7 +66,8 @@ public class EBCLIOptions {
     private String sessionName = "";
     private boolean showScript = false;
     private Level consoleLevel = Level.WARN;
-    private List<String> histoLoggerConfigs = new ArrayList<String>();
+    private List<String> histoLoggerConfigs = new ArrayList<>();
+    private List<String> statsLoggerConfigs = new ArrayList<>();
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -159,6 +161,11 @@ public class EBCLIOptions {
                     String logto = arglist.removeFirst();
                     histoLoggerConfigs.add(logto);
                     break;
+                case LOG_STATS:
+                    arglist.removeFirst();
+                    String logStatsTo = arglist.removeFirst();
+                    statsLoggerConfigs.add(logStatsTo);
+                    break;
                 case REPORT_GRAPHITE_TO:
                     arglist.removeFirst();
                     reportGraphiteTo = arglist.removeFirst();
@@ -199,10 +206,17 @@ public class EBCLIOptions {
         }
     }
 
-    public List<HistoConfig> getHistoLoggerConfigs() {
-        List<HistoConfig> configs = histoLoggerConfigs.stream().map(HistoConfig::new).collect(Collectors.toList());
-        checkHistoFiles(configs);
+    public List<LoggerConfig> getHistoLoggerConfigs() {
+        List<LoggerConfig> configs = histoLoggerConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
+        checkLoggerConfigs(configs, "--log-histograms");
         return configs;
+    }
+
+    public List<LoggerConfig> getStatsLoggerConfigs() {
+        List<LoggerConfig> configs = statsLoggerConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
+        checkLoggerConfigs(configs, "--log-histostats");
+        return configs;
+
     }
 
     public List<Cmd> getCommands() {
@@ -348,31 +362,34 @@ public class EBCLIOptions {
         }
     }
 
-    private void checkHistoFiles(List<HistoConfig> configs) {
+    private void checkLoggerConfigs(List<LoggerConfig> configs, String configName) {
         Set<String> files =new HashSet<>();
-        configs.stream().map(HistoConfig::getFilename).forEach(s -> {
+        configs.stream().map(LoggerConfig::getFilename).forEach(s -> {
             if (files.contains(s)) {
-                logger.warn(s + " is included in hdr log configs more than once. It will only be included " +
-                        "in the first matching config. Reorder your hdr logging options if  you need to control this.");
+                logger.warn(s + " is included in " + configName + " more than once. It will only be included " +
+                        "in the first matching config. Reorder your options if you need to control this.");
             }
             files.add(s);
         });
     }
 
-    public static class HistoConfig {
-        public String pattern = ".*";
+    public static class LoggerConfig {
         public String file = "";
-        public String interval = "";
+        public String pattern = ".*";
+        public String interval = "30 seconds";
 
-        public HistoConfig(String histoLoggerSpec) {
+        public LoggerConfig(String histoLoggerSpec) {
             String[] words = histoLoggerSpec.split(":");
             switch (words.length) {
                 case 3:
-                    interval = words[2];
+                    interval = words[2].isEmpty() ? interval : words[2];
                 case 2:
-                    file = words[1];
+                    pattern = words[1].isEmpty() ? pattern : words[1];
                 case 1:
                     file = words[0];
+                    if (file.isEmpty()) {
+                        throw new RuntimeException("You must not specify an empty file here for logging data.");
+                    }
                     break;
                 default:
                     throw new RuntimeException(

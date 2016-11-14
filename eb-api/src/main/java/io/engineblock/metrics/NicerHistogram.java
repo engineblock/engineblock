@@ -19,14 +19,17 @@ package io.engineblock.metrics;
 
 import com.codahale.metrics.Histogram;
 
+import java.util.ArrayList;
+import java.util.List;
 
-public class NicerHistogram extends Histogram implements DeltaSnapshotter, AttachingDeltaHdrHistogram {
+
+public class NicerHistogram extends Histogram implements DeltaSnapshotter, AttachingHdrDeltaHistoProvider {
 
     private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
     private long cacheExpiryMillis = 0L;
     private long cacheTimeMillis = 0L;
     private String metricName;
-    private NicerHistogram mirror;
+    private List<NicerHistogram> mirrors;
 
     public NicerHistogram(String metricName, DeltaHdrHistogramReservoir hdrHistogramReservoir) {
         super(hdrHistogramReservoir);
@@ -41,42 +44,48 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter, Attac
 
     /**
      * Only return a new snapshot form current reservoir data if the cached one has expired.
+     *
      * @return a new delta snapshot, or the cached one
      */
     @Override
     public ConvenientSnapshot getSnapshot() {
-        if (System.currentTimeMillis()<cacheExpiryMillis) {
+        if (System.currentTimeMillis() < cacheExpiryMillis) {
             return new ConvenientSnapshot(hdrDeltaReservoir.getLastSnapshot());
         } else {
-            return new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());        }
+            return new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());
+        }
     }
 
     public ConvenientSnapshot getDeltaSnapshot(long cacheTimeMillis) {
-        this.cacheTimeMillis= cacheTimeMillis;
+        this.cacheTimeMillis = cacheTimeMillis;
         cacheExpiryMillis = System.currentTimeMillis() + this.cacheTimeMillis;
         ConvenientSnapshot convenientSnapshot = new ConvenientSnapshot(hdrDeltaReservoir.getSnapshot());
         return convenientSnapshot;
     }
 
     @Override
-    public NicerHistogram attach() {
-        if (mirror==null) {
-            DeltaHdrHistogramReservoir mirrorReservoir = this.hdrDeltaReservoir.copySettings();
-            mirror = new NicerHistogram("mirror-" + this.metricName, mirrorReservoir);
+    public synchronized NicerHistogram attach() {
+        if (mirrors == null) {
+            mirrors = new ArrayList<NicerHistogram>();
         }
+        DeltaHdrHistogramReservoir mirrorReservoir = this.hdrDeltaReservoir.copySettings();
+        NicerHistogram mirror = new NicerHistogram("mirror-" + this.metricName, mirrorReservoir);
+        mirrors.add(mirror);
         return mirror;
     }
 
     @Override
     public void update(long value) {
         super.update(value);
-        if (mirror!=null) {
-            mirror.update(value);
+        if (mirrors != null) {
+            for (NicerHistogram mirror : mirrors) {
+                mirror.update(value);
+            }
         }
     }
 
     @Override
-    public org.HdrHistogram.Histogram getNextHdrHistogram() {
+    public org.HdrHistogram.Histogram getNextHdrDeltaHistogram() {
         return hdrDeltaReservoir.getNextHdrHistogram();
     }
 }

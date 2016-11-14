@@ -18,7 +18,7 @@
 package io.engineblock.metrics;
 
 /**
- * <p>Allow a DeltaHistogram to have an attached metric that also gets a copy of
+ * <p>Allow a DeltaHistogram to have attached metrics that also get a copy of
  * any input data.</p>
  *
  * <p>Terms</p>
@@ -33,23 +33,18 @@ package io.engineblock.metrics;
  * and wil not see previous content. Attaching metrics are responsible for the creation
  * and ownership of the attached metrics.</p>
  *
- * <p>Only one attached metric should be allowed. This does allow for
- * additional chaining, as long as only one metric is attached to each chaining
- * metric.</p>
-
  * <p>Implementations of the attaching metric should ensure that attached metrics
  * all receive the same data.</p>
-
- * <p>Implementations of attaching metric should not error when more than one
- * attachment is requested, however, a warning should be logged.</p>
+ *
+ * <p>The number of metrics that are allowed to be chained is implementation dependent.</p>
  *
  * <p>Implementations should ensure that any naming fields are marked differently so that
  * the attached metric does not have the exact same name as the attaching metric.</p>
  */
-public interface AttachingDeltaHdrHistogram extends DeltaHdrHistogram {
+public interface AttachingHdrDeltaHistoProvider extends HdrDeltaHistoProvider {
     /**
      * Attach a metric.
-     * @return the attached metric, a new instance if none was attached before, and the extant instance if one was.
+     * @return the attached metric, after adding to the mirrors for the metric.
      */
-    public DeltaHdrHistogram attach();
+    public HdrDeltaHistoProvider attach();
 }
