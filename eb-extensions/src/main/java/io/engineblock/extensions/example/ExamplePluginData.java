@@ -34,7 +34,7 @@ public class ExamplePluginData implements ScriptingPluginInfo<ExamplePlugin> {
 
     @Override
     public ExamplePlugin getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
-        logger.info("creating a new ExampleSandboxExtension");
+        logger.trace("creating a new ExampleSandboxExtension");
         return new ExamplePlugin();
     }
 

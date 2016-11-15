@@ -95,8 +95,8 @@ public class ScriptTests {
     @Test
     public void testExtensionHistogramLogger() throws IOException {
         Result result = runScenario("extension_histologger");
-        assertThat(result.getIOLog()).contains("stdout started logging to hdrhistolog.hdrlog");
-        List<String> strings = Files.readAllLines(Paths.get("hdrhistolog.hdrlog"));
+        assertThat(result.getIOLog()).contains("stdout started logging to hdrhistodata.log");
+        List<String> strings = Files.readAllLines(Paths.get("hdrhistodata.log"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains(",HIST");
         assertThat(logdata.split("Tag=testhistologger.cycles,").length).isGreaterThanOrEqualTo(3);

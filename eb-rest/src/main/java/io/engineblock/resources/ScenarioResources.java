@@ -66,8 +66,8 @@ public class ScenarioResources {
             List<Map<String, String>> paramSetList) {
 
         Scenario scenario = executor.getPendingScenario(scenarioName)
-                .orElse(new Scenario(scenarioName));
-        paramSetList.stream().forEach(scenario.getScenarioController()::apply);
+                .orElse(new Scenario(scenarioName,"1m"));
+        paramSetList.forEach(scenario.getScenarioController()::apply);
         executor.execute(scenario);
         URI uri = UriBuilder.fromResource(ScenarioResources.class).build(scenarioName);
         return Response.created(uri).build();

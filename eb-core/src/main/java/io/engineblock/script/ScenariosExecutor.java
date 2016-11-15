@@ -17,6 +17,7 @@
 
 package io.engineblock.script;
 
+import io.engineblock.activitycore.ProgressIndicator;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
@@ -31,13 +32,14 @@ import java.util.stream.Collectors;
 public class ScenariosExecutor {
 
     private final static Logger logger = LoggerFactory.getLogger(ScenariosExecutor.class);
+    private ProgressIndicator pi;
 
     private LinkedHashMap<String, SubmittedScenario> submitted = new LinkedHashMap<>();
 //
 //    private LinkedHashMap<String, Future<Result>> submittedFutures = new LinkedHashMap<>();
 //    private LinkedHashMap<String, Scenario> submittedScenarios = new LinkedHashMap<>();
 
-    private ExecutorService executor = new ThreadPoolExecutor(1,1,
+    private ExecutorService executor = new ThreadPoolExecutor(1, 1,
             0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<Runnable>());
     private String name;
@@ -53,7 +55,7 @@ public class ScenariosExecutor {
 
     public synchronized void execute(Scenario scenario) {
         ScenarioLogger.start(scenario);
-        if (submitted.get(scenario.getName())!=null) {
+        if (submitted.get(scenario.getName()) != null) {
             throw new RuntimeException("Scenario " + scenario.getName() + " is already defined. Remove it first to reuse the name.");
         }
         Future<Result> future = executor.submit(scenario);
@@ -109,17 +111,14 @@ public class ScenariosExecutor {
             logger.info("scenarios executor shutdownActivity after " + (System.currentTimeMillis() - waitedAt) + "ms.");
         }
 
-        if (isShutdown) {
-
-        } else {
+        if (!isShutdown) {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
                     + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
         Map<Scenario, Result> scenarioResultMap = new LinkedHashMap<Scenario, Result>();
         getAsyncResultStatus()
-                .entrySet().stream()
-                .forEach(es -> scenarioResultMap.put(es.getKey(), es.getValue().orElseGet(null)));
-        return new ScenariosResults(this,scenarioResultMap);
+                .entrySet().forEach(es -> scenarioResultMap.put(es.getKey(), es.getValue().orElseGet(null)));
+        return new ScenariosResults(this, scenarioResultMap);
     }
 
     /**
@@ -136,7 +135,7 @@ public class ScenariosExecutor {
      * <p>Returns a map of all pending scenario names and optional results.
      * All submitted scenarios are included. Those which are still pending
      * are returned with an empty option.</p>
-     *
+     * <p>
      * <p>Results may be exceptional. If {@link Result#getException()} is present,
      * then the result did not complete normally.</p>
      *
@@ -158,7 +157,7 @@ public class ScenariosExecutor {
                 }
             }
 
-            optResults.put(submittedScenario.getScenario(),oResult);
+            optResults.put(submittedScenario.getScenario(), oResult);
 
         }
 
@@ -175,7 +174,7 @@ public class ScenariosExecutor {
      * exception, or there was an error accessing the future, then the result will
      * contain the exception. If the callable for the scenario was cancelled, then the
      * result will contain an exception stating such.
-     *
+     * <p>
      * If the scenario is still pending, then the optional will be empty.
      *
      * @param scenarioName the scenario name of interest
@@ -184,7 +183,7 @@ public class ScenariosExecutor {
     public Optional<Result> getPendingResult(String scenarioName) {
 
         Future<Result> resultFuture1 = submitted.get(scenarioName).resultFuture;
-        if (resultFuture1==null) {
+        if (resultFuture1 == null) {
             throw new RuntimeException("Unknown scenario name:" + scenarioName);
         }
         if (resultFuture1.isDone()) {
@@ -205,7 +204,7 @@ public class ScenariosExecutor {
         if (pendingScenario.isPresent()) {
             pendingScenario.get().getScenarioController().forceStopScenario(0);
             submitted.remove(scenarioName);
-            logger.info("cancelled scenario "+ scenarioName);
+            logger.info("cancelled scenario " + scenarioName);
         } else {
             throw new RuntimeException("Unable to cancel scenario: " + scenarioName + ": not found");
         }

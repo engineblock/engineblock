@@ -8,7 +8,7 @@ activitydef = {
 };
 
 histostatslogger.logHistoStats("testing extention histostatslogger", ".*", "histostats.csv", "0.5s");
-print("started logging to histostats.csv for all metrics at 1/2 second intervals.\n");
+print("started logging to histostats.csv for all metrics at 1/2 second intervals.");
 
 scenario.start(activitydef);
 scenario.waitMillis(2000);

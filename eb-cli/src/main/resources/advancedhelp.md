@@ -24,6 +24,18 @@ To execute a scenario script directly, simply use the format:
 PROG script <scriptname> [param=value [...]]
 ~~~
 
+Time & Size Units
+=================
+Anywhere you need to specify a time, you can use standard unit suffixes,
+like "1 day", "1m", etc. Both long names and short names work in any
+case. The valid time suffixes are ns, us, ms, s, m, h, d, w, y, for
+nanoseconds, microseconds, milliseconds, seconds, minutes, hours,
+days, weeks, or years, respectively.  
+
+As well, when specifying sizes, standard SI and IEC units apply for suffixes like
+KB, KiB. For more details, see 
+[The Wikipedia Page](https://en.wikipedia.org/wiki/Binary_prefix).
+
 For Scenario Designers
 ======================
 

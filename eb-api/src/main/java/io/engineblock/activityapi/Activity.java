@@ -1,6 +1,5 @@
 package io.engineblock.activityapi;
 
-import com.codahale.metrics.Timer;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 

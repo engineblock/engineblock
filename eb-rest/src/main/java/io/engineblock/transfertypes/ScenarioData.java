@@ -20,12 +20,10 @@ package io.engineblock.transfertypes;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.core.Result;
-import io.engineblock.script.BufferAppender;
 import io.engineblock.script.Scenario;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class ScenarioData {
 
@@ -45,10 +43,10 @@ public class ScenarioData {
             this.iolog = new ArrayList<String>();
 //            this.iolog = "not logged data";
         }
-        Optional<BufferAppender> logBuffer = scenario.getLogBuffer();
-        if (logBuffer.isPresent()) {
-            this.logBuffer = logBuffer.get().toString();
-        }
+//        Optional<BufferAppender> logBuffer = scenario.getLogBuffer();
+//        if (logBuffer.isPresent()) {
+//            this.logBuffer = logBuffer.get().toString();
+//        }
         this.result = result;
     }
 

@@ -1,6 +1,9 @@
 package io.engineblock.activityimpl;
 
-import io.engineblock.activityapi.*;
+import io.engineblock.activityapi.ActionDispenser;
+import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.InputDispenser;
+import io.engineblock.activityapi.MotorDispenser;
 
 /**
  * A default implementation of an Activity, suitable for building upon.
