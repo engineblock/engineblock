@@ -6,7 +6,7 @@ This extension allows you to record HDR Histogram intervals
 
 ### Example
 ~~~
-histologger.logHistoIntervals("test run 42", ".*", "hdrdata.hdrlog", "0.5s");
+histologger.logHistoIntervals("test run 42", ".*", "hdrdata.log", "0.5s");
 ~~~
 
 The arguments to logHistoStats are:

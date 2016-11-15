@@ -72,6 +72,19 @@ Specify the metrics name prefix for graphite reporting
 Log all HDR histogram data to a file
 
     --log-histograms histodata.log
+    
+Log HDR histogram stats to a CSV file
+
+    --log-histostats stats.csv
+    
+Adjust the progress reporting indicatorSpec
+
+    --progress console:10s
+    
+or
+
+    --progress logonly:5m
+
 
 Name the current session, for logfile naming, etc
 By default, this will be "scenario-TIMESTAMP", and a logfile will be created

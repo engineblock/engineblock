@@ -16,6 +16,7 @@ package io.engineblock.script;
 
 import ch.qos.logback.classic.Logger;
 import com.codahale.metrics.MetricRegistry;
+import io.engineblock.activitycore.ProgressIndicator;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
 import io.engineblock.extensions.ScriptingPluginInfo;
@@ -43,9 +44,16 @@ public class Scenario implements Callable<Result> {
     private final List<String> scripts = new ArrayList<>();
     private ScriptEngine scriptEngine;
     private ScenarioController scenarioController;
+    private ProgressIndicator progressIndicator;
+    private String progressInterval = "console:1m";
     private ScenarioContext scriptEnv;
     private String name;
-    private BufferAppender bufferAppender;
+
+    public Scenario(String name, String progressInterval) {
+        this.name = name;
+        this.progressInterval = progressInterval;
+        init();
+    }
 
     public Scenario(String name) {
         this.name = name;
@@ -83,24 +91,11 @@ public class Scenario implements Callable<Result> {
         scriptEnv = new ScenarioContext(scenarioController);
         scriptEngine.setContext(scriptEnv);
         scenarioController = new ScenarioController();
+        progressIndicator = new ProgressIndicator(scenarioController,progressInterval);
 
         scriptEngine.put("scenario", scenarioController);
         scriptEngine.put("activities", new ScenarioBindings(scenarioController));
         scriptEngine.put("metrics", new MetricRegistryBindings(metricRegistry));
-
-        for (ScriptingPluginInfo extensionDescriptor : SandboxExtensionFinder.findAll()) {
-            org.slf4j.Logger extensionLogger =
-                    LoggerFactory.getLogger("extensions." + extensionDescriptor.getBaseVariableName());
-
-            Object extensionObject = extensionDescriptor.getExtensionObject(
-                    extensionLogger,
-                    metricRegistry,
-                    scriptEnv
-            );
-            logger.info("Adding extension object:  name=" + extensionDescriptor.getBaseVariableName() +
-                    " class=" + extensionObject.getClass().getSimpleName());
-            scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
-        }
 
         for (ScriptingPluginInfo extensionDescriptor : SandboxExtensionFinder.findAll()) {
             if (!extensionDescriptor.isAutoLoading()) {
@@ -190,10 +185,6 @@ public class Scenario implements Callable<Result> {
 
     public Optional<List<String>> getIOLog() {
         return Optional.ofNullable(scriptEnv).map(ScriptEnvBuffer::getTimeLogLines);
-    }
-
-    public Optional<BufferAppender> getLogBuffer() {
-        return Optional.ofNullable(bufferAppender);
     }
 
     public String toString() {

@@ -7,8 +7,8 @@ activitydef = {
     "targetrate" : "10000.0"
 };
 
-histologger.logHistoIntervals("testing extention histologger", ".*", "hdrhistolog.hdrlog", "0.5s");
-print("started logging to hdrhistolog.hdrlog for all metrics at 1/2 second intervals.\n");
+histologger.logHistoIntervals("testing extention histologger", ".*", "hdrhistodata.log", "0.5s");
+print("started logging to hdrhistodata.log for all metrics at 1/2 second intervals.");
 
 scenario.start(activitydef);
 scenario.waitMillis(2000);

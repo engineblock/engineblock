@@ -23,22 +23,35 @@ import org.slf4j.LoggerFactory;
 /**
  * This is a simple and light way to run a periodic task run
  */
-class PeriodicRunnable<T extends Runnable> implements Runnable {
+public class PeriodicRunnable<T extends Runnable> implements Runnable {
     private static Logger logger = LoggerFactory.getLogger(PeriodicRunnable.class);
 
     private long intervalMillis;
     private T action;
+    private Thread thread;
 
     public PeriodicRunnable(long intervalMillis, T action) {
         this.action = action;
         this.intervalMillis = intervalMillis;
     }
 
-    public void startThread() {
-        Thread intervalThread = new Thread(this);
-        intervalThread.setDaemon(true);
-        intervalThread.setName(action.toString());
-        intervalThread.start();
+    public synchronized PeriodicRunnable<T> startDaemonThread() {
+        thread = new Thread(this);
+        thread.setDaemon(true);
+        thread.setName(action.toString());
+        thread.start();
+        return this;
+    }
+
+    public synchronized  PeriodicRunnable<T> startMainThread() {
+        thread = new Thread(this);
+        thread.setName(action.toString());
+        thread.start();
+        return this;
+    }
+
+    public Thread getThread() {
+        return thread;
     }
 
     @Override

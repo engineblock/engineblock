@@ -16,6 +16,7 @@ package io.engineblock.core;
 
 import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.ActivityType;
+import io.engineblock.activityapi.ProgressMeter;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.metrics.ActivityMetrics;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.security.InvalidParameterException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -33,7 +35,7 @@ public class ScenarioController {
 
     private static final Logger logger = LoggerFactory.getLogger(ScenarioController.class);
 
-    private final Map<String, ActivityExecutor> activityExecutors = new HashMap<>();
+    private final Map<String, ActivityExecutor> activityExecutors = new ConcurrentHashMap<>();
 
     /**
      * Start an activity, given the activity definition for it. The activity will be known in the scenario
@@ -351,5 +353,9 @@ public class ScenarioController {
             activityMap.put(entry.getKey(),entry.getValue().getActivity());
         }
         return activityMap;
+    }
+
+    public Collection<ProgressMeter> getProgressMeters() {
+        return this.activityExecutors.values().stream().map(e -> (ProgressMeter)e).collect(Collectors.toList());
     }
 }

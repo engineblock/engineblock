@@ -17,13 +17,11 @@ package io.engineblock.core;
 import io.engineblock.activityapi.*;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
+import io.engineblock.activityimpl.SlotStateTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -38,7 +36,7 @@ import java.util.stream.Collectors;
  * scenario, but which is inactive. This can occur when an activity is paused by controlling logic,
  * or when the threads are set to zero.</p>
  */
-public class ActivityExecutor implements ParameterMap.Listener {
+public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);
     private final List<Motor> motors = new ArrayList<>();
     private final Activity activity;
@@ -67,6 +65,7 @@ public class ActivityExecutor implements ParameterMap.Listener {
      * changes to threads.</p>
      */
     public synchronized void startActivity() {
+        this.intendedState=SlotState.Running;
         logger.info("starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
         try {
             activity.initActivity();
@@ -74,7 +73,6 @@ public class ActivityExecutor implements ParameterMap.Listener {
             logger.error("There was an error starting activity:" + activityDef.getAlias());
             throw new RuntimeException(e);
         }
-        this.intendedState=SlotState.Running;
         adjustToActivityDef(activity.getActivityDef());
     }
 
@@ -82,8 +80,8 @@ public class ActivityExecutor implements ParameterMap.Listener {
      * Simply stop the motors
      */
     public void stopActivity() {
-        logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
         this.intendedState=SlotState.Stopped;
+        logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
         motors.forEach(Motor::requestStop);
         motors.forEach(m -> awaitRequiredMotorState(m, 10000, 50, SlotState.Stopped, SlotState.Finished));
         activity.shutdownActivity();
@@ -96,7 +94,6 @@ public class ActivityExecutor implements ParameterMap.Listener {
      * @param initialSecondsToWait milliseconds to wait after graceful shutdownActivity request, before forcing everything to stop
      */
     public synchronized void forceStopExecutor(int initialSecondsToWait) {
-
         this.intendedState=SlotState.Stopped;
 
         executorService.shutdown();
@@ -114,8 +111,9 @@ public class ActivityExecutor implements ParameterMap.Listener {
     }
 
     public boolean requestStopExecutor(int secondsToWait) {
-        logger.info("Stopping executor for " + activity.getAlias());
         intendedState=SlotState.Stopped;
+
+        logger.info("Stopping executor for " + activity.getAlias() + " when work completes.");
 
         executorService.shutdown();
         boolean wasStopped = false;
@@ -356,5 +354,41 @@ public class ActivityExecutor implements ParameterMap.Listener {
 
     public Activity getActivity() {
         return activity;
+    }
+
+    @Override
+    public synchronized double getProgress() {
+        ArrayList<Input> inputs = motors.stream()
+                .map(Motor::getInput)
+                .distinct()
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        double startCycle = getActivityDef().getStartCycle();
+        double endCycle = getActivityDef().getEndCycle();
+        double totalCycles = endCycle - startCycle;
+        double count = inputs.size();
+
+        double total = 0.0D;
+
+        for (Input input : inputs) {
+            double done = (input.getCurrent() - startCycle);
+            double fractional = (done / totalCycles);
+            total += fractional;
+        }
+
+        return total;
+    }
+
+    @Override
+    public String getProgressName() {
+        return activityDef.getAlias();
+    }
+
+    @Override
+    public SlotState getProgressState() {
+        Optional<SlotState> first = motors.stream()
+                .map(Motor::getSlotStateTracker).map(SlotStateTracker::getSlotState)
+                .distinct().sorted().findFirst();
+        return first.orElse(SlotState.Initialized);
     }
 }

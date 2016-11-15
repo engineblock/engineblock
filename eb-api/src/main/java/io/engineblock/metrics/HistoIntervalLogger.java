@@ -79,7 +79,7 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
         }
 
         this.executor = new PeriodicRunnable<HistoIntervalLogger>(this.getInterval(),this);
-        executor.startThread();
+        executor.startDaemonThread();
     }
 
     public String toString() {

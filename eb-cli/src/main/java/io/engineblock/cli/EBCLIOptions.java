@@ -1,7 +1,9 @@
 package io.engineblock.cli;
 
 import ch.qos.logback.classic.Level;
+import io.engineblock.metrics.IndicatorMode;
 import io.engineblock.util.EngineBlockFiles;
+import io.engineblock.util.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +20,7 @@ public class EBCLIOptions {
 
     public static final String docoptFileName = "commandline.md";
     private final static Logger logger = LoggerFactory.getLogger(EBCLIOptions.class);
+
     // Discovery
     private static final String HELP = "--help";
     private static final String ADVANCED_HELP = "--advanced-help";
@@ -44,6 +47,7 @@ public class EBCLIOptions {
     private static final String WANTS_TRACE_CONSOLE_LOGGING = "-vvv";
     private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
     private static final String METRICS_PREFIX = "--metrics-prefix";
+    private static final String PROGRESS_INDICATOR = "--progress";
 
     private static final Set<String> reserved_words = new HashSet<String>() {{
         addAll(
@@ -68,6 +72,7 @@ public class EBCLIOptions {
     private Level consoleLevel = Level.WARN;
     private List<String> histoLoggerConfigs = new ArrayList<>();
     private List<String> statsLoggerConfigs = new ArrayList<>();
+    private String progressSpec = "console:1m";
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -89,7 +94,7 @@ public class EBCLIOptions {
             switch (word) {
                 case SHOW_SCRIPT:
                     arglist.removeFirst();
-                    showScript =true;
+                    showScript = true;
                     break;
                 case ACTIVITY:
                     arglist.removeFirst();
@@ -103,29 +108,29 @@ public class EBCLIOptions {
                     arglist.removeFirst();
                     arglist.addFirst("start");
                     Cmd introspectActivity = parseActivityCmd(arglist);
-                    wantsMetricsForActivity=introspectActivity.cmdSpec;
+                    wantsMetricsForActivity = introspectActivity.cmdSpec;
                     break;
                 case AWAIT_ACTIVITY:
                     String awaitCmdType = arglist.removeFirst();
-                    String activityToAwait = readWordOrThrow(arglist,"activity alias to await");
+                    String activityToAwait = readWordOrThrow(arglist, "activity alias to await");
                     assertNotParameter(activityToAwait);
                     assertNotReserved(activityToAwait);
-                    Cmd awaitActivityCmd = new Cmd(CmdType.valueOf(awaitCmdType),activityToAwait);
+                    Cmd awaitActivityCmd = new Cmd(CmdType.valueOf(awaitCmdType), activityToAwait);
                     cmdList.add(awaitActivityCmd);
                     break;
                 case STOP_ACTIVITY:
-                    String stopCmdType = readWordOrThrow(arglist,"stop command");
-                    String activityToStop = readWordOrThrow(arglist,"activity alias to await");
+                    String stopCmdType = readWordOrThrow(arglist, "stop command");
+                    String activityToStop = readWordOrThrow(arglist, "activity alias to await");
                     assertNotParameter(activityToStop);
                     assertNotReserved(activityToStop);
-                    Cmd stopActivityCmd = new Cmd(CmdType.valueOf(stopCmdType),activityToStop);
+                    Cmd stopActivityCmd = new Cmd(CmdType.valueOf(stopCmdType), activityToStop);
                     cmdList.add(stopActivityCmd);
                     break;
                 case WAIT_MILLIS:
-                    String waitMillisCmdType = readWordOrThrow(arglist,"wait millis");
+                    String waitMillisCmdType = readWordOrThrow(arglist, "wait millis");
                     String millisCount = readWordOrThrow(arglist, "millis count");
                     Long.parseLong(millisCount);
-                    Cmd awaitMillisCmd = new Cmd(CmdType.valueOf(waitMillisCmdType),millisCount);
+                    Cmd awaitMillisCmd = new Cmd(CmdType.valueOf(waitMillisCmdType), millisCount);
                     cmdList.add(awaitMillisCmd);
                     break;
                 case SCRIPT:
@@ -135,6 +140,10 @@ public class EBCLIOptions {
                 case SESSION_NAME:
                     arglist.removeFirst();
                     sessionName = readWordOrThrow(arglist, "a session name");
+                    break;
+                case PROGRESS_INDICATOR:
+                    arglist.removeFirst();
+                    progressSpec = readWordOrThrow(arglist, "a progress indicator, like 'log:1m' or 'screen:10s', or just 'log' or 'screen'");
                     break;
                 case WANTS_VERSION_LONG:
                     arglist.removeFirst();
@@ -216,7 +225,6 @@ public class EBCLIOptions {
         List<LoggerConfig> configs = statsLoggerConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
         checkLoggerConfigs(configs, "--log-histostats");
         return configs;
-
     }
 
     public List<Cmd> getCommands() {
@@ -275,7 +283,6 @@ public class EBCLIOptions {
         if (scriptName.contains("=")) {
             throw new InvalidParameterException("script name must precede script arguments");
         }
-
     }
 
     private void assertNotReserved(String name) {
@@ -320,6 +327,27 @@ public class EBCLIOptions {
         return new Cmd(CmdType.valueOf(cmdType), activitydef.stream().map(s -> s + ";").collect(Collectors.joining()));
     }
 
+    public String getProgressSpec() {
+        ProgressSpec spec = parseProgressSpec(this.progressSpec);// sanity check
+        if (spec.indicatorMode == IndicatorMode.console
+                && Level.WARN.isGreaterOrEqual(wantsConsoleLogLevel())) {
+            logger.warn("Console is already logging info or more, so progress data on console is suppressed.");
+            spec.indicatorMode = IndicatorMode.logonly;
+        }
+        return spec.toString();
+    }
+
+    private void checkLoggerConfigs(List<LoggerConfig> configs, String configName) {
+        Set<String> files = new HashSet<>();
+        configs.stream().map(LoggerConfig::getFilename).forEach(s -> {
+            if (files.contains(s)) {
+                logger.warn(s + " is included in " + configName + " more than once. It will only be included " +
+                        "in the first matching config. Reorder your options if you need to control this.");
+            }
+            files.add(s);
+        });
+    }
+
     public static enum CmdType {
         start,
         run,
@@ -362,17 +390,6 @@ public class EBCLIOptions {
         }
     }
 
-    private void checkLoggerConfigs(List<LoggerConfig> configs, String configName) {
-        Set<String> files =new HashSet<>();
-        configs.stream().map(LoggerConfig::getFilename).forEach(s -> {
-            if (files.contains(s)) {
-                logger.warn(s + " is included in " + configName + " more than once. It will only be included " +
-                        "in the first matching config. Reorder your options if you need to control this.");
-            }
-            files.add(s);
-        });
-    }
-
     public static class LoggerConfig {
         public String file = "";
         public String pattern = ".*";
@@ -403,5 +420,33 @@ public class EBCLIOptions {
             return file;
         }
     }
+
+    private static class ProgressSpec {
+        public String intervalSpec;
+        public IndicatorMode indicatorMode;
+        public String toString() {
+            return indicatorMode.toString()+":" + intervalSpec;
+        }
+    }
+
+    private ProgressSpec parseProgressSpec(String interval) {
+        ProgressSpec progressSpec = new ProgressSpec();
+        String[] parts = interval.split(":");
+        switch (parts.length) {
+            case 2:
+                Unit.msFor(parts[1]).orElseThrow(
+                        () -> new RuntimeException("Unable to parse progress indicator indicatorSpec '" + parts[1] + "'")
+                );
+                progressSpec.intervalSpec = parts[1];
+            case 1:
+                progressSpec.indicatorMode = IndicatorMode.valueOf(parts[0]);
+                break;
+            default:
+                throw new RuntimeException("This should never happen.");
+        }
+        return progressSpec;
+    }
+
+
 
 }

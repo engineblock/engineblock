@@ -74,7 +74,7 @@ public class StatsIntervalLogger extends CapabilityHook<HdrDeltaHistogramAttachm
         writer.outputLegend();
 
         this.executor = new PeriodicRunnable<StatsIntervalLogger>(this.getInterval(), this);
-        executor.startThread();
+        executor.startDaemonThread();
     }
 
     public String toString() {

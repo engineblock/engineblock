@@ -98,10 +98,9 @@ public class EBCLI {
             System.exit(0);
         }
 
-
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
-        Scenario scenario = new Scenario(sessionName);
+        Scenario scenario = new Scenario(sessionName, options.getProgressSpec());
         String script = EBCLIScriptAssembly.assembleScript(options);
         if (options.wantsShowScript()) {
             System.out.println("// Script");
