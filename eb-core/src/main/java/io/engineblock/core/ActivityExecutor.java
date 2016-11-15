@@ -91,22 +91,23 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     /**
      * Shutdown the activity executor, with a grace period for the motor threads.
      *
-     * @param initialSecondsToWait milliseconds to wait after graceful shutdownActivity request, before forcing everything to stop
+     * @param initialMillisToWait milliseconds to wait after graceful shutdownActivity request, before forcing everything to stop
      */
-    public synchronized void forceStopExecutor(int initialSecondsToWait) {
+    public synchronized void forceStopExecutor(int initialMillisToWait) {
         this.intendedState=SlotState.Stopped;
 
         executorService.shutdown();
         requestStopMotors();
 
         try {
-            Thread.sleep(initialSecondsToWait);
+            Thread.sleep(initialMillisToWait);
         } catch (InterruptedException ignored) {
         }
 
         logger.info("stopping activity forcibly " + activity.getAlias());
         List<Runnable> runnables = executorService.shutdownNow();
 
+        activity.shutdownActivity();
         logger.debug(runnables.size() + " threads never started.");
     }
 

@@ -223,10 +223,10 @@ public class ActivityMetrics {
         File logfile = new File(filename);
         long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + "'"));
 
-        StatsIntervalLogger statsIntervalLogger =
-                new StatsIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
-        logger.debug("attaching " + statsIntervalLogger + " to the metrics registry.");
-        get().addListener(statsIntervalLogger);
+        HistoStatsLogger histoStatsLogger =
+                new HistoStatsLogger(sessionName, logfile, compiledPattern, intervalMillis);
+        logger.debug("attaching " + histoStatsLogger + " to the metrics registry.");
+        get().addListener(histoStatsLogger);
 
     }
 
