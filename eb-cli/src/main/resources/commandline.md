@@ -99,6 +99,8 @@ Increase console logging levels: (Default console logging level is *warning*)
     -vv        (debug)
     -vvv       (trace)
     
+    --progress console:1m (disables itself if -v options are used)
+    
 Show version, long form, with artifact coordinates.
 
     --version
