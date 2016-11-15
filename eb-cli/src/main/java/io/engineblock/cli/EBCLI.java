@@ -113,6 +113,12 @@ public class EBCLI {
         ScenariosResults scenariosResults = executor.awaitAllResults();
         //scenariosResults.reportSummaryTo(System.out);
         scenariosResults.reportToLog();
+
+        if (scenariosResults.hasError()) {
+            System.exit(2);
+        } else {
+            System.exit(0);
+        }
     }
 
     private String loadHelpFile(String filename) {

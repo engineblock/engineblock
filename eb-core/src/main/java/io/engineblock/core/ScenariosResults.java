@@ -31,7 +31,6 @@ public class ScenariosResults {
 
     private String scenariosExecutorName;
     private Map<Scenario,Result> scenarioResultMap = new LinkedHashMap<>();
-    private Result one;
 
 
     public ScenariosResults(ScenariosExecutor scenariosExecutor) {
@@ -80,5 +79,10 @@ public class ScenariosResults {
                 logger.error(scenario.getName() + ": incomplete (missing result)");
             }
         }
+    }
+
+    public boolean hasError() {
+        return this.scenarioResultMap.values().stream()
+                .anyMatch(r -> r.getException().isPresent());
     }
 }
