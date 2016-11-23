@@ -32,16 +32,17 @@ import java.util.stream.Collectors;
  * <p>An ActivityExecutor is a named instance of an execution harness for a single activity instance.
  * It is responsible for managing threads and activity settings which may be changed while the
  * activity is running.</p>
+ *
  * <p>An ActivityExecutor may be represent an activity that is defined and active in the running
  * scenario, but which is inactive. This can occur when an activity is paused by controlling logic,
  * or when the threads are set to zero.</p>
  *
  * <p>
  * Invariants:
+ * </p>
  * <ul>
  *     <li>Motors may not receive parameter updates before their owning activities are initialized.</li>
  * </ul>
- * </p>
  */
 public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);

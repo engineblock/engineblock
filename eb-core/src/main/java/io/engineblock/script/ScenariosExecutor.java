@@ -132,7 +132,7 @@ public class ScenariosExecutor {
      * <p>Returns a map of all pending scenario names and optional results.
      * All submitted scenarios are included. Those which are still pending
      * are returned with an empty option.</p>
-     * <p>
+     *
      * <p>Results may be exceptional. If {@link Result#getException()} is present,
      * then the result did not complete normally.</p>
      *
