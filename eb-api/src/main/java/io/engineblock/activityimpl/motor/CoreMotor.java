@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.engineblock.activityapi.SlotState.*;
+import static io.engineblock.activityapi.RunState.*;
 
 /**
  * <p>ActivityMotor is a Runnable which runs in one of an activity's many threads.
@@ -47,7 +47,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private Timer timer;
     private ActivityDef activityDef;
     private SlotStateTracker slotStateTracker;
-    private AtomicReference<SlotState> slotState;
+    private AtomicReference<RunState> slotState;
 
     /**
      * Create an ActivityMotor.
@@ -198,7 +198,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             if (action instanceof Stoppable) {
                 ((Stoppable) action).requestStop();
             }
-            slotStateTracker.enterState(SlotState.Stopping);
+            slotStateTracker.enterState(RunState.Stopping);
         } else {
             logger.warn("attempted to stop motor " + this.getSlotId() + ": from non Running state:" + slotState.get());
         }

@@ -1,9 +1,6 @@
 package io.engineblock.activityimpl;
 
-import io.engineblock.activityapi.ActionDispenser;
-import io.engineblock.activityapi.Activity;
-import io.engineblock.activityapi.InputDispenser;
-import io.engineblock.activityapi.MotorDispenser;
+import io.engineblock.activityapi.*;
 
 /**
  * A default implementation of an Activity, suitable for building upon.
@@ -14,9 +11,18 @@ public class SimpleActivity implements Activity {
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
     protected ActivityDef activityDef;
+    private RunState runState = RunState.Uninitialized;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
+    }
+
+    public synchronized RunState getRunState() {
+        return runState;
+    }
+
+    public synchronized void setRunState(RunState runState) {
+        this.runState = runState;
     }
 
     @Override

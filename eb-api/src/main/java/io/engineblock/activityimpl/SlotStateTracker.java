@@ -17,7 +17,7 @@
 
 package io.engineblock.activityimpl;
 
-import io.engineblock.activityapi.SlotState;
+import io.engineblock.activityapi.RunState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * slot state as
  */
 public class SlotStateTracker {
-    private final AtomicReference<SlotState> slotState = new AtomicReference<>(SlotState.Initialized);
+    private final AtomicReference<RunState> slotState = new AtomicReference<>(RunState.Uninitialized);
     private final static Logger logger = LoggerFactory.getLogger(SlotStateTracker.class);
     private final long slotId;
 
@@ -36,7 +36,7 @@ public class SlotStateTracker {
         this.slotId = slotId;
     }
 
-    public SlotState getSlotState() {
+    public RunState getSlotState() {
         return slotState.get();
     }
 
@@ -46,7 +46,7 @@ public class SlotStateTracker {
      * state for observers.
      * @return an atomic reference for SlotState
      */
-    public AtomicReference<SlotState> getAtomicSlotState() {
+    public AtomicReference<RunState> getAtomicSlotState() {
         return slotState;
     }
 
@@ -56,8 +56,8 @@ public class SlotStateTracker {
      *
      * @param to The next SlotState for this thread/slot/motor
      */
-    public synchronized void enterState(SlotState to) {
-        SlotState from = slotState.get();
+    public synchronized void enterState(RunState to) {
+        RunState from = slotState.get();
         if (!from.canTransitionTo(to)) {
             throw new RuntimeException("Invalid transition from " + from + " to " + to);
         }

@@ -18,10 +18,10 @@
 
 package io.engineblock.activityapi;
 
-public enum SlotState {
+public enum RunState {
 
     // Initial state after creation of this control
-    Initialized("i⌀"),
+    Uninitialized("i⌀"),
     // This thread has been queued to run, but hasn't signaled yet that it is full started
     // This must be set by the executor before executing the slot runnable
     Starting("s⏫"),
@@ -36,7 +36,7 @@ public enum SlotState {
 
     private String runcode;
 
-    SlotState(String runcode) {
+    RunState(String runcode) {
         this.runcode = runcode;
     }
 
@@ -44,11 +44,11 @@ public enum SlotState {
         return this.runcode;
     }
 
-    public boolean canTransitionTo(SlotState to) {
+    public boolean canTransitionTo(RunState to) {
         switch (this) {
             default:
                 return false;
-            case Initialized: // A motor was just created. This is its initial state.
+            case Uninitialized: // A motor was just created. This is its initial state.
                 switch (to) {
                     case Starting: // a motor has been reserved for an execution command
                         return true;

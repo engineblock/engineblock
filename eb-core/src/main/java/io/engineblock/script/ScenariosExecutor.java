@@ -17,7 +17,7 @@
 
 package io.engineblock.script;
 
-import io.engineblock.activitycore.ProgressIndicator;
+import io.engineblock.core.IndexedThreadFactory;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
@@ -32,24 +32,21 @@ import java.util.stream.Collectors;
 public class ScenariosExecutor {
 
     private final static Logger logger = LoggerFactory.getLogger(ScenariosExecutor.class);
-    private ProgressIndicator pi;
-
     private LinkedHashMap<String, SubmittedScenario> submitted = new LinkedHashMap<>();
-//
-//    private LinkedHashMap<String, Future<Result>> submittedFutures = new LinkedHashMap<>();
-//    private LinkedHashMap<String, Scenario> submittedScenarios = new LinkedHashMap<>();
 
-    private ExecutorService executor = new ThreadPoolExecutor(1, 1,
-            0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>());
+    private final ExecutorService executor;
     private String name;
 
     public ScenariosExecutor(String name) {
-        this.name = name;
+        this(name, 1);
     }
 
     public ScenariosExecutor(String name, int threads) {
-        executor = Executors.newFixedThreadPool(threads);
+        executor = new ThreadPoolExecutor(1, 1,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new IndexedThreadFactory("scenarios"));
+        Executors.newFixedThreadPool(threads, new IndexedThreadFactory("scenarios"));
         this.name = name;
     }
 
@@ -115,7 +112,7 @@ public class ScenariosExecutor {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
                     + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
-        Map<Scenario, Result> scenarioResultMap = new LinkedHashMap<Scenario, Result>();
+        Map<Scenario, Result> scenarioResultMap = new LinkedHashMap<>();
         getAsyncResultStatus()
                 .entrySet().forEach(es -> scenarioResultMap.put(es.getKey(), es.getValue().orElseGet(null)));
         return new ScenariosResults(this, scenarioResultMap);
@@ -125,7 +122,7 @@ public class ScenariosExecutor {
      * @return list of scenarios which have been submitted, in order
      */
     public List<String> getPendingScenarios() {
-        return new ArrayList<String>(
+        return new ArrayList<>(
                 submitted.values().stream()
                         .map(SubmittedScenario::getName)
                         .collect(Collectors.toCollection(ArrayList::new)));
@@ -200,7 +197,6 @@ public class ScenariosExecutor {
 
     public synchronized void cancelScenario(String scenarioName) {
         Optional<Scenario> pendingScenario = getPendingScenario(scenarioName);
-        Optional<Result> pendingResult = getPendingResult(scenarioName);
         if (pendingScenario.isPresent()) {
             pendingScenario.get().getScenarioController().forceStopScenario(0);
             submitted.remove(scenarioName);

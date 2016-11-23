@@ -20,5 +20,5 @@ package io.engineblock.activityapi;
 public interface ProgressMeter {
     double getProgress();
     String getProgressName();
-    SlotState getProgressState();
+    RunState getProgressState();
 }

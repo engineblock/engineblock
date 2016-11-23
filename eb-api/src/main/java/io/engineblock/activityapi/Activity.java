@@ -33,6 +33,9 @@ public interface Activity extends Comparable<Activity> {
     default void initActivity() {
     }
 
+    RunState getRunState();
+    void setRunState(RunState runState);
+
     default void shutdownActivity() {
     }
 
