@@ -62,9 +62,9 @@ public class ActivityDef {
     private ParameterMap parameterMap;
 //    private final AtomicInteger atomicThreadTarget = new AtomicInteger(0);
 
-    public ActivityDef(String parameterString) {
-        this.parameterMap = ParameterMap.parsePositional(parameterString, field_list);
-    }
+//    public ActivityDef(String parameterString) {
+//        this.parameterMap = ParameterMap.parsePositional(parameterString, field_list);
+//    }
 
     public ActivityDef(ParameterMap parameterMap) {
         this.parameterMap = parameterMap;
@@ -85,8 +85,10 @@ public class ActivityDef {
     }
 
     public static ActivityDef parseActivityDef(String namedActivitySpec) {
-        ParameterMap activityParameterMap = ParameterMap.parsePositional(namedActivitySpec, field_list);
-        ActivityDef activityDef = new ActivityDef(activityParameterMap);
+        Optional<ParameterMap> activityParameterMap = ParameterMap.parseParams(namedActivitySpec);
+        ActivityDef activityDef = new ActivityDef(activityParameterMap.orElseThrow(
+                () -> new RuntimeException("Unable to parse:" + namedActivitySpec)
+        ));
         logger.debug("parsed activityDef " + namedActivitySpec + " to-> " + activityDef);
 
         return activityDef;

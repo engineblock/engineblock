@@ -23,7 +23,6 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 public class ParameterMapTest {
 
     @Test
@@ -78,34 +77,34 @@ public class ParameterMapTest {
     }
 
 
-    @Test
-    public void testPositionalParsing() {
-        ParameterMap matchingNumbers = ParameterMap.parsePositional("1;2", new String[]{"one", "two", "three"});
-        Assertions.assertThat(matchingNumbers.getSize()).isEqualTo(2);
-        Assertions.assertThat(matchingNumbers.getIntOrDefault("one", 5)).isEqualTo(1);
-        Assertions.assertThat(matchingNumbers.getStringOrDefault("two", "default")).isEqualTo("2");
-    }
-
-    @Test(expectedExceptions = RuntimeException.class,
-            expectedExceptionsMessageRegExp = ".*ran out of positional field names.*")
-    public void testFieldNameUnderrun() {
-        ParameterMap underrun = ParameterMap.parsePositional("1;2;3;4;", new String[]{"one", "two", "three"});
-    }
-
-    @Test
-    public void testSetSignatures() {
-        ParameterMap matchingNumbers = ParameterMap.parsePositional("1;2;3.0;", new String[]{"one", "two", "three"});
-        AtomicLong changeCounter = matchingNumbers.getChangeCounter();
-        Assertions.assertThat(changeCounter.get()).isEqualTo(0L);
-        Assertions.assertThat(matchingNumbers.getDoubleOrDefault("three", 4.0D)).isEqualTo(3.0D);
-        matchingNumbers.set("three", 2.7777D);
-        Assertions.assertThat(changeCounter.get()).isEqualTo(1L);
-        Assertions.assertThat(matchingNumbers.getDoubleOrDefault("three", 9.8D)).isEqualTo(2.7777D);
-        matchingNumbers.set("three", "seventeen");
-        Assertions.assertThat(changeCounter.get()).isEqualTo(2L);
-        Assertions.assertThat(matchingNumbers.getStringOrDefault("three", "whoops")).isEqualTo("seventeen");
-    }
-
+//    @Test
+//    public void testPositionalParsing() {
+//        ParameterMap matchingNumbers = ParameterMap.parsePositional("1;2", new String[]{"one", "two", "three"});
+//        Assertions.assertThat(matchingNumbers.getSize()).isEqualTo(2);
+//        Assertions.assertThat(matchingNumbers.getIntOrDefault("one", 5)).isEqualTo(1);
+//        Assertions.assertThat(matchingNumbers.getStringOrDefault("two", "default")).isEqualTo("2");
+//    }
+//
+//    @Test(expectedExceptions = RuntimeException.class,
+//            expectedExceptionsMessageRegExp = ".*ran out of positional field names.*")
+//    public void testFieldNameUnderrun() {
+//        ParameterMap underrun = ParameterMap.parsePositional("1;2;3;4;", new String[]{"one", "two", "three"});
+//    }
+//
+//    @Test
+//    public void testSetSignatures() {
+//        ParameterMap matchingNumbers = ParameterMap.parsePositional("1;2;3.0;", new String[]{"one", "two", "three"});
+//        AtomicLong changeCounter = matchingNumbers.getChangeCounter();
+//        Assertions.assertThat(changeCounter.get()).isEqualTo(0L);
+//        Assertions.assertThat(matchingNumbers.getDoubleOrDefault("three", 4.0D)).isEqualTo(3.0D);
+//        matchingNumbers.set("three", 2.7777D);
+//        Assertions.assertThat(changeCounter.get()).isEqualTo(1L);
+//        Assertions.assertThat(matchingNumbers.getDoubleOrDefault("three", 9.8D)).isEqualTo(2.7777D);
+//        matchingNumbers.set("three", "seventeen");
+//        Assertions.assertThat(changeCounter.get()).isEqualTo(2L);
+//        Assertions.assertThat(matchingNumbers.getStringOrDefault("three", "whoops")).isEqualTo("seventeen");
+//    }
+//
     @Test
     public void testGetOptional() {
         ParameterMap abc = ParameterMap.parseOrException("a=1;b=2;c=3;");
@@ -115,5 +114,10 @@ public class ParameterMapTest {
         Assertions.assertThat(a).isEqualTo(Optional.of("1"));
         Optional<Long> aLong = abc.getOptionalLong("a");
         Assertions.assertThat(aLong).isEqualTo(Optional.of(1L));
+    }
+
+    @Test
+    public void testQuotedSemis() {
+        ParameterMap abc = ParameterMap.parseOrException("a=1;b='two;three';");
     }
 }

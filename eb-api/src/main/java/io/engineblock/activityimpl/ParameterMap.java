@@ -15,6 +15,7 @@
 
 package io.engineblock.activityimpl;
 
+import io.engineblock.activityimpl.motor.ParamsParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,6 @@ import javax.script.Bindings;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -140,7 +140,9 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         markMutation();
     }
 
-    private static Pattern encodedParamsPattern = Pattern.compile("(\\w+?)=(.+?);");
+    private static Pattern encodedParamsSquote = Pattern.compile("(?<param>\\w+?)='(?<value>[^']+?);");
+    private static Pattern encodedParamsDquote = Pattern.compile("(?<param>\\w+?)=\"(?<value>[^\"]+?);");
+    private static Pattern encodedParamsPattern = Pattern.compile("(?<param>\\w+?)=(?<value>.+?);");
 
     @Override
     public Object put(String name, Object value) {
@@ -229,35 +231,16 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         if (encodedParams == null) {
             throw new RuntimeException("Must provide a non-null String to parse parameters.");
         }
-
-        Matcher matcher = ParameterMap.encodedParamsPattern.matcher(encodedParams);
-
-        LinkedHashMap<String, String> newParamMap = new LinkedHashMap<>();
-
-        int lastEnd = 0;
-        int triedAt = 0;
-
-        while (matcher.find()) {
-            triedAt = lastEnd;
-            String paramName = matcher.group(1);
-            String paramValueString = matcher.group(2);
-            newParamMap.put(paramName, paramValueString);
-            lastEnd = matcher.end();
-        }
-
-        if (lastEnd != encodedParams.length()) {
-            throw new RuntimeException("unable to find pattern " + ParameterMap.encodedParamsPattern.pattern() + " at position " + triedAt + " in input" + encodedParams);
-        }
-
-        return new ParameterMap(newParamMap);
+        Map<String, String> parsedMap = ParamsParser.parse(encodedParams);
+        return new ParameterMap(parsedMap);
     }
 
-    static Optional<ParameterMap> parseOptionalParams(Optional<String> optionalEncodedParams) {
-        if (optionalEncodedParams.isPresent()) {
-            return parseParams(optionalEncodedParams.get());
-        }
-        return Optional.empty();
-    }
+//    static Optional<ParameterMap> parseOptionalParams(Optional<String> optionalEncodedParams) {
+//        if (optionalEncodedParams.isPresent()) {
+//            return parseParams(optionalEncodedParams.get());
+//        }
+//        return Optional.empty();
+//    }
 
     public static Optional<ParameterMap> parseParams(String encodedParams) {
         try {
@@ -267,44 +250,44 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         }
     }
 
-    /**
-     * Parse positional parameters, each suffixed with the ';' terminator.
-     * This form simply allows for the initial parameter names to be elided, so long as they
-     * are sure to match up with a well-known order. This method cleans up the input, injecting
-     * the field names as necessary, and then calls the normal parsing logic.
-     *
-     * @param encodedParams     parameter string
-     * @param defaultFieldNames the well-known field ordering
-     * @return a new ParameterMap, if parsing was successful
-     */
-    public static ParameterMap parsePositional(String encodedParams, String[] defaultFieldNames) {
-
-        String[] splitAtSemi = encodedParams.split(";");
-
-        for (int wordidx = 0; wordidx < splitAtSemi.length; wordidx++) {
-
-            if (!splitAtSemi[wordidx].contains("=")) {
-
-                if (wordidx > (defaultFieldNames.length - 1)) {
-                    throw new RuntimeException("positional param (without var=val; format) ran out of "
-                            + "positional field names:"
-                            + " names:" + Arrays.toString(defaultFieldNames)
-                            + ", values: " + Arrays.toString(splitAtSemi)
-                            + ", original: " + encodedParams
-                    );
-                }
-
-                splitAtSemi[wordidx] = defaultFieldNames[wordidx] + "=" + splitAtSemi[wordidx] + ";";
-            }
-            if (!splitAtSemi[wordidx].endsWith(";")) {
-                splitAtSemi[wordidx] = splitAtSemi[wordidx] + ";";
-            }
-        }
-
-        String allArgs = Arrays.asList(splitAtSemi).stream().collect(Collectors.joining());
-        ParameterMap parameterMap = ParameterMap.parseOrException(allArgs);
-        return parameterMap;
-    }
+//    /**
+//     * Parse positional parameters, each suffixed with the ';' terminator.
+//     * This form simply allows for the initial parameter names to be elided, so long as they
+//     * are sure to match up with a well-known order. This method cleans up the input, injecting
+//     * the field names as necessary, and then calls the normal parsing logic.
+//     *
+//     * @param encodedParams     parameter string
+//     * @param defaultFieldNames the well-known field ordering
+//     * @return a new ParameterMap, if parsing was successful
+//     */
+//    public static ParameterMap parsePositional(String encodedParams, String[] defaultFieldNames) {
+//
+//        String[] splitAtSemi = encodedParams.split(";");
+//
+//        for (int wordidx = 0; wordidx < splitAtSemi.length; wordidx++) {
+//
+//            if (!splitAtSemi[wordidx].contains("=")) {
+//
+//                if (wordidx > (defaultFieldNames.length - 1)) {
+//                    throw new RuntimeException("positional param (without var=val; format) ran out of "
+//                            + "positional field names:"
+//                            + " names:" + Arrays.toString(defaultFieldNames)
+//                            + ", values: " + Arrays.toString(splitAtSemi)
+//                            + ", original: " + encodedParams
+//                    );
+//                }
+//
+//                splitAtSemi[wordidx] = defaultFieldNames[wordidx] + "=" + splitAtSemi[wordidx] + ";";
+//            }
+//            if (!splitAtSemi[wordidx].endsWith(";")) {
+//                splitAtSemi[wordidx] = splitAtSemi[wordidx] + ";";
+//            }
+//        }
+//
+//        String allArgs = Arrays.asList(splitAtSemi).stream().collect(Collectors.joining());
+//        ParameterMap parameterMap = ParameterMap.parseOrException(allArgs);
+//        return parameterMap;
+//    }
 
     public static interface Listener {
         void handleParameterMapUpdate(ParameterMap parameterMap);
