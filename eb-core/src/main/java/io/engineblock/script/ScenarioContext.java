@@ -15,6 +15,7 @@
 package io.engineblock.script;
 
 import io.engineblock.core.ScenarioController;
+import io.engineblock.scripting.ScriptEnvBuffer;
 
 public class ScenarioContext extends ScriptEnvBuffer {
 

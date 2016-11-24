@@ -1,6 +1,6 @@
 package io.engineblock.core;
 
-import io.engineblock.script.ScriptEnvBuffer;
+import io.engineblock.scripting.ScriptEnvBuffer;
 import io.engineblock.script.Scenario;
 import org.testng.annotations.Test;
 

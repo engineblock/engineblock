@@ -1,5 +1,6 @@
 package io.engineblock.script;
 
+import io.engineblock.scripting.ScriptEnvBuffer;
 import org.testng.annotations.Test;
 
 import java.io.IOException;

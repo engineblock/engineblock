@@ -22,6 +22,7 @@ import io.engineblock.core.ScenarioController;
 import io.engineblock.extensions.ScriptingPluginInfo;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
+import io.engineblock.scripting.ScriptEnvBuffer;
 import org.slf4j.LoggerFactory;
 
 import javax.script.*;
