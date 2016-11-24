@@ -18,14 +18,16 @@
 package io.engineblock.scripting;
 
 /**
+ * <p>
  * An evaluator is a scripting helper that knows what its return type will be at runtime.
  * You can create an Evaluator from an environment and a desired return type, then reuse it.
  * Primitive types that can be mapped from the script to the return type should, including
+ * </p>
  * <UL>
- * <LI>Double -> Long</LI>
- * <LI>Double -> Integer</LI>
- * <LI>Double -> Float</LI>
- * <LI>Long -> Integer</LI>
+ * <LI>Double -&gt; Long</LI>
+ * <LI>Double -&gt; Integer</LI>
+ * <LI>Double -&gt; Float</LI>
+ * <LI>Long -&gt; Integer</LI>
  * </UL>
  *
  * <p>An evaluator is not threadsafe by default. If you need threadsafe evaluators with similar
