@@ -25,9 +25,11 @@ import io.engineblock.core.ShutdownManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class MetricReporters implements IShutdown {
@@ -49,7 +51,9 @@ public class MetricReporters implements IShutdown {
         this.metricRegistries.add(new PrefixedRegistry(registryPrefix, metricsRegistry));
         return this;
     }
+
     public MetricReporters addGraphite(String dest, String prefix) {
+        logger.debug("Adding graphite reporter to " + dest + " with prefix " + prefix);
         if (dest.indexOf(":")>=0) {
             String[] split = dest.split(":");
             addGraphite(split[0],Integer.valueOf(split[1]),prefix);
@@ -59,7 +63,35 @@ public class MetricReporters implements IShutdown {
         return this;
     }
 
+    public void addCSVReporter(String directoryName, String prefix) {
+        logger.debug("Adding CSV reporter to " + directoryName + " with prefix " + prefix);
+
+        if (metricRegistries.isEmpty()) {
+            throw new RuntimeException("There are no metric registries.");
+        }
+
+        File csvDirectory = new File(directoryName);
+        if (!csvDirectory.exists()) {
+            if (!csvDirectory.mkdirs()) {
+                throw new RuntimeException("Error creating CSV reporting directory:" + csvDirectory.getAbsolutePath());
+            }
+        }
+
+        for (PrefixedRegistry prefixedRegistry : metricRegistries) {
+            CsvReporter csvReporter = CsvReporter.forRegistry(prefixedRegistry.metricRegistry)
+                    .convertDurationsTo(TimeUnit.NANOSECONDS)
+                    .convertRatesTo(TimeUnit.SECONDS)
+                    .filter(ActivityMetrics.METRIC_FILTER)
+                    .formatFor(Locale.US)
+                    .build(new File(directoryName));
+
+            scheduledReporters.add(csvReporter);
+        }
+    }
+
     public MetricReporters addGraphite(String host, int graphitePort, String prefix) {
+
+        logger.debug("Adding graphite reporter to " + host + " with port " + graphitePort + " and prefix " + prefix);
 
         if (metricRegistries.isEmpty()) {
             throw new RuntimeException("There are no metric registries.");
@@ -80,18 +112,8 @@ public class MetricReporters implements IShutdown {
         return this;
     }
 
-//    public MetricReporters addConsole(MetricRegistry registry) {
-//        ConsoleReporter consoleReporter = ConsoleReporter.forRegistry(registry)
-//                .convertRatesTo(TimeUnit.SECONDS)
-//                .convertDurationsTo(TimeUnit.MICROSECONDS)
-//                .filter(MetricFilter.ALL)
-//                .build();
-//
-//        scheduledReporters.add(consoleReporter);
-//        return this;
-//    }
-
     public MetricReporters addLogger() {
+        logger.debug("Adding slf4j reporter for metrics");
 
         if (metricRegistries.isEmpty()) {
             throw new RuntimeException("There are no metric registries.");

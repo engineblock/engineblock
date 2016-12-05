@@ -61,6 +61,10 @@ Add the named activity to the scenario, interpolating named parameters
 
 These options modify how the scenario is run.
 
+Specify a directory and enable CSV reporting of metrics:
+
+    --report-csv-to <dirname>
+    
 Specify the graphite destination and enable reporting
 
     --report-graphite-to <addr>[:<port>]

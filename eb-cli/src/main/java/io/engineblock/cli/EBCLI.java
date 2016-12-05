@@ -69,10 +69,16 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsReportGraphiteTo()!=null) {
+        if (options.wantsReportGraphiteTo()!=null || options.wantsReportCsvTo()!=null) {
             MetricReporters reporters = MetricReporters.getInstance();
             reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
-            reporters.addGraphite(options.wantsReportGraphiteTo(),options.wantsMetricsPrefix());
+
+            if (options.wantsReportGraphiteTo()!=null) {
+                reporters.addGraphite(options.wantsReportGraphiteTo(),options.wantsMetricsPrefix());
+            }
+            if (options.wantsReportCsvTo()!=null) {
+                reporters.addCSVReporter(options.wantsReportCsvTo(),options.wantsMetricsPrefix());
+            }
             reporters.start(10,10);
         }
 

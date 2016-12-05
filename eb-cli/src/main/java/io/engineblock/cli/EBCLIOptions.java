@@ -46,6 +46,7 @@ public class EBCLIOptions {
     private static final String WANTS_DEBUG_CONSOLE_LOGGING = "-vv";
     private static final String WANTS_TRACE_CONSOLE_LOGGING = "-vvv";
     private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
+    private static final String REPORT_CSV_TO = "--report-csv-to";
     private static final String METRICS_PREFIX = "--metrics-prefix";
     private static final String PROGRESS_INDICATOR = "--progress";
 
@@ -64,6 +65,7 @@ public class EBCLIOptions {
     private boolean wantsActivityTypes = false;
     private boolean wantsBasicHelp = false;
     private String reportGraphiteTo = null;
+    private String reportCsvTo = null;
     private String metricsPrefix = "engineblock.";
     private String wantsMetricsForActivity;
     private boolean wantsAdvancedHelp = false;
@@ -174,6 +176,10 @@ public class EBCLIOptions {
                     arglist.removeFirst();
                     String logStatsTo = arglist.removeFirst();
                     statsLoggerConfigs.add(logStatsTo);
+                    break;
+                case REPORT_CSV_TO:
+                    arglist.removeFirst();
+                    reportCsvTo = arglist.removeFirst();
                     break;
                 case REPORT_GRAPHITE_TO:
                     arglist.removeFirst();
@@ -346,6 +352,10 @@ public class EBCLIOptions {
             }
             files.add(s);
         });
+    }
+
+    public String wantsReportCsvTo() {
+        return reportCsvTo;
     }
 
     public static enum CmdType {
