@@ -151,6 +151,10 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     @Override
     public synchronized void handleParameterMapUpdate(ParameterMap parameterMap) {
 
+        if (activity instanceof ActivityDefObserver) {
+            ((ActivityDefObserver)activity).onActivityDefUpdate(activityDef);
+        }
+
         // An activity must be initialized before the motors and other components are
         // considered ready to handle parameter map changes. This is signaled in an activity
         // by the RunState.

@@ -83,7 +83,7 @@ public class MetricReporters implements IShutdown {
                     .convertRatesTo(TimeUnit.SECONDS)
                     .filter(ActivityMetrics.METRIC_FILTER)
                     .formatFor(Locale.US)
-                    .build(new File(directoryName));
+                    .build(csvDirectory);
 
             scheduledReporters.add(csvReporter);
         }
