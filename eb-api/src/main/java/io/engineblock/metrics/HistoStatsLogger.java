@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -37,6 +38,7 @@ public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment
     private final static Logger logger = LoggerFactory.getLogger(HistoStatsLogger.class);
 
     private final String sessionName;
+    private final TimeUnit timeUnit;
     //    private final long intervalMillis;
     private long intervalLength;
     private File logfile;
@@ -46,11 +48,12 @@ public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment
     private List<WriterTarget> targets = new CopyOnWriteArrayList<>();
     private PeriodicRunnable<HistoStatsLogger> executor;
 
-    public HistoStatsLogger(String sessionName, File file, Pattern pattern, long intervalLength) {
+    public HistoStatsLogger(String sessionName, File file, Pattern pattern, long intervalLength, TimeUnit timeUnit) {
         this.sessionName = sessionName;
         this.logfile = file;
         this.pattern = pattern;
         this.intervalLength = intervalLength;
+        this.timeUnit = timeUnit;
         startLogging();
     }
 
@@ -70,6 +73,7 @@ public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment
         writer.outputLogFormatVersion();
         long currentTimeMillis = System.currentTimeMillis();
         writer.outputStartTime(currentTimeMillis);
+        writer.outputTimeUnit(timeUnit);
         writer.setBaseTime(currentTimeMillis);
         writer.outputLegend();
 
