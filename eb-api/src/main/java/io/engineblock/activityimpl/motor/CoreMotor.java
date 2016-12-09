@@ -141,6 +141,14 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         }
 
         slotStateTracker.enterState(Running);
+
+        MultiPhaseAction multiPhaseAction = null;
+        Timer phaseTimer = null;
+        if (action instanceof MultiPhaseAction) {
+            phaseTimer = ActivityMetrics.timer(activityDef, "phases");
+            multiPhaseAction = ((MultiPhaseAction) action);
+        }
+
         long cyclenum;
         AtomicLong cycleMax = input.getMax();
 
@@ -164,6 +172,15 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
                 logger.trace("cycle " + cyclenum);
                 action.accept(cyclenum);
+
+                if (multiPhaseAction != null) {
+                    try (Timer.Context phaseTime = phaseTimer.time()) {
+                        while (multiPhaseAction.incomplete()) {
+                            action.accept(cyclenum);
+                        }
+
+                    }
+                }
             }
         }
 

@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class HistoStatsCSVWriter {
     private final static Logger logger = LoggerFactory.getLogger(HistoStatsCSVWriter.class);
@@ -67,6 +68,15 @@ public class HistoStatsCSVWriter {
                 "#[StartTime: %.3f (seconds since epoch), %s]\n",
                 startTime / 1000.0,
                 new Date(startTime).toString()
+        );
+        writer.flush();
+    }
+
+    public void outputTimeUnit(TimeUnit timeUnit) {
+        writer.format(
+                Locale.US,
+                "#[TimeUnit: %s]\n",
+                timeUnit.toString()
         );
         writer.flush();
     }
