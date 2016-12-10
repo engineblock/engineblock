@@ -77,6 +77,34 @@ public class Unit {
         }
     }
 
+    public static Optional<Double> countFor(String spec) {
+        return convertCounts(Count.UNIT, spec);
+    }
+
+    public static Optional<Double> convertCounts(Count resultUnit, String spec) {
+        Matcher m = numberFmtPattern.matcher(spec);
+        if (m.matches()) {
+            String numberpart = m.group("number");
+            double base = Double.valueOf(numberpart);
+            String unitpart = m.group("unit");
+            if (unitpart != null) {
+                Count specifierUnit = Count.valueOfSuffix(unitpart);
+                if (specifierUnit == null) {
+                    throw new RuntimeException("Unable to recognized count unit:" + unitpart);
+                }
+                double specifierScale = specifierUnit.getMultiplier();
+                double resultScale = resultUnit.getMultiplier();
+                double multiplier = (specifierScale / resultScale);
+                base *= multiplier;
+            }
+            return Optional.of(base);
+        } else {
+            logger.error("Parsing error for specifier:'" + spec + "'");
+            return Optional.empty();
+        }
+
+    }
+
     public static Optional<Double> bytesFor(String spec) {
         return convertBytes(Bytes.BYTE, spec);
     }
@@ -105,6 +133,45 @@ public class Unit {
 
     }
 
+    public static enum Count {
+        UNIT("U", "unit", 1.0),
+        KILO("K", "kilo", 1000.0),
+        MEGA("M", "mega", 1000000.0),
+        GIGA("G", "giga", 1000000000.0),
+        TERA("T", "tera", 1000000000000.0),
+        PETA("P", "peta", 1000000000000000.0),
+        EXA("E", "exa",   1000000000000000000.0);
+
+        private final String label;
+        private final String name;
+        private final double multiplier;
+
+        Count(String label, String name, double multiplier) {
+            this.label = label;
+            this.name = name;
+            this.multiplier = multiplier;
+        }
+
+        public static Count valueOfSuffix(String suffix) {
+            for (Count count : Count.values()) {
+                if (count.toString().toLowerCase().equals(suffix.toLowerCase())) {
+                    return count;
+                }
+                if (count.label.toLowerCase().equals(suffix.toLowerCase())) {
+                    return count;
+                }
+                if (count.name.toLowerCase().equals(suffix.toLowerCase())) {
+                    return count;
+                }
+            }
+            return null;
+        }
+
+        public double getMultiplier() {
+            return multiplier;
+        }
+    }
+
     public static enum Bytes {
         BYTE("B", "byte", 1),
         KB("KB", "kilobyte", 1000),
@@ -127,7 +194,7 @@ public class Unit {
 
         private final String name;
         private final long bytes;
-        private String label;
+        private final String label;
 
         Bytes(String label, String name, long bytes) {
             this.label = label;

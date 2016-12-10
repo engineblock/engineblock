@@ -18,6 +18,7 @@
 
 package io.engineblock.activityimpl;
 
+import io.engineblock.util.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,25 +37,20 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ActivityDef {
 
-    private final static Logger logger = LoggerFactory.getLogger(ActivityDef.class);
-
-    // an alias with which to control the activity while it is running
-    private static final String FIELD_ALIAS = "alias";
-
-    // a file or URL containing the activity: statements, generator bindings, ...
-    private static final String FIELD_ATYPE = "type";
-
-    // cycles for this activity in either "M" or "N..M" form. "M" form implies "0..M"
-    private static final String FIELD_CYCLES = "cycles";
-
-    // initial thread concurrency for this activity
-    private static final String FIELD_THREADS = "threads";
-
     // milliseconds between cycles per thread, for slow tests only
     public static final String DEFAULT_ALIAS = "ALIAS_UNSET";
     public static final String DEFAULT_ATYPE = "TYPE_UNSET";
     public static final String DEFAULT_CYCLES = "0";
     public static final int DEFAULT_THREADS = 1;
+    private final static Logger logger = LoggerFactory.getLogger(ActivityDef.class);
+    // an alias with which to control the activity while it is running
+    private static final String FIELD_ALIAS = "alias";
+    // a file or URL containing the activity: statements, generator bindings, ...
+    private static final String FIELD_ATYPE = "type";
+    // cycles for this activity in either "M" or "N..M" form. "M" form implies "0..M"
+    private static final String FIELD_CYCLES = "cycles";
+    // initial thread concurrency for this activity
+    private static final String FIELD_THREADS = "threads";
     private static String[] field_list = new String[]{
             FIELD_ALIAS, FIELD_ATYPE, FIELD_CYCLES, FIELD_THREADS
     };
@@ -122,15 +118,32 @@ public class ActivityDef {
     public long getStartCycle() {
         String cycles = parameterMap.getStringOrDefault("cycles", DEFAULT_CYCLES);
         int rangeAt = cycles.indexOf("..");
+        String startCycle;
         if (rangeAt > 0) {
-            return Long.valueOf(cycles.substring(0, rangeAt));
+            startCycle = cycles.substring(0, rangeAt);
         } else {
-            return 0L;
+            startCycle = "0";
         }
+
+        return Unit.countFor(startCycle).orElseThrow(
+                () -> new RuntimeException("Unable to parse start cycles from " + startCycle)
+        ).longValue();
+    }
+
+    public void setStartCycle(String startCycle) {
+        setStartCycle(Unit.countFor(startCycle).orElseThrow(
+                () -> new RuntimeException("Unable to convert start cycle '" + startCycle + "' to a value.")
+        ).longValue());
     }
 
     public void setStartCycle(long startCycle) {
         parameterMap.set(FIELD_CYCLES, "" + startCycle + ".." + getEndCycle());
+    }
+
+    public void setEndCycle(String endCycle) {
+        setEndCycle(Unit.countFor(endCycle).orElseThrow(
+                () -> new RuntimeException("Unable to convert end cycle '" + endCycle + "' to a value.")
+        ).longValue());
     }
 
     /**
@@ -141,11 +154,15 @@ public class ActivityDef {
     public long getEndCycle() {
         String cycles = parameterMap.getStringOrDefault(FIELD_CYCLES, DEFAULT_CYCLES);
         int rangeAt = cycles.indexOf("..");
+        String endCycle;
         if (rangeAt > 0) {
-            return Long.valueOf(cycles.substring(rangeAt + 2));
+            endCycle = cycles.substring(rangeAt + 2);
         } else {
-            return Long.valueOf(cycles);
+            endCycle = cycles;
         }
+        return Unit.countFor(endCycle).orElseThrow(
+                () -> new RuntimeException("Unable to convert end cycle from " + endCycle)
+        ).longValue();
     }
 
     public void setEndCycle(long endCycle) {
