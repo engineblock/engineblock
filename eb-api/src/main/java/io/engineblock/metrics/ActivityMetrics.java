@@ -64,8 +64,6 @@ public class ActivityMetrics {
                 if (metric == null) {
                     metric = metricProvider.getMetric();
                     return get().register(fullMetricName, metric);
-                } else {
-                    logger.warn("another thread has created this metric: " + fullMetricName);
                 }
             }
         }
@@ -82,8 +80,6 @@ public class ActivityMetrics {
                     Metric registered = get().register(name, metric);
                     logger.info("registered scripting metric: " + name);
                     return registered;
-                } else {
-                    logger.warn("another thread has created this metric: " + name);
                 }
             }
         }
