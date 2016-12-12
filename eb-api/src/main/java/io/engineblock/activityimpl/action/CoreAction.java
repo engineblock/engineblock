@@ -32,7 +32,7 @@ public class CoreAction implements Action {
     public CoreAction(ActivityDef activityDef, int slot) {
         this.activityDef = activityDef;
         this.slot = slot;
-        this.interval = activityDef.getParams().getIntOrDefault("interval", 1000);
+        this.interval = activityDef.getParams().getOptionalInteger("interval").orElse(1000);
     }
 
     @Override

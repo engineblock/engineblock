@@ -100,11 +100,11 @@ public class ActivityDef {
      * @return the alias
      */
     public String getAlias() {
-        return parameterMap.getStringOrDefault("alias", DEFAULT_ALIAS);
+        return parameterMap.getOptionalString("alias").orElse(DEFAULT_ALIAS);
     }
 
     public String getActivityType() {
-        return parameterMap.getStringOrDefault("type", DEFAULT_ATYPE);
+        return parameterMap.getOptionalString("type").orElse(DEFAULT_ATYPE);
     }
 
     /**
@@ -116,7 +116,7 @@ public class ActivityDef {
      * @return the long start cycle
      */
     public long getStartCycle() {
-        String cycles = parameterMap.getStringOrDefault("cycles", DEFAULT_CYCLES);
+        String cycles = parameterMap.getOptionalString("cycles").orElse(DEFAULT_CYCLES);
         int rangeAt = cycles.indexOf("..");
         String startCycle;
         if (rangeAt > 0) {
@@ -152,7 +152,7 @@ public class ActivityDef {
      * @return the long end cycle
      */
     public long getEndCycle() {
-        String cycles = parameterMap.getStringOrDefault(FIELD_CYCLES, DEFAULT_CYCLES);
+        String cycles = parameterMap.getOptionalString(FIELD_CYCLES).orElse(DEFAULT_CYCLES);
         int rangeAt = cycles.indexOf("..");
         String endCycle;
         if (rangeAt > 0) {
@@ -175,7 +175,7 @@ public class ActivityDef {
      * @return target thread count
      */
     public int getThreads() {
-        return parameterMap.getIntOrDefault(FIELD_THREADS, DEFAULT_THREADS);
+        return parameterMap.getOptionalInteger(FIELD_THREADS).orElse(DEFAULT_THREADS);
     }
 
     public void setThreads(int threads) {

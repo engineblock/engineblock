@@ -59,7 +59,7 @@ public class DiagAction implements Action, ActivityDefObserver {
      */
     private void updateReportTime() {
 
-        reportModulo = activityDef.getParams().getLongOrDefault("modulo", 10000000);
+        reportModulo = activityDef.getParams().getOptionalLong("modulo").orElse(10000000L);
         lastUpdate = System.currentTimeMillis() - calculateOffset(slot, activityDef);
         quantizedInterval = calculateInterval(activityDef);
         logger.trace("updating report time for slot:" + slot + ", def:" + activityDef + " to " + quantizedInterval
@@ -76,7 +76,7 @@ public class DiagAction implements Action, ActivityDefObserver {
      * @return last time this thread would have updated
      */
     private long calculateOffset(long timeslot, ActivityDef activityDef) {
-        long updateInterval = activityDef.getParams().getLongOrDefault("interval", 1000L);
+        long updateInterval = activityDef.getParams().getOptionalLong("interval").orElse(1000L);
         long offset = calculateInterval(activityDef) - (updateInterval * timeslot);
         return offset;
     }
@@ -88,7 +88,7 @@ public class DiagAction implements Action, ActivityDefObserver {
      * @return long ms interval for this thread (the same for all threads, but calculated independently for each)
      */
     private long calculateInterval(ActivityDef activityDef) {
-        long updateInterval = activityDef.getParams().getLongOrDefault("interval", 1000L);
+        long updateInterval = activityDef.getParams().getOptionalLong("interval").orElse(1000L);
         if (updateInterval == 0) { // Effectively disable this if it is set to 0 as an override.
             return Long.MAX_VALUE;
         }
