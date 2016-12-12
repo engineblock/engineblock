@@ -174,8 +174,8 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                 action.accept(cyclenum);
 
                 if (multiPhaseAction != null) {
-                    try (Timer.Context phaseTime = phaseTimer.time()) {
-                        while (multiPhaseAction.incomplete()) {
+                    while (multiPhaseAction.incomplete()) {
+                        try (Timer.Context phaseTime = phaseTimer.time()) {
                             action.accept(cyclenum);
                         }
 
