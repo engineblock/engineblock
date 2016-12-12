@@ -16,11 +16,12 @@ package io.engineblock.activities.diag;
 
 import io.engineblock.activityapi.Action;
 import io.engineblock.activityapi.ActivityDefObserver;
+import io.engineblock.activityapi.MultiPhaseAction;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DiagAction implements Action, ActivityDefObserver {
+public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction {
 
     private final static Logger logger = LoggerFactory.getLogger(DiagAction.class);
     private final ActivityDef activityDef;
@@ -30,27 +31,34 @@ public class DiagAction implements Action, ActivityDefObserver {
     private long lastUpdate;
     private long quantizedInterval;
     private long reportModulo;
+    private int phasesPerCycle;
+    private int completedPhase;
 
     public DiagAction(int slot, ActivityDef activityDef, DiagActivity diagActivity) {
         this.activityDef = activityDef;
         this.slot = slot;
         this.diagActivity = diagActivity;
 
-        updateReportTime();
+        onActivityDefUpdate(activityDef);
     }
 
     @Override
     public void accept(long value) {
         long now = System.currentTimeMillis();
+        if (completedPhase>=phasesPerCycle) {
+            completedPhase=0;
+        }
         if ((now - lastUpdate) > quantizedInterval) {
             long delay = ((now - lastUpdate) - quantizedInterval);
-            logger.info("diag action interval, input=" + value + ", report delay=" + delay);
+            logger.info("diag action interval, input=" + value + ", phase=" + completedPhase +", report delay=" + delay);
             lastUpdate += quantizedInterval;
             diagActivity.delayHistogram.update(delay);
         }
         if ((value % reportModulo) == 0) {
-            logger.info("diag action   modulo, input=" + value);
+            logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
         }
+        completedPhase++;
+
     }
 
     /**
@@ -64,9 +72,11 @@ public class DiagAction implements Action, ActivityDefObserver {
         quantizedInterval = calculateInterval(activityDef);
         logger.trace("updating report time for slot:" + slot + ", def:" + activityDef + " to " + quantizedInterval
                 + ", and modulo " + reportModulo);
-
     }
 
+    private void updatePhases() {
+        phasesPerCycle = activityDef.getParams().getOptionalInteger("phases").orElse(1);
+    }
     /**
      * Calculate a reference point in the past which would have been this thread's time to update,
      * for use as a discrete reference point upon which the quantizedIntervals can be stacked to find the
@@ -101,5 +111,11 @@ public class DiagAction implements Action, ActivityDefObserver {
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
         updateReportTime();
+        updatePhases();
+    }
+
+    @Override
+    public boolean incomplete() {
+        return (completedPhase<phasesPerCycle);
     }
 }

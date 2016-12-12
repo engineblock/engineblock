@@ -20,6 +20,7 @@ import com.codahale.metrics.Gauge;
 import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.ActivityDefObserver;
 import io.engineblock.activityapi.Input;
+import io.engineblock.activityapi.RateLimiterProvider;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * after the max value. They simply expose it to callers. It is up to the
  * caller to check the value to determine when the input is deemed "used up."</p>
  */
-public class TargetRateInput implements Input, ActivityDefObserver {
+public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterProvider {
     private final static Logger logger = LoggerFactory.getLogger(TargetRateInput.class);
 
     private final AtomicLong cycleValue = new AtomicLong(0L);
@@ -134,6 +135,10 @@ public class TargetRateInput implements Input, ActivityDefObserver {
 
             logger.info("targetrate was set to:" + rate);
         }
+    }
+
+    public RateLimiter getRateLimiter() {
+        return rateLimiter;
     }
 
 }

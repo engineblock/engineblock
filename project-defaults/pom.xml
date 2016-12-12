@@ -108,12 +108,6 @@
             <organization>EngineBlock.io</organization>
             <organizationUrl>http://engineblock.io/</organizationUrl>
         </developer>
-        <developer>
-            <name>Kat Grigg</name>
-            <email>kat.grigg@gmail.com</email>
-            <organization>EngineBlock.io</organization>
-            <organizationUrl>http://engineblock.io/</organizationUrl>
-        </developer>
     </developers>
 
     <distributionManagement>
