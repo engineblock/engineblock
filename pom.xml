@@ -63,18 +63,11 @@
             <organization>EngineBlock.io</organization>
             <organizationUrl>http://engineblock.io/</organizationUrl>
         </developer>
-        <developer>
-            <name>Kat Grigg</name>
-            <email>kat.grigg@gmail.com</email>
-            <organization>EngineBlock.io</organization>
-            <organizationUrl>http://engineblock.io/</organizationUrl>
-        </developer>
     </developers>
 
     <scm>
         <connection>scm:git:https://github.com/engineblock/engineblock.git</connection>
         <developerConnection>scm:git:https://github.com/engineblock/engineblock.git</developerConnection>
-        <!--<developerConnection>scm:git:git@github.com:engineblock/engineblock.git</developerConnection> broken? -->
         <url>scm:git:git@github.com:engineblock/engineblock.git</url>
       <tag>engineblock-1.0.53</tag>
     </scm>

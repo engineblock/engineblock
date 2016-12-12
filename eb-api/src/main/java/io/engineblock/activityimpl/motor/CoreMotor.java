@@ -17,9 +17,9 @@
 package io.engineblock.activityimpl.motor;
 
 import com.codahale.metrics.Timer;
+import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.*;
 import io.engineblock.activityimpl.ActivityDef;
-import io.engineblock.activityapi.Stoppable;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
@@ -44,10 +44,10 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private long slotId;
     private Input input;
     private Action action;
-    private Timer timer;
     private ActivityDef activityDef;
     private SlotStateTracker slotStateTracker;
     private AtomicReference<RunState> slotState;
+    private RateLimiter rateLimiter; // Only for use in phasing
 
     /**
      * Create an ActivityMotor.
@@ -65,6 +65,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         setInput(input);
         slotStateTracker = new SlotStateTracker(slotId);
         slotState = slotStateTracker.getAtomicSlotState();
+        onActivityDefUpdate(activityDef);
     }
 
     /**
@@ -134,7 +135,8 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     @Override
     public void run() {
 
-        timer = ActivityMetrics.timer(activityDef, "cycles");
+        Timer timer = ActivityMetrics.timer(activityDef, "cycles");
+        Timer phaseTimer = ActivityMetrics.timer(activityDef, "phases");
 
         if (slotState.get() == Finished) {
             logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
@@ -143,9 +145,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         slotStateTracker.enterState(Running);
 
         MultiPhaseAction multiPhaseAction = null;
-        Timer phaseTimer = null;
         if (action instanceof MultiPhaseAction) {
-            phaseTimer = ActivityMetrics.timer(activityDef, "phases");
             multiPhaseAction = ((MultiPhaseAction) action);
         }
 
@@ -155,26 +155,31 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         action.init();
 
         while (slotState.get() == Running) {
+
+            cyclenum = input.getAsLong();
+            if (cyclenum >= cycleMax.get()) {
+                logger.trace("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
+                slotStateTracker.enterState(Finished);
+                continue;
+            }
+
+            if (slotState.get() != Running) {
+                logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
+                continue;
+            }
+
             try (Timer.Context cycleTime = timer.time()) {
 
-                cyclenum = input.getAsLong();
-                if (cyclenum >= cycleMax.get()) {
-                    logger.trace("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
-                    slotStateTracker.enterState(Finished);
-                    continue;
-                }
-
-                if (slotState.get() != Running) {
-                    logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
-                    continue;
-                }
-
-
                 logger.trace("cycle " + cyclenum);
-                action.accept(cyclenum);
+                try (Timer.Context phaseTime = phaseTimer.time()) {
+                    action.accept(cyclenum);
+                }
 
                 if (multiPhaseAction != null) {
                     while (multiPhaseAction.incomplete()) {
+                        if (rateLimiter!=null) {
+                            rateLimiter.acquire();
+                        }
                         try (Timer.Context phaseTime = phaseTimer.time()) {
                             action.accept(cyclenum);
                         }
@@ -203,6 +208,12 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         }
         if (action instanceof ActivityDefObserver) {
             ((ActivityDefObserver) action).onActivityDefUpdate(activityDef);
+        }
+
+        if (input instanceof RateLimiterProvider) {
+            rateLimiter = ((RateLimiterProvider)input).getRateLimiter();
+        } else {
+            rateLimiter=null;
         }
     }
 

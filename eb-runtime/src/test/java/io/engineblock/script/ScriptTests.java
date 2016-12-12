@@ -48,11 +48,12 @@ public class ScriptTests {
     }
 
     @Test
-    public void testRateLimiter() {
+    public void testTargetRatePhased() {
+
         Result result = runScenario("targetrate");
         String iolog = result.getIOLog();
         System.out.println("iolog\n"+iolog);
-        Pattern p = Pattern.compile(".*mean rate = (\\d[.\\d]+).*",Pattern.DOTALL);
+        Pattern p = Pattern.compile(".*mean phase rate = (\\d[.\\d]+).*",Pattern.DOTALL);
         Matcher m = p.matcher(iolog);
         assertThat(m.matches()).isTrue();
 
