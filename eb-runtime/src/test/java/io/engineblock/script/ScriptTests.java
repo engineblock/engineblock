@@ -49,7 +49,7 @@ public class ScriptTests {
 
     @Test
     public void testRateLimiter() {
-        Result result = runScenario("ratelimiter");
+        Result result = runScenario("targetrate");
         String iolog = result.getIOLog();
         System.out.println("iolog\n"+iolog);
         Pattern p = Pattern.compile(".*mean rate = (\\d[.\\d]+).*",Pattern.DOTALL);
@@ -59,7 +59,7 @@ public class ScriptTests {
         String digits = m.group(1);
         assertThat(digits).isNotEmpty();
         double rate = Double.valueOf(digits);
-        assertThat(rate).isCloseTo(100.0, Offset.offset(10.0));
+        assertThat(rate).isCloseTo(1000.0, Offset.offset(100.0));
     }
 
     @Test

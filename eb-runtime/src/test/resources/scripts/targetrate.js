@@ -4,7 +4,7 @@ activitydef = {
     "type" : "diag",
     "cycles" : "300",
     "threads" : "10",
-    "targetrate" : "100.0"
+    "targetrate" : "1K"
 };
 
 scenario.start(activitydef);

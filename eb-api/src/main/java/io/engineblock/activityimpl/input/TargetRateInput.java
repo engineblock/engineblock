@@ -115,7 +115,7 @@ public class TargetRateInput implements Input, ActivityDefObserver {
     }
 
     private void updateRateLimiter(ActivityDef activityDef) {
-        double rate = activityDef.getParams().getOptionalDouble("targetrate").orElse(Double.NaN);
+        double rate = activityDef.getParams().getOptionalDoubleUnitCount("targetrate").orElse(Double.NaN);
         if (!Double.isNaN(rate)) {
             if (rateLimiter==null) {
                 rateLimiter = RateLimiter.create(rate);
