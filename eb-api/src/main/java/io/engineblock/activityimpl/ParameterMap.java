@@ -16,6 +16,7 @@
 package io.engineblock.activityimpl;
 
 import io.engineblock.activityimpl.motor.ParamsParser;
+import io.engineblock.util.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,20 +51,24 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         super.putAll(valueMap);
     }
 
-    public long getLongOrDefault(String paramName, long defaultLongValue) {
-        Optional<String> l = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
-        return l.map(Long::valueOf).orElse(defaultLongValue);
-    }
+//    public long getLongOrDefault(String paramName, long defaultLongValue) {
+//        Optional<String> l = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+//        return l.map(Long::valueOf).orElse(defaultLongValue);
+//    }
 
-    public double getDoubleOrDefault(String paramName, double defaultDoubleValue) {
-        Optional<String> d = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
-        return d.map(Double::valueOf).orElse(defaultDoubleValue);
-    }
+//    public long getMillisOrDefault(String paramName, long defaultMillisValue) {
+//        return getOptionalMillisUnit(paramName).orElse(defaultMillisValue);
+//    }
 
-    public String getStringOrDefault(String paramName, String defaultStringValue) {
-        Optional<String> s = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
-        return s.orElse(defaultStringValue);
-    }
+//    public double getDoubleOrDefault(String paramName, double defaultDoubleValue) {
+//        Optional<String> d = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+//        return d.map(Double::valueOf).orElse(defaultDoubleValue);
+//    }
+
+//    public String getStringOrDefault(String paramName, String defaultStringValue) {
+//        Optional<String> s = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+//        return s.orElse(defaultStringValue);
+//    }
 
     public Optional<String> getOptionalString(String paramName) {
         return Optional.ofNullable(super.get(paramName)).map(String::valueOf);
@@ -71,6 +76,26 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     public Optional<Long> getOptionalLong(String paramName) {
         return Optional.ofNullable(super.get(paramName)).map(String::valueOf).map(Long::valueOf);
+    }
+
+    public Optional<Long> getOptionalMillisUnit(String paramName) {
+        return getOptionalString(paramName).flatMap(Unit::msFor);
+    }
+
+    public Optional<Long> getOptionalLongUnitCount(String paramName) {
+        return getOptionalDoubleUnitCount(paramName).map(Double::longValue);
+    }
+
+    public Optional<Double> getOptionalDoubleUnitCount(String paramName) {
+        return getOptionalString(paramName).flatMap(Unit::countFor);
+    }
+
+    public Optional<Long> getOptionalLongBytes(String paramName) {
+        return getOptionalDoubleBytes(paramName).map(Double::longValue);
+    }
+
+    public Optional<Double> getOptionalDoubleBytes(String paramName) {
+        return getOptionalString(paramName).flatMap(Unit::bytesFor);
     }
 
     public Optional<Double> getOptionalDouble(String paramName) {
@@ -81,15 +106,15 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         return Optional.ofNullable(super.get(paramName)).map(String::valueOf).map(Boolean::valueOf);
     }
 
-    public int getIntOrDefault(String paramName, int defaultIntValue) {
-        Optional<String> i = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
-        return i.map(Integer::valueOf).orElse(defaultIntValue);
-    }
+//    public int getIntOrDefault(String paramName, int defaultIntValue) {
+//        Optional<String> i = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+//        return i.map(Integer::valueOf).orElse(defaultIntValue);
+//    }
 
-    public boolean getBoolOrDefault(String paramName, boolean defaultBoolValue) {
-        Optional<String> b = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
-        return b.map(Boolean::valueOf).orElse(defaultBoolValue);
-    }
+//    public boolean getBoolOrDefault(String paramName, boolean defaultBoolValue) {
+//        Optional<String> b = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+//        return b.map(Boolean::valueOf).orElse(defaultBoolValue);
+//    }
 
 
     public Long takeLongOrDefault(String paramName, Long defaultLongValue) {
@@ -248,6 +273,10 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         } catch (Exception e) {
             return Optional.empty();
         }
+    }
+
+    public Optional<Integer> getOptionalInteger(String paramName) {
+        return getOptionalString(paramName).map(Integer::valueOf);
     }
 
 //    /**

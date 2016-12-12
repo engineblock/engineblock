@@ -48,63 +48,34 @@ public class ParameterMapTest {
     public void testGetLongParam() {
         Optional<ParameterMap> longOnly = ParameterMap.parseParams("longval=234433;");
         Assertions.assertThat(longOnly.isPresent()).isTrue();
-        Assertions.assertThat(longOnly.get().getLongOrDefault("longval", 12345L)).isEqualTo(234433L);
-        Assertions.assertThat(longOnly.get().getLongOrDefault("missing", 12345L)).isEqualTo(12345L);
+        Assertions.assertThat(longOnly.get().getOptionalLong("longval").orElse(12345L)).isEqualTo(234433L);
+        Assertions.assertThat(longOnly.get().getOptionalLong("missing").orElse(12345L)).isEqualTo(12345L);
     }
 
     @Test
     public void testGetDoubleParam() {
         Optional<ParameterMap> doubleOnly = ParameterMap.parseParams("doubleval=2.34433;");
         Assertions.assertThat(doubleOnly.isPresent()).isTrue();
-        Assertions.assertThat(doubleOnly.get().getDoubleOrDefault("doubleval", 3.4567d)).isEqualTo(2.34433d);
-        Assertions.assertThat(doubleOnly.get().getDoubleOrDefault("missing", 3.4567d)).isEqualTo(3.4567d);
+        Assertions.assertThat(doubleOnly.get().getOptionalDouble("doubleval").orElse(3.4567d)).isEqualTo(2.34433d);
+        Assertions.assertThat(doubleOnly.get().getOptionalDouble("missing").orElse(3.4567d)).isEqualTo(3.4567d);
     }
 
     @Test
     public void testGetStringParam() {
         Optional<ParameterMap> stringOnly = ParameterMap.parseParams("stringval=avalue;");
         Assertions.assertThat(stringOnly.isPresent()).isTrue();
-        Assertions.assertThat(stringOnly.get().getStringOrDefault("stringval", "othervalue")).isEqualTo("avalue");
-        Assertions.assertThat(stringOnly.get().getStringOrDefault("missing", "othervalue")).isEqualTo("othervalue");
+        Assertions.assertThat(stringOnly.get().getOptionalString("stringval").orElse("othervalue")).isEqualTo("avalue");
+        Assertions.assertThat(stringOnly.get().getOptionalString("missing").orElse("othervalue")).isEqualTo("othervalue");
     }
 
     @Test
     public void testGetStringStringParam() {
         Optional<ParameterMap> stringOnly = ParameterMap.parseParams("stringval=avalue;stringval2=avalue2;");
         Assertions.assertThat(stringOnly.isPresent()).isTrue();
-        Assertions.assertThat(stringOnly.get().getStringOrDefault("stringval", "othervalue")).isEqualTo("avalue");
-        Assertions.assertThat(stringOnly.get().getStringOrDefault("stringval2", "othervalue1")).isEqualTo("avalue2");
+        Assertions.assertThat(stringOnly.get().getOptionalString("stringval").orElse("othervalue")).isEqualTo("avalue");
+        Assertions.assertThat(stringOnly.get().getOptionalString("stringval2").orElse("othervalue1")).isEqualTo("avalue2");
     }
 
-
-//    @Test
-//    public void testPositionalParsing() {
-//        ParameterMap matchingNumbers = ParameterMap.parsePositional("1;2", new String[]{"one", "two", "three"});
-//        Assertions.assertThat(matchingNumbers.getSize()).isEqualTo(2);
-//        Assertions.assertThat(matchingNumbers.getIntOrDefault("one", 5)).isEqualTo(1);
-//        Assertions.assertThat(matchingNumbers.getStringOrDefault("two", "default")).isEqualTo("2");
-//    }
-//
-//    @Test(expectedExceptions = RuntimeException.class,
-//            expectedExceptionsMessageRegExp = ".*ran out of positional field names.*")
-//    public void testFieldNameUnderrun() {
-//        ParameterMap underrun = ParameterMap.parsePositional("1;2;3;4;", new String[]{"one", "two", "three"});
-//    }
-//
-//    @Test
-//    public void testSetSignatures() {
-//        ParameterMap matchingNumbers = ParameterMap.parsePositional("1;2;3.0;", new String[]{"one", "two", "three"});
-//        AtomicLong changeCounter = matchingNumbers.getChangeCounter();
-//        Assertions.assertThat(changeCounter.get()).isEqualTo(0L);
-//        Assertions.assertThat(matchingNumbers.getDoubleOrDefault("three", 4.0D)).isEqualTo(3.0D);
-//        matchingNumbers.set("three", 2.7777D);
-//        Assertions.assertThat(changeCounter.get()).isEqualTo(1L);
-//        Assertions.assertThat(matchingNumbers.getDoubleOrDefault("three", 9.8D)).isEqualTo(2.7777D);
-//        matchingNumbers.set("three", "seventeen");
-//        Assertions.assertThat(changeCounter.get()).isEqualTo(2L);
-//        Assertions.assertThat(matchingNumbers.getStringOrDefault("three", "whoops")).isEqualTo("seventeen");
-//    }
-//
     @Test
     public void testGetOptional() {
         ParameterMap abc = ParameterMap.parseOrException("a=1;b=2;c=3;");

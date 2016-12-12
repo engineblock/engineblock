@@ -55,7 +55,7 @@ public class CoreInputDispenser implements InputDispenser, ActivitiesAware {
     }
 
     private synchronized Input createInput(long slot) {
-        String linkinput = activity.getParams().getStringOrDefault("linkinput","");
+        String linkinput = activity.getParams().getOptionalString("linkinput").orElse("");
         Input input=null;
         if (linkinput.isEmpty()) {
             input =new TargetRateInput(activity.getActivityDef());

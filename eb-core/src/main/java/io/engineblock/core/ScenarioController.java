@@ -222,7 +222,7 @@ public class ScenarioController {
             ActivityExecutor executor = activityExecutors.get(activityDef.getAlias());
 
             if (executor == null && createIfMissing) {
-                String activityTypeName = activityDef.getParams().getStringOrDefault("type", "diag");
+                String activityTypeName = activityDef.getParams().getOptionalString("type").orElse("diag");
                 ActivityType activityType = ActivityTypeFinder.instance().getOrThrow(activityTypeName);
                 executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef,getActivityMap()));
                 activityExecutors.put(activityDef.getAlias(), executor);
