@@ -112,6 +112,12 @@ public class ScriptTests {
     }
 
     @Test
+    public void testAwaitFinished() {
+        Result result = runScenario("awaitfinished");
+        result.reportToLog();
+    }
+
+    @Test
     public void testStartStop() {
         Result result = runScenario("startstopdiag");
         result.reportToLog();
