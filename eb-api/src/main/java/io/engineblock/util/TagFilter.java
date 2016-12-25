@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
  */
 public class TagFilter {
     private Map<String, String> filter = new LinkedHashMap<>();
+    public static TagFilter MATCH_ALL = new TagFilter("");
 
     /**
      * Create a new tag filter. A tag filter is comprised of zero or more tag names, each with an

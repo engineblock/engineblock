@@ -39,7 +39,7 @@ All histograms use HDR histograms with *four* significant digits.
 
 All histograms reset on snapshot, automatically keeping all data until you report the snapshot or access the snapshot via scripting. (see below).
 
-The metric types that use histograms have been replaced with nicer version for scripting. You dont' have to do anything differently in your reporter configs to use them. However, if you need to use the enhanced versions in your local scripting, you can. This means that Timer and Histogram types are enchanced. If you do not use the scripting extensions, then you will automatically get the standard behavior that you are used to, only with higher-resolution HDR and full snapshots for each report to your downstream metrics systems.
+The metric types that use histograms have been replaced with nicer version for scripting. You dont' have to do anything differently in your reporter config to use them. However, if you need to use the enhanced versions in your local scripting, you can. This means that Timer and Histogram types are enchanced. If you do not use the scripting extensions, then you will automatically get the standard behavior that you are used to, only with higher-resolution HDR and full snapshots for each report to your downstream metrics systems.
 
 ### Scripting with Delta Snapshots
 
