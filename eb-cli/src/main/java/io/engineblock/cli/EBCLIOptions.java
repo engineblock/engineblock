@@ -348,7 +348,7 @@ public class EBCLIOptions {
     public String getProgressSpec() {
         ProgressSpec spec = parseProgressSpec(this.progressSpec);// sanity check
         if (spec.indicatorMode == IndicatorMode.console
-                && wantsConsoleLogLevel().isGreaterOrEqual(Level.INFO)) {
+                && Level.INFO.isGreaterOrEqual(wantsConsoleLogLevel())) {
             logger.warn("Console is already logging info or more, so progress data on console is suppressed.");
             spec.indicatorMode = IndicatorMode.logonly;
         }

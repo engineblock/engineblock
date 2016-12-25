@@ -305,17 +305,14 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
 
     private boolean awaitAllRequiredMotorState(int waitTime, int pollTime, RunState... awaitingState) {
         long startedAt = System.currentTimeMillis();
-        boolean awaited = true;
-        while (System.currentTimeMillis() < (startedAt + waitTime)) {
+        boolean awaited = false;
+        while (!awaited && (System.currentTimeMillis() < (startedAt + waitTime))) {
+            awaited=true;
             for (Motor motor : motors) {
                 awaited = awaitMotorState(motor, waitTime, pollTime, awaitingState);
                 if (!awaited) {
                     logger.trace("failed awaiting motor " + motor.getSlotId() + " for state in " +
-                            Arrays.asList(awaitingState));
-                    try {
-                        Thread.sleep(pollTime);
-                    } catch (InterruptedException ignored) {
-                    }
+                        Arrays.asList(awaitingState));
                     break;
                 }
             }
