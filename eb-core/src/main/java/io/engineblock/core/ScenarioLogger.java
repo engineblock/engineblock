@@ -27,9 +27,41 @@ import ch.qos.logback.core.FileAppender;
 import io.engineblock.script.Scenario;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class ScenarioLogger {
 
-    public static void start(Scenario scenario) {
+    private final Scenario scenario;
+    private File loggerDir = new File("logs");
+    private int maxLogfiles = 10;
+
+    public ScenarioLogger(Scenario scenario) {
+        this.scenario = scenario;
+    }
+
+    public ScenarioLogger setLogDir(String logDir) {
+        this.loggerDir = new File(logDir);
+        return this;
+    }
+
+    public ScenarioLogger setMaxLogs(int maxLogfiles) {
+        this.maxLogfiles = maxLogfiles;
+        return this;
+    }
+
+    public ScenarioLogger start() {
+
+        if (!loggerDir.exists()) {
+            if (!loggerDir.mkdirs()) {
+                throw new RuntimeException("Unable to create logger directory:" + loggerDir.getPath());
+            }
+        }
 
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         //List<LoggerContextListener> copyOfListenerList = loggerContext.getCopyOfListenerList();
@@ -44,7 +76,7 @@ public class ScenarioLogger {
         ple.setContext(loggerContext);
         ple.start();
 
-        String scenarioLog = scenario.getName()+".log";
+        String scenarioLog = loggerDir.getPath() + File.separator + scenario.getName()+".log";
         scenarioLog = scenarioLog.replaceAll("\\s","_");
         FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
         fileAppender.setFile(scenarioLog);
@@ -59,5 +91,57 @@ public class ScenarioLogger {
         logger.setLevel(Level.INFO);
         logger.setAdditive(true); /* set to true if root should log too */
 
+        purgeOldFiles(logger);
+
+        return this;
     }
+
+    private void purgeOldFiles(Logger logger) {
+        if (maxLogfiles==0) {
+            return;
+        }
+
+
+        File[] files = loggerDir.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.getPath().endsWith(".log");
+            }
+        });
+        if (files==null) {
+            return;
+        }
+
+        List<File> filesList = Arrays.asList(files);
+        int remove = filesList.size() - maxLogfiles;
+        if (remove<=0) {
+            return;
+        }
+
+        List<File> toDelete = filesList.stream()
+                .sorted(fileTimeComparator)
+                .limit(remove)
+                .collect(Collectors.toList());
+
+        for (File file : toDelete) {
+            logger.info("removing extra logfile: " + file.getPath());
+            if (!file.delete()) {
+                logger.warn("unable to delete: " + file);
+                try {
+                    Files.delete(file.toPath());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+    private static Comparator<File> fileTimeComparator = new Comparator<File>() {
+        @Override
+        public int compare(File o1, File o2) {
+            return Long.compare(o1.lastModified(),o2.lastModified());
+        }
+    };
+
+
 }

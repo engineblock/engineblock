@@ -42,6 +42,8 @@ public class EBCLIOptions {
     // Execution Options
     private static final String SCRIPT = "script";
     private static final String SESSION_NAME = "--session-name";
+    private static final String LOG_DIR = "--log-dir";
+    private static final String MAX_LOGS = "--max-logs";
     private static final String WANTS_INFO_CONSOLE_LOGGING = "-v";
     private static final String WANTS_DEBUG_CONSOLE_LOGGING = "-vv";
     private static final String WANTS_TRACE_CONSOLE_LOGGING = "-vvv";
@@ -59,6 +61,7 @@ public class EBCLIOptions {
     }};
 
     private LinkedList<Cmd> cmdList = new LinkedList<>();
+    private int maxLogs = 0;
     private boolean wantsVersion = false;
     private boolean wantsActivityHelp = false;
     private String wantsActivityHelpFor;
@@ -75,6 +78,7 @@ public class EBCLIOptions {
     private List<String> histoLoggerConfigs = new ArrayList<>();
     private List<String> statsLoggerConfigs = new ArrayList<>();
     private String progressSpec = "console:1m";
+    private String logDirectory;
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -131,7 +135,7 @@ public class EBCLIOptions {
                 case WAIT_MILLIS:
                     String waitMillisCmdType = readWordOrThrow(arglist, "wait millis");
                     String millisCount = readWordOrThrow(arglist, "millis count");
-                    Long.parseLong(millisCount);
+                    Long.parseLong(millisCount); // sanity check
                     Cmd awaitMillisCmd = new Cmd(CmdType.valueOf(waitMillisCmdType), millisCount);
                     cmdList.add(awaitMillisCmd);
                     break;
@@ -142,6 +146,14 @@ public class EBCLIOptions {
                 case SESSION_NAME:
                     arglist.removeFirst();
                     sessionName = readWordOrThrow(arglist, "a session name");
+                    break;
+                case LOG_DIR:
+                    arglist.removeFirst();
+                    logDirectory = readWordOrThrow(arglist, "a log directory");
+                    break;
+                case MAX_LOGS:
+                    arglist.removeFirst();
+                    maxLogs = Integer.valueOf(readWordOrThrow(arglist,"max logfiles to keep"));
                     break;
                 case PROGRESS_INDICATOR:
                     arglist.removeFirst();
@@ -356,6 +368,14 @@ public class EBCLIOptions {
 
     public String wantsReportCsvTo() {
         return reportCsvTo;
+    }
+
+    public String getLogDirectory() {
+        return logDirectory;
+    }
+
+    public int getMaxLogs() {
+        return maxLogs;
     }
 
     public static enum CmdType {

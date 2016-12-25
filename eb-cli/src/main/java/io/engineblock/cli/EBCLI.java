@@ -3,6 +3,7 @@ package io.engineblock.cli;
 import io.engineblock.activityapi.ActivityType;
 import io.engineblock.core.ActivityDocInfo;
 import io.engineblock.core.ActivityTypeFinder;
+import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricReporters;
@@ -115,7 +116,10 @@ public class EBCLI {
         }
 
         scenario.addScriptText(script);
-        executor.execute(scenario);
+        ScenarioLogger sl = new ScenarioLogger(scenario)
+                .setLogDir(options.getLogDirectory())
+                .setMaxLogs(options.getMaxLogs());
+        executor.execute(scenario,sl);
         ScenariosResults scenariosResults = executor.awaitAllResults();
         //scenariosResults.reportSummaryTo(System.out);
         scenariosResults.reportToLog();

@@ -51,7 +51,11 @@ public class ScenariosExecutor {
     }
 
     public synchronized void execute(Scenario scenario) {
-        ScenarioLogger.start(scenario);
+        execute(scenario, new ScenarioLogger(scenario).setLogDir("logs").setMaxLogs(0));
+    }
+
+    public synchronized void execute(Scenario scenario, ScenarioLogger scenarioLogger) {
+        scenario.setScenarioLogger(scenarioLogger);
         if (submitted.get(scenario.getName()) != null) {
             throw new RuntimeException("Scenario " + scenario.getName() + " is already defined. Remove it first to reuse the name.");
         }

@@ -19,6 +19,7 @@ import com.codahale.metrics.MetricRegistry;
 import io.engineblock.activitycore.ProgressIndicator;
 import io.engineblock.core.Result;
 import io.engineblock.core.ScenarioController;
+import io.engineblock.core.ScenarioLogger;
 import io.engineblock.extensions.ScriptingPluginInfo;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
@@ -49,6 +50,7 @@ public class Scenario implements Callable<Result> {
     private String progressInterval = "console:1m";
     private ScenarioContext scriptEnv;
     private String name;
+    private ScenarioLogger scenarioLogger;
 
     public Scenario(String name, String progressInterval) {
         this.name = name;
@@ -190,6 +192,10 @@ public class Scenario implements Callable<Result> {
 
     public String toString() {
         return "name:'" + this.getName() + "'";
+    }
+
+    public void setScenarioLogger(ScenarioLogger scenarioLogger) {
+        this.scenarioLogger = scenarioLogger;
     }
 }
 

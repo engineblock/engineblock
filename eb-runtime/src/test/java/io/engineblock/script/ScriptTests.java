@@ -18,6 +18,7 @@
 package io.engineblock.script;
 
 import io.engineblock.core.Result;
+import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
 import org.assertj.core.data.Offset;
 import org.testng.annotations.Test;
@@ -40,7 +41,8 @@ public class ScriptTests {
         ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName);
         s.addScriptText("load('classpath:scripts/" + scriptname + ".js');");
-        e.execute(s);
+        ScenarioLogger scenarioLogger = new ScenarioLogger(s).setMaxLogs(0).setLogDir("logs/test").start();
+        e.execute(s,scenarioLogger);
         ScenariosResults scenariosResults = e.awaitAllResults();
         Result result = scenariosResults.getOne();
         result.reportToLog();
