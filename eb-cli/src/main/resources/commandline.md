@@ -61,6 +61,14 @@ Add the named activity to the scenario, interpolating named parameters
 
 These options modify how the scenario is run.
 
+Specify a directory for scenario log files:
+
+    --log-dir <dirname>
+
+Specify a limit on logfiles (old files will be purged)
+
+    --log-max <count>
+
 Specify a directory and enable CSV reporting of metrics:
 
     --report-csv-to <dirname>

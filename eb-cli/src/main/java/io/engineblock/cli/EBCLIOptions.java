@@ -43,7 +43,7 @@ public class EBCLIOptions {
     private static final String SCRIPT = "script";
     private static final String SESSION_NAME = "--session-name";
     private static final String LOG_DIR = "--log-dir";
-    private static final String MAX_LOGS = "--max-logs";
+    private static final String MAX_LOGS = "--log-max";
     private static final String WANTS_INFO_CONSOLE_LOGGING = "-v";
     private static final String WANTS_DEBUG_CONSOLE_LOGGING = "-vv";
     private static final String WANTS_TRACE_CONSOLE_LOGGING = "-vvv";
