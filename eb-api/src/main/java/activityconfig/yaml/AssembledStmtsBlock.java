@@ -23,9 +23,13 @@ import java.util.List;
 public class AssembledStmtsBlock extends BlockParams {
 
     private final StmtsBlock rawStmtsBlock;
+    private StmtsDoc rawStmtsDoc;
+    private int blockIdx;
 
-    public AssembledStmtsBlock(StmtsBlock rawStmtsBlock) {
+    public AssembledStmtsBlock(StmtsBlock rawStmtsBlock, StmtsDoc rawStmtsDoc, int blockIdx) {
         this.rawStmtsBlock = rawStmtsBlock;
+        this.rawStmtsDoc = rawStmtsDoc;
+        this.blockIdx = blockIdx;
     }
 
     public List<StatementDef> getAssembledStatements() {
@@ -33,11 +37,24 @@ public class AssembledStmtsBlock extends BlockParams {
 
         List<String> statements = rawStmtsBlock.getStatements();
         for (int stmt = 0; stmt < statements.size(); stmt++) {
-            String stmtName = getName() + "-" + (stmt + 1);
+            String stmtName = getName() + "--" + (stmt + 1);
             StatementDef statementDef = new StatementDef(stmtName,statements.get(stmt));
             statementDefs.add(statementDef);
         }
         return statementDefs;
     }
 
+    @Override
+    public String getName() {
+        StringBuilder sb = new StringBuilder();
+        if (!rawStmtsDoc.getName().isEmpty()) {
+            sb.append(rawStmtsDoc.getName()).append("--");
+        }
+        if (!rawStmtsBlock.getName().isEmpty()) {
+            sb.append(rawStmtsBlock.getName());
+        } else {
+            sb.append("block").append(blockIdx);
+        }
+        return sb.toString();
+    }
 }

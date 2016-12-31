@@ -7,7 +7,7 @@ statements:
 bindings:
  b1 : b1d
  b2 : b2d
-config:
+params:
  param1: value1
 ---
 name: name2
@@ -18,7 +18,7 @@ blocks:
  - name: block1
    tags:
     block1tag: tag-value1
-   config:
+   params:
      timeout: 23423
      foobar: baz
    bindings:
@@ -33,7 +33,7 @@ blocks:
    statements:
     - s13
     - s14
-config:
+params:
  foobar: beez
 bindings:
  b11: b11d

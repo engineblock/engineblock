@@ -67,7 +67,7 @@ public class BlockParams implements Tagged {
     private String name = "";
     private Map<String, String> tags = new LinkedHashMap<>();
     private Map<String, String> bindings = new LinkedHashMap<>();
-    private Map<String, String> config = new LinkedHashMap<>();
+    private Map<String, String> params = new LinkedHashMap<>();
 
     public BlockParams() {}
 
@@ -98,19 +98,19 @@ public class BlockParams implements Tagged {
         this.tags.putAll(tags);
     }
 
-    public Map<String, String> getConfig() {
-        return Collections.unmodifiableMap(config);
+    public Map<String, String> getParams() {
+        return Collections.unmodifiableMap(params);
     }
 
-    public void setConfig(Map<String, String> config) {
-        this.config.clear();
-        this.config.putAll(config);
+    public void setParams(Map<String, String> config) {
+        this.params.clear();
+        this.params.putAll(config);
     }
 
     public void applyBlockParams(BlockParams other) {
         setName(other.getName());
         setBindings(other.getBindings());
         setTags(other.getTags());
-        setConfig(other.getConfig());
+        setParams(other.getParams());
     }
 }
