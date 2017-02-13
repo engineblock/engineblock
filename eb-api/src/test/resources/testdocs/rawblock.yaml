@@ -1,7 +1,7 @@
 tags:
  tag1: val1
 name: name
-config:
+params:
  timeout: 2343
 statements:
  - generic statement syntax here

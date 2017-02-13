@@ -41,12 +41,14 @@ public class AssembledStmtsDoc implements Tagged {
     public List<AssembledStmtsBlock> getAssembledBlocks() {
         List<AssembledStmtsBlock> assembledBlocks = new ArrayList<>();
 
+        int blockIdx=0;
         for (StmtsBlock rawStmtsBlock : rawStmtsDoc.getBlocks()) {
 
-            AssembledStmtsBlock compositeBlock = new AssembledStmtsBlock(rawStmtsBlock);
+            AssembledStmtsBlock compositeBlock = new AssembledStmtsBlock(rawStmtsBlock,rawStmtsDoc,++blockIdx);
 
             String compositeName = rawStmtsDoc.getName() +
                     (rawStmtsBlock.getName().isEmpty() ? "" : "-" + rawStmtsBlock.getName());
+
             compositeBlock.setName(compositeName);
 
             compositeBlock.setTags(new MultiMapLookup()
@@ -54,9 +56,9 @@ public class AssembledStmtsDoc implements Tagged {
                     .add(rawStmtsDoc.getTags())
             );
 
-            compositeBlock.setConfig(new MultiMapLookup()
-                    .add(rawStmtsBlock.getConfig())
-                    .add(rawStmtsDoc.getConfig())
+            compositeBlock.setParams(new MultiMapLookup()
+                    .add(rawStmtsBlock.getParams())
+                    .add(rawStmtsDoc.getParams())
             );
 
             compositeBlock.setBindings(new MultiMapLookup()
