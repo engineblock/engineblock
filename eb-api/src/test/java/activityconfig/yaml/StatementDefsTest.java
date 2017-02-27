@@ -31,6 +31,7 @@ public class StatementDefsTest {
 
     @Test
     public void testLayering() {
+
         AssembledStmtsDocList all = Statements.load("testdocs/everything.yaml");
         assertThat(all).isNotNull();
         assertThat(all.getAssembledStmtsDocs()).hasSize(2);

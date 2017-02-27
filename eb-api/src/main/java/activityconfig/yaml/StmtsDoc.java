@@ -61,9 +61,11 @@ public class StmtsDoc extends BlockParams {
      * @return all logical statement blocks containing statements
      */
     public List<StmtsBlock> getBlocks() {
-        if (!statements.isEmpty()) {
+        if (blocks.isEmpty() && !statements.isEmpty()) {
             return new ArrayList<StmtsBlock>() {{
-                add(new StmtsBlock(statements));
+                StmtsBlock stmtsBlock = new StmtsBlock(statements);
+                stmtsBlock.setName(StmtsDoc.this.getName() + "-block0");
+                add(stmtsBlock);
             }};
         } else {
             return blocks;
