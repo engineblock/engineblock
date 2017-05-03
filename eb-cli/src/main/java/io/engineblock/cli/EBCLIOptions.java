@@ -78,7 +78,7 @@ public class EBCLIOptions {
     private List<String> histoLoggerConfigs = new ArrayList<>();
     private List<String> statsLoggerConfigs = new ArrayList<>();
     private String progressSpec = "console:1m";
-    private String logDirectory;
+    private String logDirectory = "logs";
 
     EBCLIOptions(String[] args) {
         parse(args);
