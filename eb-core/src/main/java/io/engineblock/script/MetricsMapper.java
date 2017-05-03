@@ -53,9 +53,9 @@ public class MetricsMapper {
         Activity activity = activityType.get().getAssembledActivity(activityDef,new HashMap<>());
         MetricRegistryBindings metricRegistryBindings = new MetricRegistryBindings(ActivityMetrics.getMetricRegistry());
         activity.initActivity();
-        activity.getInputDispenser().getInput(0);
-        activity.getActionDispenser().getAction(0);
-        activity.getMotorDispenser().getMotor(activityDef,0);
+        activity.getInputDispenserDelegate().getInput(0);
+        activity.getActionDispenserDelegate().getAction(0);
+        activity.getMotorDispenserDelegate().getMotor(activityDef,0);
 
         Map<String, Metric> metricMap = metricRegistryBindings.getMetrics();
 

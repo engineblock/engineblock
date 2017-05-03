@@ -213,7 +213,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         // Create motor slots
         while (motors.size() < activityDef.getThreads()) {
 
-            Motor motor = activity.getMotorDispenser().getMotor(activityDef, motors.size());
+            Motor motor = activity.getMotorDispenserDelegate().getMotor(activityDef, motors.size());
             logger.trace("Starting cycle motor thread:" + motor);
             motors.add(motor);
         }

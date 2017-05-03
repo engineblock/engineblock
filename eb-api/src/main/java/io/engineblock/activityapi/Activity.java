@@ -2,23 +2,25 @@ package io.engineblock.activityapi;
 
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
+import io.engineblock.activityimpl.SimpleActivity;
 
 /**
  * Provides the components needed to build and run an activity a runtime.
+ * The easiest way to build a useful Activity is to extend {@link SimpleActivity}.
  */
 public interface Activity extends Comparable<Activity> {
 
-    MotorDispenser getMotorDispenser();
+    MotorDispenser getMotorDispenserDelegate();
 
-    void setMotorDispenser(MotorDispenser motorDispenser);
+    void setMotorDispenserDelegate(MotorDispenser motorDispenser);
 
-    InputDispenser getInputDispenser();
+    InputDispenser getInputDispenserDelegate();
 
-    void setInputDispenser(InputDispenser inputDispenser);
+    void setInputDispenserDelegate(InputDispenser inputDispenser);
 
-    ActionDispenser getActionDispenser();
+    ActionDispenser getActionDispenserDelegate();
 
-    void setActionDispenser(ActionDispenser actionDispenser);
+    void setActionDispenserDelegate(ActionDispenser actionDispenser);
 
     ActivityDef getActivityDef();
 

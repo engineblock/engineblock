@@ -26,32 +26,32 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
-    public MotorDispenser getMotorDispenser() {
+    public final MotorDispenser getMotorDispenserDelegate() {
         return motorDispenser;
     }
 
     @Override
-    public void setMotorDispenser(MotorDispenser motorDispenser) {
+    public final void setMotorDispenserDelegate(MotorDispenser motorDispenser) {
         this.motorDispenser = motorDispenser;
     }
 
     @Override
-    public InputDispenser getInputDispenser() {
+    public final InputDispenser getInputDispenserDelegate() {
         return inputDispenser;
     }
 
     @Override
-    public void setInputDispenser(InputDispenser inputDispenser) {
+    public final void setInputDispenserDelegate(InputDispenser inputDispenser) {
         this.inputDispenser = inputDispenser;
     }
 
     @Override
-    public ActionDispenser getActionDispenser() {
+    public final ActionDispenser getActionDispenserDelegate() {
         return actionDispenser;
     }
 
     @Override
-    public void setActionDispenser(ActionDispenser actionDispenser) {
+    public final void setActionDispenserDelegate(ActionDispenser actionDispenser) {
         this.actionDispenser = actionDispenser;
     }
 

@@ -67,7 +67,7 @@ public class CoreInputDispenser implements InputDispenser, ActivitiesAware {
             }
             input = new LinkedInput(
                     activity.getActivityDef(),
-                    linkedActivity.getInputDispenser().getInput(slot)
+                    linkedActivity.getInputDispenserDelegate().getInput(slot)
             );
         }
         return input;

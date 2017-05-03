@@ -68,19 +68,19 @@ public interface ActivityType {
         if (inputDispenser instanceof ActivitiesAware) {
             ((ActivitiesAware) inputDispenser).setActivitiesMap(activities);
         }
-        activity.setInputDispenser(inputDispenser);
+        activity.setInputDispenserDelegate(inputDispenser);
 
         ActionDispenser actionDispenser = getActionDispenser(activity);
         if (actionDispenser instanceof ActivitiesAware) {
             ((ActivitiesAware) actionDispenser).setActivitiesMap(activities);
         }
-        activity.setActionDispenser(actionDispenser);
+        activity.setActionDispenserDelegate(actionDispenser);
 
         MotorDispenser motorDispenser = getMotorDispenser(activity,inputDispenser, actionDispenser);
         if (motorDispenser instanceof ActivitiesAware) {
             ((ActivitiesAware) motorDispenser).setActivitiesMap(activities);
         }
-        activity.setMotorDispenser(motorDispenser);
+        activity.setMotorDispenserDelegate(motorDispenser);
 
         return activity;
     }
