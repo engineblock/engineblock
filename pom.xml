@@ -22,6 +22,7 @@
     <modules>
         <module>project-defaults</module> <!-- Holds project level defaults -->
         <module>at-basics</module> <!-- ActivityType driver for diagnostics, file, etc -->
+        <!--<module>at-json</module>-->
         <module>eb-api</module> <!-- APIs needed to implement drivers to be loaded by the core -->
         <module>eb-core</module> <!-- Scripting harness and executive logic -->
         <module>eb-runtime</module> <!-- Binds the core, drivers, and APIs into a single artifact -->
