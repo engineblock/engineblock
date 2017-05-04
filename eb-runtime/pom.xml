@@ -21,7 +21,7 @@
     <dependencies>
         <dependency>
             <groupId>io.engineblock</groupId>
-            <artifactId>at-diag</artifactId>
+            <artifactId>at-basics</artifactId>
             <version>1.0.62-SNAPSHOT</version>
         </dependency>
 

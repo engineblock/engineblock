@@ -4,7 +4,7 @@ title engineblock dependencies
 'node defaults as "project-defaults"
 
 folder engineblock {
-node diag as "at-diag"
+node basics as "at-basics"
 node api as "eb-api"
 node core as "eb-core"
 node rest as "eb-rest"
@@ -14,11 +14,11 @@ node extensions as "eb-extensions"
 cli .. runtime
 rest .. runtime
 runtime .. core
-runtime .. diag
+runtime .. basics
 runtime .. extensions
 extensions .. api
 core .. api
-diag .. api
+basics .. api
 }
 
 @enduml
