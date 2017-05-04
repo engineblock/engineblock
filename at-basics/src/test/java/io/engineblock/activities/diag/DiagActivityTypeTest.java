@@ -2,7 +2,6 @@ package io.engineblock.activities.diag;
 
 import io.engineblock.activityapi.Action;
 import io.engineblock.activityapi.ActionDispenser;
-import io.engineblock.activityapi.Activity;
 import io.engineblock.activityimpl.ActivityDef;
 import org.testng.annotations.Test;
 
@@ -27,7 +26,7 @@ public class DiagActivityTypeTest {
         DiagActivityType da = new DiagActivityType();
         da.getName();
         ActivityDef ad = ActivityDef.parseActivityDef("type=diag;");
-        Activity a = da.getActivity(ad);
+        DiagActivity a = da.getActivity(ad);
 
         ActionDispenser actionDispenser = da.getActionDispenser(a);
         Action action = actionDispenser.getAction(1);
