@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The DiagActivty, aka "diag", is simply a diagnostic activity.
+ * The DiagActivity, aka "diag", is simply a diagnostic activity.
  * It logs the input to priority INFO on some interval, in milliseconds.
  * Each interval, one of the diag actions will report both the current input value and
  * the number of milliseconds that have elapsed since the activity was scheduled to report.
