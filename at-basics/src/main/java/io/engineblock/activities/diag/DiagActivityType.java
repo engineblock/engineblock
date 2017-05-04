@@ -17,14 +17,13 @@ package io.engineblock.activities.diag;
 
 import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.ActionDispenser;
-import io.engineblock.activityapi.Activity;
-import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityapi.ActivityType;
+import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The DiagActivty, aka "diag", is simply a diagnostic activity.
+ * The DiagActivity, aka "diag", is simply a diagnostic activity.
  * It logs the input to priority INFO on some interval, in milliseconds.
  * Each interval, one of the diag actions will report both the current input value and
  * the number of milliseconds that have elapsed since the activity was scheduled to report.
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * Diag serves as a basic template for implementing your own activity type.
  */
 @AutoService(ActivityType.class)
-public class DiagActivityType implements ActivityType {
+public class DiagActivityType implements ActivityType<DiagActivity> {
 
     private static final Logger logger = LoggerFactory.getLogger(DiagActivityType.class);
 
@@ -42,12 +41,12 @@ public class DiagActivityType implements ActivityType {
     }
 
     @Override
-    public ActionDispenser getActionDispenser(Activity activity) {
-        return new DiagActionDispenser((DiagActivity)activity);
+    public ActionDispenser getActionDispenser(DiagActivity activity) {
+        return new DiagActionDispenser(activity);
     }
 
     @Override
-    public Activity getActivity(ActivityDef activityDef) {
+    public DiagActivity getActivity(ActivityDef activityDef) {
         return new DiagActivity(activityDef);
     }
 }

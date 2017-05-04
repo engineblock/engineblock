@@ -34,7 +34,7 @@ import java.util.Map;
  * an action dispenser. Default implementations of input and motor dispensers are provided,
  * and by extension, default inputs and motors.</p>
  */
-public interface ActivityType {
+public interface ActivityType<A extends Activity> {
     /**
      * Return the short name of this activity type. The fully qualified name of an activity type is
      * this value, prefixed by the package of the implementing class.
@@ -49,9 +49,10 @@ public interface ActivityType {
      * @param activityDef the definition that initializes and controls the activity.
      * @return a distinct Activity instance for each call
      */
-    default Activity getActivity(ActivityDef activityDef) {
+    @SuppressWarnings("unchecked")
+    default A getActivity(ActivityDef activityDef) {
         SimpleActivity activity = new SimpleActivity(activityDef);
-        return activity;
+        return (A) activity;
     }
 
     /**
@@ -62,7 +63,7 @@ public interface ActivityType {
      * @return a distinct activity instance for each call
      */
     default Activity getAssembledActivity(ActivityDef activityDef, Map<String,Activity> activities) {
-        Activity activity = getActivity(activityDef);
+        A activity = getActivity(activityDef);
 
         InputDispenser inputDispenser = getInputDispenser(activity);
         if (inputDispenser instanceof ActivitiesAware) {
@@ -91,7 +92,7 @@ public interface ActivityType {
      * @param activity The activity instance that will parameterize the returned ActionDispenser instance.
      * @return an instance of ActionDispenser
      */
-    default ActionDispenser getActionDispenser(Activity activity) {
+    default ActionDispenser getActionDispenser(A activity) {
         return new CoreActionDispenser(activity);
     }
 
@@ -102,12 +103,12 @@ public interface ActivityType {
      * @param activity the Activity instance which will parameterize this InputDispenser
      * @return the InputDispenser for the associated activity
      */
-    default InputDispenser getInputDispenser(Activity activity) {
+    default InputDispenser getInputDispenser(A activity) {
         return new CoreInputDispenser(activity);
     }
 
     default MotorDispenser getMotorDispenser(
-            Activity activity,
+            A activity,
             InputDispenser inputDispenser,
             ActionDispenser actionDispenser) {
         return new CoreMotorDispenser(activity, inputDispenser, actionDispenser);
