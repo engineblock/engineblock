@@ -169,13 +169,15 @@ public class ActivityMetrics {
                 ServiceLoader.load(MetricRegistryService.class);
         List<MetricRegistryService> mrss = new ArrayList<>();
         metricRegistryServices.iterator().forEachRemaining(mrss::add);
+
         if (mrss.size() == 1) {
             return mrss.get(0).getMetricRegistry();
+        } else {
+            String infoMsg = "Unable to load a dynamic MetricRegistry via ServiceLoader, using the default.";
+            logger.info(infoMsg);
+            return new MetricRegistry();
         }
 
-        String errorMsg = "found " + mrss.size() + " MetricRegistryServices instead of 1";
-        logger.error(errorMsg);
-        throw new RuntimeException(errorMsg);
     }
 
 
