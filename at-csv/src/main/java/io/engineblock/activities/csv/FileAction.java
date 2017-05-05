@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import io.virtdata.api.*;
 
 @SuppressWarnings("Duplicates")
-public class FileAction implements Action, ActivityDefObserver {
+public class FileAction implements Action{
 
     private static final Logger logger = LoggerFactory.getLogger(FileAction.class);
 
@@ -36,17 +36,8 @@ public class FileAction implements Action, ActivityDefObserver {
     @Override
     public void init() {
 
-        //empty out.txt on init
-        PrintWriter writer = null;
-        try {
-            writer = new PrintWriter("out.txt");
-            writer.print("");
-            writer.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
 
-        onActivityDefUpdate(activity.getActivityDef());
+
         readyFileStmts = activity.getReadyFileStatements().resolve();
     }
 
@@ -55,13 +46,6 @@ public class FileAction implements Action, ActivityDefObserver {
 
 
         ReadyFileStatement readyFileStringStatement;
-        //is this super inefficient by re-openning the file each time? Does it matter?
-        PrintWriter pw = null;
-        try {
-            pw = new PrintWriter(new FileWriter("out.txt", true));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         int tries = 0;
 
@@ -78,38 +62,12 @@ public class FileAction implements Action, ActivityDefObserver {
 
         try {
             try (Timer.Context executeTime = activity.executeTimer.time()) {
-                pw.println(statement);
+                activity.write(statement);
             }
         } catch (Exception e) {
         } finally {
             activity.triesHisto.update(tries);
         }
-        pw.close();
     }
 
-    @Override
-    public void onActivityDefUpdate(ActivityDef activityDef) {
-
-        this.maxTries = activityDef.getParams().getOptionalInteger("maxtries").orElse(10);
-        this.showstmts = activityDef.getParams().getOptionalBoolean("showcql").orElse(false);
-
-        boolean diagnose = activityDef.getParams().getOptionalBoolean("diagnose").orElse(false);
-
-        if (diagnose) {
-            logger.warn("You are wiring all error handlers to stop for any exception." +
-                    " This is useful for setup and troubleshooting, but unlikely to" +
-                    " be useful for long-term or bulk testing, as retryable errors" +
-                    " are normal in a busy system.");
-            this.realErrorResponse = this.retryableResponse = ErrorResponse.stop;
-        } else {
-            String realErrorsSpec = activityDef.getParams()
-                    .getOptionalString("realerrors").orElse(ErrorResponse.stop.toString());
-            this.realErrorResponse = ErrorResponse.valueOf(realErrorsSpec);
-
-            String retryableSpec = activityDef.getParams()
-                    .getOptionalString("retryable").orElse(ErrorResponse.retry.toString());
-
-            this.retryableResponse = ErrorResponse.valueOf(retryableSpec);
-        }
-    }
 }

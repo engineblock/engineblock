@@ -9,7 +9,7 @@ import io.engineblock.activityimpl.ActivityDef;
 import java.util.Optional;
 
 @AutoService(ActivityType.class)
-public class FileActivityType implements ActivityType {
+public class FileActivityType implements ActivityType<FileActivity> {
 
     @Override
     public String getName() {
@@ -34,7 +34,7 @@ public class FileActivityType implements ActivityType {
     }
 
     @Override
-    public ActionDispenser getActionDispenser(Activity activity) {
-        return new FileActionDispenser((FileActivity) activity);
+    public ActionDispenser getActionDispenser(FileActivity activity) {
+        return new FileActionDispenser(activity);
     }
 }
