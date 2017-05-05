@@ -14,6 +14,9 @@
 */
 package io.engineblock.activities.json.statements;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import io.engineblock.activities.json.JsonActivity;
+import io.engineblock.activityapi.Activity;
 import io.virtdata.core.Bindings;
 import java.util.List;
 
@@ -26,21 +29,12 @@ public class ReadyFileMapStatement implements ReadyFileStatement {
         this.dataBindings = dataBindings;
     }
 
-    public String bind(long cycleNum) {
-        String statement = null;
-        int i=0;
-        //for json we will need the names not just the values
-        List<String> allNames = dataBindings.getTemplate().getBindPointNames();
-        for (String name : allNames) {
-            if (statement != null) {
-                statement = statement + "," + dataBindings.get(i, cycleNum);
-            }
-            else {
-                statement = (String) dataBindings.get(i, cycleNum);
-            }
-            i++;
-        }
-        return statement;
+    public List<String> getBindPointNames() {
+        return dataBindings.getTemplate().getBindPointNames();
+    }
+
+    public Object[] getBindPointValues(long cycle){
+        return dataBindings.getAll(cycle);
     }
 
 }

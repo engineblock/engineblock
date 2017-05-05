@@ -14,6 +14,11 @@
 */
 package io.engineblock.activities.json.statements;
 
+import io.engineblock.activities.json.JsonActivity;
+
+import java.util.List;
+
 public interface ReadyFileStatement {
-    String bind(long cycleNum);
+    List<String> getBindPointNames();
+    Object[] getBindPointValues(long cycle);
 }
