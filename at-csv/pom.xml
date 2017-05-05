@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>engineblock</artifactId>
+        <groupId>io.engineblock</groupId>
+        <version>1.0.63-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>at-csv</artifactId>
+
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+
+    <description>
+        A CSV File ActivityType driver for engineblock,
+        based on http://engineblock.io/ and http://virtdata.io/
+    </description>
+
+    <dependencies>
+
+        <!-- core dependencies -->
+
+        <!--<groupId>org.apache.tinkerpop</groupId>-->
+        <!--<artifactId>gremlin-driver</artifactId>-->
+        <!--<version>3.2.0-incubating</version>-->
+        <!--</dependency>-->
+
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>dse-driver</artifactId>
+            <version>1.1.1-beta1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.19</version>
+        </dependency>
+
+        <!-- test only scope -->
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.8.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core-java8</artifactId>
+            <version>1.0.0m1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- compile only scope -->
+
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>1.0-rc2</version>
+            <!--<optional>true</optional>-->
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.15</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.engineblock</groupId>
+            <artifactId>eb-api</artifactId>
+            <version>1.0.63-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>io.virtdata</groupId>
+            <artifactId>metagen-userlibs</artifactId>
+            <version>1.0.27</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <annotationProcessors>
+                        <annotationProcessor>
+                            com.google.auto.service.processor.AutoServiceProcessor
+                        </annotationProcessor>
+                    </annotationProcessors>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            </transformers>
+                            <createSourcesJar>true</createSourcesJar>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <finalName>${project.artifactId}</finalName>
+                            <minimizeJar>false</minimizeJar>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- for embedding the core with this driver, optionally -->
+
+        </plugins>
+    </build>
+
+</project>

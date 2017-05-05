@@ -35,6 +35,11 @@
             <artifactId>at-basics</artifactId>
             <version>1.0.63-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>io.engineblock</groupId>
+            <artifactId>at-csv</artifactId>
+            <version>1.0.63-SNAPSHOT</version>
+        </dependency>
 
 
         <dependency>
