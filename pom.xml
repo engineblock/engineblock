@@ -30,6 +30,7 @@
         <module>eb-rest-client</module> <!-- restful server for EB runtime -->
         <module>eb-extensions</module>
         <module>at-csv</module> <!-- scripting sandbox extensions for EB -->
+        <module>at-json</module>
     </modules>
 
     <licenses>
