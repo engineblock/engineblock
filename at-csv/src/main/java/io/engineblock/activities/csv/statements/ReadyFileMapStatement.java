@@ -15,7 +15,6 @@
 package io.engineblock.activities.csv.statements;
 
 import io.virtdata.core.Bindings;
-import java.util.List;
 
 public class ReadyFileMapStatement implements ReadyFileStatement {
     private String statementTemplate;
@@ -27,20 +26,29 @@ public class ReadyFileMapStatement implements ReadyFileStatement {
     }
 
     public String bind(long cycleNum) {
-        String statement = null;
-        int i=0;
-        //for json we will need the names not just the values
-        List<String> allNames = dataBindings.getTemplate().getBindPointNames();
-        for (String name : allNames) {
-            if (statement != null) {
-                statement = statement + "," + dataBindings.get(i, cycleNum);
+        StringConcatSetter setter = new StringConcatSetter();
+        dataBindings.setFields(setter,cycleNum);
+        return dataBindings.toString();
+    }
+
+    /**
+     * This private method is responsible for handling how field assignments (field name and value)
+     * are done within {@link ReadyFileMapStatement}
+     */
+    private static class StringConcatSetter implements Bindings.FieldSetter {
+        private StringBuilder sb = new StringBuilder();
+
+        @Override
+        public void setField(String name, Object value) {
+            if (sb.length()>0) {
+                sb.append(",");
             }
-            else {
-                statement = (String) dataBindings.get(i, cycleNum);
-            }
-            i++;
+            sb.append(value);
         }
-        return statement;
+
+        public String toString() {
+            return sb.toString();
+        }
     }
 
 }
