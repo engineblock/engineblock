@@ -79,9 +79,8 @@ public class FileActivity extends SimpleActivity implements ActivityDefObserver 
         //empty out.txt on init
         PrintWriter writer = null;
         try {
-            writer = new PrintWriter(fileName);
-            writer.print("");
-            writer.close();
+            this.pw  = new PrintWriter(fileName);
+            pw.print("");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

@@ -47,8 +47,6 @@ public class FileAction implements Action{
 
         ReadyFileStatement readyFileStringStatement;
 
-        int tries = 0;
-
         String statement = null;
         try (Timer.Context bindTime = activity.bindTimer.time()) {
             int selector = (int) (cycleValue % readyFileStmts.size());
@@ -65,8 +63,6 @@ public class FileAction implements Action{
                 activity.write(statement);
             }
         } catch (Exception e) {
-        } finally {
-            activity.triesHisto.update(tries);
         }
     }
 
