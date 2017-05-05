@@ -2,12 +2,7 @@ package io.engineblock.activities.csv;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import io.engineblock.activities.csv.statements.FileStmtBlock;
-import io.engineblock.activities.csv.statements.FileStmtDoc;
-import io.engineblock.activities.csv.statements.FileStmtDocList;
-import io.engineblock.activities.csv.statements.ReadyFileStatementTemplate;
-import io.engineblock.activities.csv.statements.ReadyFileStatementsTemplate;
-import io.engineblock.activities.csv.statements.YamlFileStatementLoader;
+import io.engineblock.activities.csv.statements.*;
 import io.engineblock.activityapi.ActivityDefObserver;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
@@ -15,12 +10,13 @@ import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.ExceptionMeterMetrics;
 import io.engineblock.util.StrInterpolater;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("Duplicates")
 public class FileActivity extends SimpleActivity implements ActivityDefObserver {

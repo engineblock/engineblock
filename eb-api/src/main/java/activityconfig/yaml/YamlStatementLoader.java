@@ -29,12 +29,10 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("ALL")
 public class YamlStatementLoader {
 
     private final static Logger logger = LoggerFactory.getLogger(YamlStatementLoader.class);
@@ -42,10 +40,6 @@ public class YamlStatementLoader {
     List<Function<String, String>> stringTransformers = new ArrayList<>();
 
     public YamlStatementLoader() {
-    }
-
-    public YamlStatementLoader(Function<String, String>... stringTransformers) {
-        this.stringTransformers.addAll(Arrays.asList(stringTransformers));
     }
 
     public StmtsDocList load(String fromPath, String... searchPaths) {
@@ -83,9 +77,7 @@ public class YamlStatementLoader {
             logger.error("Error loading yaml from " + fromPath, e);
             throw e;
         }
-
     }
-
 
     private Yaml getCustomYaml() {
         Constructor constructor = new Constructor(StmtsDoc.class);
