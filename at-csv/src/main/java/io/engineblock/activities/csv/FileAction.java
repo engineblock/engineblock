@@ -54,11 +54,11 @@ public class FileAction implements Action{
             int selector = (int) (cycleValue % readyFileStmts.size());
             readyFileStringStatement = readyFileStmts.get(selector);
             statement = readyFileStringStatement.bind(cycleValue);
+            showstmts = activity.getShowstmts();
             if (showstmts) {
                 logger.info("FILE STATEMENT(cycle=" + cycleValue + "):\n" + statement);
             }
         }
-
 
         try {
             try (Timer.Context executeTime = activity.executeTimer.time()) {
