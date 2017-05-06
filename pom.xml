@@ -28,9 +28,9 @@
         <module>eb-cli</module> <!-- restful server for EB runtime -->
         <module>eb-rest</module> <!-- restful server for EB runtime -->
         <module>eb-rest-client</module> <!-- restful server for EB runtime -->
-        <module>eb-extensions</module>
-        <module>at-csv</module> <!-- scripting sandbox extensions for EB -->
-        <module>at-json</module>
+        <module>eb-extensions</module> <!-- scripting sandbox extensions for EB -->
+        <module>at-csv</module> <!-- CSV activity type -->
+        <module>at-json</module> <!-- JSON activity type -->
     </modules>
 
     <licenses>

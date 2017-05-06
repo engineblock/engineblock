@@ -10,7 +10,6 @@ import io.engineblock.activityapi.Activity;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.metrics.ExceptionMeterMetrics;
 import io.engineblock.util.StrInterpolater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,16 +40,11 @@ public class JsonActivity extends SimpleActivity implements Activity{
         stmtDocList = yamlLoader.load(yaml_loc, "activities");
     }
 
-
-
-
     @Override
     public void initActivity(){
 
         logger.debug("initializing activity: " + activityDef.getAlias());
-
         readyFileStatementsTemplate = createReadyFileStatementsTemplate();
-
         jsonWriteTimer = ActivityMetrics.timer(activityDef, "write");
 
         try {
@@ -92,7 +86,6 @@ public class JsonActivity extends SimpleActivity implements Activity{
                     readyFileStatements.size());
             getActivityDef().setCycles(String.valueOf(readyFileStatements.size()));
         }
-
 
         return readyFileStatements;
     }

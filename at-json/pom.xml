@@ -68,13 +68,8 @@
 
         <dependency>
             <groupId>io.virtdata</groupId>
-            <artifactId>metagen-api</artifactId>
-            <version>1.0.28</version>
-        </dependency>
-        <dependency>
-            <groupId>io.virtdata</groupId>
             <artifactId>metagen-userlibs</artifactId>
-            <version>1.0.28</version>
+            <version>1.0.29</version>
         </dependency>
 
     </dependencies>
