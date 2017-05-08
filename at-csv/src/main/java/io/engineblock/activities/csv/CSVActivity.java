@@ -2,12 +2,12 @@ package io.engineblock.activities.csv;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import io.engineblock.activities.csv.statements.FileStmtBlock;
-import io.engineblock.activities.csv.statements.FileStmtDoc;
-import io.engineblock.activities.csv.statements.FileStmtDocList;
-import io.engineblock.activities.csv.statements.ReadyFileStatementTemplate;
-import io.engineblock.activities.csv.statements.ReadyFileStatementsTemplate;
-import io.engineblock.activities.csv.statements.YamlFileStatementLoader;
+import io.engineblock.activities.csv.statements.CSVStmtBlock;
+import io.engineblock.activities.csv.statements.CSVStmtDoc;
+import io.engineblock.activities.csv.statements.CSVStmtDocList;
+import io.engineblock.activities.csv.statements.ReadyCSVStatementTemplate;
+import io.engineblock.activities.csv.statements.ReadyCSVStatementsTemplate;
+import io.engineblock.activities.csv.statements.YamlCSVStatementLoader;
 import io.engineblock.activityapi.ActivityDefObserver;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
@@ -23,11 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("Duplicates")
-public class FileActivity extends SimpleActivity implements ActivityDefObserver {
-    private final static Logger logger = LoggerFactory.getLogger(FileActivity.class);
-    private final FileStmtDocList stmtDocList;
+public class CSVActivity extends SimpleActivity implements ActivityDefObserver {
+    private final static Logger logger = LoggerFactory.getLogger(CSVActivity.class);
+    private final CSVStmtDocList stmtDocList;
     private final Boolean showstmts;
-    private ReadyFileStatementsTemplate readyFileStatementsTemplate;
+    private ReadyCSVStatementsTemplate readyCSVStatementsTemplate;
 
     public Timer bindTimer;
     public Timer executeTimer;
@@ -47,13 +47,13 @@ public class FileActivity extends SimpleActivity implements ActivityDefObserver 
 
     private ExceptionMeterMetrics exceptionMeterMetrics;
 
-    public FileActivity(ActivityDef activityDef) {
+    public CSVActivity(ActivityDef activityDef) {
         super(activityDef);
         StrInterpolater interp = new StrInterpolater(activityDef);
         String yaml_loc = activityDef.getParams().getOptionalString("yaml").orElse("default");
         this.showstmts = activityDef.getParams().getOptionalBoolean("showstatements").orElse(false);
         this.fileName = activityDef.getParams().getOptionalString("filename").orElse("out.txt");
-        YamlFileStatementLoader yamlLoader = new YamlFileStatementLoader(interp);
+        YamlCSVStatementLoader yamlLoader = new YamlCSVStatementLoader(interp);
         stmtDocList = yamlLoader.load(yaml_loc, "activities");
     }
 
@@ -69,7 +69,7 @@ public class FileActivity extends SimpleActivity implements ActivityDefObserver 
 
         onActivityDefUpdate(activityDef);
 
-        readyFileStatementsTemplate = createReadyFileStatementsTemplate();
+        readyCSVStatementsTemplate = createReadyCSVStatementsTemplate();
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
         resultTimer = ActivityMetrics.timer(activityDef, "result");
@@ -86,34 +86,34 @@ public class FileActivity extends SimpleActivity implements ActivityDefObserver 
         }
     }
 
-    private ReadyFileStatementsTemplate createReadyFileStatementsTemplate() {
-        ReadyFileStatementsTemplate readyFileStatements = new ReadyFileStatementsTemplate();
+    private ReadyCSVStatementsTemplate createReadyCSVStatementsTemplate() {
+        ReadyCSVStatementsTemplate readyCSVStatements = new ReadyCSVStatementsTemplate();
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-        List<FileStmtDoc> matchingStmtDocs = stmtDocList.getMatching(tagfilter);
+        List<CSVStmtDoc> matchingStmtDocs = stmtDocList.getMatching(tagfilter);
 
-        for (FileStmtDoc doc : matchingStmtDocs) {
-            for (FileStmtBlock section : doc.getAllBlocks()) {
+        for (CSVStmtDoc doc : matchingStmtDocs) {
+            for (CSVStmtBlock section : doc.getAllBlocks()) {
                 Map<String, String> bindings = section.getBindings();
                 int indexer = 0;
                 for (String stmt : section.getStatements()) {
                     String name = section.getName() + "-" + indexer++;
-                    ReadyFileStatementTemplate t = new ReadyFileStatementTemplate(name, stmt,bindings);
-                    readyFileStatements.addTemplate(t);
+                    ReadyCSVStatementTemplate t = new ReadyCSVStatementTemplate(name, stmt,bindings);
+                    readyCSVStatements.addTemplate(t);
                 }
             }
         }
 
         if (getActivityDef().getCycleCount() == 0) {
             logger.debug("Adjusting cycle count for " + activityDef.getAlias() + " to " +
-            readyFileStatements.size());
-            getActivityDef().setCycles(String.valueOf(readyFileStatements.size()));
+            readyCSVStatements.size());
+            getActivityDef().setCycles(String.valueOf(readyCSVStatements.size()));
         }
 
-        return readyFileStatements;
+        return readyCSVStatements;
     }
 
-    public ReadyFileStatementsTemplate getReadyFileStatements() {
-        return readyFileStatementsTemplate;
+    public ReadyCSVStatementsTemplate getReadyFileStatements() {
+        return readyCSVStatementsTemplate;
     }
 
     @Override

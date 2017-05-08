@@ -17,11 +17,11 @@ package io.engineblock.activities.csv.statements;
 import io.virtdata.core.Bindings;
 import java.util.List;
 
-public class ReadyFileMapStatement implements ReadyFileStatement {
+public class ReadyCSVMapStatement implements ReadyCSVStatement {
     private String statementTemplate;
     private Bindings dataBindings;
 
-    public ReadyFileMapStatement(String statementTemplate, Bindings dataBindings) {
+    public ReadyCSVMapStatement(String statementTemplate, Bindings dataBindings) {
         this.statementTemplate = statementTemplate;
         this.dataBindings = dataBindings;
     }
