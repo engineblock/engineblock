@@ -2,47 +2,49 @@ package io.engineblock.activities.csv;
 
 import com.codahale.metrics.Timer;
 import io.engineblock.activities.csv.errorhandling.ErrorResponse;
-import io.engineblock.activities.csv.statements.ReadyFileStatement;
+import io.engineblock.activities.csv.statements.ReadyCSVStatement;
 import io.engineblock.activityapi.Action;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
 @SuppressWarnings("Duplicates")
-public class FileAction implements Action{
+public class CSVAction implements Action{
 
-    private static final Logger logger = LoggerFactory.getLogger(FileAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(CSVAction.class);
 
     private int slot;
-    private FileActivity activity;
-    List<ReadyFileStatement> readyFileStmts;
+    private CSVActivity activity;
+    List<ReadyCSVStatement> readyCSVStatements;
     private int maxTries = 10;
     private boolean showstmts;
     private ErrorResponse retryableResponse;
     private ErrorResponse realErrorResponse;
 
-    public FileAction(int slot, FileActivity activity) {
+    public CSVAction(int slot, CSVActivity activity) {
         this.slot = slot;
         this.activity = activity;
     }
 
     @Override
     public void init() {
-        readyFileStmts = activity.getReadyFileStatements().resolve();
+
+
+
+        readyCSVStatements = activity.getReadyFileStatements().resolve();
     }
 
     @Override
     public void accept(long cycleValue) {
 
 
-        ReadyFileStatement readyFileStringStatement;
+        ReadyCSVStatement readyCSVStatement;
 
         String statement = null;
         try (Timer.Context bindTime = activity.bindTimer.time()) {
-            int selector = (int) (cycleValue % readyFileStmts.size());
-            readyFileStringStatement = readyFileStmts.get(selector);
-            statement = readyFileStringStatement.bind(cycleValue);
+            int selector = (int) (cycleValue % readyCSVStatements.size());
+            readyCSVStatement = readyCSVStatements.get(selector);
+            statement = readyCSVStatement.bind(cycleValue);
             showstmts = activity.getShowstmts();
             if (showstmts) {
                 logger.info("FILE STATEMENT(cycle=" + cycleValue + "):\n" + statement);

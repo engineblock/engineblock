@@ -18,20 +18,20 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("ALL")
-public class YamlFileStatementLoader {
+public class YamlCSVStatementLoader {
 
-    private final static Logger logger = LoggerFactory.getLogger(YamlFileStatementLoader.class);
+    private final static Logger logger = LoggerFactory.getLogger(YamlCSVStatementLoader.class);
     List<Function<String, String>> imageTransformers = new ArrayList<>();
     List<Function<String, String>> stringTransformers = new ArrayList<>();
 
-    public YamlFileStatementLoader() {
+    public YamlCSVStatementLoader() {
     }
 
-    public YamlFileStatementLoader(Function<String, String>... stringTransformers) {
+    public YamlCSVStatementLoader(Function<String, String>... stringTransformers) {
         this.stringTransformers.addAll(Arrays.asList(stringTransformers));
     }
 
-    public FileStmtDocList load(String fromPath, String... searchPaths) {
+    public CSVStmtDocList load(String fromPath, String... searchPaths) {
         InputStream stream = EngineBlockFiles.findRequiredStreamOrFile(fromPath, "yaml", searchPaths);
         String data = "";
 
@@ -56,12 +56,12 @@ public class YamlFileStatementLoader {
 
         try {
             Iterable<Object> objects = yaml.loadAll(data);
-            List<FileStmtDoc> stmtListList = new ArrayList<>();
+            List<CSVStmtDoc> stmtListList = new ArrayList<>();
             for (Object object : objects) {
-                FileStmtDoc tgsd = (FileStmtDoc) object;
+                CSVStmtDoc tgsd = (CSVStmtDoc) object;
                 stmtListList.add(tgsd);
             }
-            return new FileStmtDocList(stmtListList);
+            return new CSVStmtDocList(stmtListList);
         } catch (Exception e) {
             logger.error("Error loading yaml from " + fromPath, e);
             throw e;
@@ -70,9 +70,9 @@ public class YamlFileStatementLoader {
     }
 
     private Yaml getCustomYaml() {
-        Constructor constructor = new Constructor(FileStmtDoc.class);
-        TypeDescription tds = new TypeDescription(FileStmtDoc.class);
-        tds.putListPropertyType("blocks", FileStmtBlock.class);
+        Constructor constructor = new Constructor(CSVStmtDoc.class);
+        TypeDescription tds = new TypeDescription(CSVStmtDoc.class);
+        tds.putListPropertyType("blocks", CSVStmtBlock.class);
         constructor.addTypeDescription(tds);
         return new Yaml(constructor);
     }
