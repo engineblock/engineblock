@@ -6,16 +6,16 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileStmtDoc extends FileStmtBlock {
+public class CSVStmtDoc extends CSVStmtBlock {
 
-    private final static Logger logger = LoggerFactory.getLogger(FileStmtDoc.class);
-    private List<FileStmtBlock> blocks = new ArrayList<>();
+    private final static Logger logger = LoggerFactory.getLogger(CSVStmtDoc.class);
+    private List<CSVStmtBlock> blocks = new ArrayList<>();
 
-    public List<FileStmtBlock> getBlocks() {
+    public List<CSVStmtBlock> getBlocks() {
         return blocks;
     }
 
-    public void setBlocks(List<FileStmtBlock> blocks) {
+    public void setBlocks(List<CSVStmtBlock> blocks) {
         this.blocks.clear();
         this.blocks.addAll(blocks);
     }
@@ -23,10 +23,10 @@ public class FileStmtDoc extends FileStmtBlock {
     /**
      * Returns a full view of all blocks, with the global 'this' block inserted at the front of the list,
      * but only if it includes statements.
-     * @return a new List of FileStmtSections
+     * @return a new List of CSVStmtSections
      */
-    public List<FileStmtBlock> getAllBlocks() {
-        List<FileStmtBlock> allSections = new ArrayList<FileStmtBlock>();
+    public List<CSVStmtBlock> getAllBlocks() {
+        List<CSVStmtBlock> allSections = new ArrayList<CSVStmtBlock>();
         if (getStatements().size()>0) {
             allSections.add(this);
         }

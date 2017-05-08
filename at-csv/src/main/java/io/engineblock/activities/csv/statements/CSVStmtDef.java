@@ -8,17 +8,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Holds a base name, a set of statements, some bindings, and tags for a File statement.
+ * Holds a base name, a set of statements, some bindings, and tags for a csv statement.
  * This version is meant to provide YAML-friendly field naming.
  */
-public class FileStmtDef implements Tagged {
+public class CSVStmtDef implements Tagged {
 
     private Map<String,String> tags = new LinkedHashMap<>();
     private String name;
     private List<String> statements = new ArrayList<>();
     private Map<String,String> bindings = new LinkedHashMap<>();
 
-    public FileStmtDef() {};
+    public CSVStmtDef() {};
 
     public List<String> getStatements() {
         return statements;
