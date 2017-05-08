@@ -1,5 +1,7 @@
 package io.engineblock.activities.json;
 
+import io.engineblock.activityapi.Action;
+import io.engineblock.activityapi.ActionDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import org.testng.annotations.Test;
 
@@ -15,27 +17,16 @@ public class JsonActivityTypeTest {
     @Test
     public void testJsonActivity(){
         JsonActivityType jsonActivityType = new JsonActivityType();
-        ActivityDef activityDef = ActivityDef.parseActivityDef("type=json; yaml=activityDefTest.yaml");
+        ActivityDef activityDef = ActivityDef.parseActivityDef("type=json; yaml=json-test.yaml");
 
         JsonActivity jsonActivity = jsonActivityType.getActivity(activityDef);
         jsonActivity.initActivity();
 
-        try{
-            byte[] encoded = Files.readAllBytes(Paths.get("out.json"));
-            String producedOutput = new String(encoded, StandardCharsets.UTF_8);
+        ActionDispenser actionDispenser = jsonActivityType.getActionDispenser(jsonActivity);
+        Action action = actionDispenser.getAction(1);
+        action.init();
 
-            String expectedOutput =
-                    "{\"bar\":\"zero\",\"foo\":\"zero\",\"customer\":\"zero\"}\n" +
-                    "{\"bar\":\"one\",\"foo\":\"one\",\"customer\":\"one\"}\n" +
-                    "{\"bar\":\"two\",\"foo\":\"two\",\"customer\":\"two\"}";
-
-            assertThat(producedOutput).isEqualTo(expectedOutput);
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-            assert(false);
-        }
+        action.accept(1L);
 
     }
 

@@ -13,7 +13,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class JsonAction implements Action {
 
@@ -37,11 +39,9 @@ public class JsonAction implements Action {
 
         int selector = (int) (cycle % readyFileStmts.size());
 
+        Map<String, Object> bindPoints = readyFileStmts.get(selector).bind(cycle);
         try (Timer.Context writeTime = activity.getJsonWriteTimer().time()) {
-            activity.writeObject(
-                    readyFileStmts.get(selector).getBindPointNames(),
-                    readyFileStmts.get(selector).getBindPointValues(cycle)
-            );
+            activity.writeObject(bindPoints);
         }
 
     }
