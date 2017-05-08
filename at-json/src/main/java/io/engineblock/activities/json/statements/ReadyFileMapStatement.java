@@ -14,11 +14,10 @@
 */
 package io.engineblock.activities.json.statements;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import io.engineblock.activities.json.JsonActivity;
-import io.engineblock.activityapi.Activity;
 import io.virtdata.core.Bindings;
-import java.util.List;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ReadyFileMapStatement implements ReadyFileStatement {
     private String statementTemplate;
@@ -29,12 +28,10 @@ public class ReadyFileMapStatement implements ReadyFileStatement {
         this.dataBindings = dataBindings;
     }
 
-    public List<String> getBindPointNames() {
-        return dataBindings.getTemplate().getBindPointNames();
-    }
+    public Map<String, Object> bind(long cycle){
+        Map<String, Object> bindPoints = new HashMap<String, Object>();
+        dataBindings.setMap(bindPoints, cycle);
 
-    public Object[] getBindPointValues(long cycle){
-        return dataBindings.getAll(cycle);
+        return bindPoints;
     }
-
 }

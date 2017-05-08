@@ -90,13 +90,13 @@ public class JsonActivity extends SimpleActivity implements Activity{
         return readyFileStatements;
     }
 
-    public synchronized void writeObject(List<String> objectNames, Object[] objectValues)
+    public synchronized void writeObject(Map<String, Object> bindPoints)
     {
         try {
             generator.writeStartObject();
 
-            for(int i = 0; i < objectNames.size(); i++) {
-                generator.writeStringField(objectNames.get(i), objectValues[i].toString());
+            for(String bindPoint: bindPoints.keySet()){
+                generator.writeStringField(bindPoint, bindPoints.get(bindPoint).toString());
             }
 
             generator.writeEndObject();
