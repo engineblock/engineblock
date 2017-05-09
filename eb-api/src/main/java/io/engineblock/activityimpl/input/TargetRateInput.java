@@ -79,6 +79,14 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
     }
 
     @Override
+    public long getSpan(long span) {
+        if (rateLimiter != null) {
+            rateLimiter.acquire();
+        }
+        return cycleValue.getAndAdd(span);
+    }
+
+    @Override
     public AtomicLong getMin() {
         return min;
     }

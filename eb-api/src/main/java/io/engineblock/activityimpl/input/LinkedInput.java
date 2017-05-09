@@ -35,7 +35,7 @@ public class LinkedInput implements Input, ActivityDefObserver, Stoppable {
 
     private Input linkedInput;
     private ActivityDef activityDef;
-    private boolean running=true;
+    private boolean running = true;
 
     public LinkedInput(ActivityDef activityDef, Input linkedInput) {
         this.activityDef = activityDef;
@@ -65,7 +65,7 @@ public class LinkedInput implements Input, ActivityDefObserver, Stoppable {
 
         while (true) {
             long current = cycleValue.get();
-            if (current<linkedPoint) {
+            if (current < linkedPoint) {
                 long next = current + 1;
                 if (cycleValue.compareAndSet(current, next)) {
                     return current;
@@ -74,7 +74,31 @@ public class LinkedInput implements Input, ActivityDefObserver, Stoppable {
             long newLinkedPoint = linkedInput.getCurrent();
             if (newLinkedPoint == linkedPoint) {
                 slowMeDown(); // On if the linking input tried to go faster than the linked-to input
-                if(!running) { return current; }
+                if (!running) {
+                    return current;
+                }
+            } else {
+                linkedPoint = newLinkedPoint;
+                continue;
+            }
+        }
+    }
+
+
+    @Override
+    public long getSpan(long span) {
+        while (true) {
+
+            long current = cycleValue.get();
+            if (current < linkedPoint) {
+                return cycleValue.getAndAdd(span);
+            }
+            long newLinkedPoint = linkedInput.getCurrent();
+            if (newLinkedPoint == linkedPoint) {
+                slowMeDown(); // only if the linking input tried to go faster than the linked-to input
+                if (!running) {
+                    return current;
+                }
             } else {
                 linkedPoint = newLinkedPoint;
                 continue;
@@ -84,10 +108,11 @@ public class LinkedInput implements Input, ActivityDefObserver, Stoppable {
 
     /**
      * for testing
+     *
      * @return true, if this input could advance according to the linked input
      */
     protected boolean canAdvance() {
-           return (cycleValue.get() < linkedInput.getCurrent());
+        return (cycleValue.get() < linkedInput.getCurrent());
     }
 
     /**
@@ -109,6 +134,6 @@ public class LinkedInput implements Input, ActivityDefObserver, Stoppable {
 
     @Override
     public void requestStop() {
-        this.running=false;
+        this.running = false;
     }
 }

@@ -48,6 +48,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private SlotStateTracker slotStateTracker;
     private AtomicReference<RunState> slotState;
     private RateLimiter rateLimiter; // Only for use in phasing
+    private long span = 1L;
 
     /**
      * Create an ActivityMotor.
@@ -156,34 +157,39 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
         while (slotState.get() == Running) {
 
-            cyclenum = input.getAsLong();
-            if (cyclenum >= cycleMax.get()) {
-                logger.trace("input exhausted (input " + cyclenum + "), stopping motor thread " + slotId);
+            long firstcycle = input.getSpan(span);
+            long nextspan = firstcycle + span;
+
+            if (firstcycle >= cycleMax.get()) {
+                logger.trace("input exhausted (input " + firstcycle + "), stopping motor thread " + slotId);
                 slotStateTracker.enterState(Finished);
                 continue;
             }
 
-            if (slotState.get() != Running) {
-                logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
-                continue;
-            }
+            for (cyclenum = firstcycle;  cyclenum < nextspan; cyclenum++) {
 
-            try (Timer.Context cycleTime = timer.time()) {
-
-                logger.trace("cycle " + cyclenum);
-                try (Timer.Context phaseTime = phaseTimer.time()) {
-                    action.accept(cyclenum);
+                if (slotState.get() != Running) {
+                    logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
+                    continue;
                 }
 
-                if (multiPhaseAction != null) {
-                    while (multiPhaseAction.incomplete()) {
-                        if (rateLimiter!=null) {
-                            rateLimiter.acquire();
-                        }
-                        try (Timer.Context phaseTime = phaseTimer.time()) {
-                            action.accept(cyclenum);
-                        }
+                try (Timer.Context cycleTime = timer.time()) {
 
+                    logger.trace("cycle " + cyclenum);
+                    try (Timer.Context phaseTime = phaseTimer.time()) {
+                        action.accept(cyclenum);
+                    }
+
+                    if (multiPhaseAction != null) {
+                        while (multiPhaseAction.incomplete()) {
+                            if (rateLimiter != null) {
+                                rateLimiter.acquire();
+                            }
+                            try (Timer.Context phaseTime = phaseTimer.time()) {
+                                action.accept(cyclenum);
+                            }
+
+                        }
                     }
                 }
             }
@@ -211,10 +217,12 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         }
 
         if (input instanceof RateLimiterProvider) {
-            rateLimiter = ((RateLimiterProvider)input).getRateLimiter();
+            rateLimiter = ((RateLimiterProvider) input).getRateLimiter();
         } else {
-            rateLimiter=null;
+            rateLimiter = null;
         }
+
+        this.span = activityDef.getParams().getOptionalLong("span").orElse(1L);
     }
 
     @Override

@@ -23,7 +23,7 @@ import java.util.function.LongSupplier;
  * Inputs are required to act as sequences at this level. They act as the dataflow control points for
  * banks of motors and actions. As such, they must know their bounds.
  */
-public interface Input extends LongSupplier {
+public interface Input extends LongSpanSupplier {
     /**
      * @return the minimum value to be provided by this input sequence.
      */
@@ -46,5 +46,15 @@ public interface Input extends LongSupplier {
      * @return The next long value in the sequence
      */
     long getAsLong();
+
+    /**
+     * For the sake of efficiency, ActivityMotors that consume values from this interface
+     * should do a range check after getting the value. When the value exceeds the value
+     * provided by {@link getMax}, the motor should take this as a signal to terminate
+     * gracefullly with a log line indicating why.
+     * @param span The width of the span of numbers returned
+     * @return the first value of the span
+     */
+    long getSpan(long span);
 
 }
