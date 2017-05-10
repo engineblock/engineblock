@@ -48,7 +48,7 @@ public class CSVActivity extends SimpleActivity implements ActivityDefObserver {
         StrInterpolater interp = new StrInterpolater(activityDef);
         String yaml_loc = activityDef.getParams().getOptionalString("yaml").orElse("default");
         this.showstmts = activityDef.getParams().getOptionalBoolean("showstatements").orElse(false);
-        this.fileName = activityDef.getParams().getOptionalString("filename").orElse("out.txt");
+        this.fileName = activityDef.getParams().getOptionalString("filename").orElse("stdout");
         YamlCSVStatementLoader yamlLoader = new YamlCSVStatementLoader(interp);
         stmtDocList = yamlLoader.load(yaml_loc, "activities");
     }
@@ -74,11 +74,15 @@ public class CSVActivity extends SimpleActivity implements ActivityDefObserver {
         //clear out the file
         //empty out.txt on init
         PrintWriter writer = null;
-        try {
-            this.pw  = new PrintWriter(fileName);
-            pw.print("");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        if (fileName.toLowerCase().equals("stdout")) {
+            this.pw = new PrintWriter(System.out);
+        } else {
+            try {
+                this.pw  = new PrintWriter(fileName);
+                pw.print("");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
     }
 

@@ -25,7 +25,8 @@ activity types.
 
 ## csv ActivityType Parameters
 
-- **filename** - this is the name of the output file, the default is out.txt 
+- **filename** - this is the name of the output file 
+    (defaults to "stdout", which actually writes to stdout, not the filesystem)
 - **yaml** - The file which holds the schema and statement defs. 
     (no default, required)
 - **cycles** - standard, however the activity type will default 
