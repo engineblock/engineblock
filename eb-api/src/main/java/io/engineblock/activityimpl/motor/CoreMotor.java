@@ -57,7 +57,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      */
-public CoreMotor(
+    public CoreMotor(
             ActivityDef activityDef,
             long slotId,
             Input input) {
@@ -136,8 +136,9 @@ public CoreMotor(
     @Override
     public void run() {
 
-        Timer timer = ActivityMetrics.timer(activityDef, "cycles");
-        Timer phaseTimer = ActivityMetrics.timer(activityDef, "phases");
+        Timer cyclesTimer = ActivityMetrics.timer(activityDef, "cycles");
+        Timer phasesTimer = ActivityMetrics.timer(activityDef, "phases");
+        Timer stridesTimer = ActivityMetrics.timer(activityDef, "strides");
 
         if (slotState.get() == Finished) {
             logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
@@ -166,33 +167,37 @@ public CoreMotor(
                 continue;
             }
 
-            for (cyclenum = thisIntervalStart;  cyclenum < nextIntervalStart; cyclenum++) {
+            try (Timer.Context stridesTime = stridesTimer.time()) {
 
-                if (slotState.get() != Running) {
-                    logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
-                    continue;
-                }
+                for (cyclenum = thisIntervalStart; cyclenum < nextIntervalStart; cyclenum++) {
 
-                try (Timer.Context cycleTime = timer.time()) {
-
-                    logger.trace("cycle " + cyclenum);
-                    try (Timer.Context phaseTime = phaseTimer.time()) {
-                        action.accept(cyclenum);
+                    if (slotState.get() != Running) {
+                        logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
+                        continue;
                     }
 
-                    if (multiPhaseAction != null) {
-                        while (multiPhaseAction.incomplete()) {
-                            if (rateLimiter != null) {
-                                rateLimiter.acquire();
-                            }
-                            try (Timer.Context phaseTime = phaseTimer.time()) {
-                                action.accept(cyclenum);
-                            }
+                    try (Timer.Context cycleTime = cyclesTimer.time()) {
 
+                        logger.trace("cycle " + cyclenum);
+                        try (Timer.Context phaseTime = phasesTimer.time()) {
+                            action.accept(cyclenum);
+                        }
+
+                        if (multiPhaseAction != null) {
+                            while (multiPhaseAction.incomplete()) {
+                                if (rateLimiter != null) {
+                                    rateLimiter.acquire();
+                                }
+                                try (Timer.Context phaseTime = phasesTimer.time()) {
+                                    action.accept(cyclenum);
+                                }
+
+                            }
                         }
                     }
                 }
             }
+
         }
 
         //MetricsContext.getInstance().getMetrics().getTimers().get("foo").getMeanRate();
