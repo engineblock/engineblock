@@ -32,12 +32,6 @@
       
         <dependency>
             <groupId>io.engineblock</groupId>
-            <artifactId>at-json</artifactId>
-            <version>1.0.66-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.engineblock</groupId>
             <artifactId>eb-extensions</artifactId>
             <version>1.0.66-SNAPSHOT</version>
         </dependency>
