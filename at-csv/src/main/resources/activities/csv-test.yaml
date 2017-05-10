@@ -4,10 +4,12 @@ tags:
  oevure: bananas
 name: outerblock
 statements:
+  - thread
   - foo
   - bar
   - customer
 bindings:
+  thread: ThreadNumToLong()
   bar: NumberNameToString()
   foo: NumberNameToString()
   customer: NumberNameToString()

@@ -3,7 +3,7 @@
 
     <groupId>io.engineblock</groupId>
     <artifactId>project-defaults</artifactId>
-    <version>1.0.63-SNAPSHOT</version>
+    <version>1.0.66-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>

@@ -3,16 +3,16 @@ package io.engineblock.activities.csv;
 import io.engineblock.activityapi.Action;
 import io.engineblock.activityapi.ActionDispenser;
 
-public class FileActionDispenser implements ActionDispenser {
+public class CSVActionDispenser implements ActionDispenser {
 
-    private FileActivity activity;
+    private CSVActivity activity;
 
-    public FileActionDispenser(FileActivity activity) {
+    public CSVActionDispenser(CSVActivity activity) {
         this.activity = activity;
     }
 
     @Override
     public Action getAction(int slot) {
-        return new FileAction(slot, activity);
+        return new CSVAction(slot, activity);
     }
 }

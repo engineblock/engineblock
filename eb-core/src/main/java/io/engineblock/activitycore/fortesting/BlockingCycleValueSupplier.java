@@ -62,6 +62,19 @@ public class BlockingCycleValueSupplier implements Input {
         return cycle.get();
     }
 
+    @Override
+    public long getInterval(long stride) {
+        synchronized(this) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Unexpected interruption in synchronized test method.");
+            }
+        }
+        return cycle.getAndAdd(stride);
+    }
+
     public void setForSingleReader(long value) {
         setValue(value);
         synchronized (this) {

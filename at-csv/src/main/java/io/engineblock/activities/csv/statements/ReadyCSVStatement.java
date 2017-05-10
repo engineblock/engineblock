@@ -14,6 +14,6 @@
 */
 package io.engineblock.activities.csv.statements;
 
-public interface ReadyFileStatement {
+public interface ReadyCSVStatement {
     String bind(long cycleNum);
 }

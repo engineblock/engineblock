@@ -1,68 +1,40 @@
-# file activity type
+# csv activity type
 
 This is an activity type which allows for the generation of data
-into a file from Powertools EngineBlock.
-
-This activity type is wired synchronously within each client 
-thread, however the async API is used in order to expose fine-grain 
-metrics about op binding and io.
+into a csv file from Powertools EngineBlock.
 
 ## Example activity definitions
 
-Run a file activity named 'a1', with definitions from activities/tofile.yaml
+Run a csv activity named 'csv-test', with definitions from activities/csv-test.yaml
 ~~~
-... type=file alias=a1 yaml=tofile
-~~~
-
-Run a file activity defined by tofile.yaml, but with shortcut naming
-~~~
-... type=file yaml=tofile
+... type=csv yaml=csv-test
 ~~~
 
 Only run statement groups which match a tag regex
 ~~~
-... type=file yaml=tofile tags=group:'ddl.*'
+... type=csv yaml=csv-test tags=group:'ddl.*'
 ~~~
 
 Run the matching 'dml' statements, with 100 cycles, from [1000..1100)
 ~~~
-... type=file yaml=tofile tags=group:'dml.*' cycles=1000..11000
+... type=csv yaml=csv-test tags=group:'dml.*' cycles=1000..11000 filename=test.csv
 ~~~
 This last example shows that the cycle range is [inclusive..exclusive),
 to allow for stacking test intervals. This is standard across all
 activity types.
 
-## file ActivityType Parameters
+## csv ActivityType Parameters
 
+- **filename** - this is the name of the output file 
+    (defaults to "stdout", which actually writes to stdout, not the filesystem)
 - **yaml** - The file which holds the schema and statement defs. 
     (no default, required)
-~~~
-DOCS TBD FOR THIS SECTION
-- **cl** - An override to consistency levels for the activity. If
-    this option is used, then all consistency levels will be replaced
-    by this one for the current activity, and a log line explaining
-    the difference with respect to the yaml will be emitted.
-    This is not a dynamic parameter. It will only be applied at
-    activity start.
-~~~~    
-- **maxtries** - how many times an operation may be attempted
-~~~
-DOCS TBD FOR THIS SECTION
-- **diagnose** - if this is set to true, then any exception for an 
-    operation are thrown instead of handled internally. This can 
-    be useful for diagnosing exceptions during scenario development.
-    In this version of ebcql, this is a shortcut for setting all the
-    exception handlers to **stop**.
-~~~
-- **cycles** - standard, however the cql activity type will default 
+- **cycles** - standard, however the activity type will default 
     this to however many statements are included in the current 
     activity, after tag filtering, etc.
-- **alias** - this is a standard engineblock parameter, however 
-    the cql type will use the yaml value also as the alias value 
-    when not specified.
+- **alias** - this is a standard engineblock parameter
 
 ## Error Handling
-
 #### Error Handlers
 
 When an error occurs, you can control how it is handled. 
@@ -206,7 +178,7 @@ encountered and a qualifying value is not found, an error will be thrown.
 The YAML file referenced in the yaml= parameter will be searched for in the following places, in this order:
 1. A URL, if it starts with 'http:' or 'https:'
 2. The local filesystem, if it exists there
-3. The internal classpath and assets in the ebcql jar.
+3. The internal classpath and assets in the eb jar.
 
 The '.yaml' suffix is not required in the yaml= parameter, however it is
 required on the actual file. As well, the logical search path "activities/"
@@ -217,5 +189,18 @@ This is a basic example below that can be copied as a starting template.
 
 ## YAML Example
     ---
-    CONTENT TBD
-     
+    tags:
+     type: testtag
+     kind: somekind
+     oevure: bananas
+    name: outerblock
+    statements:
+      - foo
+      - bar
+      - customer
+    bindings:
+      bar: NumberNameToString()
+      foo: NumberNameToString()
+      customer: NumberNameToString()
+
+This will output a csv file with 3 columns.
