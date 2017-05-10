@@ -16,14 +16,13 @@
 package io.engineblock.activityapi;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.LongSupplier;
 
 /**
  * An Input is the core data source for feeding actions within an activity.
  * Inputs are required to act as sequences at this level. They act as the dataflow control points for
  * banks of motors and actions. As such, they must know their bounds.
  */
-public interface Input extends LongSpanSupplier {
+public interface Input extends longIntervalSupplier {
     /**
      * @return the minimum value to be provided by this input sequence.
      */
@@ -52,9 +51,9 @@ public interface Input extends LongSpanSupplier {
      * should do a range check after getting the value. When the value exceeds the value
      * provided by {@link getMax}, the motor should take this as a signal to terminate
      * gracefullly with a log line indicating why.
-     * @param span The width of the span of numbers returned
-     * @return the first value of the span
+     * @param stride The width of the interval of numbers returned
+     * @return the first value of the interval
      */
-    long getSpan(long span);
+    long getInterval(long stride);
 
 }

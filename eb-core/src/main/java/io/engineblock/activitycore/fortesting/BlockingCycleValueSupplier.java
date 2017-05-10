@@ -63,7 +63,7 @@ public class BlockingCycleValueSupplier implements Input {
     }
 
     @Override
-    public long getSpan(long span) {
+    public long getInterval(long stride) {
         synchronized(this) {
             try {
                 this.wait();
@@ -72,7 +72,7 @@ public class BlockingCycleValueSupplier implements Input {
                 throw new RuntimeException("Unexpected interruption in synchronized test method.");
             }
         }
-        return cycle.getAndAdd(span);
+        return cycle.getAndAdd(stride);
     }
 
     public void setForSingleReader(long value) {

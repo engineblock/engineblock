@@ -2,12 +2,14 @@ package io.engineblock.activitycore;
 
 import io.engineblock.activityapi.Action;
 import io.engineblock.activityapi.Motor;
+import io.engineblock.activityapi.RunState;
 import io.engineblock.activitycore.fortesting.BlockingCycleValueSupplier;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.motor.CoreMotor;
 import org.testng.annotations.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,20 +28,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-@Test(enabled=false)
+@Test
 public class CoreMotorTest {
 
-    @Test(enabled=false)
+    @Test
     public void testBasicActivityMotor() {
         BlockingCycleValueSupplier lockstepper = new BlockingCycleValueSupplier();
         Motor cm = new CoreMotor(ActivityDef.parseActivityDef("alias=foo"), 5L, lockstepper);
         AtomicLong observableAction = new AtomicLong(-3L);
         cm.setAction(getTestConsumer(observableAction));
+        cm.getSlotStateTracker().enterState(RunState.Starting);
         Thread t = new Thread(cm);
         t.setName("TestMotor");
         t.start();
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1000);  // allow action time to be waiting in monitor for test fixture
         } catch (InterruptedException ignored) {}
 
         lockstepper.setForSingleReader(5L);
@@ -47,6 +50,40 @@ public class CoreMotorTest {
         assertThat(observableAction.get()).isEqualTo(5L);
     }
 
+    @Test
+    public void testIteratorStride() {
+        BlockingCycleValueSupplier lockstepper = new BlockingCycleValueSupplier();
+        Motor cm1 = new CoreMotor(ActivityDef.parseActivityDef("stride=3"),1L, lockstepper);
+        AtomicLongArray ary = new AtomicLongArray(10);
+        Action a1 = getTestArrayConsumer(ary);
+        cm1.setAction(a1);
+        cm1.getSlotStateTracker().enterState(RunState.Starting);
+
+        Thread t1 = new Thread(cm1);
+        t1.setName("cm1");
+        t1.start();
+        try {
+            Thread.sleep(500); // allow action time to be waiting in monitor for test fixture
+        } catch (InterruptedException ignored) {}
+
+        lockstepper.setForSingleReader(11L);
+        boolean result = awaitAryCondition(ala -> (ala.get(2)==13L),ary,5000,100);
+        assertThat(ary.get(0)).isEqualTo(11L);
+        assertThat(ary.get(1)).isEqualTo(12L);
+        assertThat(ary.get(2)).isEqualTo(13L);
+        assertThat(ary.get(3)).isEqualTo(0L);
+
+    }
+
+    private Action getTestArrayConsumer(final AtomicLongArray ary) {
+        return new Action() {
+            private int offset=0;
+            @Override
+            public void accept(long value) {
+                ary.set(offset++,value);
+            }
+        };
+    }
     private Action getTestConsumer(final AtomicLong atomicLong) {
         return new Action() {
             @Override
@@ -55,6 +92,25 @@ public class CoreMotorTest {
             }
         };
     }
+
+
+    private boolean awaitAryCondition(Predicate<AtomicLongArray> atomicLongAryPredicate, AtomicLongArray ary, long millis, long retry) {
+        long start = System.currentTimeMillis();
+        long now=start;
+        while (now < start + millis) {
+            boolean result = atomicLongAryPredicate.test(ary);
+            if (result) {
+                return true;
+            } else {
+                try {
+                    Thread.sleep(retry);
+                } catch (InterruptedException ignored) {}
+            }
+            now = System.currentTimeMillis();
+        }
+        return false;
+    }
+
     private boolean awaitCondition(Predicate<AtomicLong> atomicPredicate, AtomicLong atomicInteger, long millis, long retry) {
         long start = System.currentTimeMillis();
         long now=start;

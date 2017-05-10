@@ -86,12 +86,12 @@ public class LinkedInput implements Input, ActivityDefObserver, Stoppable {
 
 
     @Override
-    public long getSpan(long span) {
+    public long getInterval(long stride) {
         while (true) {
 
             long current = cycleValue.get();
             if (current < linkedPoint) {
-                return cycleValue.getAndAdd(span);
+                return cycleValue.getAndAdd(stride);
             }
             long newLinkedPoint = linkedInput.getCurrent();
             if (newLinkedPoint == linkedPoint) {

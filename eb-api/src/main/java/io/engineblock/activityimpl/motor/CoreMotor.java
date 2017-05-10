@@ -48,7 +48,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private SlotStateTracker slotStateTracker;
     private AtomicReference<RunState> slotState;
     private RateLimiter rateLimiter; // Only for use in phasing
-    private long span = 1L;
+    private long stride = 1L;
 
     /**
      * Create an ActivityMotor.
@@ -57,7 +57,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      */
-    public CoreMotor(
+public CoreMotor(
             ActivityDef activityDef,
             long slotId,
             Input input) {
@@ -157,16 +157,16 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
         while (slotState.get() == Running) {
 
-            long firstcycle = input.getSpan(span);
-            long nextspan = firstcycle + span;
+            long thisIntervalStart = input.getInterval(stride);
+            long nextIntervalStart = thisIntervalStart + stride;
 
-            if (firstcycle >= cycleMax.get()) {
-                logger.trace("input exhausted (input " + firstcycle + "), stopping motor thread " + slotId);
+            if (thisIntervalStart >= cycleMax.get()) {
+                logger.trace("input exhausted (input " + thisIntervalStart + "), stopping motor thread " + slotId);
                 slotStateTracker.enterState(Finished);
                 continue;
             }
 
-            for (cyclenum = firstcycle;  cyclenum < nextspan; cyclenum++) {
+            for (cyclenum = thisIntervalStart;  cyclenum < nextIntervalStart; cyclenum++) {
 
                 if (slotState.get() != Running) {
                     logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
@@ -222,7 +222,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             rateLimiter = null;
         }
 
-        this.span = activityDef.getParams().getOptionalLong("span").orElse(1L);
+        this.stride = activityDef.getParams().getOptionalLong("stride").orElse(1L);
     }
 
     @Override
