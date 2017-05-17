@@ -23,6 +23,8 @@ public class LongTreeTracker {
 
     private static long odds = 0b0101010101010101010101010101010101010101010101010101010101010101L;
     private static long eens = 0b1010101010101010101010101010101010101010101010101010101010101010L;
+    private static long msbb = 0b1000000000000000000000000000000000000000000000000000000000000000L;
+    private static long left = 0b1111111111111111111111111111111100000000000000000000000000000000L;
 
     public LongTreeTracker(long timage) {
         this.timage = timage;
@@ -31,46 +33,64 @@ public class LongTreeTracker {
     public LongTreeTracker() {
     }
 
-//    public long parentOf(int posFromLSB) {
-//        return 1 << (posFromLSB >> 1);
-//    }
-
-    private static long leftbit = 0b1000000000000000000000000000000000000000000000000000000000000000L;
-
     /**
      * Apply an index value between 0 and 31 inclusive. Return the accumulator.
-     * If all 32 slots of this tracker have been completed, the returned value will
+     * If all 32 slots of this tracker have been isCompleted, the returned value will
      * have LSB bit 2 set.
      * @param index a long value between 0 and 31 to mark as complete
      * @return the accumulator
      */
-    public long applyPosition(int index) {
+    public long setCompleted(long index, long image) {
         long position = 63 - index;
 
         while (position > 0) {
             long applybt = 1L << position;
 //            System.out.println("applybt:\n" + diagString(applybt));
 //            System.out.print("image:\n" + this);
-            timage |= applybt;
+            image |= applybt;
             long comask = applybt | (applybt & eens) >> 1 | (applybt & odds) << 1;
 //            System.out.println("comask:\n" + diagString(comask));
-            if ((comask & timage) != comask) {
+            if ((comask & image) != comask) {
                 break;
             }
             position >>= 1;
         }
 //        System.out.println("image:\n" + this);
-        return timage;
+        return image;
     }
 
-    public boolean completed(long index) {
-        long l = leftbit >>> index;
+    public long setCompleted(long index) {
+        return timage = setCompleted(index,timage);
+    }
+
+
+    public boolean isCompleted(long index) {
+        long l = msbb >>> index;
         return (timage & l ) == l;
     }
 
-    public long completed() {
-        long l = Long.lowestOneBit(timage >> 32);
-        return l; // not yet
+    public boolean isCompleted() {
+        return ((timage & 2L) > 0);
+    }
+
+    /**
+     * @return the lowest index isCompleted, or -1 if none were isCompleted
+     */
+    public long getLowestCompleted() {
+        int l = Long.numberOfLeadingZeros(timage&left);
+        return (l!=64) ? l : -1;
+    }
+
+    /**
+     * @return the highest index isCompleted, or -1 if none were isCompleted
+     */
+    public long getHighestCompleted() {
+        int l = Long.numberOfTrailingZeros(timage&left);
+        return (l!=64) ? 31-(l-32) : -1;
+    }
+
+    public long getTotalCompleted() {
+        return Long.bitCount(timage&left);
     }
 
     public static String toBinaryString(long bitfield) {
