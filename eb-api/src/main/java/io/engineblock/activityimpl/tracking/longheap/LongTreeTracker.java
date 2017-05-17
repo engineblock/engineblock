@@ -38,6 +38,7 @@ public class LongTreeTracker {
      * If all 32 slots of this tracker have been isCompleted, the returned value will
      * have LSB bit 2 set.
      * @param index a long value between 0 and 31 to mark as complete
+     * @param image the long value which serves as the starting state of the bit field
      * @return the accumulator
      */
     public long setCompleted(long index, long image) {
@@ -56,6 +57,7 @@ public class LongTreeTracker {
             position >>= 1;
         }
 //        System.out.println("image:\n" + this);
+        // TODO Fix this test
         return image;
     }
 

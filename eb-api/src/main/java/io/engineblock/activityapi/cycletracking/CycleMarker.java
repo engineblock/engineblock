@@ -20,7 +20,6 @@ package io.engineblock.activityapi.cycletracking;
  *     number than the highest cycle number that has been isCompleted, but it must never be higher.
  *     </LI>
  * </UL>
- * </p>
  */
 public interface CycleMarker {
 
