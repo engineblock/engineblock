@@ -1,6 +1,4 @@
-package io.engineblock.activityapi;
-
-import java.util.concurrent.atomic.AtomicLong;
+package io.engineblock.activityapi.cycletracking;
 
 /**
  * <p>A cycle tracker allows concurrent threads to report on the
@@ -13,18 +11,18 @@ import java.util.concurrent.atomic.AtomicLong;
  * completion on a specific cycle when it is complete, independent
  * of the order of completion.</p>
  *
- * <p>It is the job of the tracker to provide efficent concurrent access
+ * <p>It is the job of the tracker to provide efficient concurrent access
  * to:
  * <UL>
  *     <LI>The lowest cycle number that has been isCompleted. This may return a lower
  *     cycle number that has been isCompleted within some bound, but it may not be higher..</LI>
  *     <LI>The highest cycle number that has been isCompleted. This may return a lower cycle
- *     number than the highest cycle number that has been isCompleted, but it must never be higher
- *     than the highest cycle numer that has actually been isCompleted.</LI>
+ *     number than the highest cycle number that has been isCompleted, but it must never be higher.
+ *     </LI>
  * </UL>
  * </p>
  */
-public interface CycleTracker {
+public interface CycleMarker {
 
     /**
      * Mark a numbered cycle as isCompleted.
