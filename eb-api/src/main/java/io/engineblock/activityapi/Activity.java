@@ -1,5 +1,6 @@
 package io.engineblock.activityapi;
 
+import io.engineblock.activityapi.cycletracking.CycleMarker;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.activityimpl.SimpleActivity;
@@ -21,6 +22,10 @@ public interface Activity extends Comparable<Activity> {
     ActionDispenser getActionDispenserDelegate();
 
     void setActionDispenserDelegate(ActionDispenser actionDispenser);
+
+    CycleMarker getCycleMarkerDelegate();
+
+    void setCycleMarkerDelegate(CycleMarker cycleMarker);
 
     ActivityDef getActivityDef();
 

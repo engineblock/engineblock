@@ -31,7 +31,7 @@ public class DiagActivityTypeTest {
 
         ActionDispenser actionDispenser = da.getActionDispenser(a);
         Action action = actionDispenser.getAction(1);
-        action.accept(1L);
+        action.runCycle(1L);
     }
 
 }

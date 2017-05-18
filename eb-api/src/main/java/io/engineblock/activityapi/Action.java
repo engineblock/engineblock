@@ -14,21 +14,22 @@
 */
 package io.engineblock.activityapi;
 
-import java.util.function.LongConsumer;
-
 /**
  * An action is the core logic that occurs within an activity.
  * Within a thread slot, a motor will continuously ask an action to process its input.
  */
-public interface Action extends LongConsumer {
+@FunctionalInterface
+public interface Action {
 
     /**
-     * <p>Apply a work function to an input value.</p>
+     * <p>Apply a work function to an input value, producing an int status code.</p>
+     * The meaning of status codes is activity specific, however the values Integer.MIN_VALUE,
+     * and Integer.MAX_VALUE are reserved.
      *
      * @param value a long input
+     * @return an int status
      */
-    @Override
-    void accept(long value);
+    int runCycle(long value);
 
     default void init() {
     }

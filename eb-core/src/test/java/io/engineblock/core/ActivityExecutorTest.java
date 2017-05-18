@@ -73,12 +73,13 @@ public class ActivityExecutorTest {
     private Action motorActionDelay(final long delay) {
         Action consumer = new Action() {
             @Override
-            public void accept(long value) {
+            public int runCycle(long value) {
                 System.out.println("consuming " + value + ", delaying:" + delay);
                 try {
                     Thread.sleep(delay);
                 } catch (InterruptedException ignored) {
                 }
+                return 0;
             }
         };
         return consumer;

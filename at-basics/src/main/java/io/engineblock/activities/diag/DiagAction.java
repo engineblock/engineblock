@@ -42,24 +42,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
         onActivityDefUpdate(activityDef);
     }
 
-    @Override
-    public void accept(long value) {
-        long now = System.currentTimeMillis();
-        if (completedPhase>=phasesPerCycle) {
-            completedPhase=0;
-        }
-        if ((now - lastUpdate) > quantizedInterval) {
-            long delay = ((now - lastUpdate) - quantizedInterval);
-            logger.info("diag action interval, input=" + value + ", phase=" + completedPhase +", report delay=" + delay);
-            lastUpdate += quantizedInterval;
-            diagActivity.delayHistogram.update(delay);
-        }
-        if ((value % reportModulo) == 0) {
-            logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
-        }
-        completedPhase++;
 
-    }
 
     /**
      * idempotently assign the last update reference time and the interval which, when added to it, represent when this
@@ -117,5 +100,29 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     @Override
     public boolean incomplete() {
         return (completedPhase<phasesPerCycle);
+    }
+
+    @Override
+    public int runPhase(long value) {
+        return runCycle(value);
+    }
+
+    @Override
+    public int runCycle(long value) {
+        long now = System.currentTimeMillis();
+        if (completedPhase>=phasesPerCycle) {
+            completedPhase=0;
+        }
+        if ((now - lastUpdate) > quantizedInterval) {
+            long delay = ((now - lastUpdate) - quantizedInterval);
+            logger.info("diag action interval, input=" + value + ", phase=" + completedPhase +", report delay=" + delay);
+            lastUpdate += quantizedInterval;
+            diagActivity.delayHistogram.update(delay);
+        }
+        if ((value % reportModulo) == 0) {
+            logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
+        }
+        completedPhase++;
+        return 0;
     }
 }

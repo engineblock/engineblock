@@ -19,12 +19,16 @@ package io.engineblock.activityimpl.motor;
 import com.codahale.metrics.Timer;
 import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.*;
+import io.engineblock.activityapi.cycletracking.CycleMarker;
+import io.engineblock.activityapi.cycletracking.CycleMarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
+import io.engineblock.extensions.CycleMarkerFinder;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -151,6 +155,14 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             multiPhaseAction = ((MultiPhaseAction) action);
         }
 
+        CycleMarker cycleMarker = null;
+        Optional<String> markerName = activityDef.getParams().getOptionalString("marker");
+        if (markerName.isPresent()) {
+            Optional<CycleMarkerDispenser> markerDispenser =
+                    CycleMarkerFinder.instance().get(markerName.get());
+            cycleMarker=markerDispenser.map(md -> md.getMarker(activityDef,slotId)).orElse(null);
+        }
+
         long cyclenum;
         AtomicLong cycleMax = input.getMax();
 
@@ -175,12 +187,12 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                         logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
                         continue;
                     }
-
+                    int result=-1;
                     try (Timer.Context cycleTime = cyclesTimer.time()) {
 
                         logger.trace("cycle " + cyclenum);
                         try (Timer.Context phaseTime = phasesTimer.time()) {
-                            action.accept(cyclenum);
+                            result=action.runCycle(cyclenum);
                         }
 
                         if (multiPhaseAction != null) {
@@ -189,10 +201,14 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                                     rateLimiter.acquire();
                                 }
                                 try (Timer.Context phaseTime = phasesTimer.time()) {
-                                    action.accept(cyclenum);
+                                    result=multiPhaseAction.runPhase(cyclenum);
                                 }
 
                             }
+                        }
+
+                        if (cycleMarker!=null) {
+                            cycleMarker.markResult(cyclenum,result);
                         }
                     }
                 }

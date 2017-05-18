@@ -15,10 +15,11 @@
  * /
  */
 
-package io.engineblock.activityimpl;
+package io.engineblock.activityapi.cycletracking;
 
-import java.io.Closeable;
+import io.engineblock.activityimpl.ActivityDef;
 
-public interface ResultRecorder extends Closeable {
-    void recordResult(long offset, char result);
+public interface CycleMarkerDispenser {
+    String getName();
+    CycleMarker getMarker(ActivityDef def, long slot);
 }

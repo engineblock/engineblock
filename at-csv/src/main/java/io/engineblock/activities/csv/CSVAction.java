@@ -4,9 +4,10 @@ import com.codahale.metrics.Timer;
 import io.engineblock.activities.csv.errorhandling.ErrorResponse;
 import io.engineblock.activities.csv.statements.ReadyCSVStatement;
 import io.engineblock.activityapi.Action;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 @SuppressWarnings("Duplicates")
 public class CSVAction implements Action{
@@ -28,18 +29,12 @@ public class CSVAction implements Action{
 
     @Override
     public void init() {
-
-
-
         readyCSVStatements = activity.getReadyFileStatements().resolve();
     }
 
     @Override
-    public void accept(long cycleValue) {
-
-
+    public int runCycle(long cycleValue) {
         ReadyCSVStatement readyCSVStatement;
-
         String statement = null;
         try (Timer.Context bindTime = activity.bindTimer.time()) {
             int selector = (int) (cycleValue % readyCSVStatements.size());
@@ -57,6 +52,7 @@ public class CSVAction implements Action{
             }
         } catch (Exception e) {
         }
+        return 0;
     }
 
 }

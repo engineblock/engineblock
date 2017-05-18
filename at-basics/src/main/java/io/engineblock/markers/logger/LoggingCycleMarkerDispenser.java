@@ -15,31 +15,27 @@
  * /
  */
 
-package io.engineblock.activityimpl.action;
+package io.engineblock.markers.logger;
 
-import io.engineblock.activityapi.Action;
+import com.google.auto.service.AutoService;
+import io.engineblock.activityapi.cycletracking.CycleMarker;
+import io.engineblock.activityapi.cycletracking.CycleMarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CoreAction implements Action {
-    private final static Logger logger = LoggerFactory.getLogger(CoreAction.class);
+@AutoService(CycleMarkerDispenser.class)
+public class LoggingCycleMarkerDispenser implements CycleMarkerDispenser {
 
-    private final int interval;
-    private final int slot;
-    private final ActivityDef activityDef;
+    private final static Logger logger = LoggerFactory.getLogger(LoggingCycleMarkerDispenser.class);
 
-    public CoreAction(ActivityDef activityDef, int slot) {
-        this.activityDef = activityDef;
-        this.slot = slot;
-        this.interval = activityDef.getParams().getOptionalInteger("interval").orElse(1000);
+    @Override
+    public String getName() {
+        return "logger";
     }
 
     @Override
-    public int runCycle(long value) {
-        if ((value % interval) == 0) {
-            logger.info(activityDef.getAlias() + "[" + slot + "]: cycle=" + value);
-        }
-        return 0;
+    public CycleMarker getMarker(ActivityDef def, long slot) {
+        return new LoggingCycleMarker(def,slot);
     }
 }

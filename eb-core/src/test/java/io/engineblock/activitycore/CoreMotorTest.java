@@ -79,16 +79,18 @@ public class CoreMotorTest {
         return new Action() {
             private int offset=0;
             @Override
-            public void accept(long value) {
+            public int runCycle(long value) {
                 ary.set(offset++,value);
+                return 0;
             }
         };
     }
     private Action getTestConsumer(final AtomicLong atomicLong) {
         return new Action() {
             @Override
-            public void accept(long value) {
+            public int runCycle(long value) {
                 atomicLong.set(value);
+                return 0;
             }
         };
     }
