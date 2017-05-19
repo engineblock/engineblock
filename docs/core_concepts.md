@@ -1,5 +1,5 @@
 # Core Concepts
- wgn and execution. This guide is intended to illustrate the moving parts and how they work together.
+EngineBlock (EB) is a machine pattern for loadtest design and execution. This guide is intended to illustrate the moving parts and how they work together.
 
 ## Scenario
 
