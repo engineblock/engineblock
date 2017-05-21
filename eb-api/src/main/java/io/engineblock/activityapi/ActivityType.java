@@ -18,10 +18,12 @@
 
 package io.engineblock.activityapi;
 
+import io.engineblock.activityapi.cycletracking.MarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.action.CoreActionDispenser;
 import io.engineblock.activityimpl.input.CoreInputDispenser;
+import io.engineblock.activityimpl.marker.CoreMarkerDispenser;
 import io.engineblock.activityimpl.motor.CoreMotorDispenser;
 
 import java.util.Map;
@@ -77,6 +79,12 @@ public interface ActivityType<A extends Activity> {
         }
         activity.setActionDispenserDelegate(actionDispenser);
 
+        MarkerDispenser markerDispenser = getMarkerDispenser(activity);
+        if (markerDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware) markerDispenser).setActivitiesMap(activities);
+        }
+        activity.setMarkerDispenserDelegate(markerDispenser);
+
         MotorDispenser motorDispenser = getMotorDispenser(activity,inputDispenser, actionDispenser);
         if (motorDispenser instanceof ActivitiesAware) {
             ((ActivitiesAware) motorDispenser).setActivitiesMap(activities);
@@ -85,6 +93,10 @@ public interface ActivityType<A extends Activity> {
 
         return activity;
     }
+
+    default MarkerDispenser getMarkerDispenser(A activity) {
+        return new CoreMarkerDispenser(activity);
+    };
 
     /**
      * This method will be called <em>once</em> per action instance.

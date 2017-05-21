@@ -33,6 +33,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     private long reportModulo;
     private int phasesPerCycle;
     private int completedPhase;
+    private int errormodulo;
 
     public DiagAction(int slot, ActivityDef activityDef, DiagActivity diagActivity) {
         this.activityDef = activityDef;
@@ -49,7 +50,6 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
      * diagnostic thread should take its turn to log cycle info. Also, update the modulo parameter.
      */
     private void updateReportTime() {
-
         reportModulo = activityDef.getParams().getOptionalLong("modulo").orElse(10000000L);
         lastUpdate = System.currentTimeMillis() - calculateOffset(slot, activityDef);
         quantizedInterval = calculateInterval(activityDef);
@@ -95,6 +95,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     public void onActivityDefUpdate(ActivityDef activityDef) {
         updateReportTime();
         updatePhases();
+        this.errormodulo=activityDef.getParams().getOptionalInteger("errormodulo").orElse(10);
     }
 
     @Override
@@ -123,6 +124,10 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
             logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
         }
         completedPhase++;
+
+        if ((value%errormodulo)==0) {
+            return 1;
+        }
         return 0;
     }
 }

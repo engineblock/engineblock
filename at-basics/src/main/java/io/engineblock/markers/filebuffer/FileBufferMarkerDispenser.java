@@ -15,27 +15,24 @@
  * /
  */
 
-package io.engineblock.markers.logger;
+package io.engineblock.markers.filebuffer;
 
 import com.google.auto.service.AutoService;
-import io.engineblock.activityapi.cycletracking.CycleMarker;
-import io.engineblock.activityapi.cycletracking.CycleMarkerDispenser;
+import io.engineblock.activityapi.cycletracking.MarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@AutoService(CycleMarkerDispenser.class)
-public class LoggingCycleMarkerDispenser implements CycleMarkerDispenser {
+// TODO: Create one dispenser per activity
 
-    private final static Logger logger = LoggerFactory.getLogger(LoggingCycleMarkerDispenser.class);
+@AutoService(MarkerDispenser.class)
+public class FileBufferMarkerDispenser implements MarkerDispenser<FileBufferMarker> {
 
     @Override
     public String getName() {
-        return "logger";
+        return "filebuffer";
     }
 
     @Override
-    public CycleMarker getMarker(ActivityDef def, long slot) {
-        return new LoggingCycleMarker(def,slot);
+    public FileBufferMarker getMarker(ActivityDef def, long slot) {
+        return new FileBufferMarker(def);
     }
 }

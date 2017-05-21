@@ -20,15 +20,12 @@ import com.codahale.metrics.Timer;
 import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.*;
 import io.engineblock.activityapi.cycletracking.CycleMarker;
-import io.engineblock.activityapi.cycletracking.CycleMarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
-import io.engineblock.extensions.CycleMarkerFinder;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -53,6 +50,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private AtomicReference<RunState> slotState;
     private RateLimiter rateLimiter; // Only for use in phasing
     private long stride = 1L;
+    private CycleMarker cycleMarker;
 
     /**
      * Create an ActivityMotor.
@@ -136,6 +134,17 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         return slotStateTracker;
     }
 
+    @Override
+    public Motor setMarker(CycleMarker cycleMarker) {
+        this.cycleMarker = cycleMarker;
+        return this;
+    }
+
+    @Override
+    public CycleMarker getMarker() {
+        return this.cycleMarker;
+    }
+
 
     @Override
     public void run() {
@@ -153,14 +162,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         MultiPhaseAction multiPhaseAction = null;
         if (action instanceof MultiPhaseAction) {
             multiPhaseAction = ((MultiPhaseAction) action);
-        }
-
-        CycleMarker cycleMarker = null;
-        Optional<String> markerName = activityDef.getParams().getOptionalString("marker");
-        if (markerName.isPresent()) {
-            Optional<CycleMarkerDispenser> markerDispenser =
-                    CycleMarkerFinder.instance().get(markerName.get());
-            cycleMarker=markerDispenser.map(md -> md.getMarker(activityDef,slotId)).orElse(null);
         }
 
         long cyclenum;
@@ -203,7 +204,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                                 try (Timer.Context phaseTime = phasesTimer.time()) {
                                     result=multiPhaseAction.runPhase(cyclenum);
                                 }
-
                             }
                         }
 

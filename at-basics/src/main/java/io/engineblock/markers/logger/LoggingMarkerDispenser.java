@@ -15,11 +15,28 @@
  * /
  */
 
-package io.engineblock.activityapi.cycletracking;
+package io.engineblock.markers.logger;
 
+import com.google.auto.service.AutoService;
+import io.engineblock.activityapi.cycletracking.MarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public interface CycleMarkerDispenser {
-    String getName();
-    CycleMarker getMarker(ActivityDef def, long slot);
+/**
+ * A
+ */
+@AutoService(MarkerDispenser.class)
+public class LoggingMarkerDispenser implements MarkerDispenser<LoggingCycleMarker> {
+
+    private final static Logger logger = LoggerFactory.getLogger(LoggingMarkerDispenser.class);
+
+    @Override
+    public String getName() {
+        return "logger";
+    }
+    @Override
+    public LoggingCycleMarker getMarker(ActivityDef def, long slot) {
+        return new LoggingCycleMarker(def,slot);
+    }
 }

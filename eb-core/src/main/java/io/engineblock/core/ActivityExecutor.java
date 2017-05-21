@@ -68,8 +68,8 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     }
 
 
-    // TODO: Doc how uninitialized activities do not propogate parameter map changes and how
-    // TODO: this is different from preventing modification to uninitializaed activities
+    // TODO: Doc how uninitialized activities do not propagate parameter map changes and how
+    // TODO: this is different from preventing modification to uninitialized activities
 
     /**
      * <p>True-up the number of motor instances known to the executor. Start all non-running motors.
