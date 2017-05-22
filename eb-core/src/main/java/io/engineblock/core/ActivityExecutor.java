@@ -79,8 +79,8 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     public synchronized void startActivity() {
         logger.info("starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
         try {
-            activity.initActivity();
             activity.setRunState(RunState.Starting);
+            activity.initActivity();
         } catch (Exception e) {
             logger.error("There was an error starting activity:" + activityDef.getAlias());
             throw new RuntimeException(e);
@@ -234,6 +234,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
             case Running:
                 motors.stream()
                         .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Running)
+                        .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Finished)
                         .forEach(m -> {
                             m.getSlotStateTracker().enterState(RunState.Starting);
                             executorService.execute(m);
