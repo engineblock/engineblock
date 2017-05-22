@@ -17,7 +17,10 @@
 
 package io.engineblock.activityapi.cycletracking;
 
-public interface MarkerDispenser {
-    String getName();
-    CycleMarker getMarker(long slot);
+public interface SegmentedInput {
+    /**
+     * @param stride The number of contiguous cycles that must be provided
+     * @return a {@link CycleSegment}
+     */
+    CycleSegment getSegment(int stride);
 }

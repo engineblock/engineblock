@@ -17,7 +17,7 @@
 
 package io.engineblock.markers.filebuffer;
 
-import io.engineblock.activityapi.cycletracking.CycleMarker;
+import io.engineblock.activityapi.cycletracking.CycleResultSink;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +30,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class FileBufferMarker implements CycleMarker {
-    private final static Logger logger = LoggerFactory.getLogger(FileBufferMarker.class);
+public class FileBufferResultSink implements CycleResultSink {
+    private final static Logger logger = LoggerFactory.getLogger(FileBufferResultSink.class);
     MappedByteBuffer mbb;
     RandomAccessFile file;
     FileBufferConfig config;
     long currentSize=0;
     private ActivityDef activityDef;
 
-    public FileBufferMarker(ActivityDef activityDef) {
+    public FileBufferResultSink(ActivityDef activityDef) {
         this.activityDef = activityDef;
         config = new FileBufferConfig(activityDef);
         ensureCapacity(config.size);
@@ -75,19 +75,21 @@ public class FileBufferMarker implements CycleMarker {
         return mbb;
     }
 
+
     @Override
-    public void markResult(long completedCycle, int result) {
+    public boolean markResult(long completedCycle, int result) {
         if (completedCycle>=currentSize) {
             synchronized (this) {
                 mbb=ensureCapacity(completedCycle);
             }
         }
         try {
-            mbb.put((int) completedCycle, (byte) result);
+            mbb.put((int) completedCycle, (byte) (result & 127));
 //        System.out.println("cycle="+completedCycle+",result="+result);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return true;
     }
 
     private class FileBufferConfig {
@@ -96,7 +98,7 @@ public class FileBufferMarker implements CycleMarker {
         public final long growsize; // logical chunksize boundary to fill to on overrun
 
         public FileBufferConfig(ActivityDef activityDef) {
-            Optional<String> marker = activityDef.getParams().getOptionalString("marker");
+            Optional<String> marker = activityDef.getParams().getOptionalString("tracker");
             marker.orElseThrow(() -> new RuntimeException("marker parameter is missing?"));
             logger.debug("parsing marker config:" +marker.get());
             Map<String, String> params =

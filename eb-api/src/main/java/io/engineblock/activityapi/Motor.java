@@ -15,7 +15,7 @@
 
 package io.engineblock.activityapi;
 
-import io.engineblock.activityapi.cycletracking.CycleMarker;
+import io.engineblock.activityapi.cycletracking.CycleResultSink;
 import io.engineblock.activityimpl.SlotStateTracker;
 
 /**
@@ -58,11 +58,11 @@ public interface Motor extends Runnable, Stoppable {
     /**
      * Set the marker for this motor. After each cycle, the result code
      * will be submitted to the marker for that cycle specifically.
-     * @param cycleMarker A marker for this activity or motor
+     * @param cycleResultSink A marker for this activity or motor
      * @return This Motor, for method chaining
      */
-    Motor setMarker(CycleMarker cycleMarker);
-    CycleMarker getMarker();
+    Motor setTracker(CycleResultSink cycleResultSink);
+    CycleResultSink getMarker();
 
 //    SlotState getSlotState();
 }

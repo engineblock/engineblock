@@ -38,9 +38,9 @@ public class LinkedInputTest {
         long last2kFast = 0L;
         long lastAsFast = 0L;
         for (int i = 0; i < 100; i++) {
-            last2kFast = goes2Kfast.getAsLong();
+            last2kFast = goes2Kfast.getCycle();
             assertThat(goesAsFast.canAdvance()).isTrue();
-            lastAsFast = goesAsFast.getAsLong();
+            lastAsFast = goesAsFast.getCycle();
             assertThat(goesAsFast.canAdvance()).isFalse();
             assertThat(goesAsFast.canAdvance()).isFalse();
         }
@@ -55,7 +55,7 @@ public class LinkedInputTest {
         Runnable linked = new Runnable() {
             @Override
             public void run() {
-                long value = goes2Kfast.getAsLong();
+                long value = goes2Kfast.getCycle();
                 asFastValue.set(value);
             }
         };
@@ -68,7 +68,7 @@ public class LinkedInputTest {
         } catch (InterruptedException ignored) {
         }
         assertThat(asFastValue.get()).isEqualTo(0L);
-        goes2Kfast.getAsLong();
+        goes2Kfast.getCycle();
 
         try {
             Thread.sleep(100);
@@ -93,7 +93,7 @@ public class LinkedInputTest {
                 long value=-1L;
                 for (int i = 0; i < cycles ; i++) {
                     try (Timer.Context c = fastInputTimer.time()) {
-                        value = fastInput.getAsLong();
+                        value = fastInput.getCycle();
                         if ((value % updateAt)==0) {
                             System.out.println("fastone:" + value + " @" + System.nanoTime());
                             System.out.flush();
@@ -111,7 +111,7 @@ public class LinkedInputTest {
                 long value=-1L;
                 for (int i = 0; i < cycles; i++) {
                     try (Timer.Context c = slowInputTimer.time()) {
-                        value = slowInput.getAsLong();
+                        value = slowInput.getCycle();
                         if ((value % updateAt)==0) {
                             System.out.println("slowone:" + value + " @" + System.nanoTime());
                             System.out.flush();

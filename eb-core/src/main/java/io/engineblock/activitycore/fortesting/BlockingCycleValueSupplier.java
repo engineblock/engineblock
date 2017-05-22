@@ -35,22 +35,22 @@ public class BlockingCycleValueSupplier implements Input {
     }
 
     @Override
-    public AtomicLong getMin() {
+    public AtomicLong getMinCycle() {
         return minValue;
     }
 
     @Override
-    public AtomicLong getMax() {
+    public AtomicLong getMaxCycle() {
         return maxValue;
     }
 
     @Override
-    public long getCurrent() {
+    public long getPendingCycle() {
         return cycle.get();
     }
 
     @Override
-    public long getAsLong() {
+    public long getCycle() {
         synchronized (this) {
             try {
                 this.wait();
@@ -63,7 +63,7 @@ public class BlockingCycleValueSupplier implements Input {
     }
 
     @Override
-    public long getInterval(long stride) {
+    public long getCycleInterval(long stride) {
         synchronized(this) {
             try {
                 this.wait();

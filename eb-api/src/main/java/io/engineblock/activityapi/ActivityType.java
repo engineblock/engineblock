@@ -18,12 +18,12 @@
 
 package io.engineblock.activityapi;
 
-import io.engineblock.activityapi.cycletracking.MarkerDispenser;
+import io.engineblock.activityapi.cycletracking.TrackerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.action.CoreActionDispenser;
 import io.engineblock.activityimpl.input.CoreInputDispenser;
-import io.engineblock.activityimpl.marker.CoreMarkerDispenser;
+import io.engineblock.activityimpl.tracker.CoreTrackerDispenser;
 import io.engineblock.activityimpl.motor.CoreMotorDispenser;
 
 import java.util.Map;
@@ -60,11 +60,12 @@ public interface ActivityType<A extends Activity> {
     /**
      * Create an instance of an activity that ties together all the components into a usable
      * activity instance. This is the method that should be called by executor classes.
+     *
      * @param activityDef the definition that initializez and controlls the activity.
-     * @param activities a map of existing activities
+     * @param activities  a map of existing activities
      * @return a distinct activity instance for each call
      */
-    default Activity getAssembledActivity(ActivityDef activityDef, Map<String,Activity> activities) {
+    default Activity getAssembledActivity(ActivityDef activityDef, Map<String, Activity> activities) {
         A activity = getActivity(activityDef);
 
         InputDispenser inputDispenser = getInputDispenser(activity);
@@ -79,13 +80,13 @@ public interface ActivityType<A extends Activity> {
         }
         activity.setActionDispenserDelegate(actionDispenser);
 
-        MarkerDispenser markerDispenser = getMarkerDispenser(activity);
-        if (markerDispenser instanceof ActivitiesAware) {
-            ((ActivitiesAware) markerDispenser).setActivitiesMap(activities);
+        TrackerDispenser trackerDispenser = getTrackerDispenser(activity);
+        if (trackerDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware) trackerDispenser).setActivitiesMap(activities);
         }
-        activity.setMarkerDispenserDelegate(markerDispenser);
+        activity.setTrackerDispenserDelegate(trackerDispenser);
 
-        MotorDispenser motorDispenser = getMotorDispenser(activity,inputDispenser, actionDispenser);
+        MotorDispenser motorDispenser = getMotorDispenser(activity, inputDispenser, actionDispenser, trackerDispenser);
         if (motorDispenser instanceof ActivitiesAware) {
             ((ActivitiesAware) motorDispenser).setActivitiesMap(activities);
         }
@@ -94,9 +95,11 @@ public interface ActivityType<A extends Activity> {
         return activity;
     }
 
-    default MarkerDispenser getMarkerDispenser(A activity) {
-        return new CoreMarkerDispenser(activity);
-    };
+    default TrackerDispenser getTrackerDispenser(A activity) {
+        return new CoreTrackerDispenser(activity);
+    }
+
+    ;
 
     /**
      * This method will be called <em>once</em> per action instance.
@@ -122,8 +125,9 @@ public interface ActivityType<A extends Activity> {
     default MotorDispenser getMotorDispenser(
             A activity,
             InputDispenser inputDispenser,
-            ActionDispenser actionDispenser) {
-        return new CoreMotorDispenser(activity, inputDispenser, actionDispenser);
+            ActionDispenser actionDispenser,
+            TrackerDispenser trackerDispenser) {
+        return new CoreMotorDispenser(activity, inputDispenser, actionDispenser, trackerDispenser);
     }
 
 

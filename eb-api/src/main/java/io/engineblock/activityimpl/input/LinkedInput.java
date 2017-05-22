@@ -40,26 +40,26 @@ public class LinkedInput implements Input, ActivityDefObserver, Stoppable {
     public LinkedInput(ActivityDef activityDef, Input linkedInput) {
         this.activityDef = activityDef;
         this.linkedInput = linkedInput;
-        this.cycleValue.set(linkedInput.getCurrent());
+        this.cycleValue.set(linkedInput.getPendingCycle());
     }
 
     @Override
-    public AtomicLong getMin() {
+    public AtomicLong getMinCycle() {
         return min;
     }
 
     @Override
-    public AtomicLong getMax() {
+    public AtomicLong getMaxCycle() {
         return max;
     }
 
     @Override
-    public long getCurrent() {
+    public long getPendingCycle() {
         return cycleValue.get();
     }
 
     @Override
-    public long getAsLong() {
+    public long getCycle() {
         // Because this is a conditional increment, we have to use CAS to avoid race conditions invalidating
         // our invariant that this input never provides a higher value than the linked input
 
@@ -71,7 +71,7 @@ public class LinkedInput implements Input, ActivityDefObserver, Stoppable {
                     return current;
                 }
             }
-            long newLinkedPoint = linkedInput.getCurrent();
+            long newLinkedPoint = linkedInput.getPendingCycle();
             if (newLinkedPoint == linkedPoint) {
                 slowMeDown(); // On if the linking input tried to go faster than the linked-to input
                 if (!running) {
@@ -86,14 +86,14 @@ public class LinkedInput implements Input, ActivityDefObserver, Stoppable {
 
 
     @Override
-    public long getInterval(long stride) {
+    public long getCycleInterval(int stride) {
         while (true) {
 
             long current = cycleValue.get();
             if (current < linkedPoint) {
                 return cycleValue.getAndAdd(stride);
             }
-            long newLinkedPoint = linkedInput.getCurrent();
+            long newLinkedPoint = linkedInput.getPendingCycle();
             if (newLinkedPoint == linkedPoint) {
                 slowMeDown(); // only if the linking input tried to go faster than the linked-to input
                 if (!running) {
@@ -112,7 +112,7 @@ public class LinkedInput implements Input, ActivityDefObserver, Stoppable {
      * @return true, if this input could advance according to the linked input
      */
     protected boolean canAdvance() {
-        return (cycleValue.get() < linkedInput.getCurrent());
+        return (cycleValue.get() < linkedInput.getPendingCycle());
     }
 
     /**

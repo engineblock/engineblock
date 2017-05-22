@@ -16,7 +16,7 @@
  */
 package io.engineblock.extensions;
 
-import io.engineblock.activityapi.cycletracking.MarkerDispenser;
+import io.engineblock.activityapi.cycletracking.TrackerDispenser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class CycleMarkerFinder {
     private static final Logger logger = LoggerFactory.getLogger(CycleMarkerFinder.class);
     private static CycleMarkerFinder instance;
 
-    private final Map<String, MarkerDispenser> types = new ConcurrentHashMap<>();
+    private final Map<String, TrackerDispenser> types = new ConcurrentHashMap<>();
 
     private CycleMarkerFinder() {
     }
@@ -50,7 +50,7 @@ public class CycleMarkerFinder {
      * @param markerType The canonical marker type name.
      * @return an optional ActivityType instance
      */
-    public Optional<MarkerDispenser> get(String markerType) {
+    public Optional<TrackerDispenser> get(String markerType) {
         markerType=markerType.split(",")[0]; // Strip any ,... from the front
         return Optional.ofNullable(getTypes().get(markerType));
     }
@@ -61,20 +61,20 @@ public class CycleMarkerFinder {
      * @return an ActivityType instance
      * @throws RuntimeException if the activity type isn't found.
      */
-    public MarkerDispenser getOrThrow(String markerType) {
-        Optional<MarkerDispenser> at = Optional.ofNullable(getTypes().get(markerType));
+    public TrackerDispenser getOrThrow(String markerType) {
+        Optional<TrackerDispenser> at = Optional.ofNullable(getTypes().get(markerType));
         return at.orElseThrow(
                 () -> new RuntimeException("CycleMarkerType '" + markerType + "' not found. Available types:" +
                 this.getTypes().keySet().stream().collect(Collectors.joining(",")))
         );
     }
 
-    private synchronized Map<String, MarkerDispenser> getTypes() {
+    private synchronized Map<String, TrackerDispenser> getTypes() {
         if (types.size()==0) {
             ClassLoader cl = getClass().getClassLoader();
             logger.debug("loading CycleMarkerDispenser types");
-            ServiceLoader<MarkerDispenser> sl = ServiceLoader.load(MarkerDispenser.class);
-            for (MarkerDispenser cmd : sl) {
+            ServiceLoader<TrackerDispenser> sl = ServiceLoader.load(TrackerDispenser.class);
+            for (TrackerDispenser cmd : sl) {
                 if (types.get(cmd.getName()) != null) {
                     throw new RuntimeException("CycleMarkerDispenser '" + cmd.getName()
                             + "' is already defined.");
@@ -91,8 +91,8 @@ public class CycleMarkerFinder {
      * in alphabetical order of their type names.
      * @return a list of ActivityType instances.
      */
-    public List<MarkerDispenser> getAll() {
-        List<MarkerDispenser> types = new ArrayList<>(getTypes().values());
+    public List<TrackerDispenser> getAll() {
+        List<TrackerDispenser> types = new ArrayList<>(getTypes().values());
         types.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
         return Collections.unmodifiableList(types);
     }

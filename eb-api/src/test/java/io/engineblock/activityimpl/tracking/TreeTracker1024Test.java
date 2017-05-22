@@ -16,6 +16,6 @@ public class TreeTracker1024Test {
             assertThat(tt.isCompleted()).isFalse().as("cycle: {}",i);
         }
         tt.setPosition(1023);
-//        assertThat(tt.isCompleted()).isTrue().as("cycle: 1023");
+//        assertThat(tt.isCycleCompleted()).isTrue().as("cycle: 1023");
     }
 }

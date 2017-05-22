@@ -60,7 +60,7 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
     }
 
 
-    public TargetRateInput setNextValue(long newValue) {
+    private TargetRateInput setNextValue(long newValue) {
         if (newValue < min.get() || newValue > max.get()) {
             throw new RuntimeException(
                     "new value (" + newValue + ") must be within min..max range: [" + min + ".." + max + "]"
@@ -71,7 +71,7 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
     }
 
     @Override
-    public long getAsLong() {
+    public long getCycle() {
         if (rateLimiter != null) {
             rateLimiter.acquire();
         }
@@ -79,7 +79,7 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
     }
 
     @Override
-    public long getInterval(long stride) {
+    public long getCycleInterval(int stride) {
         if (rateLimiter != null) {
             rateLimiter.acquire();
         }
@@ -87,17 +87,17 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
     }
 
     @Override
-    public AtomicLong getMin() {
+    public AtomicLong getMinCycle() {
         return min;
     }
 
     @Override
-    public AtomicLong getMax() {
+    public AtomicLong getMaxCycle() {
         return max;
     }
 
     @Override
-    public long getCurrent() {
+    public long getPendingCycle() {
         return cycleValue.get();
     }
 

@@ -19,7 +19,8 @@ package io.engineblock.activityimpl.motor;
 import com.codahale.metrics.Timer;
 import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.CycleMarker;
+import io.engineblock.activityapi.cycletracking.CycleResultSink;
+import io.engineblock.activityapi.cycletracking.Tracker;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
@@ -49,8 +50,8 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private SlotStateTracker slotStateTracker;
     private AtomicReference<RunState> slotState;
     private RateLimiter rateLimiter; // Only for use in phasing
-    private long stride = 1L;
-    private CycleMarker cycleMarker;
+    private int stride = 1;
+    private CycleResultSink cycleResultSink;
 
     /**
      * Create an ActivityMotor.
@@ -71,6 +72,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         onActivityDefUpdate(activityDef);
     }
 
+
     /**
      * Create an ActivityMotor.
      *
@@ -87,6 +89,26 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     ) {
         this(activityDef, slotId, input);
         setAction(action);
+    }
+    /**
+     * Create an ActivityMotor.
+     *
+     * @param activityDef The activity def that this motor is based on.
+     * @param slotId      The enumeration of the motor, as assigned by its executor.
+     * @param input       A LongSupplier which provides the cycle number inputs.
+     * @param action      An LongConsumer which is applied to the input for each cycle.
+     * @param tracker     An optional tracker.
+     */
+    public CoreMotor(
+            ActivityDef activityDef,
+            long slotId,
+            Input input,
+            Action action,
+            Tracker tracker
+    ) {
+        this(activityDef, slotId, input);
+        setAction(action);
+        setTracker(tracker);
     }
 
     /**
@@ -135,14 +157,14 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     }
 
     @Override
-    public Motor setMarker(CycleMarker cycleMarker) {
-        this.cycleMarker = cycleMarker;
+    public Motor setTracker(CycleResultSink cycleResultSink) {
+        this.cycleResultSink = cycleResultSink;
         return this;
     }
 
     @Override
-    public CycleMarker getMarker() {
-        return this.cycleMarker;
+    public CycleResultSink getMarker() {
+        return this.cycleResultSink;
     }
 
 
@@ -165,13 +187,13 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         }
 
         long cyclenum;
-        AtomicLong cycleMax = input.getMax();
+        AtomicLong cycleMax = input.getMaxCycle();
 
         action.init();
 
         while (slotState.get() == Running) {
 
-            long thisIntervalStart = input.getInterval(stride);
+            long thisIntervalStart = input.getCycleInterval(stride);
             long nextIntervalStart = thisIntervalStart + stride;
 
             if (thisIntervalStart >= cycleMax.get()) {
@@ -207,8 +229,8 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                             }
                         }
 
-                        if (cycleMarker!=null) {
-                            cycleMarker.markResult(cyclenum,result);
+                        if (cycleResultSink !=null) {
+                            cycleResultSink.markResult(cyclenum,result);
                         }
                     }
                 }
@@ -243,7 +265,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             rateLimiter = null;
         }
 
-        this.stride = activityDef.getParams().getOptionalLong("stride").orElse(1L);
+        this.stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
     }
 
     @Override

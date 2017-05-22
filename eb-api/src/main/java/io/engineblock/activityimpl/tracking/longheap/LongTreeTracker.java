@@ -35,7 +35,7 @@ public class LongTreeTracker {
 
     /**
      * Apply an index value between 0 and 31 inclusive. Return the accumulator.
-     * If all 32 slots of this tracker have been isCompleted, the returned value will
+     * If all 32 slots of this tracker have been isCycleCompleted, the returned value will
      * have LSB bit 2 set.
      * @param index a long value between 0 and 31 to mark as complete
      * @param image the long value which serves as the starting state of the bit field
@@ -76,7 +76,7 @@ public class LongTreeTracker {
     }
 
     /**
-     * @return the lowest index isCompleted, or -1 if none were isCompleted
+     * @return the lowest index isCycleCompleted, or -1 if none were isCycleCompleted
      */
     public long getLowestCompleted() {
         int l = Long.numberOfLeadingZeros(timage&left);
@@ -84,7 +84,7 @@ public class LongTreeTracker {
     }
 
     /**
-     * @return the highest index isCompleted, or -1 if none were isCompleted
+     * @return the highest index isCycleCompleted, or -1 if none were isCycleCompleted
      */
     public long getHighestCompleted() {
         int l = Long.numberOfTrailingZeros(timage&left);

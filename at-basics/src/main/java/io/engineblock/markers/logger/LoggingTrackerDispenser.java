@@ -17,26 +17,19 @@
 
 package io.engineblock.markers.logger;
 
-import com.google.auto.service.AutoService;
-import io.engineblock.activityapi.cycletracking.MarkerDispenser;
+import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.cycletracking.CycleResultSink;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * A
- */
-@AutoService(MarkerDispenser.class)
-public class LoggingMarkerDispenser implements MarkerDispenser<LoggingCycleMarker> {
+public class LoggingTrackerDispenser {
 
-    private final static Logger logger = LoggerFactory.getLogger(LoggingMarkerDispenser.class);
+    private final static Logger logger = LoggerFactory.getLogger(LoggingTrackerDispenser.class);
+    private Activity activity;
 
-    @Override
-    public String getName() {
-        return "logger";
-    }
-    @Override
-    public LoggingCycleMarker getMarker(ActivityDef def, long slot) {
-        return new LoggingCycleMarker(def,slot);
+
+    public CycleResultSink getTracker(ActivityDef activityDef, long slot) {
+        return new LoggingCycleResultSink(activity.getActivityDef(), slot);
     }
 }

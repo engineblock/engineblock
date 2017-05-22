@@ -24,36 +24,40 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public interface Input extends longIntervalSupplier {
     /**
-     * @return the minimum value to be provided by this input sequence.
+     * @return the minimum value to be provided by this input sequence, AKA
+     * the first value that it will provide.
      */
-    AtomicLong getMin();
+    AtomicLong getMinCycle();
 
     /**
-     * @return the maximum value to be provided by this input sequence.
+     * @return the maximum value to be provided by this input sequence
+     * before it is considered exhausted.
      */
-    AtomicLong getMax();
+    AtomicLong getMaxCycle();
 
     /**
      * @return the current value of the atomic register used by this input.
      */
-    long getCurrent();
+    long getPendingCycle();
 
     /**
      * For the sake of efficiency, ActivityMotors that consume values from this interface should do a range check
-     * after getting the value. When the value exceeds the the value provided by {@link #getMax}, the motor should
+     * after getting the value. When the value exceeds the the value provided by {@link #getMaxCycle}, the motor should
      * take this as a signal to terminate gracefully with a log line indicating why.
      * @return The next long value in the sequence
      */
-    long getAsLong();
+    default long getCycle() {
+        return getCycleInterval(1);
+    }
 
     /**
      * For the sake of efficiency, ActivityMotors that consume values from this interface
      * should do a range check after getting the value. When the value exceeds the value
-     * provided by {@link getMax}, the motor should take this as a signal to terminate
-     * gracefullly with a log line indicating why.
+     * provided by {@link #getMaxCycle}, the motor should take this as a signal to terminate
+     * gracefully with a log line indicating why.
      * @param stride The width of the interval of numbers returned
      * @return the first value of the interval
      */
-    long getInterval(long stride);
+    long getCycleInterval(int stride);
 
 }
