@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * An Input is the core data source for feeding actions within an activity.
  * Inputs are required to act as sequences at this level. They act as the dataflow control points for
- * banks of motors and actions. As such, they must know their bounds.
+ * banks of motors and actions.f As such, they must know their bounds.
  */
 public interface Input extends longIntervalSupplier {
     /**
