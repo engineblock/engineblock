@@ -60,11 +60,18 @@ public class CoreTrackerDispenser implements TrackerDispenser {
             if (markerOption.isPresent()) {
                 Config config = new Config(activity.getActivityDef());
                 String trackerType = config.params.get("type");
+                long cycleCount = activity.getActivityDef().getCycleCount();
+                long stride = activity.getParams().getOptionalLong("stride").orElse(1L);
+                if ((cycleCount%stride)!=0) {
+                    throw new RuntimeException("stride must evenly divide into cycles.");
+                    // TODO: Consider setting cycles to " ...
+                }
+                int extentSize = calculateExtentSize(cycleCount, stride);
                 if (trackerType==null) {
                     tracker = new CoreTracker(
                             this.activity.getActivityDef().getStartCycle(),
                             this.activity.getActivityDef().getEndCycle(),
-                            1024
+                            extentSize, 3
                     );
                 } else {
                     Optional<TrackerDispenser> markerDispenser = CycleMarkerFinder.instance().get(trackerType);
@@ -76,6 +83,18 @@ public class CoreTrackerDispenser implements TrackerDispenser {
             }
         }
         return tracker;
+    }
+
+    private int calculateExtentSize(long cycleCount, long stride) {
+        if (cycleCount<=2000000) {
+            return (int) cycleCount;
+        }
+        for (int cs=2000000;  cs>500000;  cs--) {
+            if ((cycleCount%cs)==0 && (stride%cs)==0) {
+                return cs;
+            }
+        }
+        throw new RuntimeException("no even divisor of cycleCount and Stride between 500K and 2M");
     }
 
     private class Config {

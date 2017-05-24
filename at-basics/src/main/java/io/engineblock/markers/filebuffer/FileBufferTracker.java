@@ -17,6 +17,7 @@
 
 package io.engineblock.markers.filebuffer;
 
+import io.engineblock.activityapi.cycletracking.CycleSegment;
 import io.engineblock.activityapi.cycletracking.Tracker;
 import io.engineblock.activityimpl.ActivityDef;
 
@@ -40,16 +41,6 @@ public class FileBufferTracker implements Tracker {
     }
 
     @Override
-    public boolean isCycleCompleted(long cycle) {
-        return source.isCycleCompleted(cycle);
-    }
-
-    @Override
-    public long getMaxContiguousMarked() {
-        return source.getMaxContiguousMarked();
-    }
-
-    @Override
     public AtomicLong getMinCycle() {
         return null;
     }
@@ -65,7 +56,12 @@ public class FileBufferTracker implements Tracker {
     }
 
     @Override
-    public long getCycleInterval(long stride) {
+    public long getCycleInterval(int stride) {
         return 0;
+    }
+
+    @Override
+    public CycleSegment getSegment(int stride) {
+        return null;
     }
 }

@@ -63,7 +63,7 @@ public class BlockingCycleValueSupplier implements Input {
     }
 
     @Override
-    public long getCycleInterval(long stride) {
+    public long getCycleInterval(int stride) {
         synchronized(this) {
             try {
                 this.wait();

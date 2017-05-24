@@ -21,7 +21,6 @@ import io.engineblock.activityapi.cycletracking.CycleSegment;
 import io.engineblock.activityapi.cycletracking.SegmentedInput;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -29,15 +28,14 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ByteTrackerExtent implements SegmentedInput {
 
-    private final AtomicLong min; // The maximum value to be dispatched
-    private final AtomicLong max; // The minimum value to be dispatched
+    private final long min; // The maximum value to be dispatched
+    private final long max; // The minimum value to be dispatched
     private final AtomicInteger totalMarked; // The total number of marked values
     private final AtomicInteger totalServed; // the total number of served values
-//    private final AtomicLong maxcont; // max contiguously marked value, starting from min-1
-//    private final AtomicLong currentValue; // The next value that would be dispatched
-    private int size; // max-min
     byte[] markerData;
-    private AtomicReference<ByteTrackerExtent> nextExtent=new AtomicReference<>();
+    private int size; // max-min
+    private AtomicReference<ByteTrackerExtent> nextExtent = new AtomicReference<>();
+    private boolean filled = false;
 
     /**
      * Create a simple marker extent
@@ -46,9 +44,9 @@ public class ByteTrackerExtent implements SegmentedInput {
      * @param max the last logical cycle to be returned by this tracker
      */
     public ByteTrackerExtent(long min, long max) {
-        this.min = new AtomicLong(min);
-        this.max = new AtomicLong(max);
-        this.size = (int)(max - min)+1;
+        this.min = min;
+        this.max = max;
+        this.size = (int) (max - min) + 1;
         markerData = new byte[size];
         totalMarked = new AtomicInteger(0);
         totalServed = new AtomicInteger(0);
@@ -56,57 +54,79 @@ public class ByteTrackerExtent implements SegmentedInput {
 //        currentValue = new AtomicLong(min);
     }
 
-    public boolean markResult(long cycle, int result) {
-        if (cycle < min.get() || cycle > max.get()) {
-            return false;
+    /**
+     * mark the named cycle in the extent, or in any future extent that we know. The return value determines the
+     * known state of the extent:
+     * <ol>
+     * <li>negative value: indicates an attempt to mark a value outside the range,
+     * either before min or after max of the furthest known extent</li>
+     * <li>zero: indicates successful marking, but exactly no remaining space available.
+     * This is how a marking thread can detect that it was the one that finished marking
+     * an extent.</li>
+     * <li>positive value: indicates how many cycles remain available in the extent to
+     * be marked.</li>
+     * </ol>
+     *
+     * @param cycle  The cycle to be marked
+     * @param result the result code to mark in the cycle
+     * @return the number of cycles remaining after marking, or a negative number indicating an error.
+     */
+    public long markResult(long cycle, int result) {
+        if (cycle < min) {
+            return cycle - min; // how short were we? ( a negative number )
+        }
+        if (cycle > max) {
+            ByteTrackerExtent next = this.nextExtent.get();
+            if (next != null) {
+                return next.markResult(cycle, result);
+            } else {
+                return max - cycle; // how long were we? ( a negative number )
+            }
         }
 
-        int position = (int) (cycle - min.get());
+        int position = (int) (cycle - min);
         byte resultCode = (byte) (result & 127);
-        markerData[position]=resultCode;
-        totalMarked.incrementAndGet();
+        markerData[position] = resultCode;
+        int i = totalMarked.incrementAndGet();
 
-        return true;
+        return size-i;
     }
 
     @Override
     public CycleSegment getSegment(int stride) {
-        while (true) {
-            int current = totalServed.get();
-            int next=current+stride;
-            if (next<=totalMarked.get()) {
-                if (totalServed.compareAndSet(current,next)) {
-                    return CycleSegment.forData(next,markerData,current,stride);
-                }
-            } else if (next<=max.get()) {
-                try {
-                    Thread.sleep(0L,1000);
-                } catch (InterruptedException ignored) {
-                }
-            } else {
-                throw new RuntimeException("overread on " + this + " for " + stride + " cycles");
+        if (!filled) {
+            filled = isFullyFilled();
+            if (!filled) {
+                throw new RuntimeException("Not allowed to read segments on unfilled extent.");
             }
         }
-    }
 
-    public AtomicLong getMaxCycle() {
-        return max;
+        while (totalServed.get() < size) {
+            int current = totalServed.get();
+            int next = current + stride;
+            if (next <= totalMarked.get()) {
+                if (totalServed.compareAndSet(current, next)) {
+                    return CycleSegment.forData(current + min, markerData, current, stride);
+                }
+            }
+        }
+        return null;
     }
-
-    public AtomicLong getMinCycle() {
-        return min;
-    }
-
     // TODO: consider making intervals overlap perfectly with ...
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("(").append(min.get()).append(",").append(max.get()).append("): ")
-                .append(", size=").append(this.size);
-        sb.append(" data=");
-        for (int i = 0; i < this.markerData.length; i++) {
-            sb.append(markerData[i]).append(",");
+        sb.append("(").append(min).append(",").append(max).append("): ")
+                .append(", size=").append(this.size)
+                .append(", marked=").append(this.totalMarked.get())
+                .append(", served=").append(this.totalServed.get());
+        if (markerData.length<1024*50) {
+            sb.append(" data=");
+            for (int i = 0; i < this.markerData.length; i++) {
+                sb.append(markerData[i]).append(",");
+            }
+
         }
         return sb.toString();
     }
@@ -114,6 +134,7 @@ public class ByteTrackerExtent implements SegmentedInput {
     public boolean isFullyFilled() {
         return (totalMarked.get() == size);
     }
+
     public boolean isFullyServed() {
         return (totalServed.get() == size);
     }
@@ -130,5 +151,38 @@ public class ByteTrackerExtent implements SegmentedInput {
     // For testing
     byte[] getMarkerData() {
         return markerData;
+    }
+
+    /**
+     * Find the last known extent, and add another after it, account for
+     * contiguous ranges and extent size. Note that this does not mean
+     * necessarily that the extent will be added immediately after the current one.
+     *
+     * @return The new extent that was created.
+     */
+    public ByteTrackerExtent extend() {
+
+        ByteTrackerExtent lastExtent = this;
+        while (lastExtent.getNextExtent().get() != null) {
+            lastExtent = lastExtent.getNextExtent().get();
+        }
+
+        ByteTrackerExtent newLastExtent = new ByteTrackerExtent(
+                lastExtent.getMin() + size, lastExtent.getMax() + size
+        );
+
+        if (!lastExtent.getNextExtent().compareAndSet(null, newLastExtent)) {
+            throw new RuntimeException("There should be no contention for extending the extents");
+        }
+
+        return newLastExtent;
+    }
+
+    public long getMax() {
+        return max;
+    }
+
+    public long getMin() {
+        return min;
     }
 }

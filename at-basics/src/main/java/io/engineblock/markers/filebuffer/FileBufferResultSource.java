@@ -18,6 +18,7 @@
 package io.engineblock.markers.filebuffer;
 
 import io.engineblock.activityapi.cycletracking.CycleResultSource;
+import io.engineblock.activityapi.cycletracking.CycleSegment;
 import io.engineblock.activityimpl.ActivityDef;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,16 +29,6 @@ public class FileBufferResultSource implements CycleResultSource {
 
     public FileBufferResultSource(ActivityDef activityDef) {
         this.activityDef = activityDef;
-    }
-
-    @Override
-    public boolean isCycleCompleted(long cycle) {
-        return false;
-    }
-
-    @Override
-    public long getMaxContiguousMarked() {
-        return 0;
     }
 
     @Override
@@ -56,7 +47,12 @@ public class FileBufferResultSource implements CycleResultSource {
     }
 
     @Override
-    public long getCycleInterval(long stride) {
+    public long getCycleInterval(int stride) {
         return 0;
+    }
+
+    @Override
+    public CycleSegment getSegment(int stride) {
+        return null;
     }
 }

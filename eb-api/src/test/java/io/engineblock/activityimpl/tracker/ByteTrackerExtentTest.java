@@ -17,6 +17,7 @@
 
 package io.engineblock.activityimpl.tracker;
 
+import io.engineblock.activityapi.cycletracking.CycleSegment;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,15 +27,25 @@ public class ByteTrackerExtentTest {
 
     @Test
     public void testOrdered4() {
-        ByteTrackerExtent bt4 = new ByteTrackerExtent(33, 8);
-        bt4.markResult(33L,0);
-        bt4.markResult(34L,1);
-        bt4.markResult(35L,2);
+        ByteTrackerExtent bt4 = new ByteTrackerExtent(33, 36);
         bt4.markResult(36L,3);
-        assertThat(bt4.getMarkerData()[0]).isEqualTo((byte)0);
-        assertThat(bt4.getMarkerData()[1]).isEqualTo((byte)1);
-        assertThat(bt4.getMarkerData()[2]).isEqualTo((byte)2);
+        bt4.markResult(33L,0);
+        bt4.markResult(35L,2);
         assertThat(bt4.getMarkerData()[3]).isEqualTo((byte)3);
+        assertThat(bt4.getMarkerData()[0]).isEqualTo((byte)0);
+        assertThat(bt4.getMarkerData()[2]).isEqualTo((byte)2);
+        assertThat(bt4.isFullyFilled()).isFalse();
+        bt4.markResult(34L,1);
+        assertThat(bt4.getMarkerData()[1]).isEqualTo((byte)1);
+        assertThat(bt4.isFullyFilled()).isTrue();
+
+        CycleSegment seg1 = bt4.getSegment(2);
+        assertThat(seg1.cycle).isEqualTo(33);
+        assertThat(seg1.codes.length).isEqualTo(2);
+        assertThat(seg1.codes[0]).isEqualTo((byte)0);
+        assertThat(bt4.isFullyServed()).isFalse();
+        CycleSegment seg2 = bt4.getSegment(2);
+        assertThat(bt4.isFullyServed()).isTrue();
     }
 
 

@@ -20,15 +20,5 @@ package io.engineblock.activityapi.cycletracking;
 import io.engineblock.activityapi.Input;
 
 public interface CycleResultSource extends Input, SegmentedInput {
-    /**
-     * @param cycle the cycle number to check for completion
-     * @return true if the numbered cycle has been marked isCycleCompleted
-     */
-    boolean isCycleCompleted(long cycle);
-
-    /**
-     * @return the maximum cycle isCycleCompleted
-     */
-    long getMaxContiguousMarked();
 
 }
