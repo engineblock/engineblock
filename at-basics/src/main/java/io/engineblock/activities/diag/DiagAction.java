@@ -95,7 +95,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     public void onActivityDefUpdate(ActivityDef activityDef) {
         updateReportTime();
         updatePhases();
-        this.errormodulo=activityDef.getParams().getOptionalInteger("errormodulo").orElse(10);
+        this.errormodulo=activityDef.getParams().getOptionalInteger("errormodulo").orElse(1000);
     }
 
     @Override

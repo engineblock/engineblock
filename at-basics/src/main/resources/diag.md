@@ -14,3 +14,11 @@ active motor.
 ## parameters
 
 - interval - The number of milliseconds to delay between each report.
+  ( default: 1000ms )
+- modulo - The cycle rate at which to generate a single output status line.
+  ( default: modulo=10000000 )
+- errormodulo - The cycle rate at which to generate a non-zero status code 
+  (1=every cycle, 10=every 10th cycle)
+  ( default: errormodule=1000 )
+- phases - The number of phases to run.
+  ( default: phases=1 )

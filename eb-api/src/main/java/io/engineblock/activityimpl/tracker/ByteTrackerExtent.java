@@ -95,9 +95,9 @@ public class ByteTrackerExtent implements SegmentedInput {
     @Override
     public CycleSegment getSegment(int stride) {
         if (!filled) {
-            filled = isFullyFilled();
+            filled = isFullyFilled(); // eagerly evaluate fill until it is known to be filled, the make it fast
             if (!filled) {
-                throw new RuntimeException("Not allowed to read segments on unfilled extent.");
+                return null;
             }
         }
 
@@ -111,6 +111,11 @@ public class ByteTrackerExtent implements SegmentedInput {
             }
         }
         return null;
+    }
+
+    @Override
+    public long remainingCycles() {
+        return size - totalServed.get();
     }
     // TODO: consider making intervals overlap perfectly with ...
 
@@ -131,6 +136,10 @@ public class ByteTrackerExtent implements SegmentedInput {
         return sb.toString();
     }
 
+    public boolean isReadable() {
+        return isFullyFilled() && !isFullyServed();
+    }
+
     public boolean isFullyFilled() {
         return (totalMarked.get() == size);
     }
@@ -142,10 +151,6 @@ public class ByteTrackerExtent implements SegmentedInput {
 
     public AtomicReference<ByteTrackerExtent> getNextExtent() {
         return nextExtent;
-    }
-
-    public void setNextExtent(AtomicReference<ByteTrackerExtent> nextExtent) {
-        this.nextExtent = nextExtent;
     }
 
     // For testing
@@ -185,4 +190,5 @@ public class ByteTrackerExtent implements SegmentedInput {
     public long getMin() {
         return min;
     }
+
 }

@@ -41,18 +41,20 @@ public class CoreTrackerTest {
 
     @Test
     public void testRotationSingleExtent() {
-        CoreTracker ct4 = new CoreTracker(0,7,4,1);
+        CoreTracker ct4 = new CoreTracker(0,11,4,2);
         ct4.markResult(0,0);
         ct4.markResult(1,1);
         ct4.markResult(2,2);
         ct4.markResult(3,3);
+        CycleSegment segment1 = ct4.getSegment(4); // without this, will block here due to lack of segment allowance
         ct4.markResult(4,4);
         ct4.markResult(5,5);
         ct4.markResult(6,6);
         ct4.markResult(7,7);
-        CycleSegment segment1 = ct4.getSegment(4);
-        CycleSegment segment2 = ct4.getSegment(2);
-        CycleSegment segment3 = ct4.getSegment(2);
+        CycleSegment segment2 = ct4.getSegment(4);
+//        CycleSegment segment2 = ct4.getSegment(2);
+//        CycleSegment segment3 = ct4.getSegment(2);
+        ct4.flush();
 
     }
 
@@ -95,7 +97,6 @@ public class CoreTrackerTest {
         }
 
         assertThat(readSegments).hasSize(100);
-
         System.out.println("finished writer and reader");
     }
 

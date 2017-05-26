@@ -15,18 +15,10 @@
  * /
  */
 
-package io.engineblock.activityapi.cycletracking;
+package io.engineblock.activityimpl.tracker;
 
-public interface SegmentedInput {
-    /**
-     * @param stride The number of contiguous cycles that must be provided
-     * @return a {@link CycleSegment}
-     */
-    CycleSegment getSegment(int stride);
-
-    /**
-     * Return the number of remaining cycles, if possible.
-     * @return remaining cycles, or -1L if unknown;
-     */
-    long remainingCycles();
+public interface ExtentReader {
+    default void onExtent(ByteTrackerExtent extent) {}
+    default void onFilledExtent(ByteTrackerExtent extent) {}
+    default void onServedExtent(ByteTrackerExtent extent) {}
 }
