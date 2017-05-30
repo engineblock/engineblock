@@ -64,4 +64,9 @@ public class FileBufferTracker implements Tracker {
     public CycleSegment getSegment(int stride) {
         return null;
     }
+
+    @Override
+    public long remainingCycles() {
+        throw new RuntimeException("implement me");
+    }
 }

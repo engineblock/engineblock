@@ -55,4 +55,9 @@ public class FileBufferResultSource implements CycleResultSource {
     public CycleSegment getSegment(int stride) {
         return null;
     }
+
+    @Override
+    public long remainingCycles() {
+        throw new RuntimeException("implement me");
+    }
 }

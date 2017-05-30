@@ -41,4 +41,11 @@ public class CycleSegment {
         s.codes = Arrays.copyOfRange(buffer,offset,offset+len);
         return s;
     }
+
+    public static CycleSegment forData(long cycle, byte[] buffer) {
+        CycleSegment s = new CycleSegment();
+        s.cycle=cycle;
+        s.codes = buffer;
+        return s;
+    }
 }

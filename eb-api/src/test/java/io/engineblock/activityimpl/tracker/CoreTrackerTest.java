@@ -54,7 +54,7 @@ public class CoreTrackerTest {
         CycleSegment segment2 = ct4.getSegment(4);
 //        CycleSegment segment2 = ct4.getSegment(2);
 //        CycleSegment segment3 = ct4.getSegment(2);
-        ct4.flush();
+//        ct4.flush();
 
     }
 

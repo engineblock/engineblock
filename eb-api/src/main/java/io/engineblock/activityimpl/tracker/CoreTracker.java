@@ -115,6 +115,11 @@ public class CoreTracker implements Tracker {
         }
     }
 
+    @Override
+    public long remainingCycles() {
+        throw new RuntimeException("experiment: delete me");
+    }
+
     private void onFullyServed(ByteTrackerExtent firstReadable) {
         logger.debug("fully served: " + firstReadable);
     }
