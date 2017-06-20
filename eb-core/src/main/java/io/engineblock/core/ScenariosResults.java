@@ -30,14 +30,14 @@ public class ScenariosResults {
     private static final Logger logger = LoggerFactory.getLogger(ScenariosResults.class);
 
     private String scenariosExecutorName;
-    private Map<Scenario,Result> scenarioResultMap = new LinkedHashMap<>();
+    private Map<Scenario,ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
 
 
     public ScenariosResults(ScenariosExecutor scenariosExecutor) {
         this.scenariosExecutorName =scenariosExecutor.getName();
     }
 
-    public ScenariosResults(ScenariosExecutor scenariosExecutor, Map<Scenario, Result> map) {
+    public ScenariosResults(ScenariosExecutor scenariosExecutor, Map<Scenario, ScenarioResult> map) {
         this.scenariosExecutorName = scenariosExecutor.getName();
         scenarioResultMap.putAll(map);
     }
@@ -58,7 +58,7 @@ public class ScenariosResults {
 //        }
 //    }
 
-    public Result getOne() {
+    public ScenarioResult getOne() {
         if (this.scenarioResultMap.size()!=1) {
             throw new RuntimeException("getOne found " + this.scenarioResultMap.size() + " results instead of 1.");
         }
@@ -67,9 +67,9 @@ public class ScenariosResults {
     }
 
     public void reportToLog() {
-        for (Map.Entry<Scenario, Result> entry : this.scenarioResultMap.entrySet()) {
+        for (Map.Entry<Scenario, ScenarioResult> entry : this.scenarioResultMap.entrySet()) {
             Scenario scenario = entry.getKey();
-            Result oresult = entry.getValue();
+            ScenarioResult oresult = entry.getValue();
 
             logger.info("results for scenario: " + scenario);
 

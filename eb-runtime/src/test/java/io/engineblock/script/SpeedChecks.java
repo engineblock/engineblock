@@ -14,7 +14,7 @@
 */
 package io.engineblock.script;
 
-import io.engineblock.core.Result;
+import io.engineblock.core.ScenarioResult;
 import org.testng.annotations.Test;
 
 
@@ -27,12 +27,12 @@ public class SpeedChecks {
 
     @Test(enabled = false)
     public void testSpeedSanity() {
-        Result result = ScriptTests.runScenario("speedcheck");
+        ScenarioResult scenarioResult = ScriptTests.runScenario("speedcheck");
     }
 
     @Test(enabled = false)
     public void testThreadSpeeds() {
-        Result result = ScriptTests.runScenario("threadspeeds");
+        ScenarioResult scenarioResult = ScriptTests.runScenario("threadspeeds");
     }
 
 

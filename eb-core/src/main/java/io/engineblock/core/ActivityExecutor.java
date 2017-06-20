@@ -50,6 +50,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     private final Activity activity;
     private final ActivityDef activityDef;
     private ExecutorService executorService;
+    private RuntimeException stoppingException;
 //    private RunState intendedState = RunState.Uninitialized;
 
     public ActivityExecutor(Activity activity) {
@@ -59,7 +60,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
                 0, Integer.MAX_VALUE,
                 0L, TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
-                new IndexedThreadFactory(activity.getAlias())
+                new IndexedThreadFactory(activity.getAlias(), new ActivityExceptionHandler(this))
         );
         activity.getActivityDef().getParams().addListener(this);
     }
@@ -122,6 +123,10 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
 
         activity.shutdownActivity();
         logger.debug(runnables.size() + " threads never started.");
+
+        if (stoppingException!=null) {
+            throw stoppingException;
+        }
     }
 
     public boolean requestStopExecutor(int secondsToWait) {
@@ -138,6 +143,9 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
             logger.warn("while waiting termination of activity " + activity.getAlias() + ", " + ie.getMessage());
         } finally {
             activity.shutdownActivity();
+        }
+        if (stoppingException!=null) {
+            throw stoppingException;
         }
 
         return wasStopped;
@@ -414,5 +422,10 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
                 .map(Motor::getSlotStateTracker).map(SlotStateTracker::getSlotState)
                 .distinct().sorted().findFirst();
         return first.orElse(RunState.Uninitialized);
+    }
+
+    public synchronized void notifyException(Thread t, Throwable e) {
+        this.stoppingException=new RuntimeException("Error in activity thread " +t.getName(), e);
+        forceStopExecutor(10000);
     }
 }
