@@ -90,11 +90,11 @@ public class CoreTrackerDispenser implements TrackerDispenser {
             return (int) cycleCount;
         }
         for (int cs=2000000;  cs>500000;  cs--) {
-            if ((cycleCount%cs)==0 && (stride%cs)==0) {
+            if ((cycleCount%cs)==0 && (cs%stride)==0) {
                 return cs;
             }
         }
-        throw new RuntimeException("no even divisor of cycleCount and Stride between 500K and 2M");
+        throw new RuntimeException("no even divisor of cycleCount and Stride between 500K and 2M, with cycles=" + cycleCount +",  and stride=" + stride);
     }
 
     private class Config {

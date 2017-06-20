@@ -11,10 +11,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * Created by jshook on 5/26/17.
- */
-
 public class RingTracker implements Tracker {
 
     private final static Logger logger = LoggerFactory.getLogger(RingTracker.class);
@@ -42,6 +38,7 @@ public class RingTracker implements Tracker {
             throw new RuntimeException("buffsize must be 1 + (2 x window size) at a minimum.");
         }
         setupBuffer();
+        logger.debug("new ring tracker: " + this);
     }
 
     private void setupBuffer() {
@@ -68,32 +65,34 @@ public class RingTracker implements Tracker {
     public boolean markResult(long completedCycle, int result) {
         while (true) {
             long wstart = this.markingStart.get();
-            logger.trace("marking result  " + completedCycle + " => " + result);
+            logger.debug("marking result  " + completedCycle + " => " + result);
 
             // TODO: consider deterministic forward unmarking, i.e. markingStart+windowSize
             if (completedCycle >= wstart && completedCycle < (wstart + windowSize)) {
                 if (buffer.compareAndSet(bufferOffset(completedCycle), -1, result)) {
 
+                    long pending = this.pendingCycle.get();
                     // fast forward start to next unmarked region if possible
                     while (
                             completedCycle == markingStart.get()
                                     && buffer.get(bufferOffset(completedCycle)) > 0
                                     && pendingCycle.get() >= (completedCycle - windowSize)
+
                             ) {
                         if (markingStart.compareAndSet(completedCycle, completedCycle + 1)) {
                             buffer.set(bufferOffset(completedCycle + windowSize), -1);
                             completedCycle++;
-                            logger.trace("advanced to " + completedCycle);
+                            logger.debug("signalling canWrite & canWrite");
+                            lock.lock();
+                            canWrite.signalAll();
+                            logger.debug("signalled canWrite");
+                            canRead.signalAll();
+                            logger.debug("signalled canRead");
+                            lock.unlock();
+                            logger.debug("advanced to " + completedCycle);
                         } else {
                             logger.error("unable to advance to " + completedCycle);
                         }
-                    }
-                    if (wstart != this.markingStart.get()) {
-                        logger.trace("signalling canWrite");
-                        lock.lock();
-                        canWrite.signalAll();
-                        lock.unlock();
-                        logger.trace("signalled canWrite");
                     }
                     return true;
                 } else {
@@ -105,11 +104,11 @@ public class RingTracker implements Tracker {
                     throw new RuntimeException("attempted to mark cycle:" + completedCycle + ", but pending starts at " + pendingCycle.get());
                 }
                 try {
-                    logger.trace("awaiting canWrite");
+                    logger.debug("awaiting canWrite");
                     lock.lock();
-                    canWrite.await(10, TimeUnit.SECONDS);
+                    boolean awaited = canWrite.await(10, TimeUnit.SECONDS);
                     lock.unlock();
-                    logger.trace("awaited canWrite");
+                    logger.debug("awaited canWrite, timeout?==" + !awaited);
                 } catch (InterruptedException ignored) {
                 }
             }
@@ -127,7 +126,7 @@ public class RingTracker implements Tracker {
             if (stride > windowSize) {
                 throw new RuntimeException("Stride:" + stride + " must be less than or equal to window size:" + windowSize);
             }
-            if (pending >= (starting - windowSize) && pending < starting) {
+            if (pending >= (starting - windowSize) && pending+stride <= starting) {
                 if (pendingCycle.compareAndSet(pending, pending + stride)) {
                     int boff = bufferOffset(pending);
                     byte[] data = new byte[stride];
@@ -138,9 +137,11 @@ public class RingTracker implements Tracker {
                 }
             } else {
                 try {
+                    logger.debug("awaiting canRead");
                     lock.lock();
-                    canRead.await(10, TimeUnit.SECONDS);
+                    boolean awaited = canRead.await(1, TimeUnit.SECONDS);
                     lock.unlock();
+                    logger.debug("awaited canRead, timeout?==" + !awaited);
                 } catch (InterruptedException ignored) {
                 }
             }

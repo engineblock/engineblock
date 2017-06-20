@@ -2,24 +2,39 @@ package io.engineblock.activityimpl.tracker;
 
 import io.engineblock.activityapi.cycletracking.CycleSegment;
 import io.engineblock.activityapi.cycletracking.Tracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testng.Assert.*;
-
-/**
- * Created by jshook on 5/26/17.
- */
 
 @Test
 public class RingTrackerTest {
+    private static final Logger logger = LoggerFactory.getLogger("test");
+
+    private static boolean await(
+            Predicate<List<CycleSegment>> predicate,
+            List<CycleSegment> list, int pollInterval, int totalTimeout) {
+        long start = System.currentTimeMillis();
+        long end = start;
+        while ((end - start) < totalTimeout) {
+            if (predicate.test(list)) {
+                return true;
+            }
+            try {
+                Thread.sleep(pollInterval);
+            } catch (InterruptedException ignored) {
+            }
+            end = System.currentTimeMillis();
+        }
+        return false;
+    }
 
     @Test(
             expectedExceptions = {RuntimeException.class},
@@ -71,19 +86,24 @@ public class RingTrackerTest {
         rThread.start();
         mThread.start();
 
+        reader.q.offer(2);
         marker.q.offer(3);
         marker.q.offer(7);
-        reader.strideQ.offer(2);
 
-        boolean waited=await(cs -> cs.size()>=1,reader.segments,100,10000);
+        reader.q.offer(0);
+        marker.q.offer(0);
+
+        boolean waited = await(cs -> cs.size() >= 1, reader.segments, 100, 10000);
         assertThat(waited).isTrue();
 
         assertThat(reader.segments.get(0).cycle).isEqualTo(3);
         assertThat(reader.segments.get(0).codes).hasSize(2);
+        assertThat(reader.segments.get(0).codes[0]).isEqualTo((byte)3);
+        assertThat(reader.segments.get(0).codes[1]).isEqualTo((byte)0);
 
-
-        reader.stop = true;
-        marker.stop = true;
+//
+//        reader.stop = true;
+//        marker.stop = true;
         try {
             rThread.join();
             mThread.join();
@@ -92,27 +112,10 @@ public class RingTrackerTest {
 
     }
 
-    private static boolean await(Predicate<List<CycleSegment>> predicate, List<CycleSegment> list, int pollInterval, int totalTimeout) {
-            long start=System.currentTimeMillis();
-            long end=start;
-            while ((end-start)<totalTimeout) {
-                if (predicate.test(list)) {
-                    return true;
-                }
-                try {
-                    Thread.sleep(pollInterval);
-                } catch (InterruptedException ignored) {
-                }
-                end = System.currentTimeMillis();
-            }
-            return false;
-    }
-
     private static class Reader implements Runnable {
         private final Tracker t;
-        private volatile boolean stop = false;
 
-        public LinkedBlockingQueue<Integer> strideQ = new LinkedBlockingQueue<>(1);
+        public LinkedBlockingQueue<Integer> q = new LinkedBlockingQueue<>(1);
         public List<CycleSegment> segments = new ArrayList<>();
 
         public Reader(Tracker t) {
@@ -121,22 +124,27 @@ public class RingTrackerTest {
 
         @Override
         public void run() {
-            while (!stop) {
-                try {
-                    Integer stride = strideQ.poll(10, TimeUnit.SECONDS);
-                    if (stride != null) {
-                        CycleSegment segment = t.getSegment(stride);
-                        segments.add(segment);
+            try {
+                logger.debug("test reader awaiting stride data, 0 means stop");
+                Integer stride = q.poll(10, TimeUnit.SECONDS);
+                logger.debug ("reading stride==" + stride);
+                if (stride != null) {
+                    if (stride == 0) {
+                        logger.debug("read stride value 0, stopping test reader");
+                        return;
                     }
-                } catch (InterruptedException ignored) {
+                    CycleSegment segment = t.getSegment(stride);
+                    segments.add(segment);
+                } else {
+                    throw new RuntimeException("Test error: Waiting too long for input.");
                 }
+            } catch (InterruptedException ignored) {
             }
         }
     }
 
     public static class Marker implements Runnable {
         private final Tracker t;
-        public volatile boolean stop = false;
 
         public LinkedBlockingQueue<Integer> q = new LinkedBlockingQueue<>(1);
 
@@ -146,18 +154,23 @@ public class RingTrackerTest {
 
         @Override
         public void run() {
-            while (!stop) {
-                Integer value = null;
-                try {
-                    value = q.poll(1, TimeUnit.SECONDS);
-                } catch (InterruptedException ignored) {
-                }
+            Integer value = null;
+            try {
+                logger.debug("test marker awaiting cycle data, 0 means stop");
+                value = q.poll(10, TimeUnit.SECONDS);
+                logger.debug ("marking cycle=" + value + " + status=" + value);
                 if (value != null) {
+                    if (value == 0) {
+                        logger.debug("read marker value 0, stopping test marker");
+                        return;
+                    }
                     t.markResult(value, value);
+                } else {
+                    throw new RuntimeException("Test error: waited too long for input: 10s");
                 }
+            } catch (InterruptedException ignored) {
             }
         }
-
-
     }
+
 }
