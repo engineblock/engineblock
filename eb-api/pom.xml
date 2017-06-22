@@ -23,6 +23,7 @@
             <groupId>io.virtdata</groupId>
             <artifactId>metagen-userlibs</artifactId>
             <version>${metagen-version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -77,11 +78,6 @@
             <version>2.1.9</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>22.0</version>
-        </dependency>
         <dependency>
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
