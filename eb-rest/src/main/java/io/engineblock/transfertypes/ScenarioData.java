@@ -19,7 +19,7 @@ package io.engineblock.transfertypes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.engineblock.activityimpl.ActivityDef;
-import io.engineblock.core.Result;
+import io.engineblock.core.ScenarioResult;
 import io.engineblock.script.Scenario;
 
 import java.util.ArrayList;
@@ -30,10 +30,10 @@ public class ScenarioData {
     private final String name;
     private final List<ActivityDef> activityDefs;
     private final List<String> iolog;
-    private Result result;
+    private ScenarioResult scenarioResult;
     private String logBuffer;
 
-    public ScenarioData(Scenario scenario, Result result) {
+    public ScenarioData(Scenario scenario, ScenarioResult scenarioResult) {
         this.name = scenario.getName();
         this.activityDefs = scenario.getScenarioController().getActivityDefs();
         if (scenario.getIOLog().isPresent()) {
@@ -47,7 +47,7 @@ public class ScenarioData {
 //        if (logBuffer.isPresent()) {
 //            this.logBuffer = logBuffer.get().toString();
 //        }
-        this.result = result;
+        this.scenarioResult = scenarioResult;
     }
 
     @JsonProperty
@@ -66,8 +66,8 @@ public class ScenarioData {
     }
 
     @JsonProperty
-    public Result getResult() {
-        return result;
+    public ScenarioResult getScenarioResult() {
+        return scenarioResult;
     }
 
     @JsonProperty

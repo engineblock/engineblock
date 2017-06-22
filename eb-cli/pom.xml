@@ -43,11 +43,6 @@
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
         </dependency>
-        <dependency>
-            <groupId>io.engineblock</groupId>
-            <artifactId>eb-core</artifactId>
-            <version>1.0.68-SNAPSHOT</version>
-        </dependency>
 
     </dependencies>
 
