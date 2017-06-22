@@ -60,11 +60,12 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>io.virtdata</groupId>
-            <artifactId>metagen-userlibs</artifactId>
-            <version>${metagen-version}</version>
-        </dependency>
+        <!-- Now included via metagen api -->
+        <!--<dependency>-->
+            <!--<groupId>io.virtdata</groupId>-->
+            <!--<artifactId>metagen-userlibs</artifactId>-->
+            <!--<version>${metagen-version}</version>-->
+        <!--</dependency>-->
 
     </dependencies>
 
