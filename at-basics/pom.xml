@@ -63,7 +63,7 @@
         <dependency>
             <groupId>io.virtdata</groupId>
             <artifactId>metagen-userlibs</artifactId>
-            <version>1.0.44</version>
+            <version>${metagen-version}</version>
         </dependency>
 
     </dependencies>
