@@ -25,38 +25,22 @@
             <artifactId>eb-runtime</artifactId>
             <version>1.0.68-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>io.engineblock</groupId>
-            <artifactId>eb-core</artifactId>
-            <version>1.0.68-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.engineblock</groupId>
-            <artifactId>at-basics</artifactId>
-            <version>1.0.68-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>io.engineblock</groupId>
-            <artifactId>at-csv</artifactId>
-            <version>1.0.68-SNAPSHOT</version>
-        </dependency>
-
 
         <dependency>
             <groupId>com.atlassian.commonmark</groupId>
             <artifactId>commonmark</artifactId>
-            <version>0.5.0</version>
+            <version>0.9.0</version>
         </dependency>
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.7</version>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.1.7</version>
+            <version>1.2.3</version>
         </dependency>
         <!--<dependency>-->
             <!--<groupId>org.slf4j</groupId>-->
@@ -67,13 +51,23 @@
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
-            <version>1.0.0-rc2</version>
+            <version>1.1.1</version>
         </dependency>
 
         <dependency>
             <groupId>com.smoketurner</groupId>
             <artifactId>dropwizard-swagger</artifactId>
-            <version>1.0.0-rc2-1</version>
+            <version>1.1.1-1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-jersey</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-annotation</artifactId>
+            <version>3.1.4</version>
         </dependency>
 
     </dependencies>

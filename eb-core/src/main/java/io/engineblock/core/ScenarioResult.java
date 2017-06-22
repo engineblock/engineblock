@@ -27,19 +27,19 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class Result {
+public class ScenarioResult {
 
-    private final static Logger logger = LoggerFactory.getLogger(Result.class);
+    private final static Logger logger = LoggerFactory.getLogger(ScenarioResult.class);
 
     private Exception exception;
     private String iolog;
     private String report;
 
-    public Result(String iolog) {
+    public ScenarioResult(String iolog) {
         this.iolog = iolog;
     }
 
-    public Result(Exception e) {
+    public ScenarioResult(Exception e) {
         this.iolog = e.getMessage();
         this.exception = e;
     }

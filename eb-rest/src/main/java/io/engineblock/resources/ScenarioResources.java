@@ -18,7 +18,7 @@
 package io.engineblock.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import io.engineblock.core.Result;
+import io.engineblock.core.ScenarioResult;
 import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
 import io.engineblock.transfertypes.ScenarioData;
@@ -86,7 +86,7 @@ public class ScenarioResources {
     @ApiOperation("Get scenarios details by name.")
     public ScenarioData getScenario(@PathParam("scenario") String scenarioName) {
         Optional<Scenario> pendingScenario = executor.getPendingScenario(scenarioName);
-        Optional<Result> pendingResult = executor.getPendingResult(scenarioName);
+        Optional<ScenarioResult> pendingResult = executor.getPendingResult(scenarioName);
         return new ScenarioData(
                 scenarioFor(scenarioName),
                 resultFor(scenarioName)
@@ -182,7 +182,7 @@ public class ScenarioResources {
                 .orElseThrow(() -> new RuntimeException("Scenario '" + scenarioName + "' was not found"));
     }
 
-    private Result resultFor(String scenarioName) {
+    private ScenarioResult resultFor(String scenarioName) {
         return executor.getPendingResult(scenarioName)
                 .orElseThrow(() -> new RuntimeException("Scenario '" + scenarioName + "' was not found"));
     }
