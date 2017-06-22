@@ -26,7 +26,7 @@
         <dependency>
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
-            <version>1.0-rc2</version>
+            <version>1.0-rc3</version>
             <!--<optional>true</optional>-->
             <scope>compile</scope>
         </dependency>
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.19</version>
+            <version>1.7.25</version>
         </dependency>
 
         <!-- test scope only -->
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.8.21</version>
+            <version>6.11</version>
             <scope>test</scope>
         </dependency>
 
@@ -74,7 +74,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.6.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
