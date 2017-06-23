@@ -167,7 +167,9 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         // considered ready to handle parameter map changes. This is signaled in an activity
         // by the RunState.
         if (activity.getRunState()!=RunState.Uninitialized) {
-            adjustToActivityDef(activity.getActivityDef());
+            if (activity.getRunState()==RunState.Running) {
+                adjustToActivityDef(activity.getActivityDef());
+            }
             motors.stream()
                     .filter(m -> (m instanceof ActivityDefObserver))
 //                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Uninitialized)
