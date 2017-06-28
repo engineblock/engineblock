@@ -28,6 +28,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     private final DiagActivity diagActivity;
 
     private int slot;
+    private long erroroncycle=-1;
     private long lastUpdate;
     private long quantizedInterval;
     private long reportModulo;
@@ -56,6 +57,9 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
         }
         if ((value % reportModulo) == 0) {
             logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
+        }
+        if (erroroncycle==value) {
+            throw new RuntimeException("Diag was asked to error on cycle " + erroroncycle);
         }
         completedPhase++;
 
@@ -112,6 +116,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     public void onActivityDefUpdate(ActivityDef activityDef) {
         updateReportTime();
         updatePhases();
+        this.erroroncycle = activityDef.getParams().getOptionalLong("erroroncycle").orElse(-1L);
     }
 
     @Override

@@ -45,6 +45,13 @@ public class StrInterpolaterTest {
                     }
                 }
         );
+        add(
+                new HashMap<String,String>() {
+                    {
+                        put("json-a-b", "'a': 'b'");
+                    }
+                }
+        );
     }};
 
     private static StrInterpolater interp = new StrInterpolater(abcd);
@@ -83,6 +90,20 @@ public class StrInterpolaterTest {
     public void shouldWorkWithOddCharacters() {
         String a = interp.apply("<<unchanged:{'parm1':'val1',parm2:val2, parm3: 'val3'}>>");
         assertThat(a).isEqualTo("{'parm1':'val1',parm2:val2, parm3: 'val3'}");
+    }
+
+    @Test
+    public void shouldWorkWithAllQuotes() {
+        String a = interp.apply("<<Token:'Key': 'Value'>>");
+        assertThat(a).isEqualTo("'Key': 'Value'");
+    }
+
+    @Test
+    public void shouldWorkWithAllQuotesOverride() {
+        String a = interp.apply("<<Token:'Key': 'Value'>>");
+        assertThat(a).isEqualTo("'Key': 'Value'");
+        String b = interp.apply("<<json-a-b:'Key': 'Value'>>");
+        assertThat(b).isEqualTo("'a': 'b'");
     }
 
 }

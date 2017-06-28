@@ -48,6 +48,7 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -64,7 +65,8 @@
                 </executions>
                 <configuration>
                     <includes>
-                        <include>**/*Tests.java</include>
+                        <include>**/*IntegrationTest.java</include>
+                        <include>**/*IntegrationTests.java</include>
                     </includes>
                     <properties>
                         <property>
@@ -123,6 +125,7 @@
 
                             </transformers>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <finalName>${project.artifactId}</finalName>
                         </configuration>
                     </execution>
                 </executions>

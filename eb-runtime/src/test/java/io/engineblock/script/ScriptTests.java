@@ -146,16 +146,17 @@ public class ScriptTests {
 
     @Test
     public void testExceptionPropagationFromMotorThread() {
-        ScenarioResult scenearioResult = runScenario("activityerror");
-        assertThat(scenearioResult.getException()).isPresent();
-        assertThat(scenearioResult.getException().get().getMessage()).contains("For input string: \"unparsable\"");
+        ScenarioResult scenarioResult = runScenario("activityerror");
+        assertThat(scenarioResult.getException()).isPresent();
+        assertThat(scenarioResult.getException().get().getMessage()).contains("For input string: \"unparsable\"");
     }
 
     @Test
     public void testExceptionPropagationFromActivityInit() {
-        ScenarioResult scenearioResult = runScenario("activityiniterror");
-        assertThat(scenearioResult.getException()).isPresent();
-        assertThat(scenearioResult.getException().get().getMessage()).contains("For input string: \"unparsable\"");
+        ScenarioResult scenarioResult = runScenario("activityiniterror");
+        assertThat(scenarioResult.getException()).isPresent();
+        assertThat(scenarioResult.getException().get().getMessage()).contains("For input string: \"unparsable\"");
+        assertThat(scenarioResult.getException()).isNotNull();
     }
 
 
