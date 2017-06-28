@@ -128,6 +128,7 @@
                                     <mainClass>io.engineblock.cli.EBCLI</mainClass>
                                 </transformer>
                             </transformers>
+                            <finalName>${project.artifactId}</finalName>
                             <createSourcesJar>true</createSourcesJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>

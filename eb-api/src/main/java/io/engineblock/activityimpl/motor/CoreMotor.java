@@ -241,7 +241,9 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             }
             slotStateTracker.enterState(RunState.Stopping);
         } else {
-            logger.warn("attempted to stop motor " + this.getSlotId() + ": from non Running state:" + slotState.get());
+            if (slotState.get()!=Stopped && slotState.get() !=Stopping) {
+                logger.warn("attempted to stop motor " + this.getSlotId() + ": from non Running state:" + slotState.get());
+            }
         }
     }
 

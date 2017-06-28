@@ -83,8 +83,10 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
             activity.setRunState(RunState.Starting);
             activity.initActivity();
         } catch (Exception e) {
-            logger.error("There was an error starting activity:" + activityDef.getAlias());
-            throw new RuntimeException(e);
+            this.stoppingException = new RuntimeException("Error initializing activity '" +
+                    activity.getAlias() +"': " + e.getMessage(),e);
+            logger.error("error initializing activity '" + activity.getAlias() + "': " + stoppingException);
+            throw stoppingException;
         }
         adjustToActivityDef(activity.getActivityDef());
         activity.setRunState(RunState.Running);
@@ -190,6 +192,9 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         boolean awaited = awaitAllRequiredMotorState(timeout, 50, RunState.Finished, RunState.Stopped);
         if (awaited) {
             awaited = awaitCompletion(timeout);
+        }
+        if (stoppingException!=null) {
+            throw stoppingException;
         }
         return awaited;
     }
