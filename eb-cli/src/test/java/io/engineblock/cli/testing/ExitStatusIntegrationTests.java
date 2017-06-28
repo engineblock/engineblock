@@ -51,12 +51,12 @@ public class ExitStatusIntegrationTests {
     @Test
     public void testExitStatusOnActivityThreadException() {
 ProcessInvoker invoker = new ProcessInvoker();
-    ProcessResult result = invoker.run("badparam", 15,
+    ProcessResult result = invoker.run("badparam", 30,
             "java", "-jar", "target/eb-cli.jar", "run", "type=diag", "erroroncycle=10", "cycles=20", "-vv"
     );
     String stdout= result.getStdoutData().stream().collect(Collectors.joining("\n"));
     assertThat(stdout).contains("Diag was asked to error on cycle 10");
-    assertThat(result.exitStatus).isEqualTo(137);
+    assertThat(result.exitStatus).isEqualTo(2);
     }
 
 }
