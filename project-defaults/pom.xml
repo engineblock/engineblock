@@ -6,6 +6,12 @@
     <version>1.0.75-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <metagen-version>1.0.54</metagen-version>
+    </properties>
+
     <name>${project.artifactId}</name>
     <url>http://engineblock.io/</url>
     <description>
@@ -13,11 +19,6 @@
         This module acts as the parent pom for engineblock Maven modules.
     </description>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <metagen-version>1.0.53</metagen-version>
-    </properties>
 
     <licenses>
         <license>

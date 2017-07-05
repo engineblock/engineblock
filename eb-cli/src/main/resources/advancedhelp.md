@@ -67,10 +67,11 @@ to make a list that you can copy metric names from for scripting. If you provide
 an example activity alias that matches one of your scripts, you can use it exactly
 as it appears.
 ~~~
-PROG --metrics diag anexample
+PROG --list-metrics type=diag alias=anexample
 ~~~
 This will dump a list of metric names in the shortened format that is most suitable
-for scenario script development.
+for scenario script development. This format is required for the --list-metrics
+option, but it should be familiar and easy to copy and paste from other command lines.
 
 ## Scripting on the command line
 
