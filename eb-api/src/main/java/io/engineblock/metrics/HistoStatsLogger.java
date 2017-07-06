@@ -34,7 +34,8 @@ import java.util.regex.Pattern;
  * which both match the pattern and which are {@link EncodableHistogram}s are written the configured
  * logfile at the configured interval.
  */
-public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment> implements Runnable {
+public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment>
+        implements Runnable, MetricsCloseable  {
     private final static Logger logger = LoggerFactory.getLogger(HistoStatsLogger.class);
 
     private final String sessionName;
@@ -47,6 +48,7 @@ public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment
 
     private List<WriterTarget> targets = new CopyOnWriteArrayList<>();
     private PeriodicRunnable<HistoStatsLogger> executor;
+    private long lastRunTime=0L;
 
     public HistoStatsLogger(String sessionName, File file, Pattern pattern, long intervalLength, TimeUnit timeUnit) {
         this.sessionName = sessionName;
@@ -113,6 +115,18 @@ public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment
         for (WriterTarget target : this.targets) {
             Histogram nextHdrHistogram = target.histoProvider.getNextHdrDeltaHistogram();
             writer.writeInterval(nextHdrHistogram);
+        }
+        this.lastRunTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void closeMetrics() {
+        long now = System.currentTimeMillis();
+        if (lastRunTime+1000<now) {
+            logger.debug("Writing last partial interval: " + this);
+            run();
+        } else {
+            logger.debug("Not writing last partial interval <1s: " + this);
         }
     }
 

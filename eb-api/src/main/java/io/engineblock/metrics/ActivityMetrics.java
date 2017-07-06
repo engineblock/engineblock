@@ -42,6 +42,7 @@ public class ActivityMetrics {
     public static MetricFilter METRIC_FILTER = (name, metric) -> {
         return true;
     };
+    private static List<MetricsCloseable> metricsCloseables = new ArrayList<>();
 
     private ActivityMetrics() {
     }
@@ -204,6 +205,7 @@ public class ActivityMetrics {
                 new HistoIntervalLogger(sessionName, logfile, compiledPattern, intervalMillis);
         logger.debug("attaching " + histoIntervalLogger + " to the metrics registry.");
         get().addListener(histoIntervalLogger);
+        metricsCloseables.add(histoIntervalLogger);
     }
 
     /**
@@ -225,7 +227,18 @@ public class ActivityMetrics {
                 new HistoStatsLogger(sessionName, logfile, compiledPattern, intervalMillis, TimeUnit.NANOSECONDS);
         logger.debug("attaching " + histoStatsLogger + " to the metrics registry.");
         get().addListener(histoStatsLogger);
+        metricsCloseables.add(histoStatsLogger);
+    }
 
+    /**
+     * This should be called at the end of a process, so that open intervals can be finished, logs closed properly,
+     * etc.
+     */
+    public static void closeMetrics() {
+        logger.trace("Closing all registered metrics closable objects.");
+        for (MetricsCloseable metricsCloseable : metricsCloseables) {
+            metricsCloseable.closeMetrics();
+        }
     }
 
     private static interface MetricProvider {
@@ -242,7 +255,6 @@ public class ActivityMetrics {
                 .build();
         consoleReporter.report();
         out.println("====================   END-METRIC-LOG   ====================");
-
     }
 
 }

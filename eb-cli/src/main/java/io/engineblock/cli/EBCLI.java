@@ -121,6 +121,7 @@ public class EBCLI {
                 .setMaxLogs(options.getMaxLogs());
         executor.execute(scenario,sl);
         ScenariosResults scenariosResults = executor.awaitAllResults();
+        ActivityMetrics.closeMetrics();
         //scenariosResults.reportSummaryTo(System.out);
         scenariosResults.reportToLog();
 
