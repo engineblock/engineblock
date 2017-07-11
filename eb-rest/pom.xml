@@ -7,7 +7,7 @@
     <parent>
         <artifactId>project-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>1.0.78-SNAPSHOT</version>
+        <version>1.0.78</version>
         <relativePath>../project-defaults</relativePath>
     </parent>
 
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-runtime</artifactId>
-            <version>1.0.78-SNAPSHOT</version>
+            <version>1.0.78</version>
         </dependency>
 
         <dependency>
