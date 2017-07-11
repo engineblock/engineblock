@@ -161,6 +161,10 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             long thisIntervalStart = input.getInterval(stride);
             long nextIntervalStart = thisIntervalStart + stride;
 
+            if (action instanceof StrideAware) {
+                ((StrideAware)action).setInterval(thisIntervalStart,stride);
+            }
+
             if (thisIntervalStart >= cycleMax.get()) {
                 logger.trace("input exhausted (input " + thisIntervalStart + "), stopping motor thread " + slotId);
                 slotStateTracker.enterState(Finished);

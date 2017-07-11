@@ -49,7 +49,7 @@ public interface Input extends longIntervalSupplier {
     /**
      * For the sake of efficiency, ActivityMotors that consume values from this interface
      * should do a range check after getting the value. When the value exceeds the value
-     * provided by {@link getMax}, the motor should take this as a signal to terminate
+     * provided by {@link #getMax}, the motor should take this as a signal to terminate
      * gracefullly with a log line indicating why.
      * @param stride The width of the interval of numbers returned
      * @return the first value of the interval
