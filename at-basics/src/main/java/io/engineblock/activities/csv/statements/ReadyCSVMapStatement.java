@@ -27,7 +27,7 @@ public class ReadyCSVMapStatement implements ReadyCSVStatement {
 
     public String bind(long cycleNum) {
         StringConcatSetter setter = new StringConcatSetter();
-        dataBindings.setFields(setter,cycleNum);
+        dataBindings.setAllFields(setter,cycleNum);
         return setter.toString();
     }
 
