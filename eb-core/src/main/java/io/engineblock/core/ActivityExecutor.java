@@ -99,7 +99,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         activity.setRunState(RunState.Stopped);
         logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
         motors.forEach(Motor::requestStop);
-        motors.forEach(m -> awaitRequiredMotorState(m, 10000, 50, RunState.Stopped, RunState.Finished));
+        motors.forEach(m -> awaitRequiredMotorState(m, 30000, 50, RunState.Stopped, RunState.Finished));
         activity.shutdownActivity();
         logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
     }
@@ -372,7 +372,8 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         boolean awaitedRequiredState = awaitMotorState(m, waitTime, pollTime, awaitingState);
         if (!awaitedRequiredState) {
             String error = "Unable to await " + activityDef.getAlias() +
-                    "/Motor[" + m.getSlotId() + "]: from state " + startingState + " to " + m.getSlotStateTracker().getSlotState();
+                    "/Motor[" + m.getSlotId() + "]: from state " + startingState + " to " + m.getSlotStateTracker().getSlotState()
+                    + " after waiting for " + waitTime +"ms";
             RuntimeException e = new RuntimeException(error);
             logger.error(error);
             throw e;
