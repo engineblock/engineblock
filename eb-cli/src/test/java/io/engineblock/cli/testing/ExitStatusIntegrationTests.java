@@ -29,6 +29,7 @@ public class ExitStatusIntegrationTests {
     @Test
     public void testExitStatusOnBadParam() {
         ProcessInvoker invoker = new ProcessInvoker();
+        invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("badparam", 15,
                 "java", "-jar", "target/eb-cli.jar", "--log-dir", "logs/test", "badparam"
         );
@@ -40,6 +41,7 @@ public class ExitStatusIntegrationTests {
     @Test
     public void testExitStatusOnActivityInitException() {
         ProcessInvoker invoker = new ProcessInvoker();
+        invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("badparam", 15,
                 "java", "-jar", "target/eb-cli.jar", "--log-dir", "logs/test", "run", "type=diag", "initdelay=notanumber"
         );
@@ -50,13 +52,14 @@ public class ExitStatusIntegrationTests {
 
     @Test
     public void testExitStatusOnActivityThreadException() {
-ProcessInvoker invoker = new ProcessInvoker();
-    ProcessResult result = invoker.run("badparam", 30,
-            "java", "-jar", "target/eb-cli.jar", "--log-dir", "logs/test", "run", "type=diag", "erroroncycle=10", "cycles=20", "-vv"
-    );
-    String stdout= result.getStdoutData().stream().collect(Collectors.joining("\n"));
-    assertThat(stdout).contains("Diag was asked to error on cycle 10");
-    assertThat(result.exitStatus).isEqualTo(2);
+        ProcessInvoker invoker = new ProcessInvoker();
+        invoker.setLogDir("logs/test");
+        ProcessResult result = invoker.run("badparam", 30,
+                "java", "-jar", "target/eb-cli.jar", "--log-dir", "logs/test", "run", "type=diag", "erroroncycle=10", "cycles=20", "-vv"
+        );
+        String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
+        assertThat(stdout).contains("Diag was asked to error on cycle 10");
+        assertThat(result.exitStatus).isEqualTo(2);
     }
 
 }
