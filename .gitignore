@@ -5,5 +5,5 @@
 **/.project
 **/.settings
 **/*.log
-**/*.logs
+**/logs
 **/*.csv
