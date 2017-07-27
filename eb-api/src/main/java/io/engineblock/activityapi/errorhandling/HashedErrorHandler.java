@@ -43,15 +43,15 @@ public class HashedErrorHandler<T extends Exception,R> implements CycleErrorHand
     private final Class<?> upperBound;
 
 
-    HashedErrorHandler(Class<T> upperBound, CycleErrorHandler<T,R> defaultErrorHandler) {
+    public HashedErrorHandler(Class<T> upperBound, CycleErrorHandler<T,R> defaultErrorHandler) {
         setDefaultHandler(defaultErrorHandler);
         this.upperBound = upperBound;
     }
 
-    HashedErrorHandler(Class<T> upperBound) {
+    public HashedErrorHandler(Class<T> upperBound) {
         this.upperBound = upperBound;
     }
-    HashedErrorHandler() {
+    public HashedErrorHandler() {
         this.upperBound = Exception.class;
     }
 
