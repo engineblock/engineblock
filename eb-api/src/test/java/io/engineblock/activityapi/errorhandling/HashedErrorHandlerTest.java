@@ -17,35 +17,36 @@
 
 package io.engineblock.activityapi.errorhandling;
 
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
+@Test(singleThreaded = true)
 public class HashedErrorHandlerTest {
 
-    HashedErrorHandler<Exception, Boolean> handler;
+    HashedErrorHandler<Throwable, Boolean> handler;
 
-    @BeforeTest
+    @BeforeMethod
     public void beforeTest() {
-        handler = new HashedErrorHandler<>(Exception.class);
+        handler = new HashedErrorHandler<Throwable,Boolean>();
     }
 
     @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*actually.*")
-    public void testDefaultHandler() {
+    public void testDefaultHandlerThrowsException() {
         handler.handleError(1L, new InvalidParameterException("this is an invalid exception, actually"));
     }
 
     @Test
     public void testSuperclassErrorHandler() {
-        handler.addHandler(
-                IndexOutOfBoundsException.class,
-                CycleErrorHandlers.log(Exception.class, true));
+        handler.setHandlerForClasses(
+                CycleErrorHandlers.log(true), IndexOutOfBoundsException.class
+        );
         try {
             String[] a = new String[10];
             System.out.println(a[20]);
@@ -58,22 +59,24 @@ public class HashedErrorHandlerTest {
     public void testDefaultOverride() {
         List<CycleErrorHandler.Triple> list = new ArrayList<>();
         RuntimeException myError = new RuntimeException("none here");
-        handler.setDefaultHandler(CycleErrorHandlers.store(Exception.class, list, true));
+        handler.setDefaultHandler(CycleErrorHandlers.store(list, true));
         handler.handleError(3L, myError, "an error");
         assertThat(list.get(0).cycle).isEqualTo(3L);
         assertThat(list.get(0).error).isEqualTo(myError);
         assertThat(list.get(0).msg).isEqualTo("an error");
     }
 
+    @Test
     public void testExactClassHandler() {
         List<CycleErrorHandler.Triple> list = new ArrayList<>();
-        handler.addHandler(
-                StringIndexOutOfBoundsException.class,
+        handler.setHandlerForClasses(
+                CycleErrorHandlers.store(list, true),
+                StringIndexOutOfBoundsException.class
 
-                CycleErrorHandlers.store(Exception.class, list, true));
-        handler.addHandler(
-                IndexOutOfBoundsException.class,
-                CycleErrorHandlers.store(Exception.class, list, false));
+        );
+        handler.setHandlerForClasses(
+                CycleErrorHandlers.store(list, false), IndexOutOfBoundsException.class
+        );
 
         try {
             String[] a = new String[10];
@@ -85,6 +88,42 @@ public class HashedErrorHandlerTest {
         assertThat(list.get(0).result).isOfAnyClassIn(Boolean.class);
         boolean result = (boolean) list.get(0).result;
         assertThat(result).isFalse();
+    }
+
+    @Test(expectedExceptions = RuntimeException.class,expectedExceptionsMessageRegExp = ".*this is an error.*")
+    public void testNamedGroup() {
+        handler.setGroup("test1",IndexOutOfBoundsException.class,ArrayIndexOutOfBoundsException.class);
+        handler.setGroup("types",InvalidParameterException.class);
+        handler.setHandlerForGroup("types",CycleErrorHandlers.rethrow("testNamedGroup"));
+        handler.handleError(5L,new InvalidParameterException("this is an error"));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class,expectedExceptionsMessageRegExp = ".*Found 2.*")
+    public void testFindVagueSingleSubmatchException() {
+        handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
+        handler.setHandlerForPattern("Index", CycleErrorHandlers.rethrow("12345 678910 11 12"));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class,expectedExceptionsMessageRegExp = ".*rethrown\\(Journey.*")
+    public void testFindMultipleRegex() {
+        handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
+        handler.setHandlerForPattern(".*Index.*", CycleErrorHandlers.rethrow("Journey through the klein bottle."));
+        Boolean result = handler.handleError(9L, new IndexOutOfBoundsException("9L was out of bounds"));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*Found no matching.*")
+    public void testNonMatchingSubstringException() {
+        handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
+        Set<Class<? extends Throwable>> groups = handler.getGroup("index");
+        assertThat(groups).isNotNull();
+        assertThat(groups).contains(IndexOutOfBoundsException.class);
+        handler.setHandlerForPattern("Dyahwemo", CycleErrorHandlers.rethrow("Journey through the klein bottle."));
+    }
+
+    @Test(expectedExceptions=RuntimeException.class,expectedExceptionsMessageRegExp = ".*Group name 'outdex' was not found.*")
+    public void testSetHandlerForMissingGroupException() {
+        handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
+        handler.setHandlerForGroup("outdex", CycleErrorHandlers.rethrow("Journey through the klein bottle."));
     }
 
 }

@@ -17,7 +17,8 @@
 
 package io.engineblock.activityapi.errorhandling;
 
-public interface CycleErrorHandler<T extends Exception, R> {
+public interface CycleErrorHandler<T extends Throwable, R> {
+
     default R handleError(long cycle, T error) {
         return handleError(cycle, error, error.getMessage());
     }
@@ -35,4 +36,6 @@ public interface CycleErrorHandler<T extends Exception, R> {
             this.result = result;
         }
     }
+
+
 }

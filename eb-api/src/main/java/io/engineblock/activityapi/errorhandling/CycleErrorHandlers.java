@@ -29,15 +29,14 @@ public class CycleErrorHandlers {
 
     private final static Logger logger = LoggerFactory.getLogger(CycleErrorHandlers.class);
 
-    public static <T extends Exception,R> CycleErrorHandler<T,R> log(Class<T> clazz, R result) {
+    public static <T extends Throwable, R> CycleErrorHandler<T, R> log(R result) {
         return (cycle, error, errMsg) -> {
-            logger.error("in cycle " + cycle +": " + errMsg,error);
+            logger.error("in cycle " + cycle + ": " + errMsg, error);
             return result;
         };
     }
 
-    public static <T extends Exception,R> CycleErrorHandler<T,R> store(
-            Class<T> clazz,
+    public static <T extends Throwable, R> CycleErrorHandler<T, R> store(
             List<CycleErrorHandler.Triple> list,
             R result) {
         return (cycle, error, errMsg) -> {
@@ -45,4 +44,11 @@ public class CycleErrorHandlers {
             return result;
         };
     }
+
+    public static <T extends Throwable, R> CycleErrorHandler<T, R> rethrow(String prefix) {
+        return (cycle, error, errMsg) -> {
+            throw new RuntimeException("rethrown(" + prefix + ") in cycle(" + cycle + ") :" + errMsg, error);
+        };
+    }
+
 }
