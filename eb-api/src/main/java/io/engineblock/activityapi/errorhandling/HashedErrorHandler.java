@@ -252,4 +252,7 @@ public class HashedErrorHandler<T extends Throwable, R> implements CycleErrorHan
         return errorHandler.handleError(cycle, throwable, errMsg);
     }
 
+    public List<String> getGroupNames() {
+        return new ArrayList<String>(this.errorGroups.keySet());
+    }
 }

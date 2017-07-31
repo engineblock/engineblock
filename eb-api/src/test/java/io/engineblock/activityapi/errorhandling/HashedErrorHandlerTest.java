@@ -95,6 +95,9 @@ public class HashedErrorHandlerTest {
         handler.setGroup("test1",IndexOutOfBoundsException.class,ArrayIndexOutOfBoundsException.class);
         handler.setGroup("types",InvalidParameterException.class);
         handler.setHandlerForGroup("types",CycleErrorHandlers.rethrow("testNamedGroup"));
+        assertThat(handler.getGroupNames()).hasSize(2);
+        assertThat(handler.getGroupNames()).contains("test1");
+        assertThat(handler.getGroupNames()).contains("types");
         handler.handleError(5L,new InvalidParameterException("this is an error"));
     }
 
