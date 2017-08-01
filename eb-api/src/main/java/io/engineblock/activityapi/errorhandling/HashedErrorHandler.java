@@ -145,6 +145,21 @@ public class HashedErrorHandler<T extends Throwable, R> implements CycleErrorHan
     }
 
     /**
+     * Unset all class handlers. This does not reset the default handler.
+     */
+    public final synchronized void resetAllClassHandlers() {
+        handlers.clear();
+    }
+
+    /**
+     * Return the current list of active handler assignments.
+     * @return an unmodifiable {@link Map} of {@link Class} to {@link CycleErrorHandler}.
+     */
+    public final synchronized Map<Class<? extends T>, CycleErrorHandler<T, R>> getHandlers() {
+        return Collections.unmodifiableMap(handlers);
+    }
+
+    /**
      * Add to the set of valid classes that will be used when searching for a class
      * by name.
      *
@@ -164,6 +179,7 @@ public class HashedErrorHandler<T extends Throwable, R> implements CycleErrorHan
      * or super-class specific handler.
      *
      * @param errorHandler The error handler to be called as a last resort.
+     * @return this HashedErrorHandler, for method chaining
      */
     public HashedErrorHandler<T, R> setDefaultHandler(CycleErrorHandler<T, R> errorHandler) {
         Objects.requireNonNull(errorHandler);
@@ -255,4 +271,5 @@ public class HashedErrorHandler<T extends Throwable, R> implements CycleErrorHan
     public List<String> getGroupNames() {
         return new ArrayList<String>(this.errorGroups.keySet());
     }
+
 }

@@ -129,4 +129,12 @@ public class HashedErrorHandlerTest {
         handler.setHandlerForGroup("outdex", CycleErrorHandlers.rethrow("Journey through the klein bottle."));
     }
 
+    @Test
+    public void testResetAllClassHandlers() {
+        handler.setGroup("some", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
+        handler.setHandlerForGroup("some", CycleErrorHandlers.rethrow("Octothorpe and Umlaut are friends."));
+        assertThat(handler.getHandlers()).hasSize(2);
+        handler.resetAllClassHandlers();
+        assertThat(handler.getHandlers()).hasSize(0);
+    }
 }

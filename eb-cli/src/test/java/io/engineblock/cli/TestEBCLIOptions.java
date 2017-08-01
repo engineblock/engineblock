@@ -57,16 +57,16 @@ public class TestEBCLIOptions {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"--help"});
         assertThat(opts.wantsBasicHelp()).isTrue();
         opts = new EBCLIOptions(new String[]{"--version"});
-        assertThat(opts.wantsActivityHelp()).isFalse();
+        assertThat(opts.wantsTopicalHelp()).isFalse();
     }
 
     @Test
     public void shouldRecognizeWantsActivityHelp() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"--help", "foo"});
-        assertThat(opts.wantsActivityHelp()).isTrue();
-        assertThat(opts.wantsActivityHelpFor()).isEqualTo("foo");
+        assertThat(opts.wantsTopicalHelp()).isTrue();
+        assertThat(opts.wantsTopicalHelpFor()).isEqualTo("foo");
         opts = new EBCLIOptions(new String[]{"--version"});
-        assertThat(opts.wantsActivityHelp()).isFalse();
+        assertThat(opts.wantsTopicalHelp()).isFalse();
     }
 
     @Test(expectedExceptions = {InvalidParameterException.class}, expectedExceptionsMessageRegExp = ".*unrecognized option.*")
