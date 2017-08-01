@@ -28,14 +28,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * from each type of error you want to track.
  */
 public class ExceptionHistoMetrics {
-    private final ConcurrentHashMap<Class<? extends Exception>, Histogram> counters = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Class<? extends Throwable>, Histogram> counters = new ConcurrentHashMap<>();
     private ActivityDef activityDef;
 
     public ExceptionHistoMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
     }
 
-    public void update(Exception e, long magnitude) {
+    public void update(Throwable e, long magnitude) {
         Histogram h = counters.get(e.getClass());
         if (h == null) {
             synchronized (counters) {
