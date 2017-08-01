@@ -22,6 +22,11 @@ public interface CycleErrorHandler<T extends Throwable, R> {
     default R handleError(long cycle, T error) {
         return handleError(cycle, error, error.getMessage());
     }
+
+    default R handleError(long cycle, T error, long magnitude) {
+        return handleError(cycle, error, "magnitude: " + String.valueOf(magnitude));
+    }
+
     R handleError(long cycle, T error, String errMsg);
 
     public static class Triple<T,R> {
