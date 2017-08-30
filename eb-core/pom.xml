@@ -7,7 +7,7 @@
     <parent>
         <artifactId>project-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>1.0.92-SNAPSHOT</version>
+        <version>1.0.92</version>
         <relativePath>../project-defaults</relativePath>
     </parent>
 
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-api</artifactId>
-            <version>1.0.92-SNAPSHOT</version>
+            <version>1.0.92</version>
         </dependency>
 
         <dependency>
