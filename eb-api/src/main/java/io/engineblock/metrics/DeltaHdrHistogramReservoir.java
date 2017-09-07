@@ -40,7 +40,6 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
 
     private final Recorder recorder;
     private Histogram lastHistogram;
-    private final int significantDigits;
 
     private Histogram intervalHistogram;
     private long intervalHistogramEndTime = System.currentTimeMillis();
@@ -56,7 +55,6 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
     public DeltaHdrHistogramReservoir(String name, int significantDigits) {
         this.metricName = name;
         this.recorder = new Recorder(significantDigits);
-        this.significantDigits = significantDigits;
 
         /*
          * Start by flipping the recorder's interval histogram.
@@ -131,7 +129,7 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
     }
 
     public DeltaHdrHistogramReservoir copySettings() {
-        return new DeltaHdrHistogramReservoir(this.metricName, significantDigits);
+        return new DeltaHdrHistogramReservoir(this.metricName, intervalHistogram.getNumberOfSignificantValueDigits());
     }
 
     public void attachLogWriter(HistogramLogWriter logWriter) {
