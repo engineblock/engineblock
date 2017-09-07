@@ -99,7 +99,7 @@ public class ActivityMetrics {
     public static Timer timer(ActivityDef activityDef, String name) {
         String fullMetricName = activityDef.getAlias() + "." + name;
         Timer registeredTimer = (Timer) register(activityDef, name, () ->
-                new NicerTimer(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, new Recorder(4))));
+                new NicerTimer(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, 4)));
         return registeredTimer;
     }
 
@@ -115,7 +115,7 @@ public class ActivityMetrics {
     public static Histogram histogram(ActivityDef activityDef, String name) {
         String fullMetricName = activityDef.getAlias() + "." + name;
         return (Histogram) register(activityDef, name, () ->
-                new NicerHistogram(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, new Recorder(4))));
+                new NicerHistogram(fullMetricName, new DeltaHdrHistogramReservoir(fullMetricName, 4)));
     }
 
     /**

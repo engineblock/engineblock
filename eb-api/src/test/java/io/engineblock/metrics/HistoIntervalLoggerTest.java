@@ -42,7 +42,7 @@ public class HistoIntervalLoggerTest {
         HistoIntervalLogger hil = new HistoIntervalLogger("loggertest", tempFile, Pattern.compile(".*"), 1000);
 
         NicerHistogram nicerHistogram = new NicerHistogram(
-                "histo1", new DeltaHdrHistogramReservoir("histo1", new Recorder(4)));
+                "histo1", new DeltaHdrHistogramReservoir("histo1", 4));
 
         hil.onHistogramAdded("histo1",nicerHistogram);
 

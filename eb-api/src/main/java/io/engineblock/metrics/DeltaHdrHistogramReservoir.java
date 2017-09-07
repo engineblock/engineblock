@@ -36,32 +36,22 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
 
     private final Recorder recorder;
     private Histogram lastHistogram;
-    private int signifantDigits;
+    private final int significantDigits;
 
     private Histogram intervalHistogram;
     private long intervalHistogramEndTime = System.currentTimeMillis();
-    private String metricName;
+    private final String metricName;
 
     /**
      * Create a reservoir with a default recorder. This recorder should be suitable for most usage.
      *
      * @param name the name to give to the reservoir, for logging purposes
-     * @param signifantDigits how many significant digits to track in the reservoir
+     * @param significantDigits how many significant digits to track in the reservoir
      */
-    public DeltaHdrHistogramReservoir(String name, int signifantDigits) {
-        this(name, new Recorder(signifantDigits));
-        this.signifantDigits = signifantDigits;
-    }
-
-    /**
-     * Create a reservoir with a user-specified recorder.
-     *
-     * @param name the name to give to the reservoir for logging purposes
-     * @param recorder Recorder to use
-     */
-    public DeltaHdrHistogramReservoir(String name, Recorder recorder) {
+    public DeltaHdrHistogramReservoir(String name, int significantDigits) {
         this.metricName = name;
-        this.recorder = recorder;
+        this.recorder = new Recorder(significantDigits);
+        this.significantDigits = significantDigits;
 
         /*
          * Start by flipping the recorder's interval histogram.
@@ -91,8 +81,7 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
     @Override
     public Snapshot getSnapshot() {
         lastHistogram = getNextHdrHistogram();
-        DeltaHistogramSnapshot snapshot = new DeltaHistogramSnapshot(lastHistogram);
-        return snapshot;
+        return new DeltaHistogramSnapshot(lastHistogram);
     }
 
     public Histogram getNextHdrHistogram() {
@@ -134,6 +123,6 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
     }
 
     public DeltaHdrHistogramReservoir copySettings() {
-        return new DeltaHdrHistogramReservoir(this.metricName, new Recorder(signifantDigits));
+        return new DeltaHdrHistogramReservoir(this.metricName, significantDigits);
     }
 }
