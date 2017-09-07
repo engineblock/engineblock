@@ -433,6 +433,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     }
 
     public synchronized void notifyException(Thread t, Throwable e) {
+        logger.error("Uncaught exception in activity thread forwarded to activity executor:", e);
         this.stoppingException=new RuntimeException("Error in activity thread " +t.getName(), e);
         forceStopExecutor(10000);
     }
