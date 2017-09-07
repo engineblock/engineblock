@@ -45,7 +45,7 @@ public class HistoIntervalLoggerTest {
         final int significantDigits = 4;
 
         NicerHistogram nicerHistogram = new NicerHistogram(
-                "histo1", new DeltaHdrHistogramReservoir("histo1", new Recorder(significantDigits)));
+                "histo1", new DeltaHdrHistogramReservoir("histo1", significantDigits));
 
         hil.onHistogramAdded("histo1",nicerHistogram);
 
