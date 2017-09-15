@@ -31,7 +31,8 @@ public class SequencePlanner<T> {
 
     public enum SequencerType {
         bucket,
-        interval
+        interval,
+        concat
     }
 
     public SequencePlanner(List<T> elements, ToLongFunction<T> ratioFunc, SequencerType sequencerType) {
@@ -44,6 +45,9 @@ public class SequencePlanner<T> {
                 logger.debug("sequencing elements by interval and position");
                 this.elementIndex = new IntervalSequencer<T>().sequenceByIndex(elements,ratioFunc);
                 break;
+            case concat:
+                logger.debug("sequencing elements by concatenation");
+                this.elementIndex = new ConcatSequencer<T>().sequenceByIndex(elements,ratioFunc);
         }
         this.elements = elements;
     }

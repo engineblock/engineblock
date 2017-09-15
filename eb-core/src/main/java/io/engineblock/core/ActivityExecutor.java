@@ -412,7 +412,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
 
         for (Input input : inputs) {
             double done = (input.getCurrent() - startCycle);
-            double fractional = (done / totalCycles);
+            double fractional = (done / (totalCycles-1));
             total += fractional;
         }
 

@@ -19,18 +19,27 @@ import com.codahale.metrics.MetricFilter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class MetricInstanceFilter implements MetricFilter {
 
     private List<Metric> included = new ArrayList<Metric>();
+    private List<Pattern> includedPatterns = new ArrayList<>();
 
     public MetricInstanceFilter add(Metric metric) {
         this.included.add(metric);
         return this;
     }
 
+    public MetricInstanceFilter add(String pattern) {
+        this.includedPatterns.add(Pattern.compile(pattern));
+        return this;
+    }
+
     @Override
     public boolean matches(String name, Metric metric) {
-        return included.isEmpty() || included.stream().anyMatch(m -> m==metric);
+        return (included.isEmpty() && includedPatterns.isEmpty())
+                || (included.stream().anyMatch(m -> m == metric) ||
+                includedPatterns.stream().anyMatch(p -> p.matcher(metric.toString()).matches()));
     }
 }
