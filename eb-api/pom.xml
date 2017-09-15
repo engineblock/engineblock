@@ -7,7 +7,7 @@
     <parent>
         <artifactId>project-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>1.0.97-SNAPSHOT</version>
+        <version>1.0.97</version>
         <relativePath>../project-defaults</relativePath>
     </parent>
 
