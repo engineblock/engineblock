@@ -31,7 +31,7 @@ public class MetricInstanceFilter implements MetricFilter {
         return this;
     }
 
-    public MetricInstanceFilter add(String pattern) {
+    public MetricInstanceFilter addPattern(String pattern) {
         this.includedPatterns.add(Pattern.compile(pattern));
         return this;
     }
