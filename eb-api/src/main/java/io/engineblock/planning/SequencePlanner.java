@@ -38,15 +38,15 @@ public class SequencePlanner<T> {
     public SequencePlanner(List<T> elements, ToLongFunction<T> ratioFunc, SequencerType sequencerType) {
         switch (sequencerType) {
             case bucket:
-                logger.debug("sequencing elements by simple round-robin");
+                logger.trace("sequencing elements by simple round-robin");
                 this.elementIndex = new BucketSequencer<T>().sequenceByIndex(elements,ratioFunc);
                 break;
             case interval:
-                logger.debug("sequencing elements by interval and position");
+                logger.trace("sequencing elements by interval and position");
                 this.elementIndex = new IntervalSequencer<T>().sequenceByIndex(elements,ratioFunc);
                 break;
             case concat:
-                logger.debug("sequencing elements by concatenation");
+                logger.trace("sequencing elements by concatenation");
                 this.elementIndex = new ConcatSequencer<T>().sequenceByIndex(elements,ratioFunc);
         }
         this.elements = elements;
