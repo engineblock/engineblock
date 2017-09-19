@@ -52,7 +52,34 @@
                 </configuration>
             </plugin>
 
-        </plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>wrap-eb</id>
+                        <phase>package</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>${project.basedir}/wrap_eb.sh</executable>
+                        </configuration>
+                    </execution>
+                    <!--<execution>-->
+                        <!--<id>publish-eb</id>-->
+                        <!--<phase>deploy</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>exec</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<executable>${project.basedir}/publish.sh</executable>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+
+                </executions>
+            </plugin>
+
+    </plugins>
     </build>
 
 
