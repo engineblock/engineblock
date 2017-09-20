@@ -15,7 +15,12 @@
  * /
  */
 
-package activityconfig.yaml;
+package activityconfig;
+
+import activityconfig.yaml.BlockParams;
+import activityconfig.yaml.StatementDef;
+import activityconfig.yaml.StmtsBlock;
+import activityconfig.yaml.StmtsDoc;
 
 import java.util.ArrayList;
 import java.util.List;

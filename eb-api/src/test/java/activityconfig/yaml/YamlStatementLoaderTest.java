@@ -50,7 +50,7 @@ public class YamlStatementLoaderTest {
         assertThat(stmtsDoc.getName()).isEqualTo("name1");
         assertThat(blocks).hasSize(1);
         StmtsBlock stmtsBlock = blocks.get(0);
-        assertThat(stmtsBlock.getName()).isEqualTo("");
+        assertThat(stmtsBlock.getName()).isEqualTo("name");
     }
 
 

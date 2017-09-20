@@ -17,6 +17,7 @@
 
 package activityconfig.yaml;
 
+import activityconfig.AssembledStmtsBlock;
 import activityconfig.AssembledStmtsDoc;
 import activityconfig.AssembledStmtsDocList;
 import activityconfig.Statements;
@@ -31,27 +32,28 @@ public class StatementDefsTest {
 
     @Test
     public void testLayering() {
+
         AssembledStmtsDocList all = Statements.load("testdocs/everything.yaml");
         assertThat(all).isNotNull();
         assertThat(all.getAssembledStmtsDocs()).hasSize(2);
         AssembledStmtsDoc doc1 = all.getAssembledStmtsDocs().get(0);
-        assertThat(doc1.getName()).isEqualTo("name1");
+        assertThat(doc1.getName()).isEqualTo("doc1");
         assertThat(doc1.getAssembledBlocks()).hasSize(1);
         AssembledStmtsDoc doc2 = all.getAssembledStmtsDocs().get(1);
         assertThat(doc2.getAssembledBlocks()).hasSize(2);
 
         AssembledStmtsBlock block1 = doc1.getAssembledBlocks().get(0);
         assertThat(block1.getBindings()).hasSize(2);
-        assertThat(block1.getName()).isEqualTo("name1--block1");
+        assertThat(block1.getName()).isEqualTo("doc1--block0");
         assertThat(block1.getTags()).hasSize(1);
 
         AssembledStmtsBlock block21 = doc2.getAssembledBlocks().get(0);
         AssembledStmtsBlock block22 = doc2.getAssembledBlocks().get(1);
 
-        assertThat(block21.getName()).isEqualTo("name2--block1");
+        assertThat(block21.getName()).isEqualTo("doc2--block1");
         assertThat(block21.getTags()).hasSize(3);
 
-        assertThat(block22.getName()).isEqualTo("name2--block2");
+        assertThat(block22.getName()).isEqualTo("doc2--block2");
         assertThat(block22.getTags()).hasSize(2);
         assertThat(block22.getTags().get("root1")).isEqualTo("value23");
     }
@@ -63,11 +65,11 @@ public class StatementDefsTest {
         assertThat(all.getAssembledStmtsDocs()).hasSize(2);
         AssembledStmtsDoc doc1 = all.getAssembledStmtsDocs().get(0);
         AssembledStmtsBlock block1 = doc1.getAssembledBlocks().get(0);
-        assertThat(block1.getName()).isEqualTo("name1--block1");
+        assertThat(block1.getName()).isEqualTo("doc1--block0");
         List<StatementDef> assys = block1.getAssembledStatements();
         assertThat(assys).hasSize(2);
         StatementDef sdef1 = assys.get(0);
-        assertThat(sdef1.getName()).isEqualTo("name1--block1--1");
+        assertThat(sdef1.getName()).isEqualTo("doc1--block0--1");
         assertThat(assys.get(0).getStatement()).isEqualTo("s1");
 
     }
