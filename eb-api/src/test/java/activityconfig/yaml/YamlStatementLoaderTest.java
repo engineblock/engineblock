@@ -47,10 +47,10 @@ public class YamlStatementLoaderTest {
         assertThat(stmtsDocs).hasSize(2);
         StmtsDoc stmtsDoc = stmtsDocs.get(0);
         List<StmtsBlock> blocks = stmtsDoc.getBlocks();
-        assertThat(stmtsDoc.getName()).isEqualTo("name1");
+        assertThat(stmtsDoc.getName()).isEqualTo("doc1");
         assertThat(blocks).hasSize(1);
         StmtsBlock stmtsBlock = blocks.get(0);
-        assertThat(stmtsBlock.getName()).isEqualTo("name");
+        assertThat(stmtsBlock.getName()).isEqualTo("block0");
     }
 
 
