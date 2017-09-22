@@ -15,7 +15,7 @@
  * /
  */
 
-package activityconfig.yaml;
+package activityconfig.rawyaml;
 
 import io.engineblock.activityimpl.ActivityInitializationError;
 import io.engineblock.util.EngineBlockFiles;
@@ -33,16 +33,16 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class YamlStatementLoader {
+public class RawYamlStatementLoader {
 
-    private final static Logger logger = LoggerFactory.getLogger(YamlStatementLoader.class);
+    private final static Logger logger = LoggerFactory.getLogger(RawYamlStatementLoader.class);
     List<Function<String, String>> imageTransformers = new ArrayList<>();
     List<Function<String, String>> stringTransformers = new ArrayList<>();
 
-    public YamlStatementLoader() {
+    public RawYamlStatementLoader() {
     }
 
-    public StmtsDocList load(String fromPath, String... searchPaths) {
+    public RawStmtsDocList load(String fromPath, String... searchPaths) {
         InputStream stream = EngineBlockFiles.findRequiredStreamOrFile(fromPath, "yaml", searchPaths);
         String data = "";
 
@@ -67,12 +67,12 @@ public class YamlStatementLoader {
 
         try {
             Iterable<Object> objects = yaml.loadAll(data);
-            List<StmtsDoc> stmtListList = new ArrayList<>();
+            List<RawStmtsDoc> stmtListList = new ArrayList<>();
             for (Object object : objects) {
-                StmtsDoc tgsd = (StmtsDoc) object;
+                RawStmtsDoc tgsd = (RawStmtsDoc) object;
                 stmtListList.add(tgsd);
             }
-            return new StmtsDocList(stmtListList);
+            return new RawStmtsDocList(stmtListList);
         } catch (Exception e) {
             logger.error("Error loading yaml from " + fromPath, e);
             throw e;
@@ -80,9 +80,9 @@ public class YamlStatementLoader {
     }
 
     private Yaml getCustomYaml() {
-        Constructor constructor = new Constructor(StmtsDoc.class);
-        TypeDescription tds = new TypeDescription(StmtsDoc.class);
-        tds.putListPropertyType("blocks", StmtsBlock.class);
+        Constructor constructor = new Constructor(RawStmtsDoc.class);
+        TypeDescription tds = new TypeDescription(RawStmtsDoc.class);
+        tds.putListPropertyType("blocks", RawStmtsBlock.class);
         constructor.addTypeDescription(tds);
         return new Yaml(constructor);
     }

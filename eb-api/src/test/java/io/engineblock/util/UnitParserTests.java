@@ -34,11 +34,11 @@ public class UnitParserTests {
 
     @Test
     public void testDurationParser() {
-        assertThat(Unit.msFor("1000")).isEqualTo(1000L);
-        assertThat(Unit.msFor("1S")).isEqualTo(1000L);
-        assertThat(Unit.msFor("1 SECOND")).isEqualTo(1000L);
-        assertThat(Unit.msFor("5d")).isEqualTo(86400*1000*5);
-        assertThat(Unit.durationFor(Unit.Duration.HOUR,"5 days")).isEqualTo(120L);
+        assertThat(Unit.msFor("1000")).contains(1000L);
+        assertThat(Unit.msFor("1S")).contains(1000L);
+        assertThat(Unit.msFor("1 SECOND")).contains(1000L);
+        assertThat(Unit.msFor("5d")).contains((long)86400*1000*5);
+        assertThat(Unit.durationFor(Unit.Duration.HOUR,"5 days")).contains(120L);
     }
 
     @Test

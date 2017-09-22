@@ -17,25 +17,38 @@
 
 package activityconfig.yaml;
 
-public class StatementDef extends BlockParams {
+import java.util.Map;
 
-    private String statement;
+public class StmtDef {
+
+    private StmtsBlock block;
     private String name;
+    private String stmt;
 
-    public StatementDef() {}
-
-    public StatementDef(String name, String statement) {
+    public StmtDef(StmtsBlock block, String name, String stmt) {
+        this.block = block;
         this.name = name;
-        this.statement = statement;
+        this.stmt = stmt;
     }
 
-
-    public String getStatement() {
-        return statement;
-    }
-
-    @Override
     public String getName() {
         return name;
+    }
+
+    public String getStmt() {
+        return stmt;
+    }
+
+    public Map<String,String> getBindings() {
+        return block.getBindings();
+    }
+
+    public Map<String, String> getParams() {
+        return block.getParams();
+    }
+
+    public Map<String,String> getTags() {
+        return block.getTags();
+
     }
 }

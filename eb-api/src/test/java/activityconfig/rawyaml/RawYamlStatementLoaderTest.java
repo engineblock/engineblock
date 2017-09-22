@@ -15,7 +15,7 @@
  * /
  */
 
-package activityconfig.yaml;
+package activityconfig.rawyaml;
 
 import org.testng.annotations.Test;
 
@@ -24,14 +24,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
-public class YamlStatementLoaderTest {
+public class RawYamlStatementLoaderTest {
 
     @Test
     public void tetLoadPropertiesBlock() {
-        YamlStatementLoader ysl = new YamlStatementLoader();
-        StmtsDocList rawBlockDocs = ysl.load("testdocs/rawblock.yaml");
+        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
+        RawStmtsDocList rawBlockDocs = ysl.load("testdocs/rawblock.yaml");
         assertThat(rawBlockDocs.getStmtsDocs()).hasSize(1);
-        StmtsDoc rawBlockDoc = rawBlockDocs.getStmtsDocs().get(0);
+        RawStmtsDoc rawBlockDoc = rawBlockDocs.getStmtsDocs().get(0);
         assertThat(rawBlockDoc.getStatements()).hasSize(1);
         assertThat(rawBlockDoc.getBindings()).hasSize(1);
         assertThat(rawBlockDoc.getName()).isEqualTo("name");
@@ -41,16 +41,16 @@ public class YamlStatementLoaderTest {
 
     @Test
     public void testLoadFullFormat() {
-        YamlStatementLoader ysl = new YamlStatementLoader();
-        StmtsDocList erthing = ysl.load("testdocs/everything.yaml");
-        List<StmtsDoc> stmtsDocs = erthing.getStmtsDocs();
-        assertThat(stmtsDocs).hasSize(2);
-        StmtsDoc stmtsDoc = stmtsDocs.get(0);
-        List<StmtsBlock> blocks = stmtsDoc.getBlocks();
-        assertThat(stmtsDoc.getName()).isEqualTo("name1");
+        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
+        RawStmtsDocList erthing = ysl.load("testdocs/everything.yaml");
+        List<RawStmtsDoc> rawStmtsDocs = erthing.getStmtsDocs();
+        assertThat(rawStmtsDocs).hasSize(2);
+        RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);
+        List<RawStmtsBlock> blocks = rawStmtsDoc.getBlocks();
+        assertThat(rawStmtsDoc.getName()).isEqualTo("doc1");
         assertThat(blocks).hasSize(1);
-        StmtsBlock stmtsBlock = blocks.get(0);
-        assertThat(stmtsBlock.getName()).isEqualTo("");
+        RawStmtsBlock rawStmtsBlock = blocks.get(0);
+        assertThat(rawStmtsBlock.getName()).isEqualTo("block0");
     }
 
 

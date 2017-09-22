@@ -27,6 +27,11 @@ public class MultiMapLookup implements Map<String, String> {
     public MultiMapLookup() {
     }
 
+    public MultiMapLookup(Map<String,String> map1, Map<String,String> map2) {
+        add(map1);
+        add(map2);
+    }
+
     public MultiMapLookup add(Map<String,String> map) {
         maps.add(map);
         return this;
@@ -57,8 +62,8 @@ public class MultiMapLookup implements Map<String, String> {
     public String get(Object key) {
         return maps.stream()
                 .filter(m -> m.containsKey(key))
-                .map(m -> m.get(key))
                 .findFirst()
+                .map(m -> m.get(key))
                 .orElse(null);
     }
 

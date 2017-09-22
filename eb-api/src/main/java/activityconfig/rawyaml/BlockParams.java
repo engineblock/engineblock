@@ -15,9 +15,7 @@
  * /
  */
 
-package activityconfig.yaml;
-
-import io.engineblock.util.Tagged;
+package activityconfig.rawyaml;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -40,7 +38,7 @@ import java.util.Map;
  * Generally speaking, names are concatenated with hyphens to yield more specific names,
  * while bindings, config and tags are layered, with same-named bindings overriding at
  * lower levels.
- * See {@link StmtsBlock} and {@link StmtsDoc} for more details.
+ * See {@link RawStmtsBlock} and {@link RawStmtsDoc} for more details.
  * </p>
  * <p>
  * The name represents a symbolic name for the statements in the list. Each statement will
@@ -62,10 +60,9 @@ import java.util.Map;
  *   field2: ToDate()
  * </pre>
  */
-public class BlockParams implements Tagged {
+public class BlockParams extends Tags {
 
     private String name = "";
-    private Map<String, String> tags = new LinkedHashMap<>();
     private Map<String, String> bindings = new LinkedHashMap<>();
     private Map<String, String> params = new LinkedHashMap<>();
 
@@ -86,16 +83,6 @@ public class BlockParams implements Tagged {
     public void setBindings(Map<String, String> bindings) {
         this.bindings.clear();
         this.bindings.putAll(bindings);
-    }
-
-    @Override
-    public Map<String, String> getTags() {
-        return Collections.unmodifiableMap(tags);
-    }
-
-    public void setTags(Map<String, String> tags) {
-        this.tags.clear();
-        this.tags.putAll(tags);
     }
 
     public Map<String, String> getParams() {

@@ -17,16 +17,30 @@
 
 package activityconfig.yaml;
 
+import activityconfig.rawyaml.RawStmtsDocList;
+import io.engineblock.util.TagFilter;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class StmtsDocList {
-    private List<StmtsDoc> stmtsDocList;
 
-    public StmtsDocList(List<StmtsDoc> stmtsDocList) {
-        this.stmtsDocList = stmtsDocList;
+    private RawStmtsDocList rawStmtsDocList;
+
+    public StmtsDocList(RawStmtsDocList rawStmtsDocList) {
+        this.rawStmtsDocList = rawStmtsDocList;
     }
 
-    public List<StmtsDoc> getStmtsDocs() {
-        return stmtsDocList;
+    public List<StmtsDoc> getStmtDocs(String tagFilter) {
+        TagFilter tf = new TagFilter(tagFilter);
+        return getStmtDocs().stream()
+                .filter(tf::matchesTagged)
+                .collect(Collectors.toList());
+    }
+
+    public List<StmtsDoc> getStmtDocs() {
+        return rawStmtsDocList.getStmtsDocs().stream()
+                .map(StmtsDoc::new)
+                .collect(Collectors.toList());
     }
 }
