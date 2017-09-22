@@ -15,17 +15,19 @@
  * /
  */
 
-package activityconfig;
+package activityconfig.rawyaml;
 
-import activityconfig.yaml.StmtsDocList;
-import activityconfig.yaml.YamlStatementLoader;
+import java.util.List;
 
-public class Statements {
+public class RawStmtsDocList {
 
-    public static AssembledStmtsDocList load(String path, String... searchPaths) {
-        YamlStatementLoader loader = new YamlStatementLoader();
-        StmtsDocList raw = loader.load(path, searchPaths);
-        AssembledStmtsDocList layered = new AssembledStmtsDocList(raw);
-        return layered;
+    private List<RawStmtsDoc> rawStmtsDocList;
+
+    public RawStmtsDocList(List<RawStmtsDoc> rawStmtsDocList) {
+        this.rawStmtsDocList = rawStmtsDocList;
+    }
+
+    public List<RawStmtsDoc> getStmtsDocs() {
+        return rawStmtsDocList;
     }
 }

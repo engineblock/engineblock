@@ -15,7 +15,7 @@
  * /
  */
 
-package activityconfig.yaml;
+package activityconfig.rawyaml;
 
 import io.engineblock.util.Tagged;
 

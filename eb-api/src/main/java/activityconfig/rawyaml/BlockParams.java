@@ -15,7 +15,7 @@
  * /
  */
 
-package activityconfig.yaml;
+package activityconfig.rawyaml;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -38,7 +38,7 @@ import java.util.Map;
  * Generally speaking, names are concatenated with hyphens to yield more specific names,
  * while bindings, config and tags are layered, with same-named bindings overriding at
  * lower levels.
- * See {@link StmtsBlock} and {@link StmtsDoc} for more details.
+ * See {@link RawStmtsBlock} and {@link RawStmtsDoc} for more details.
  * </p>
  * <p>
  * The name represents a symbolic name for the statements in the list. Each statement will

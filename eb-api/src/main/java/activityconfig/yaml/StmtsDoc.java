@@ -17,69 +17,55 @@
 
 package activityconfig.yaml;
 
+import activityconfig.rawyaml.RawStmtsBlock;
+import activityconfig.rawyaml.RawStmtsDoc;
+import io.engineblock.util.Tagged;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
- * A statements doc can have either a list of statement blocks or a
- * list of statements but not both. It can also have all the block
- * parameters assignable to {@link BlockParams}.
- * <p>
- * The reason for having support both statements or statement blocks
- * is merely convenience. If you do not need or want to deal with the
- * full blocks format, the extra structure gets in the way. However,
- * having both a list and a blocks section in the same document can
- * create confusion. The compromise was to allow for either, but
- * specifically disallow them together.
+ * AssembledStmtsDoc creates a logical view of a raw statements doc that includes
+ * the overrides and filtering between the document layer and block layer.
  */
-public class StmtsDoc extends BlockParams {
+public class StmtsDoc implements Tagged {
 
-    private List<StmtsBlock> blocks = new ArrayList<>();
-    private List<String> statements = new ArrayList<>();
+    private RawStmtsDoc rawStmtsDoc;
 
-    public List<String> getStatements() {
-        return statements;
+    public StmtsDoc(RawStmtsDoc rawStmtsDoc) {
+        this.rawStmtsDoc = rawStmtsDoc;
     }
 
-    public void setStatements(List<String> statements) {
-
-        if (!blocks.isEmpty()) {
-            throw new RuntimeException("presently, you must pick between having " +
-                    "blocks and statement at the document level. This on already has blocks." +
-                    " Add your statements under it.");
-        }
-        this.statements.clear();
-        this.statements.addAll(statements);
-    }
-
-    /**
-     * Return the list of statement blocks in this StmtsDoc.
-     * If raw statements are defined on this StmtsDoc, then a single
-     * StmtBlock containing those statements is returned. Otherwise,
-     * the list of StmtBlocks is returned.
-     *
-     * @return all logical statement blocks containing statements
-     */
     public List<StmtsBlock> getBlocks() {
-        if (blocks.isEmpty() && !statements.isEmpty()) {
-            return new ArrayList<StmtsBlock>() {{
-                StmtsBlock stmtsBlock = new StmtsBlock(statements);
-                stmtsBlock.setName("block0");
-                add(stmtsBlock);
-            }};
-        } else {
-            return blocks;
+        List<StmtsBlock> blocks = new ArrayList<>();
+
+        int blockIdx=0;
+        for (RawStmtsBlock rawStmtsBlock : rawStmtsDoc.getBlocks()) {
+            String compositeName = rawStmtsDoc.getName() +
+                    (rawStmtsBlock.getName().isEmpty() ? "" : "-" + rawStmtsBlock.getName());
+            StmtsBlock compositeBlock = new StmtsBlock(compositeName, rawStmtsBlock,this,++blockIdx);
+            blocks.add(compositeBlock);
         }
+
+        return blocks;
     }
 
-    public void setBlocks(List<StmtsBlock> blocks) {
-        if (!statements.isEmpty()) {
-            throw new RuntimeException("presently, you must pick between having " +
-                    "blocks and statement at the document level." +
-                    " This one already has statements. You can move " +
-                    "them to a new blocks section");
-        }
-        this.blocks.clear();
-        this.blocks.addAll(blocks);
+    @Override
+    public Map<String, String> getTags() {
+        return rawStmtsDoc.getTags();
     }
+
+    public Map<String, String> getParams() {
+        return rawStmtsDoc.getParams();
+    }
+
+    public Map<String, String> getBindings() {
+        return rawStmtsDoc.getBindings();
+    }
+
+    public String getName() {
+        return rawStmtsDoc.getName();
+    }
+
 }
