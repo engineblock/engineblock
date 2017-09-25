@@ -3,8 +3,14 @@
 
     <groupId>io.engineblock</groupId>
     <artifactId>project-defaults</artifactId>
-    <version>1.0.67-SNAPSHOT</version>
+    <version>1.0.105-SNAPSHOT</version>
     <packaging>pom</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <metagen-version>1.0.72</metagen-version>
+    </properties>
 
     <name>${project.artifactId}</name>
     <url>http://engineblock.io/</url>
@@ -13,10 +19,6 @@
         This module acts as the parent pom for engineblock Maven modules.
     </description>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    </properties>
 
     <licenses>
         <license>
@@ -42,7 +44,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.6.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -53,7 +55,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
+                <version>2.10.4</version>
                 <configuration>
                     <doctitle>EngineBlock API</doctitle>
                     <windowtitle>EngineBlock API</windowtitle>
@@ -72,7 +74,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -88,7 +90,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.3</version>
+                <version>1.6.8</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>

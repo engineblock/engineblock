@@ -1,6 +1,6 @@
 tags:
  atagname: atagvalue
-name: name1
+name: doc1
 statements:
  - s1
  - s2
@@ -10,7 +10,7 @@ bindings:
 params:
  param1: value1
 ---
-name: name2
+name: doc2
 tags:
  root1: val1
  root2: val2

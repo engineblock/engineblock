@@ -28,6 +28,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     private final DiagActivity diagActivity;
 
     private int slot;
+    private long erroroncycle=-1;
     private long lastUpdate;
     private long quantizedInterval;
     private long reportModulo;
@@ -43,7 +44,27 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
         onActivityDefUpdate(activityDef);
     }
 
+    @Override
+    public void accept(long value) {
+        long now = System.currentTimeMillis();
+        if (completedPhase>=phasesPerCycle) {
+            completedPhase=0;
+        }
+        if ((now - lastUpdate) > quantizedInterval) {
+            long delay = ((now - lastUpdate) - quantizedInterval);
+            logger.info("diag action interval, input=" + value + ", phase=" + completedPhase +", report delay=" + delay);
+            lastUpdate += quantizedInterval;
+            diagActivity.delayHistogram.update(delay);
+        }
+        if ((value % reportModulo) == 0) {
+            logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
+        }
+        if (erroroncycle==value) {
+            throw new RuntimeException("Diag was asked to error on cycle " + erroroncycle);
+        }
+        completedPhase++;
 
+    }
 
     /**
      * idempotently assign the last update reference time and the interval which, when added to it, represent when this
@@ -95,6 +116,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     public void onActivityDefUpdate(ActivityDef activityDef) {
         updateReportTime();
         updatePhases();
+        this.erroroncycle = activityDef.getParams().getOptionalLong("erroroncycle").orElse(-1L);
         this.errormodulo=activityDef.getParams().getOptionalInteger("errormodulo").orElse(1000);
     }
 
@@ -130,4 +152,5 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
         }
         return 0;
     }
+
 }

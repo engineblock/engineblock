@@ -1,7 +1,7 @@
 package io.engineblock.cli;
 
 import io.engineblock.activityapi.ActivityType;
-import io.engineblock.core.ActivityDocInfo;
+import io.engineblock.core.MarkdownDocInfo;
 import io.engineblock.core.ActivityTypeFinder;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class EBCLI {
@@ -57,9 +58,11 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsActivityHelp()) {
-            String activityHelpMarkdown = ActivityDocInfo.forActivityType(options.wantsActivityHelpFor());
-            System.out.println(activityHelpMarkdown);
+        if (options.wantsTopicalHelp()) {
+            Optional<String> helpDoc = MarkdownDocInfo.forHelpTopic(options.wantsTopicalHelpFor());
+            System.out.println(helpDoc.orElseThrow(
+                    () -> new RuntimeException("No help could be found for " + options.wantsTopicalHelpFor())
+            ));
             System.exit(0);
         }
 
@@ -70,17 +73,17 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsReportGraphiteTo()!=null || options.wantsReportCsvTo()!=null) {
+        if (options.wantsReportGraphiteTo() != null || options.wantsReportCsvTo() != null) {
             MetricReporters reporters = MetricReporters.getInstance();
             reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
 
-            if (options.wantsReportGraphiteTo()!=null) {
-                reporters.addGraphite(options.wantsReportGraphiteTo(),options.wantsMetricsPrefix());
+            if (options.wantsReportGraphiteTo() != null) {
+                reporters.addGraphite(options.wantsReportGraphiteTo(), options.wantsMetricsPrefix());
             }
-            if (options.wantsReportCsvTo()!=null) {
-                reporters.addCSVReporter(options.wantsReportCsvTo(),options.wantsMetricsPrefix());
+            if (options.wantsReportCsvTo() != null) {
+                reporters.addCSVReporter(options.wantsReportCsvTo(), options.wantsMetricsPrefix());
             }
-            reporters.start(10,10);
+            reporters.start(10, 10);
         }
 
         String timestamp = String.valueOf(System.currentTimeMillis());
@@ -119,8 +122,9 @@ public class EBCLI {
         ScenarioLogger sl = new ScenarioLogger(scenario)
                 .setLogDir(options.getLogDirectory())
                 .setMaxLogs(options.getMaxLogs());
-        executor.execute(scenario,sl);
+        executor.execute(scenario, sl);
         ScenariosResults scenariosResults = executor.awaitAllResults();
+        ActivityMetrics.closeMetrics();
         //scenariosResults.reportSummaryTo(System.out);
         scenariosResults.reportToLog();
 

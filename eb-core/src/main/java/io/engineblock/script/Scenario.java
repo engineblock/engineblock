@@ -17,7 +17,7 @@ package io.engineblock.script;
 import ch.qos.logback.classic.Logger;
 import com.codahale.metrics.MetricRegistry;
 import io.engineblock.activitycore.ProgressIndicator;
-import io.engineblock.core.Result;
+import io.engineblock.core.ScenarioResult;
 import io.engineblock.core.ScenarioController;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.extensions.ScriptingPluginInfo;
@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-public class Scenario implements Callable<Result> {
+public class Scenario implements Callable<ScenarioResult> {
 
     private static final Logger logger = (Logger) LoggerFactory.getLogger(Scenario.class);
     private static final ScriptEngineManager engineManager = new ScriptEngineManager();
@@ -154,10 +154,10 @@ public class Scenario implements Callable<Result> {
 
     }
 
-    public Result call() {
+    public ScenarioResult call() {
         run();
         String iolog = scriptEnv.getTimedLog();
-        return new Result(iolog);
+        return new ScenarioResult(iolog);
     }
 
     @Override

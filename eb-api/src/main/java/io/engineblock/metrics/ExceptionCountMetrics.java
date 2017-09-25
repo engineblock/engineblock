@@ -26,20 +26,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * Use this to provide exception metering in a uniform way.
  */
 public class ExceptionCountMetrics {
-    private final ConcurrentHashMap<Class<? extends Exception>, Counter> counters = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Class<? extends Throwable>, Counter> counters = new ConcurrentHashMap<>();
     private ActivityDef activityDef;
 
     public ExceptionCountMetrics(ActivityDef activityDef) {
         this.activityDef = activityDef;
     }
 
-    public void count(Exception e) {
+    public void count(Throwable e) {
         Counter c = counters.get(e.getClass());
         if (c == null) {
             synchronized (counters) {
                 c = counters.computeIfAbsent(
                         e.getClass(),
-                        k -> ActivityMetrics.counter(activityDef, "exceptions." + e.getClass().getSimpleName())
+                        k -> ActivityMetrics.counter(activityDef, "errorcounts." + e.getClass().getSimpleName())
                 );
             }
         }

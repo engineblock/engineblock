@@ -19,14 +19,14 @@ package io.engineblock.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import io.engineblock.activityapi.ActivityType;
-import io.engineblock.core.ActivityDocInfo;
+import io.engineblock.core.MarkdownDocInfo;
 import io.engineblock.core.ActivityTypeFinder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.commonmark.html.HtmlRenderer;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -67,8 +67,10 @@ public class ActivityTypeResources {
         Optional<ActivityType> activityType = ActivityTypeFinder.instance().get(activityTypeName);
         if (activityType.isPresent()) {
             Parser parser = Parser.builder().build();
-            String activityMarkdown = ActivityDocInfo.forActivityType(activityTypeName);
-            Node doc = parser.parse(activityMarkdown);
+            Optional<String> activityMarkdown = MarkdownDocInfo.forHelpTopic(activityTypeName);
+            Node doc = parser.parse(activityMarkdown.orElseThrow(
+                    () -> new RuntimeException("Unable to find help for " + activityTypeName))
+            );
             HtmlRenderer renderer = HtmlRenderer.builder().build();
             String render = renderer.render(doc);
             return Response.ok(render,MediaType.TEXT_HTML_TYPE).build();

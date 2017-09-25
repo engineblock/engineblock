@@ -18,7 +18,7 @@
 package io.engineblock.script;
 
 import io.engineblock.core.IndexedThreadFactory;
-import io.engineblock.core.Result;
+import io.engineblock.core.ScenarioResult;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
 import org.slf4j.Logger;
@@ -36,6 +36,7 @@ public class ScenariosExecutor {
 
     private final ExecutorService executor;
     private String name;
+    private RuntimeException stoppingException;
 
     public ScenariosExecutor(String name) {
         this(name, 1);
@@ -45,8 +46,7 @@ public class ScenariosExecutor {
         executor = new ThreadPoolExecutor(1, 1,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
-                new IndexedThreadFactory("scenarios"));
-        Executors.newFixedThreadPool(threads, new IndexedThreadFactory("scenarios"));
+                new IndexedThreadFactory("scenarios", new ScenarioExceptionHandler(this)));
         this.name = name;
     }
 
@@ -59,7 +59,7 @@ public class ScenariosExecutor {
         if (submitted.get(scenario.getName()) != null) {
             throw new RuntimeException("Scenario " + scenario.getName() + " is already defined. Remove it first to reuse the name.");
         }
-        Future<Result> future = executor.submit(scenario);
+        Future<ScenarioResult> future = executor.submit(scenario);
         SubmittedScenario s = new SubmittedScenario(scenario, future);
         submitted.put(s.getName(), s);
     }
@@ -116,7 +116,7 @@ public class ScenariosExecutor {
             throw new RuntimeException("executor still runningScenarios after awaiting all results for " + timeout
                     + "ms.  isTerminated:" + executor.isTerminated() + " isShutdown:" + executor.isShutdown());
         }
-        Map<Scenario, Result> scenarioResultMap = new LinkedHashMap<>();
+        Map<Scenario, ScenarioResult> scenarioResultMap = new LinkedHashMap<>();
         getAsyncResultStatus()
                 .entrySet().forEach(es -> scenarioResultMap.put(es.getKey(), es.getValue().orElseGet(null)));
         return new ScenariosResults(this, scenarioResultMap);
@@ -137,24 +137,24 @@ public class ScenariosExecutor {
      * All submitted scenarios are included. Those which are still pending
      * are returned with an empty option.</p>
      *
-     * <p>Results may be exceptional. If {@link Result#getException()} is present,
+     * <p>Results may be exceptional. If {@link ScenarioResult#getException()} is present,
      * then the result did not complete normally.</p>
      *
      * @return map of async results, with incomplete results as Optional.empty()
      */
-    public Map<Scenario, Optional<Result>> getAsyncResultStatus() {
+    public Map<Scenario, Optional<ScenarioResult>> getAsyncResultStatus() {
 
-        Map<Scenario, Optional<Result>> optResults = new LinkedHashMap<>();
+        Map<Scenario, Optional<ScenarioResult>> optResults = new LinkedHashMap<>();
 
         for (SubmittedScenario submittedScenario : submitted.values()) {
-            Future<Result> resultFuture = submittedScenario.getResultFuture();
+            Future<ScenarioResult> resultFuture = submittedScenario.getResultFuture();
 
-            Optional<Result> oResult = Optional.empty();
+            Optional<ScenarioResult> oResult = Optional.empty();
             if (resultFuture.isDone()) {
                 try {
                     oResult = Optional.of(resultFuture.get());
                 } catch (Exception e) {
-                    oResult = Optional.of(new Result(e));
+                    oResult = Optional.of(new ScenarioResult(e));
                 }
             }
 
@@ -181,9 +181,9 @@ public class ScenariosExecutor {
      * @param scenarioName the scenario name of interest
      * @return an optional result
      */
-    public Optional<Result> getPendingResult(String scenarioName) {
+    public Optional<ScenarioResult> getPendingResult(String scenarioName) {
 
-        Future<Result> resultFuture1 = submitted.get(scenarioName).resultFuture;
+        Future<ScenarioResult> resultFuture1 = submitted.get(scenarioName).resultFuture;
         if (resultFuture1 == null) {
             throw new RuntimeException("Unknown scenario name:" + scenarioName);
         }
@@ -191,10 +191,10 @@ public class ScenariosExecutor {
             try {
                 return Optional.ofNullable(resultFuture1.get());
             } catch (Exception e) {
-                return Optional.of(new Result(e));
+                return Optional.of(new ScenarioResult(e));
             }
         } else if (resultFuture1.isCancelled()) {
-            return Optional.of(new Result(new Exception("result was cancelled.")));
+            return Optional.of(new ScenarioResult(new Exception("result was cancelled.")));
         }
         return Optional.empty();
     }
@@ -216,9 +216,9 @@ public class ScenariosExecutor {
 
     private static class SubmittedScenario {
         private Scenario scenario;
-        private Future<Result> resultFuture;
+        private Future<ScenarioResult> resultFuture;
 
-        SubmittedScenario(Scenario scenario, Future<Result> resultFuture) {
+        SubmittedScenario(Scenario scenario, Future<ScenarioResult> resultFuture) {
             this.scenario = scenario;
             this.resultFuture = resultFuture;
         }
@@ -227,7 +227,7 @@ public class ScenariosExecutor {
             return scenario;
         }
 
-        Future<Result> getResultFuture() {
+        Future<ScenarioResult> getResultFuture() {
             return resultFuture;
         }
 
@@ -235,4 +235,10 @@ public class ScenariosExecutor {
             return scenario.getName();
         }
     }
+
+    public synchronized void notifyException(Thread t, Throwable e) {
+        this.stoppingException = new RuntimeException("Error in scenario thread " + t.getName(), e);
+    }
+
+
 }

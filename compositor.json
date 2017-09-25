@@ -7,84 +7,30 @@
   "title": "EngineBlock",
   "branch": "",
   "style": {
-    "name": "Default",
+    "name": "Humanist",
     "componentSet": {
       "nav": "nav/BasicNav",
-      "header": "header/BannerHeader",
-      "article": "article/BasicArticle",
+      "header": "header/LightBannerHeader",
+      "article": "article/ReaderArticle",
       "footer": "footer/BasicFooter"
     },
-    "fontFamily": "-apple-system, BlinkMacSystemFont, sans-serif",
-    "fontWeight": 400,
-    "bold": 600,
-    "lineHeight": 1.5,
-    "typeScale": [
-      72,
-      48,
-      24,
-      20,
-      16,
-      14,
-      12
-    ],
-    "monospace": "Menlo, monospace",
+    "fontFamily": "Athelas, Georgia, serif",
     "heading": {
-      "fontFamily": null,
-      "fontStyle": null,
-      "fontWeight": 600,
-      "lineHeight": 1.25,
-      "textTransform": null,
-      "letterSpacing": null,
-      "h0": {},
-      "h1": {},
-      "h2": {},
-      "h3": {},
-      "h4": {},
-      "h5": {},
-      "h6": {}
-    },
-    "alternativeText": {},
-    "space": [
-      0,
-      8,
-      16,
-      32,
-      48,
-      64,
-      96
-    ],
-    "layout": {
-      "maxWidth": 1024,
-      "centered": false
+      "fontWeight": 400,
+      "textTransform": "uppercase",
+      "letterSpacing": "0.1em"
     },
     "colors": {
-      "text": "#111",
+      "text": "#121212",
       "background": "#fff",
-      "primary": "#08e",
-      "secondary": "#059",
-      "highlight": "#e08",
+      "primary": "#ee5544",
+      "secondary": "#005499",
+      "highlight": "#00bd78",
       "border": "#ddd",
-      "muted": "#eee"
+      "muted": "#f3f3f3"
     },
-    "border": {
-      "width": 1,
-      "radius": 2
-    },
-    "link": {},
-    "button": {
-      "hover": {
-        "boxShadow": "inset 0 0 0 999px rgba(0, 0, 0, .125)"
-      }
-    },
-    "input": {},
-    "body": {
-      "margin": 0
-    },
-    "breakpoints": {
-      "xs": "@media screen and (max-width:40em)",
-      "sm": "@media screen and (min-width:40em)",
-      "md": "@media screen and (min-width:52em)",
-      "lg": "@media screen and (min-width:64em)"
+    "layout": {
+      "maxWidth": 768
     }
   },
   "content": [
@@ -102,13 +48,17 @@
         {
           "href": "https://travis-ci.org/engineblock/engineblock",
           "text": "CI"
+        },
+        {
+          "href": "http://docs.engineblock.io/",
+          "text": "Docs"
         }
       ]
     },
     {
       "component": "header",
-      "heading": "engineblock",
-      "subhead": "Core EngineBlock libraries and runtime.",
+      "heading": "EngineBlock",
+      "subhead": "",
       "children": [
         {
           "component": "ui/TweetButton",
@@ -121,14 +71,18 @@
           "repo": "engineblock"
         }
       ],
-      "links": []
+      "links": [],
+      "image": "https://github.com/engineblock/engineblock-docs/raw/master/docs/images/engineblock_128.png",
+      "backgroundImage": "",
+      "slug": "",
+      "text": "Core EngineBlock libraries and runtime."
     },
     {
       "component": "article",
       "metadata": {
         "source": "github.readme"
       },
-      "html": "<p><a href=\"https://maven-badges.herokuapp.com/maven-central/io.engineblock/engineblock/\"><img src=\"https://maven-badges.herokuapp.com/maven-central/io.engineblock/eb-api/badge.svg\"></a> <a href=\"https://travis-ci.org/engineblock/engineblock\"><img src=\"https://travis-ci.org/engineblock/engineblock.svg?branch=master\"></a></p>\n<h1>Status</h1>\n<p>This is in active development. Collaborators are welcome. However, there is still work to be done to groom the slope for new users.</p>\n<h2>Engine Block</h2>\n<p>This project aims to provide a missing power tool in the test tooling arsenal.</p>\n<p>The design goals:</p>\n<ol>\n<li>Provide a useful and intuitive Reusable Machine Pattern for constructing and reasoning about concurrent performance tests. To encourage this, the runtime machinery is based on <a href=\"https://github.com/engineblock/engineblock/blob/master/docs/core_concepts.md\">simple and tangible core concepts</a>.</li>\n<li>Reduce testing time of complex scenarios with many variables. This is achieved by controlling tests from an <a href=\"https://github.com/engineblock/engineblock/blob/master/docs/scripting.md\">open javascript sandbox</a>. This makes more sophisticated scenarios possible when needed.</li>\n<li>Minimize the amount of effort required to get empirical results from a test cycle. For this, <a href=\"https://github.com/engineblock/engineblock/blob/master/docs/metrics.md\">metrics reporting</a> is baked in.</li>\n</ol>\n<p>In short, Engine Block wishes to be a programmable power tool for performance testing. However, it is somewhat generic. It doesn&apos;t know directly about a particular type of system, or protocol.\nIt simply provides a suitable machine harness in which to put your drivers and testing logic. If you know how to build a client for a particular kind of system, EB will let you load it like a plugin and control it dynamically.</p>\n<p>The most direct way to do this, if you are a tool developer, is to build your own activity type drivers and embed EB as the core runtime. You can always experiment with it and learn how it works by using the built-in diagnostic drivers.</p>\n<h2>Getting Started</h2>\n<p>You can begin at <a href=\"https://github.com/engineblock/engineblock/blob/master/docs/quickstart.md\">Quick Start</a> or consult the full <a href=\"https://github.com/engineblock/engineblock/blob/master/docs/usage_guide.md\">Usage Guide</a>. At least taking a glance at the guide is recommended.</p>\n<h2>Contributions</h2>\n<p>If you are interested in contributing to Engine Block, more information is available in the <a href=\"https://github.com/engineblock/engineblock/blob/master/docs/developers.md\">Developer&apos;s section</a>.</p>\n<h2>History</h2>\n<p>The Engine Block project started as a branch of <a href=\"http://github.com/jshook/testclient\">test client</a>. It has since evolved to be more generic.</p>\n<h2>License</h2>\n<p>This is licensed under the Apache Public License 2.0</p>\n"
+      "html": "<p><a href=\"https://maven-badges.herokuapp.com/maven-central/io.engineblock/engineblock/\"><img src=\"https://maven-badges.herokuapp.com/maven-central/io.engineblock/eb-api/badge.svg\"></a> <a href=\"https://travis-ci.org/engineblock/engineblock\"><img src=\"https://travis-ci.org/engineblock/engineblock.svg?branch=master\"></a></p>\n<h1>Status</h1>\n<p>This is in active development. Collaborators are welcome. However, there is still work to be done to groom the slope for new users.</p>\n<h2>Documentation Site</h2>\n<p>For docs, please visit the <a href=\"http://docs.engineblock.io/\">EngineBlock Docs Site</a>.</p>\n<h2>EngineBlock</h2>\n<p>This project aims to provide a missing power tool in the test tooling arsenal.</p>\n<p>The design goals:</p>\n<ol>\n<li>Provide a useful and intuitive Reusable Machine Pattern for constructing and reasoning about concurrent performance tests. To encourage this, the runtime machinery is based on <a href=\"http://docs.engineblock.io/user-guide/concepts/\">simple and tangible core concepts</a>.</li>\n<li>Reduce testing time of complex scenarios with many variables. This is achieved by controlling tests from an <a href=\"http://docs.engineblock.io/user-guide/scripting/\">open javascript sandbox</a>. This makes more sophisticated scenarios possible when needed.</li>\n<li>Minimize the amount of effort required to get empirical results from a test cycle. For this, <a href=\"http://docs.engineblock.io/user-guide/metrics/\">metrics reporting</a> is baked in.</li>\n</ol>\n<p>In short, Engine Block wishes to be a programmable power tool for performance\ntesting. However, it is somewhat generic. It doesn&apos;t know directly about a\nparticular type of system, or protocol. It simply provides a suitable machine\nharness in which to put your drivers and testing logic. If you know how to build\na client for a particular kind of system, EB will let you load it like a plugin\nand control it dynamically.</p>\n<p>The most direct way to do this, if you are a tool developer, is to build your\nown activity type drivers and embed EB as the core runtime. You can always\nexperiment with it and learn how it works by using the built-in diagnostic\ndrivers.</p>\n<h2>History</h2>\n<p>The Engine Block project started as a branch of <a href=\"http://github.com/jshook/testclient\">test\nclient</a>. It has since evolved to be more\ngeneric.</p>\n<h2>License</h2>\n<p>EngineBlock is licensed under the Apache Public License 2.0</p>\n"
     },
     {
       "component": "footer",

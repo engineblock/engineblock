@@ -33,7 +33,7 @@ public class StrInterpolater implements Function<String, String> {
     private StrSubstitutor substitutor= new StrSubstitutor(multimap,"<<",">>",'\\');
 
     public StrInterpolater(ActivityDef... activityDefs) {
-        Arrays.asList(activityDefs).stream()
+        Arrays.stream(activityDefs)
                 .map(ad -> ad.getParams().getStringStringMap())
                 .forEach(multimap::add);
     }

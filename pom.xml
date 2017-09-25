@@ -7,7 +7,7 @@
     <parent>
         <artifactId>project-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>1.0.67-SNAPSHOT</version>
+        <version>1.0.105-SNAPSHOT</version>
         <relativePath>project-defaults</relativePath>
     </parent>
 
@@ -29,7 +29,6 @@
         <module>eb-rest</module> <!-- restful server for EB runtime -->
         <module>eb-rest-client</module> <!-- restful server for EB runtime -->
         <module>eb-extensions</module> <!-- scripting sandbox extensions for EB -->
-        <module>at-csv</module> <!-- CSV activity type -->
     </modules>
 
     <licenses>
@@ -53,7 +52,34 @@
                 </configuration>
             </plugin>
 
-        </plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>wrap-eb</id>
+                        <phase>package</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>${project.basedir}/wrap_eb.sh</executable>
+                        </configuration>
+                    </execution>
+                    <!--<execution>-->
+                        <!--<id>publish-eb</id>-->
+                        <!--<phase>deploy</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>exec</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<executable>${project.basedir}/publish.sh</executable>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+
+                </executions>
+            </plugin>
+
+    </plugins>
     </build>
 
 

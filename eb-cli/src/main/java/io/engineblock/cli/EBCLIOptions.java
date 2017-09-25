@@ -261,11 +261,11 @@ public class EBCLIOptions {
         return wantsActivityTypes;
     }
 
-    public boolean wantsActivityHelp() {
+    public boolean wantsTopicalHelp() {
         return wantsActivityHelp;
     }
 
-    public String wantsActivityHelpFor() {
+    public String wantsTopicalHelpFor() {
         return wantsActivityHelpFor;
     }
 

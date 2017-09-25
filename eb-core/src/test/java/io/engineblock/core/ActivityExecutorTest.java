@@ -2,14 +2,19 @@ package io.engineblock.core;
 
 import io.engineblock.activityapi.*;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityimpl.action.CoreActionDispenser;
+import io.engineblock.activityimpl.input.CoreInputDispenser;
 import io.engineblock.activityimpl.input.TargetRateInput;
 import io.engineblock.activityimpl.motor.CoreMotor;
 import io.engineblock.activityimpl.SimpleActivity;
+import io.engineblock.activityimpl.motor.CoreMotorDispenser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /*
 *   Copyright 2015 jshook
@@ -25,19 +30,47 @@ import java.util.Optional;
 *   See the License for the specific language governing permissions and
 *   limitations under the License.
 */
-@Test(enabled=false)
+@Test(enabled=true)
 public class ActivityExecutorTest {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutorTest.class);
 
-    @Test(enabled=false)
+    @Test
+    public void testDelayedStartSanity() {
+        ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test;cycles=10000;initdelay=10000;");
+        Optional<ActivityType> activityType = ActivityTypeFinder.instance().get(ad.getActivityType());
+        Activity a = new DelayedInitActivity(ad);
+        InputDispenser idisp = new CoreInputDispenser(a);
+        ActionDispenser adisp = new CoreActionDispenser(a);
+        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp);
+        a.setActionDispenserDelegate(adisp);
+        a.setInputDispenserDelegate(idisp);
+        a.setMotorDispenserDelegate(mdisp);
+
+        ActivityExecutor ae = new ActivityExecutor(a);
+        ad.setThreads(1);
+        ae.startActivity();
+        ae.awaitCompletion(15000);
+        assertThat(idisp.getInput(10).getCurrent()).isEqualTo(10001L);
+
+    }
+
+
+    @Test(enabled=true)
     public void testNewActivityExecutor() {
-        ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test");
+        ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test;cycles=1000;");
         Optional<ActivityType> activityType = ActivityTypeFinder.instance().get(ad.getActivityType());
         Input longSupplier = new TargetRateInput(ad);
         MotorDispenser cmf = getActivityMotorFactory(
                 ad, motorActionDelay(999), longSupplier
         );
         Activity a = new SimpleActivity(ad);
+        InputDispenser idisp = new CoreInputDispenser(a);
+        ActionDispenser adisp = new CoreActionDispenser(a);
+        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp);
+        a.setActionDispenserDelegate(adisp);
+        a.setInputDispenserDelegate(idisp);
+        a.setMotorDispenserDelegate(mdisp);
+
         ActivityExecutor ae = new ActivityExecutor(a);
         ad.setThreads(5);
         ae.startActivity();
@@ -83,5 +116,24 @@ public class ActivityExecutorTest {
             }
         };
         return consumer;
+    }
+
+    private static class DelayedInitActivity extends SimpleActivity {
+        private static Logger logger = LoggerFactory.getLogger(DelayedInitActivity.class);
+
+        public DelayedInitActivity(ActivityDef activityDef) {
+            super(activityDef);
+        }
+
+        @Override
+        public void initActivity() {
+            Integer initdelay = activityDef.getParams().getOptionalInteger("initdelay").orElse(0);
+            logger.info("delaying for " + initdelay);
+            try {
+                Thread.sleep(initdelay);
+            } catch (InterruptedException ignored) {
+            }
+            logger.info("delayed for " + initdelay);
+        }
     }
 }

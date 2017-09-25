@@ -27,10 +27,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class IndexedThreadFactory implements ThreadFactory {
 
+    private final Thread.UncaughtExceptionHandler uncaughtExceptionHandler;
     private String name = Thread.currentThread().getName() + "-factory";
     private AtomicInteger threadIndexer = new AtomicInteger(0);
 
-    public IndexedThreadFactory(String name) { this.name = name; }
+    public IndexedThreadFactory(String name, Thread.UncaughtExceptionHandler exceptionHandler) {
+        this.name = name;
+        this.uncaughtExceptionHandler = exceptionHandler;
+    }
 
     public class IndexedThread extends Thread {
 
@@ -63,6 +67,9 @@ public class IndexedThreadFactory implements ThreadFactory {
         IndexedThread thread = new IndexedThread(threadIndex, r);
         thread.setName(name + String.format(":%03d", threadIndex));
         thread.setMetricName(thread.getName().split(":")[0].split("/")[0]);
+        if (uncaughtExceptionHandler!=null) {
+            thread.setUncaughtExceptionHandler(uncaughtExceptionHandler);
+        }
 
         return thread;
     }

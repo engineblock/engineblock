@@ -5,4 +5,7 @@
 **/.project
 **/.settings
 **/*.log
+**/logs
 **/*.csv
+metrics/**
+bin/**

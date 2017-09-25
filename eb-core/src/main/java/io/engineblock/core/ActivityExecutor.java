@@ -21,10 +21,7 @@ import io.engineblock.activityimpl.SlotStateTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -53,6 +50,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     private final Activity activity;
     private final ActivityDef activityDef;
     private ExecutorService executorService;
+    private RuntimeException stoppingException;
 //    private RunState intendedState = RunState.Uninitialized;
 
     public ActivityExecutor(Activity activity) {
@@ -62,7 +60,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
                 0, Integer.MAX_VALUE,
                 0L, TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
-                new IndexedThreadFactory(activity.getAlias())
+                new IndexedThreadFactory(activity.getAlias(), new ActivityExceptionHandler(this))
         );
         activity.getActivityDef().getParams().addListener(this);
     }
@@ -82,11 +80,13 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     public synchronized void startActivity() {
         logger.info("starting activity " + activity.getAlias() + " for cycles " + activity.getCycleSummary());
         try {
-            activity.initActivity();
             activity.setRunState(RunState.Starting);
+            activity.initActivity();
         } catch (Exception e) {
-            logger.error("There was an error starting activity:" + activityDef.getAlias());
-            throw new RuntimeException(e);
+            this.stoppingException = new RuntimeException("Error initializing activity '" +
+                    activity.getAlias() +"': " + e.getMessage(),e);
+            logger.error("error initializing activity '" + activity.getAlias() + "': " + stoppingException);
+            throw stoppingException;
         }
         adjustToActivityDef(activity.getActivityDef());
         activity.setRunState(RunState.Running);
@@ -99,7 +99,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         activity.setRunState(RunState.Stopped);
         logger.info("stopping activity in progress: " + this.getActivityDef().getAlias());
         motors.forEach(Motor::requestStop);
-        motors.forEach(m -> awaitRequiredMotorState(m, 10000, 50, RunState.Stopped, RunState.Finished));
+        motors.forEach(m -> awaitRequiredMotorState(m, 30000, 50, RunState.Stopped, RunState.Finished));
         activity.shutdownActivity();
         logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
     }
@@ -125,6 +125,10 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
 
         activity.shutdownActivity();
         logger.debug(runnables.size() + " threads never started.");
+
+        if (stoppingException!=null) {
+            throw stoppingException;
+        }
     }
 
     public boolean requestStopExecutor(int secondsToWait) {
@@ -141,6 +145,9 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
             logger.warn("while waiting termination of activity " + activity.getAlias() + ", " + ie.getMessage());
         } finally {
             activity.shutdownActivity();
+        }
+        if (stoppingException!=null) {
+            throw stoppingException;
         }
 
         return wasStopped;
@@ -162,7 +169,9 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         // considered ready to handle parameter map changes. This is signaled in an activity
         // by the RunState.
         if (activity.getRunState()!=RunState.Uninitialized) {
-            adjustToActivityDef(activity.getActivityDef());
+            if (activity.getRunState()==RunState.Running) {
+                adjustToActivityDef(activity.getActivityDef());
+            }
             motors.stream()
                     .filter(m -> (m instanceof ActivityDefObserver))
 //                    .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Uninitialized)
@@ -183,6 +192,9 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         boolean awaited = awaitAllRequiredMotorState(timeout, 50, RunState.Finished, RunState.Stopped);
         if (awaited) {
             awaited = awaitCompletion(timeout);
+        }
+        if (stoppingException!=null) {
+            throw stoppingException;
         }
         return awaited;
     }
@@ -237,6 +249,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
             case Running:
                 motors.stream()
                         .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Running)
+                        .filter(m -> m.getSlotStateTracker().getSlotState() != RunState.Finished)
                         .forEach(m -> {
                             m.getSlotStateTracker().enterState(RunState.Starting);
                             executorService.execute(m);
@@ -359,7 +372,8 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         boolean awaitedRequiredState = awaitMotorState(m, waitTime, pollTime, awaitingState);
         if (!awaitedRequiredState) {
             String error = "Unable to await " + activityDef.getAlias() +
-                    "/Motor[" + m.getSlotId() + "]: from state " + startingState + " to " + m.getSlotStateTracker().getSlotState();
+                    "/Motor[" + m.getSlotId() + "]: from state " + startingState + " to " + m.getSlotStateTracker().getSlotState()
+                    + " after waiting for " + waitTime +"ms";
             RuntimeException e = new RuntimeException(error);
             logger.error(error);
             throw e;
@@ -416,5 +430,11 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
                 .map(Motor::getSlotStateTracker).map(SlotStateTracker::getSlotState)
                 .distinct().sorted().findFirst();
         return first.orElse(RunState.Uninitialized);
+    }
+
+    public synchronized void notifyException(Thread t, Throwable e) {
+        //logger.error("Uncaught exception in activity thread forwarded to activity executor:", e);
+        this.stoppingException=new RuntimeException("Error in activity thread " +t.getName(), e);
+        forceStopExecutor(10000);
     }
 }

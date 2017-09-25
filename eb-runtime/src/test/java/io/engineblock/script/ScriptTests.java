@@ -17,7 +17,7 @@
 
 package io.engineblock.script;
 
-import io.engineblock.core.Result;
+import io.engineblock.core.ScenarioResult;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
 import org.assertj.core.data.Offset;
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Test
 public class ScriptTests {
 
-    public static Result runScenario(String scriptname) {
+    public static ScenarioResult runScenario(String scriptname) {
         String scenarioName = "testing activity" + scriptname;
         ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName);
@@ -44,16 +44,16 @@ public class ScriptTests {
         ScenarioLogger scenarioLogger = new ScenarioLogger(s).setMaxLogs(0).setLogDir("logs/test").start();
         e.execute(s,scenarioLogger);
         ScenariosResults scenariosResults = e.awaitAllResults();
-        Result result = scenariosResults.getOne();
-        result.reportToLog();
-        return result;
+        ScenarioResult scenarioResult = scenariosResults.getOne();
+        scenarioResult.reportToLog();
+        return scenarioResult;
     }
 
     @Test
     public void testTargetRatePhased() {
 
-        Result result = runScenario("targetrate");
-        String iolog = result.getIOLog();
+        ScenarioResult scenarioResult = runScenario("targetrate");
+        String iolog = scenarioResult.getIOLog();
         System.out.println("iolog\n"+iolog);
         Pattern p = Pattern.compile(".*mean phase rate = (\\d[.\\d]+).*",Pattern.DOTALL);
         Matcher m = p.matcher(iolog);
@@ -67,28 +67,28 @@ public class ScriptTests {
 
     @Test
     public void testExtensionPoint() {
-        Result result = runScenario("extensions");
-        assertThat(result.getIOLog()).contains("sum is 46");
+        ScenarioResult scenarioResult = runScenario("extensions");
+        assertThat(scenarioResult.getIOLog()).contains("sum is 46");
     }
 
     @Test
     public void testLinkedInput() {
-        Result result = runScenario("linkedinput");
+        ScenarioResult scenarioResult = runScenario("linkedinput");
         Pattern p = Pattern.compile(".*started leader.*started follower.*stopped leader.*stopped follower.*",
                 Pattern.DOTALL);
-        assertThat(p.matcher(result.getIOLog()).matches()).isTrue();
+        assertThat(p.matcher(scenarioResult.getIOLog()).matches()).isTrue();
     }
 
     @Test
     public void testExtensionCsvLogger() {
-        Result result = runScenario("extension_csvmetrics");
-        assertThat(result.getIOLog()).contains("started new csvlogger: csvmetricstestdir");
+        ScenarioResult scenarioResult = runScenario("extension_csvmetrics");
+        assertThat(scenarioResult.getIOLog()).contains("started new csvlogger: csvmetricstestdir");
     }
 
     @Test
     public void testExtensionHistoStatsLogger() throws IOException {
-        Result result = runScenario("extension_histostatslogger");
-        assertThat(result.getIOLog()).contains("stdout started logging to histostats.csv");
+        ScenarioResult scenarioResult = runScenario("extension_histostatslogger");
+        assertThat(scenarioResult.getIOLog()).contains("stdout started logging to histostats.csv");
         List<String> strings = Files.readAllLines(Paths.get("histostats.csv"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains("min,p25,p50,p75,p90,p95,");
@@ -97,8 +97,8 @@ public class ScriptTests {
 
     @Test
     public void testExtensionHistogramLogger() throws IOException {
-        Result result = runScenario("extension_histologger");
-        assertThat(result.getIOLog()).contains("stdout started logging to hdrhistodata.log");
+        ScenarioResult scenarioResult = runScenario("extension_histologger");
+        assertThat(scenarioResult.getIOLog()).contains("stdout started logging to hdrhistodata.log");
         List<String> strings = Files.readAllLines(Paths.get("hdrhistodata.log"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains(",HIST");
@@ -107,41 +107,56 @@ public class ScriptTests {
 
     @Test
     public void testBlockingRun() {
-        Result result = runScenario("blockingrun");
-        int a1end = result.getIOLog().indexOf("blockingactivity1 finished");
-        int a2start = result.getIOLog().indexOf("running blockingactivity2");
+        ScenarioResult scenarioResult = runScenario("blockingrun");
+        int a1end = scenarioResult.getIOLog().indexOf("blockingactivity1 finished");
+        int a2start = scenarioResult.getIOLog().indexOf("running blockingactivity2");
         assertThat(a1end).isLessThan(a2start);
     }
 
     @Test
     public void testAwaitFinished() {
-        Result result = runScenario("awaitfinished");
-        result.reportToLog();
+        ScenarioResult scenarioResult = runScenario("awaitfinished");
+        scenarioResult.reportToLog();
     }
 
     @Test
     public void testStartStop() {
-        Result result = runScenario("startstopdiag");
-        result.reportToLog();
-        int startedAt = result.getIOLog().indexOf("starting activity teststartstopdiag");
-        int stoppedAt = result.getIOLog().indexOf("stopped activity teststartstopdiag");
+        ScenarioResult scenarioResult = runScenario("startstopdiag");
+        scenarioResult.reportToLog();
+        int startedAt = scenarioResult.getIOLog().indexOf("starting activity teststartstopdiag");
+        int stoppedAt = scenarioResult.getIOLog().indexOf("stopped activity teststartstopdiag");
         assertThat(startedAt).isGreaterThan(0);
         assertThat(stoppedAt).isGreaterThan(startedAt);
     }
 
     @Test
     public void testThreadChange() {
-        Result result = runScenario("threadchange");
-        int changedTo1At = result.getIOLog().indexOf("threads now 1");
-        int changedTo5At = result.getIOLog().indexOf("threads now 5");
+        ScenarioResult scenarioResult = runScenario("threadchange");
+        int changedTo1At = scenarioResult.getIOLog().indexOf("threads now 1");
+        int changedTo5At = scenarioResult.getIOLog().indexOf("threads now 5");
         assertThat(changedTo1At).isGreaterThan(0);
         assertThat(changedTo5At).isGreaterThan(changedTo1At);
     }
 
     @Test
     public void testReadMetric() {
-        Result result = runScenario("readmetrics");
-        assertThat(result.getIOLog()).contains("count: ");
+        ScenarioResult scenarioResult = runScenario("readmetrics");
+        assertThat(scenarioResult.getIOLog()).contains("count: ");
+    }
+
+    @Test
+    public void testExceptionPropagationFromMotorThread() {
+        ScenarioResult scenarioResult = runScenario("activityerror");
+        assertThat(scenarioResult.getException()).isPresent();
+        assertThat(scenarioResult.getException().get().getMessage()).contains("For input string: \"unparsable\"");
+    }
+
+    @Test
+    public void testExceptionPropagationFromActivityInit() {
+        ScenarioResult scenarioResult = runScenario("activityiniterror");
+        assertThat(scenarioResult.getException()).isPresent();
+        assertThat(scenarioResult.getException().get().getMessage()).contains("For input string: \"unparsable\"");
+        assertThat(scenarioResult.getException()).isNotNull();
     }
 
 

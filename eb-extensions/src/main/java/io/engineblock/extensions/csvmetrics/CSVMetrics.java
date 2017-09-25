@@ -19,7 +19,6 @@ package io.engineblock.extensions.csvmetrics;
 
 import com.codahale.metrics.CsvReporter;
 import com.codahale.metrics.Metric;
-import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import org.slf4j.Logger;
 
@@ -82,6 +81,9 @@ public class CSVMetrics {
 
     public void add(Metric metric) {
         filter.add(metric);
+    }
+    public void addPattern(String regex) {
+        filter.addPattern(regex);
     }
 
     private MetricInstanceFilter filter = new MetricInstanceFilter();
