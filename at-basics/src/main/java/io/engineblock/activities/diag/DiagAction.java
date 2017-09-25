@@ -28,13 +28,13 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     private final DiagActivity diagActivity;
 
     private int slot;
-    private long erroroncycle=-1;
+//    private long erroroncycle=-1;
     private long lastUpdate;
     private long quantizedInterval;
     private long reportModulo;
     private int phasesPerCycle;
     private int completedPhase;
-    private int errormodulo;
+    private int errormodulo = Integer.MAX_VALUE;
 
     public DiagAction(int slot, ActivityDef activityDef, DiagActivity diagActivity) {
         this.activityDef = activityDef;
@@ -42,28 +42,6 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
         this.diagActivity = diagActivity;
 
         onActivityDefUpdate(activityDef);
-    }
-
-    @Override
-    public void accept(long value) {
-        long now = System.currentTimeMillis();
-        if (completedPhase>=phasesPerCycle) {
-            completedPhase=0;
-        }
-        if ((now - lastUpdate) > quantizedInterval) {
-            long delay = ((now - lastUpdate) - quantizedInterval);
-            logger.info("diag action interval, input=" + value + ", phase=" + completedPhase +", report delay=" + delay);
-            lastUpdate += quantizedInterval;
-            diagActivity.delayHistogram.update(delay);
-        }
-        if ((value % reportModulo) == 0) {
-            logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
-        }
-        if (erroroncycle==value) {
-            throw new RuntimeException("Diag was asked to error on cycle " + erroroncycle);
-        }
-        completedPhase++;
-
     }
 
     /**
@@ -147,10 +125,33 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
         }
         completedPhase++;
 
-        if ((value%errormodulo)==0) {
+        if ((value % errormodulo)==0) {
             return 1;
         }
         return 0;
     }
+
+//    @Override
+//    public void accept(long value) {
+//        long now = System.currentTimeMillis();
+//        if (completedPhase>=phasesPerCycle) {
+//            completedPhase=0;
+//        }
+//        if ((now - lastUpdate) > quantizedInterval) {
+//            long delay = ((now - lastUpdate) - quantizedInterval);
+//            logger.info("diag action interval, input=" + value + ", phase=" + completedPhase +", report delay=" + delay);
+//            lastUpdate += quantizedInterval;
+//            diagActivity.delayHistogram.update(delay);
+//        }
+//        if ((value % reportModulo) == 0) {
+//            logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
+//        }
+//        if (erroroncycle==value) {
+//            throw new RuntimeException("Diag was asked to error on cycle " + erroroncycle);
+//        }
+//        completedPhase++;
+//
+//    }
+
 
 }
