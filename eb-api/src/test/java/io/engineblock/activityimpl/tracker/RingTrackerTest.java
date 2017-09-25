@@ -1,7 +1,7 @@
 package io.engineblock.activityimpl.tracker;
 
 import io.engineblock.activityapi.cycletracking.CycleSegment;
-import io.engineblock.activityapi.cycletracking.Tracker;
+import io.engineblock.activityapi.cycletracking.CycleSinkSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -41,7 +41,7 @@ public class RingTrackerTest {
             expectedExceptionsMessageRegExp = ".*attempted to mark cycle:3.*")
     public void testUnderMarkingError() {
         RingTracker rt = new RingTracker(13, 31, 7, 3);
-        rt.markResult(3, 5);
+        rt.consumeResult(3, 5);
     }
 
     @Test(
@@ -55,17 +55,17 @@ public class RingTrackerTest {
     @Test
     public void testPerfectFit() {
         RingTracker rt = new RingTracker(3, 6, 9, 4);
-        rt.markResult(3, 3);
-        rt.markResult(4, 4);
-        rt.markResult(5, 5);
-        rt.markResult(6, 6);
+        rt.consumeResult(3, 3);
+        rt.consumeResult(4, 4);
+        rt.consumeResult(5, 5);
+        rt.consumeResult(6, 6);
         CycleSegment segment1 = rt.getSegment(4);
         assertThat(segment1.codes).isEqualTo(new byte[]{(byte) 3, (byte) 4, (byte) 5, (byte) 6});
         assertThat(segment1.cycle).isEqualTo(3L);
-        rt.markResult(7, 7);
-        rt.markResult(8, 8);
-        rt.markResult(9, 9);
-        rt.markResult(10, 10);
+        rt.consumeResult(7, 7);
+        rt.consumeResult(8, 8);
+        rt.consumeResult(9, 9);
+        rt.consumeResult(10, 10);
         CycleSegment segment2 = rt.getSegment(4);
         assertThat(segment2.codes).isEqualTo(new byte[]{(byte) 7, (byte) 8, (byte) 9, (byte) 10});
         assertThat(segment2.cycle).isEqualTo(7L);
@@ -113,12 +113,12 @@ public class RingTrackerTest {
     }
 
     private static class Reader implements Runnable {
-        private final Tracker t;
+        private final CycleSinkSource t;
 
         public LinkedBlockingQueue<Integer> q = new LinkedBlockingQueue<>(1);
         public List<CycleSegment> segments = new ArrayList<>();
 
-        public Reader(Tracker t) {
+        public Reader(CycleSinkSource t) {
             this.t = t;
         }
 
@@ -144,11 +144,11 @@ public class RingTrackerTest {
     }
 
     public static class Marker implements Runnable {
-        private final Tracker t;
+        private final CycleSinkSource t;
 
         public LinkedBlockingQueue<Integer> q = new LinkedBlockingQueue<>(1);
 
-        public Marker(Tracker t) {
+        public Marker(CycleSinkSource t) {
             this.t = t;
         }
 
@@ -164,7 +164,7 @@ public class RingTrackerTest {
                         logger.debug("read marker value 0, stopping test marker");
                         return;
                     }
-                    t.markResult(value, value);
+                    t.consumeResult(value, value);
                 } else {
                     throw new RuntimeException("Test error: waited too long for input: 10s");
                 }

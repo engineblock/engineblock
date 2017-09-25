@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.markers.logger;
+package io.engineblock.activityapi.cycletracking.markers.logger;
 
 import io.engineblock.activityapi.cycletracking.CycleResultSink;
 import io.engineblock.activityimpl.ActivityDef;
@@ -35,7 +35,7 @@ public class LoggingCycleResultSink implements CycleResultSink {
     }
 
     @Override
-    public boolean markResult(long completedCycle, int result) {
+    public boolean consumeResult(long completedCycle, int result) {
         sb.get().setLength(0);
         sb.get()
                 .append("activity=").append(def.getAlias())

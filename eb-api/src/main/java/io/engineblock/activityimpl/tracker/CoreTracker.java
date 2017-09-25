@@ -18,7 +18,7 @@
 package io.engineblock.activityimpl.tracker;
 
 import io.engineblock.activityapi.cycletracking.CycleSegment;
-import io.engineblock.activityapi.cycletracking.Tracker;
+import io.engineblock.activityapi.cycletracking.CycleSinkSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * This cycle marker wraps another tracking structure in order to
  * allow for flexible buffering methods.
  */
-public class CoreTracker implements Tracker {
+public class CoreTracker implements CycleSinkSource {
     private final static Logger logger = LoggerFactory.getLogger(CoreTracker.class);
     private final int extentSize;
     private final int maxExtents;
@@ -146,7 +146,7 @@ public class CoreTracker implements Tracker {
      * @return true if the result could be marked, otherwise false
      */
     @Override
-    public boolean markResult(long completedCycle, int result) {
+    public boolean consumeResult(long completedCycle, int result) {
         while (true) {
             ByteTrackerExtent extent = this.markingExtents.get();
             long remaining = extent.markResult(completedCycle, result);

@@ -15,29 +15,29 @@
  * /
  */
 
-package io.engineblock.markers.filebuffer;
+package io.engineblock.activityapi.cycletracking.markers.filebuffer;
 
 import io.engineblock.activityapi.cycletracking.CycleSegment;
-import io.engineblock.activityapi.cycletracking.Tracker;
+import io.engineblock.activityapi.cycletracking.CycleSinkSource;
 import io.engineblock.activityimpl.ActivityDef;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class FileBufferTracker implements Tracker {
+public class FileBufferTracker implements CycleSinkSource {
 
     private final ActivityDef activityDef;
     FileBufferResultSink sink;
-    FileBufferResultSource source;
+    FileBufferCycleSource source;
 
     public FileBufferTracker(ActivityDef activityDef) {
         this.activityDef = activityDef;
         sink = new FileBufferResultSink(activityDef);
-        source = new FileBufferResultSource(activityDef);
+        source = new FileBufferCycleSource(activityDef);
     }
 
     @Override
-    public boolean markResult(long completedCycle, int result) {
-        return sink.markResult(completedCycle, result);
+    public boolean consumeResult(long completedCycle, int result) {
+        return sink.consumeResult(completedCycle, result);
     }
 
     @Override

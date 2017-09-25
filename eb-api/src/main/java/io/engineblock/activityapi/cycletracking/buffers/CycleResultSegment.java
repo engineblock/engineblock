@@ -15,12 +15,7 @@
  * /
  */
 
-package io.engineblock.activityapi.cycletracking;
+package io.engineblock.activityapi.cycletracking.buffers;
 
-import io.engineblock.activityapi.Activity;
-
-public interface TrackerDispenser {
-    String getName();
-    void setActivity(Activity activity);
-    CycleSinkSource getTracker(long slot);
+public interface CycleResultSegment extends Iterable<CycleResult> {
 }

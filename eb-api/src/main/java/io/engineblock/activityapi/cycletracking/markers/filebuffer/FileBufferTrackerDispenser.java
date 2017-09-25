@@ -15,11 +15,11 @@
  * /
  */
 
-package io.engineblock.markers.filebuffer;
+package io.engineblock.activityapi.cycletracking.markers.filebuffer;
 
 import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.Activity;
-import io.engineblock.activityapi.cycletracking.Tracker;
+import io.engineblock.activityapi.cycletracking.CycleSinkSource;
 import io.engineblock.activityapi.cycletracking.TrackerDispenser;
 
 // TODO: Create one dispenser per activity
@@ -40,7 +40,7 @@ public class FileBufferTrackerDispenser implements TrackerDispenser {
     }
 
     @Override
-    public Tracker getTracker(long slot) {
+    public CycleSinkSource getTracker(long slot) {
         return new FileBufferTracker(activity.getActivityDef());
     }
 }

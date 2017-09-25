@@ -1,7 +1,7 @@
 package io.engineblock.activityimpl.tracker;
 
 import io.engineblock.activityapi.cycletracking.CycleSegment;
-import io.engineblock.activityapi.cycletracking.Tracker;
+import io.engineblock.activityapi.cycletracking.CycleSinkSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class RingTracker implements Tracker {
+public class RingTracker implements CycleSinkSource {
 
     private final static Logger logger = LoggerFactory.getLogger(RingTracker.class);
 
@@ -62,7 +62,7 @@ public class RingTracker implements Tracker {
     }
 
     @Override
-    public boolean markResult(long completedCycle, int result) {
+    public boolean consumeResult(long completedCycle, int result) {
         while (true) {
             long wstart = this.markingStart.get();
             logger.debug("marking result  " + completedCycle + " => " + result);

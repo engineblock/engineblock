@@ -1,6 +1,7 @@
 package io.engineblock.core;
 
 import io.engineblock.activityapi.*;
+import io.engineblock.activityapi.cycletracking.TrackerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.action.CoreActionDispenser;
 import io.engineblock.activityimpl.input.CoreInputDispenser;
@@ -8,6 +9,7 @@ import io.engineblock.activityimpl.input.TargetRateInput;
 import io.engineblock.activityimpl.motor.CoreMotor;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.motor.CoreMotorDispenser;
+import io.engineblock.activityimpl.tracker.CoreTrackerDispenser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -41,7 +43,8 @@ public class ActivityExecutorTest {
         Activity a = new DelayedInitActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
-        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp);
+        TrackerDispenser tdisp = new CoreTrackerDispenser(a);
+        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
         a.setActionDispenserDelegate(adisp);
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
@@ -50,7 +53,7 @@ public class ActivityExecutorTest {
         ad.setThreads(1);
         ae.startActivity();
         ae.awaitCompletion(15000);
-        assertThat(idisp.getInput(10).getCurrent()).isEqualTo(10001L);
+        assertThat(idisp.getInput(10).getPendingCycle()).isEqualTo(10001L);
 
     }
 
@@ -66,7 +69,8 @@ public class ActivityExecutorTest {
         Activity a = new SimpleActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
-        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp);
+        TrackerDispenser tdisp = new CoreTrackerDispenser(a);
+        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
         a.setActionDispenserDelegate(adisp);
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);

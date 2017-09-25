@@ -14,9 +14,8 @@
  *    limitations under the License.
  * /
  */
-package io.engineblock.extensions;
+package io.engineblock.activityapi.cycletracking;
 
-import io.engineblock.activityapi.cycletracking.TrackerDispenser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,19 +27,19 @@ import java.util.stream.Collectors;
  * Convenient singleton for accessing all loadable CycleMarker instances via
  * CycleMarkerDispensers.
  */
-public class CycleMarkerFinder {
+public class TrackerFinder {
 
-    private static final Logger logger = LoggerFactory.getLogger(CycleMarkerFinder.class);
-    private static CycleMarkerFinder instance;
+    private static final Logger logger = LoggerFactory.getLogger(TrackerFinder.class);
+    private static TrackerFinder instance;
 
     private final Map<String, TrackerDispenser> types = new ConcurrentHashMap<>();
 
-    private CycleMarkerFinder() {
+    private TrackerFinder() {
     }
 
-    public synchronized static CycleMarkerFinder instance() {
+    public synchronized static TrackerFinder instance() {
         if (instance==null) {
-            instance = new CycleMarkerFinder();
+            instance = new TrackerFinder();
         }
         return instance;
     };

@@ -95,11 +95,16 @@ public interface ActivityType<A extends Activity> {
         return activity;
     }
 
+    /**
+     * This method will be called <em>once</em> per action instance.
+     *
+     * @param activity The activity instance that will parameterize the returned TrackerDispenser instance.
+     * @return an instance of TrackerDispenser
+     */
     default TrackerDispenser getTrackerDispenser(A activity) {
         return new CoreTrackerDispenser(activity);
     }
 
-    ;
 
     /**
      * This method will be called <em>once</em> per action instance.

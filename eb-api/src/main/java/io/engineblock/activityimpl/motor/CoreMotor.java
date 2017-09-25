@@ -20,7 +20,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.*;
 import io.engineblock.activityapi.cycletracking.CycleResultSink;
-import io.engineblock.activityapi.cycletracking.Tracker;
+import io.engineblock.activityapi.cycletracking.CycleSinkSource;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
@@ -97,18 +97,18 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      * @param action      An LongConsumer which is applied to the input for each cycle.
-     * @param tracker     An optional tracker.
+     * @param cycleSinkSource     An optional tracker.
      */
     public CoreMotor(
             ActivityDef activityDef,
             long slotId,
             Input input,
             Action action,
-            Tracker tracker
+            CycleSinkSource cycleSinkSource
     ) {
         this(activityDef, slotId, input);
         setAction(action);
-        setTracker(tracker);
+        setTracker(cycleSinkSource);
     }
 
     /**
@@ -234,7 +234,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                         }
 
                         if (cycleResultSink !=null) {
-                            cycleResultSink.markResult(cyclenum,result);
+                            cycleResultSink.consumeResult(cyclenum,result);
                         }
                     }
                 }

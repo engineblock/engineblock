@@ -15,10 +15,9 @@
  * /
  */
 
-package io.engineblock.activityapi.cycletracking;
+package io.engineblock.activityapi.cycletracking.buffers;
 
-import io.engineblock.activityapi.Input;
-
-public interface CycleResultSource extends Input, SegmentedInput {
-
+public interface CycleResult {
+    long getCycle();
+    int getResult();
 }

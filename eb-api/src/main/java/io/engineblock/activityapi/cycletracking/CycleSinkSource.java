@@ -22,7 +22,9 @@ package io.engineblock.activityapi.cycletracking;
  * status of a cycle-oriented task, like an activity.</p>
  *
  * Trackers are types that know how read data that is collected
- * at runtime by a {@link CycleResultSink}.
+ * at runtime by a {@link CycleResultSink}, and provide data
+ * in contiguous mode by a {@link CycleSource}, blocking
+ * as necessary to prevent reading over undecided cycles.
  *
  * <p>When an activity is configured with a marker, it must mark
  * completion on a specific cycle when it is complete, independent
@@ -31,13 +33,12 @@ package io.engineblock.activityapi.cycletracking;
  * <p>It is the job of the tracker to provide efficient concurrent access
  * to:
  * <UL>
- *     <LI>The lowest cycle number that has been isCycleCompleted. This may return a lower
- *     cycle number that has been isCycleCompleted within some bound, but it may not be higher..</LI>
- *     <LI>The highest cycle number that has been isCycleCompleted. This may return a lower cycle
- *     number than the highest cycle number that has been isCycleCompleted, but it must never be higher.
- *     </LI>
+ * <LI>The lowest cycle number that has been completed. This may return a lower
+ * cycle number that has been isCycleCompleted within some bound, but it may not be higher..</LI>
+ * <LI>The highest cycle number that has been isCycleCompleted. This may return a lower cycle
+ * number than the highest cycle number that has been isCycleCompleted, but it must never be higher.</LI>
  * </UL>
  */
-public interface Tracker extends CycleResultSink, CycleResultSource {
+public interface CycleSinkSource extends CycleResultSink, CycleSource {
 
 }

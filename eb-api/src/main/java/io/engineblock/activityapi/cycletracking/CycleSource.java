@@ -15,21 +15,13 @@
  * /
  */
 
-package io.engineblock.markers.logger;
+package io.engineblock.activityapi.cycletracking;
 
-import io.engineblock.activityapi.Activity;
-import io.engineblock.activityapi.cycletracking.CycleResultSink;
-import io.engineblock.activityimpl.ActivityDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.engineblock.activityapi.Input;
 
-public class LoggingTrackerDispenser {
+/**
+ * A cycle result source provides specific cycles to consumers.
+ */
+public interface CycleSource extends Input, SegmentedInput {
 
-    private final static Logger logger = LoggerFactory.getLogger(LoggingTrackerDispenser.class);
-    private Activity activity;
-
-
-    public CycleResultSink getTracker(ActivityDef activityDef, long slot) {
-        return new LoggingCycleResultSink(activity.getActivityDef(), slot);
-    }
 }

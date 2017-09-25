@@ -15,19 +15,19 @@
  * /
  */
 
-package io.engineblock.markers.filebuffer;
+package io.engineblock.activityapi.cycletracking.markers.filebuffer;
 
-import io.engineblock.activityapi.cycletracking.CycleResultSource;
+import io.engineblock.activityapi.cycletracking.CycleSource;
 import io.engineblock.activityapi.cycletracking.CycleSegment;
 import io.engineblock.activityimpl.ActivityDef;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class FileBufferResultSource implements CycleResultSource {
+public class FileBufferCycleSource implements CycleSource {
 
     private ActivityDef activityDef;
 
-    public FileBufferResultSource(ActivityDef activityDef) {
+    public FileBufferCycleSource(ActivityDef activityDef) {
         this.activityDef = activityDef;
     }
 

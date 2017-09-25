@@ -30,27 +30,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CoreTrackerTest {
 
     @Test
-    public void testCore4() {
+    public void testCoreSimple0to4() {
         CoreTracker ct4 = new CoreTracker(0,3,4,1);
-        ct4.markResult(0,0);
-        ct4.markResult(1,1);
-        ct4.markResult(2,2);
-        ct4.markResult(3,3);
+        ct4.consumeResult(0,0);
+        ct4.consumeResult(1,1);
+        ct4.consumeResult(2,2);
+        ct4.consumeResult(3,3);
 //        assertThat(ct4.getMaxContiguousMarked()).isEqualTo(3);
     }
 
     @Test
     public void testRotationSingleExtent() {
         CoreTracker ct4 = new CoreTracker(0,11,4,2);
-        ct4.markResult(0,0);
-        ct4.markResult(1,1);
-        ct4.markResult(2,2);
-        ct4.markResult(3,3);
+        ct4.consumeResult(0,0);
+        ct4.consumeResult(1,1);
+        ct4.consumeResult(2,2);
+        ct4.consumeResult(3,3);
         CycleSegment segment1 = ct4.getSegment(4); // without this, will block here due to lack of segment allowance
-        ct4.markResult(4,4);
-        ct4.markResult(5,5);
-        ct4.markResult(6,6);
-        ct4.markResult(7,7);
+        ct4.consumeResult(4,4);
+        ct4.consumeResult(5,5);
+        ct4.consumeResult(6,6);
+        ct4.consumeResult(7,7);
         CycleSegment segment2 = ct4.getSegment(4);
 //        CycleSegment segment2 = ct4.getSegment(2);
 //        CycleSegment segment3 = ct4.getSegment(2);
@@ -80,7 +80,7 @@ public class CoreTrackerTest {
             @Override
             public void run() {
                 for (int i = 0; i <= 99; i++) {
-                    ct.markResult(i,i);
+                    ct.consumeResult(i,i);
                 }
             }
         };
@@ -124,7 +124,7 @@ public class CoreTrackerTest {
             @Override
             public void run() {
                 for (long i = min; i < max; i++) {
-                    ct.markResult(i,(int) i);
+                    ct.consumeResult(i,(int) i);
                 }
             }
         };

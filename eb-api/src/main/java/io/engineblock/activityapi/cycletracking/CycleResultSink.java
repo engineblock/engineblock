@@ -7,15 +7,13 @@ package io.engineblock.activityapi.cycletracking;
 public interface CycleResultSink {
 
     /**
-     * Mark a numbered cycle with a specific result.
-     * @param completedCycle The cycle to mark isCycleCompleted
+     * Mark the result of the numbered cycle with an integer value.
+     * The meaning of the value provided is contextual to the way it is used.
+     * (Each process will have its own status tables, etc.)
+     *
+     * @param completedCycle The cycle number being marked.
+     * @param result the result ordinal
      */
-//    boolean markResult(long completedCycle, byte result);
-
-    boolean markResult(long completedCycle, int result);
-//    {
-//        return markResult(completedCycle, result & (byte) 127);
-//    }
-
+    boolean consumeResult(long completedCycle, int result);
 
 }
