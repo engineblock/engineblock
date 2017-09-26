@@ -27,19 +27,19 @@ import java.util.stream.Collectors;
  * Convenient singleton for accessing all loadable CycleMarker instances via
  * CycleMarkerDispensers.
  */
-public class TrackerFinder {
+public class MarkerFinder {
 
-    private static final Logger logger = LoggerFactory.getLogger(TrackerFinder.class);
-    private static TrackerFinder instance;
+    private static final Logger logger = LoggerFactory.getLogger(MarkerFinder.class);
+    private static MarkerFinder instance;
 
-    private final Map<String, TrackerDispenser> types = new ConcurrentHashMap<>();
+    private final Map<String, MarkerDispenser> types = new ConcurrentHashMap<>();
 
-    private TrackerFinder() {
+    private MarkerFinder() {
     }
 
-    public synchronized static TrackerFinder instance() {
+    public synchronized static MarkerFinder instance() {
         if (instance==null) {
-            instance = new TrackerFinder();
+            instance = new MarkerFinder();
         }
         return instance;
     };
@@ -49,7 +49,7 @@ public class TrackerFinder {
      * @param markerType The canonical marker type name.
      * @return an optional ActivityType instance
      */
-    public Optional<TrackerDispenser> get(String markerType) {
+    public Optional<MarkerDispenser> get(String markerType) {
         markerType=markerType.split(",")[0]; // Strip any ,... from the front
         return Optional.ofNullable(getTypes().get(markerType));
     }
@@ -60,20 +60,20 @@ public class TrackerFinder {
      * @return an ActivityType instance
      * @throws RuntimeException if the activity type isn't found.
      */
-    public TrackerDispenser getOrThrow(String markerType) {
-        Optional<TrackerDispenser> at = Optional.ofNullable(getTypes().get(markerType));
+    public MarkerDispenser getOrThrow(String markerType) {
+        Optional<MarkerDispenser> at = Optional.ofNullable(getTypes().get(markerType));
         return at.orElseThrow(
                 () -> new RuntimeException("CycleMarkerType '" + markerType + "' not found. Available types:" +
                 this.getTypes().keySet().stream().collect(Collectors.joining(",")))
         );
     }
 
-    private synchronized Map<String, TrackerDispenser> getTypes() {
+    private synchronized Map<String, MarkerDispenser> getTypes() {
         if (types.size()==0) {
             ClassLoader cl = getClass().getClassLoader();
             logger.debug("loading CycleMarkerDispenser types");
-            ServiceLoader<TrackerDispenser> sl = ServiceLoader.load(TrackerDispenser.class);
-            for (TrackerDispenser cmd : sl) {
+            ServiceLoader<MarkerDispenser> sl = ServiceLoader.load(MarkerDispenser.class);
+            for (MarkerDispenser cmd : sl) {
                 if (types.get(cmd.getName()) != null) {
                     throw new RuntimeException("CycleMarkerDispenser '" + cmd.getName()
                             + "' is already defined.");
@@ -90,9 +90,9 @@ public class TrackerFinder {
      * in alphabetical order of their type names.
      * @return a list of ActivityType instances.
      */
-    public List<TrackerDispenser> getAll() {
-        List<TrackerDispenser> types = new ArrayList<>(getTypes().values());
-        types.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+    public List<MarkerDispenser> getAll() {
+        List<MarkerDispenser> types = new ArrayList<>(getTypes().values());
+        types.sort(Comparator.comparing(MarkerDispenser::getName));
         return Collections.unmodifiableList(types);
     }
 }

@@ -114,12 +114,6 @@ public class ByteTrackerExtent implements SegmentedInput {
     }
 
     @Override
-    public long remainingCycles() {
-        return size - totalServed.get();
-    }
-    // TODO: consider making intervals overlap perfectly with ...
-
-    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("(").append(min).append(",").append(max).append("): ")
@@ -134,10 +128,6 @@ public class ByteTrackerExtent implements SegmentedInput {
 
         }
         return sb.toString();
-    }
-
-    public boolean isReadable() {
-        return isFullyFilled() && !isFullyServed();
     }
 
     public boolean isFullyFilled() {
@@ -177,7 +167,8 @@ public class ByteTrackerExtent implements SegmentedInput {
         );
 
         if (!lastExtent.getNextExtent().compareAndSet(null, newLastExtent)) {
-            throw new RuntimeException("There should be no contention for extending the extents");
+            throw new RuntimeException("There should be no contention for extending the extents. If this occurs, then" +
+                    "there is a synchronization bug somewhere in the calling code.");
         }
 
         return newLastExtent;
@@ -191,4 +182,7 @@ public class ByteTrackerExtent implements SegmentedInput {
         return min;
     }
 
+    public int count() {
+        return 1 + ((nextExtent.get()==null) ? 0 : nextExtent.get().count());
+    }
 }

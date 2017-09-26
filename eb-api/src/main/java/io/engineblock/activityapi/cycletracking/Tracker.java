@@ -22,6 +22,6 @@ import io.engineblock.activityapi.Input;
 /**
  * A cycle result source provides specific cycles to consumers.
  */
-public interface CycleSource extends Input, SegmentedInput {
+public interface Tracker extends Input, SegmentedInput {
 
 }

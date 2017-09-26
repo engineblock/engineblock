@@ -17,7 +17,7 @@
 
 package io.engineblock.activityapi.cycletracking.markers.filebuffer;
 
-import io.engineblock.activityapi.cycletracking.CycleResultSink;
+import io.engineblock.activityapi.cycletracking.Marker;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,14 +30,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class FileBufferResultSink implements CycleResultSink {
-    private final static Logger logger = LoggerFactory.getLogger(FileBufferResultSink.class);
+public class FileBufferMarker implements Marker {
+    private final static Logger logger = LoggerFactory.getLogger(FileBufferMarker.class);
     private MappedByteBuffer mbb;
     private RandomAccessFile file;
     private FileBufferConfig config;
     private long currentSize=0;
 
-    public FileBufferResultSink(ActivityDef activityDef) {
+    public FileBufferMarker(ActivityDef activityDef) {
         config = new FileBufferConfig(activityDef);
         ensureCapacity(config.size);
     }
@@ -75,7 +75,7 @@ public class FileBufferResultSink implements CycleResultSink {
 
 
     @Override
-    public boolean consumeResult(long completedCycle, int result) {
+    public boolean onCycleResult(long completedCycle, int result) {
         if (completedCycle>=currentSize) {
             synchronized (this) {
                 mbb=ensureCapacity(completedCycle);

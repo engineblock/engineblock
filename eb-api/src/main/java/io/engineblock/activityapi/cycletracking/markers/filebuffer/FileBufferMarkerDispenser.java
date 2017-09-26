@@ -17,35 +17,30 @@
 
 package io.engineblock.activityapi.cycletracking.markers.filebuffer;
 
-import io.engineblock.activityapi.cycletracking.CycleSegment;
-import io.engineblock.activityapi.cycletracking.Tracker;
+import com.google.auto.service.AutoService;
+import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.cycletracking.Marker;
+import io.engineblock.activityapi.cycletracking.MarkerDispenser;
 
-import java.util.concurrent.atomic.AtomicLong;
+// TODO: Create one dispenser per activity
 
-public class FileBufferTracker implements Tracker {
+@AutoService(MarkerDispenser.class)
+public class FileBufferMarkerDispenser implements MarkerDispenser {
+
+    private Activity activity;
 
     @Override
-    public AtomicLong getMinCycle() {
-        return null;
+    public String getName() {
+        return "filebuffer";
     }
 
     @Override
-    public AtomicLong getMaxCycle() {
-        return null;
+    public void setActivity(Activity activity) {
+        this.activity = activity;
     }
 
     @Override
-    public long getPendingCycle() {
-        return 0;
-    }
-
-    @Override
-    public long getCycleInterval(int stride) {
-        return 0;
-    }
-
-    @Override
-    public CycleSegment getSegment(int stride) {
-        return null;
+    public Marker getMarker(long slot) {
+        return new FileBufferMarker(activity.getActivityDef());
     }
 }

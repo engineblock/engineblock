@@ -4,7 +4,7 @@ package io.engineblock.activityapi.cycletracking;
  * A cycle marker is simply a type that knows how to do something
  * useful with the result of a particular cycle.
  */
-public interface CycleResultSink {
+public interface Marker {
 
     /**
      * Mark the result of the numbered cycle with an integer value.
@@ -14,6 +14,6 @@ public interface CycleResultSink {
      * @param completedCycle The cycle number being marked.
      * @param result the result ordinal
      */
-    boolean consumeResult(long completedCycle, int result);
+    boolean onCycleResult(long completedCycle, int result);
 
 }

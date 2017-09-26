@@ -23,10 +23,4 @@ public interface SegmentedInput {
      * @return a {@link CycleSegment}
      */
     CycleSegment getSegment(int stride);
-
-    /**
-     * Return the number of remaining cycles, if possible.
-     * @return remaining cycles, or -1L if unknown;
-     */
-    long remainingCycles();
 }

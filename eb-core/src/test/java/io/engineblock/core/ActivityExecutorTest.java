@@ -1,7 +1,7 @@
 package io.engineblock.core;
 
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.TrackerDispenser;
+import io.engineblock.activityapi.cycletracking.MarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.action.CoreActionDispenser;
 import io.engineblock.activityimpl.input.CoreInputDispenser;
@@ -9,7 +9,7 @@ import io.engineblock.activityimpl.input.TargetRateInput;
 import io.engineblock.activityimpl.motor.CoreMotor;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.motor.CoreMotorDispenser;
-import io.engineblock.activityimpl.tracker.CoreTrackerDispenser;
+import io.engineblock.activityimpl.tracker.CoreMarkerDispenser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -43,7 +43,7 @@ public class ActivityExecutorTest {
         Activity a = new DelayedInitActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
-        TrackerDispenser tdisp = new CoreTrackerDispenser(a);
+        MarkerDispenser tdisp = new CoreMarkerDispenser(a);
         MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
         a.setActionDispenserDelegate(adisp);
         a.setInputDispenserDelegate(idisp);
@@ -69,7 +69,7 @@ public class ActivityExecutorTest {
         Activity a = new SimpleActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
-        TrackerDispenser tdisp = new CoreTrackerDispenser(a);
+        MarkerDispenser tdisp = new CoreMarkerDispenser(a);
         MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
         a.setActionDispenserDelegate(adisp);
         a.setInputDispenserDelegate(idisp);

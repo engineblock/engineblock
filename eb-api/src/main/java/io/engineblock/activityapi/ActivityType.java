@@ -18,12 +18,12 @@
 
 package io.engineblock.activityapi;
 
-import io.engineblock.activityapi.cycletracking.TrackerDispenser;
+import io.engineblock.activityapi.cycletracking.MarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.action.CoreActionDispenser;
 import io.engineblock.activityimpl.input.CoreInputDispenser;
-import io.engineblock.activityimpl.tracker.CoreTrackerDispenser;
+import io.engineblock.activityimpl.tracker.CoreMarkerDispenser;
 import io.engineblock.activityimpl.motor.CoreMotorDispenser;
 
 import java.util.Map;
@@ -80,13 +80,13 @@ public interface ActivityType<A extends Activity> {
         }
         activity.setActionDispenserDelegate(actionDispenser);
 
-        TrackerDispenser trackerDispenser = getTrackerDispenser(activity);
-        if (trackerDispenser instanceof ActivitiesAware) {
-            ((ActivitiesAware) trackerDispenser).setActivitiesMap(activities);
+        MarkerDispenser markerDispenser = getMarkerDispenser(activity);
+        if (markerDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware) markerDispenser).setActivitiesMap(activities);
         }
-        activity.setTrackerDispenserDelegate(trackerDispenser);
+        activity.setMarkerDispenserDelegate(markerDispenser);
 
-        MotorDispenser motorDispenser = getMotorDispenser(activity, inputDispenser, actionDispenser, trackerDispenser);
+        MotorDispenser motorDispenser = getMotorDispenser(activity, inputDispenser, actionDispenser, markerDispenser);
         if (motorDispenser instanceof ActivitiesAware) {
             ((ActivitiesAware) motorDispenser).setActivitiesMap(activities);
         }
@@ -101,8 +101,8 @@ public interface ActivityType<A extends Activity> {
      * @param activity The activity instance that will parameterize the returned TrackerDispenser instance.
      * @return an instance of TrackerDispenser
      */
-    default TrackerDispenser getTrackerDispenser(A activity) {
-        return new CoreTrackerDispenser(activity);
+    default MarkerDispenser getMarkerDispenser(A activity) {
+        return new CoreMarkerDispenser(activity);
     }
 
 
@@ -131,8 +131,8 @@ public interface ActivityType<A extends Activity> {
             A activity,
             InputDispenser inputDispenser,
             ActionDispenser actionDispenser,
-            TrackerDispenser trackerDispenser) {
-        return new CoreMotorDispenser(activity, inputDispenser, actionDispenser, trackerDispenser);
+            MarkerDispenser markerDispenser) {
+        return new CoreMotorDispenser(activity, inputDispenser, actionDispenser, markerDispenser);
     }
 
 

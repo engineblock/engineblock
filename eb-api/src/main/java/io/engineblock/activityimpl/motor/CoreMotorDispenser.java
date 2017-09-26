@@ -17,8 +17,8 @@
 package io.engineblock.activityimpl.motor;
 
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.CycleSinkSource;
-import io.engineblock.activityapi.cycletracking.TrackerDispenser;
+import io.engineblock.activityapi.cycletracking.Marker;
+import io.engineblock.activityapi.cycletracking.MarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 
 /**
@@ -30,24 +30,24 @@ public class CoreMotorDispenser implements MotorDispenser {
     private final Activity activity;
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
-    private TrackerDispenser trackerDispenser;
+    private MarkerDispenser markerDispenser;
 
     public CoreMotorDispenser(Activity activity,
                               InputDispenser inputDispenser,
                               ActionDispenser actionDispenser,
-                              TrackerDispenser trackerDispenser) {
+                              MarkerDispenser markerDispenser) {
         this.activity = activity;
         this.inputDispenser = inputDispenser;
         this.actionDispenser = actionDispenser;
-        this.trackerDispenser = trackerDispenser;
+        this.markerDispenser = markerDispenser;
     }
 
     @Override
     public Motor getMotor(ActivityDef activityDef, int slotId) {
         Action action = actionDispenser.getAction(slotId);
         Input input = inputDispenser.getInput(slotId);
-        CycleSinkSource cycleSinkSource = trackerDispenser.getTracker(slotId);
-        Motor am = new CoreMotor(activity.getActivityDef(), slotId, input, action, cycleSinkSource);
+        Marker marker = markerDispenser.getMarker(slotId);
+        Motor am = new CoreMotor(activity.getActivityDef(), slotId, input, action, marker);
         return am;
     }
 }

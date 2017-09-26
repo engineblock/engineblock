@@ -17,25 +17,25 @@
 
 package io.engineblock.activityapi.cycletracking.markers.logger;
 
-import io.engineblock.activityapi.cycletracking.CycleResultSink;
+import io.engineblock.activityapi.cycletracking.Marker;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoggingCycleResultSink implements CycleResultSink {
-    private final static Logger logger = LoggerFactory.getLogger(LoggingCycleResultSink.class);
+public class LoggingMarker implements Marker {
+    private final static Logger logger = LoggerFactory.getLogger(LoggingMarker.class);
 
     private final ActivityDef def;
     private final long slot;
     private final ThreadLocal<StringBuilder> sb = ThreadLocal.withInitial(StringBuilder::new);
 
-    public LoggingCycleResultSink(ActivityDef def, long slot) {
+    public LoggingMarker(ActivityDef def, long slot) {
         this.def = def;
         this.slot = slot;
     }
 
     @Override
-    public boolean consumeResult(long completedCycle, int result) {
+    public boolean onCycleResult(long completedCycle, int result) {
         sb.get().setLength(0);
         sb.get()
                 .append("activity=").append(def.getAlias())

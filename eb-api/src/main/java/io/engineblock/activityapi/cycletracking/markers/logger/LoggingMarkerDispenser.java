@@ -15,32 +15,24 @@
  * /
  */
 
-package io.engineblock.activityapi.cycletracking.markers.filebuffer;
+package io.engineblock.activityapi.cycletracking.markers.logger;
 
 import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.Activity;
-import io.engineblock.activityapi.cycletracking.CycleSinkSource;
-import io.engineblock.activityapi.cycletracking.TrackerDispenser;
+import io.engineblock.activityapi.cycletracking.Marker;
+import io.engineblock.activityapi.cycletracking.MarkerDispenser;
+import io.engineblock.activityimpl.ActivityDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-// TODO: Create one dispenser per activity
+@AutoService(MarkerDispenser.class)
+public class LoggingMarkerDispenser {
 
-@AutoService(TrackerDispenser.class)
-public class FileBufferTrackerDispenser implements TrackerDispenser {
-
+    private final static Logger logger = LoggerFactory.getLogger(LoggingMarkerDispenser.class);
     private Activity activity;
 
-    @Override
-    public String getName() {
-        return "filebuffer";
-    }
 
-    @Override
-    public void setActivity(Activity activity) {
-        this.activity = activity;
-    }
-
-    @Override
-    public CycleSinkSource getTracker(long slot) {
-        return new FileBufferTracker(activity.getActivityDef());
+    public Marker getTracker(ActivityDef activityDef, long slot) {
+        return new LoggingMarker(activity.getActivityDef(), slot);
     }
 }

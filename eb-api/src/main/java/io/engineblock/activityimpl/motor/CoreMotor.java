@@ -19,8 +19,7 @@ package io.engineblock.activityimpl.motor;
 import com.codahale.metrics.Timer;
 import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.CycleResultSink;
-import io.engineblock.activityapi.cycletracking.CycleSinkSource;
+import io.engineblock.activityapi.cycletracking.Marker;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
@@ -51,7 +50,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private AtomicReference<RunState> slotState;
     private RateLimiter rateLimiter; // Only for use in phasing
     private int stride = 1;
-    private CycleResultSink cycleResultSink;
+    private Marker marker;
 
     /**
      * Create an ActivityMotor.
@@ -97,18 +96,18 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      * @param action      An LongConsumer which is applied to the input for each cycle.
-     * @param cycleSinkSource     An optional tracker.
+     * @param marker     An optional tracker.
      */
     public CoreMotor(
             ActivityDef activityDef,
             long slotId,
             Input input,
             Action action,
-            CycleSinkSource cycleSinkSource
+            Marker marker
     ) {
         this(activityDef, slotId, input);
         setAction(action);
-        setTracker(cycleSinkSource);
+        setResultSink(marker);
     }
 
     /**
@@ -157,14 +156,14 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     }
 
     @Override
-    public Motor setTracker(CycleResultSink cycleResultSink) {
-        this.cycleResultSink = cycleResultSink;
+    public Motor setResultSink(Marker marker) {
+        this.marker = marker;
         return this;
     }
 
     @Override
-    public CycleResultSink getMarker() {
-        return this.cycleResultSink;
+    public Marker getResultSink() {
+        return this.marker;
     }
 
 
@@ -233,8 +232,8 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                             }
                         }
 
-                        if (cycleResultSink !=null) {
-                            cycleResultSink.consumeResult(cyclenum,result);
+                        if (marker !=null) {
+                            marker.onCycleResult(cyclenum,result);
                         }
                     }
                 }

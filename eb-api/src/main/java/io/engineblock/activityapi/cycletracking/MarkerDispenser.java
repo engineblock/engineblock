@@ -19,8 +19,8 @@ package io.engineblock.activityapi.cycletracking;
 
 import io.engineblock.activityapi.Activity;
 
-public interface TrackerDispenser {
+public interface MarkerDispenser {
     String getName();
     void setActivity(Activity activity);
-    CycleSinkSource getTracker(long slot);
+    Marker getMarker(long slot);
 }

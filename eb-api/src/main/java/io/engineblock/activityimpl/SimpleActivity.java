@@ -1,7 +1,7 @@
 package io.engineblock.activityimpl;
 
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.TrackerDispenser;
+import io.engineblock.activityapi.cycletracking.MarkerDispenser;
 
 /**
  * A default implementation of an Activity, suitable for building upon.
@@ -11,7 +11,7 @@ public class SimpleActivity implements Activity {
     private MotorDispenser motorDispenser;
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
-    private TrackerDispenser trackerDispenser;
+    private MarkerDispenser markerDispenser;
     protected ActivityDef activityDef;
     private RunState runState = RunState.Uninitialized;
 
@@ -58,13 +58,13 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
-    public TrackerDispenser getTrackerDispenserDelegate() {
-        return this.trackerDispenser;
+    public MarkerDispenser getTrackerDispenserDelegate() {
+        return this.markerDispenser;
     }
 
     @Override
-    public void setTrackerDispenserDelegate(TrackerDispenser trackerDispenser) {
-        this.trackerDispenser=trackerDispenser;
+    public void setMarkerDispenserDelegate(MarkerDispenser markerDispenser) {
+        this.markerDispenser = markerDispenser;
     }
 
     @Override

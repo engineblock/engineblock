@@ -27,30 +27,30 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
-public class CoreTrackerTest {
+public class CoreMarkerTest {
 
     @Test
     public void testCoreSimple0to4() {
-        CoreTracker ct4 = new CoreTracker(0,3,4,1);
-        ct4.consumeResult(0,0);
-        ct4.consumeResult(1,1);
-        ct4.consumeResult(2,2);
-        ct4.consumeResult(3,3);
+        CoreMarker ct4 = new CoreMarker(0,3,4,1);
+        ct4.onCycleResult(0,0);
+        ct4.onCycleResult(1,1);
+        ct4.onCycleResult(2,2);
+        ct4.onCycleResult(3,3);
 //        assertThat(ct4.getMaxContiguousMarked()).isEqualTo(3);
     }
 
     @Test
     public void testRotationSingleExtent() {
-        CoreTracker ct4 = new CoreTracker(0,11,4,2);
-        ct4.consumeResult(0,0);
-        ct4.consumeResult(1,1);
-        ct4.consumeResult(2,2);
-        ct4.consumeResult(3,3);
+        CoreMarker ct4 = new CoreMarker(0,11,4,2);
+        ct4.onCycleResult(0,0);
+        ct4.onCycleResult(1,1);
+        ct4.onCycleResult(2,2);
+        ct4.onCycleResult(3,3);
         CycleSegment segment1 = ct4.getSegment(4); // without this, will block here due to lack of segment allowance
-        ct4.consumeResult(4,4);
-        ct4.consumeResult(5,5);
-        ct4.consumeResult(6,6);
-        ct4.consumeResult(7,7);
+        ct4.onCycleResult(4,4);
+        ct4.onCycleResult(5,5);
+        ct4.onCycleResult(6,6);
+        ct4.onCycleResult(7,7);
         CycleSegment segment2 = ct4.getSegment(4);
 //        CycleSegment segment2 = ct4.getSegment(2);
 //        CycleSegment segment3 = ct4.getSegment(2);
@@ -60,7 +60,7 @@ public class CoreTrackerTest {
 
     @Test
     public void testCompletionBlocking() {
-        CoreTracker ct = new CoreTracker(0,100,10,3);
+        CoreMarker ct = new CoreMarker(0,100,10,3);
         List<CycleSegment> readSegments = new ArrayList<CycleSegment>();
         AtomicLong readCount = new AtomicLong(0L);
 
@@ -80,7 +80,7 @@ public class CoreTrackerTest {
             @Override
             public void run() {
                 for (int i = 0; i <= 99; i++) {
-                    ct.consumeResult(i,i);
+                    ct.onCycleResult(i,i);
                 }
             }
         };
@@ -104,7 +104,7 @@ public class CoreTrackerTest {
     public void testCompletionBlockingBulk() {
         long min=0;
         long max=1000000;
-        CoreTracker ct = new CoreTracker(0,max,100000,4);
+        CoreMarker ct = new CoreMarker(0,max,100000,4);
         List<CycleSegment> readSegments = new ArrayList<CycleSegment>();
         AtomicLong readCount = new AtomicLong(0L);
 
@@ -124,7 +124,7 @@ public class CoreTrackerTest {
             @Override
             public void run() {
                 for (long i = min; i < max; i++) {
-                    ct.consumeResult(i,(int) i);
+                    ct.onCycleResult(i,(int) i);
                 }
             }
         };
