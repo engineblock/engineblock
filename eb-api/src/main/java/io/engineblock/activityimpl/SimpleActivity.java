@@ -1,12 +1,17 @@
 package io.engineblock.activityimpl;
 
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.MarkerDispenser;
+import io.engineblock.activityapi.cycletracking.markers.MarkerDispenser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A default implementation of an Activity, suitable for building upon.
  */
 public class SimpleActivity implements Activity {
+
+    private List<AutoCloseable> closeables = new ArrayList<>();
 
     private MotorDispenser motorDispenser;
     private InputDispenser inputDispenser;
@@ -58,7 +63,7 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
-    public MarkerDispenser getTrackerDispenserDelegate() {
+    public MarkerDispenser getMarkerDispenserDelegate() {
         return this.markerDispenser;
     }
 
@@ -79,5 +84,22 @@ public class SimpleActivity implements Activity {
     @Override
     public int compareTo(Activity o) {
         return getAlias().compareTo(o.getAlias());
+    }
+
+    @Override
+    public void registerAutoCloseable(AutoCloseable closeable) {
+        this.closeables.add(closeable);
+    }
+
+    @Override
+    public void closeAutoCloseables() {
+        for (AutoCloseable closeable : closeables) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                throw new RuntimeException("Error closing " + closeable);
+            }
+        }
+        closeables.clear();
     }
 }

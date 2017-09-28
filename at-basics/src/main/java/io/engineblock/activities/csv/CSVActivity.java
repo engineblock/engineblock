@@ -104,7 +104,7 @@ public class CSVActivity extends SimpleActivity implements ActivityDefObserver {
         }
 
         if (getActivityDef().getCycleCount() == 0) {
-            logger.debug("Adjusting cycle count for " + activityDef.getAlias() + " to " +
+            logger.debug("Adjusting cycle getChainSize for " + activityDef.getAlias() + " to " +
             readyCSVStatements.size());
             getActivityDef().setCycles(String.valueOf(readyCSVStatements.size()));
         }

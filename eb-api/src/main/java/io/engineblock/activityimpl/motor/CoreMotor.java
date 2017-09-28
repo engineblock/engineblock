@@ -19,7 +19,7 @@ package io.engineblock.activityimpl.motor;
 import com.codahale.metrics.Timer;
 import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.Marker;
+import io.engineblock.activityapi.cycletracking.markers.Marker;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
@@ -216,7 +216,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                     int result=-1;
                     try (Timer.Context cycleTime = cyclesTimer.time()) {
 
-                        logger.trace("cycle " + cyclenum);
+                        //logger.trace("cycle " + cyclenum);
                         try (Timer.Context phaseTime = phasesTimer.time()) {
                             result=action.runCycle(cyclenum);
                         }

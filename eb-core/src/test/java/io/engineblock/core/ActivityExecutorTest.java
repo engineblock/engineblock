@@ -1,7 +1,7 @@
 package io.engineblock.core;
 
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.MarkerDispenser;
+import io.engineblock.activityapi.cycletracking.markers.MarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.action.CoreActionDispenser;
 import io.engineblock.activityimpl.input.CoreInputDispenser;
@@ -9,7 +9,7 @@ import io.engineblock.activityimpl.input.TargetRateInput;
 import io.engineblock.activityimpl.motor.CoreMotor;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.motor.CoreMotorDispenser;
-import io.engineblock.activityimpl.tracker.CoreMarkerDispenser;
+import io.engineblock.activityimpl.marker.CoreMarkerDispenser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;

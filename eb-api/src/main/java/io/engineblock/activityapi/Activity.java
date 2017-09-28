@@ -1,6 +1,6 @@
 package io.engineblock.activityapi;
 
-import io.engineblock.activityapi.cycletracking.MarkerDispenser;
+import io.engineblock.activityapi.cycletracking.markers.MarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.activityimpl.SimpleActivity;
@@ -10,6 +10,18 @@ import io.engineblock.activityimpl.SimpleActivity;
  * The easiest way to build a useful Activity is to extend {@link SimpleActivity}.
  */
 public interface Activity extends Comparable<Activity> {
+
+    /**
+     * Register an object which should be closed after this activity is shutdown.
+     *
+     * @param closeable An Autocloseable object
+     */
+    void registerAutoCloseable(AutoCloseable closeable);
+
+    /**
+     * Close all autocloseables that have been registered with this Activity.
+     */
+    void closeAutoCloseables();
 
     MotorDispenser getMotorDispenserDelegate();
 
@@ -23,7 +35,7 @@ public interface Activity extends Comparable<Activity> {
 
     void setActionDispenserDelegate(ActionDispenser actionDispenser);
 
-    MarkerDispenser getTrackerDispenserDelegate();
+    MarkerDispenser getMarkerDispenserDelegate();
 
     void setMarkerDispenserDelegate(MarkerDispenser markerDispenser);
 

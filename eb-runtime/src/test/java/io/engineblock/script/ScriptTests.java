@@ -141,7 +141,7 @@ public class ScriptTests {
     @Test
     public void testReadMetric() {
         ScenarioResult scenarioResult = runScenario("readmetrics");
-        assertThat(scenarioResult.getIOLog()).contains("count: ");
+        assertThat(scenarioResult.getIOLog()).contains("getChainSize: ");
     }
 
     @Test

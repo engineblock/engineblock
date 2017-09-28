@@ -15,7 +15,7 @@
 
 package io.engineblock.activityapi;
 
-import io.engineblock.activityapi.cycletracking.Marker;
+import io.engineblock.activityapi.cycletracking.markers.Marker;
 import io.engineblock.activityimpl.SlotStateTracker;
 
 /**

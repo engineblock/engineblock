@@ -17,8 +17,8 @@
 package io.engineblock.activityimpl.motor;
 
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.Marker;
-import io.engineblock.activityapi.cycletracking.MarkerDispenser;
+import io.engineblock.activityapi.cycletracking.markers.Marker;
+import io.engineblock.activityapi.cycletracking.markers.MarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 
 /**

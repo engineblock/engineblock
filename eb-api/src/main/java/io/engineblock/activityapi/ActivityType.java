@@ -18,12 +18,12 @@
 
 package io.engineblock.activityapi;
 
-import io.engineblock.activityapi.cycletracking.MarkerDispenser;
+import io.engineblock.activityapi.cycletracking.markers.MarkerDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.action.CoreActionDispenser;
 import io.engineblock.activityimpl.input.CoreInputDispenser;
-import io.engineblock.activityimpl.tracker.CoreMarkerDispenser;
+import io.engineblock.activityimpl.marker.CoreMarkerDispenser;
 import io.engineblock.activityimpl.motor.CoreMotorDispenser;
 
 import java.util.Map;
@@ -98,8 +98,8 @@ public interface ActivityType<A extends Activity> {
     /**
      * This method will be called <em>once</em> per action instance.
      *
-     * @param activity The activity instance that will parameterize the returned TrackerDispenser instance.
-     * @return an instance of TrackerDispenser
+     * @param activity The activity instance that will parameterize the returned MarkerDispenser instance.
+     * @return an instance of MarkerDispenser
      */
     default MarkerDispenser getMarkerDispenser(A activity) {
         return new CoreMarkerDispenser(activity);

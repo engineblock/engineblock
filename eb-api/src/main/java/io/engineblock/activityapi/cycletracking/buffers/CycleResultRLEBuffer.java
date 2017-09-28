@@ -45,6 +45,7 @@ public class CycleResultRLEBuffer implements CycleResultSegment {
         return new Iter();
     }
 
+
     private class Iter implements Iterator<CycleResult> {
         private int dataOffset =-datalen;
         private long rleNextCycle = 0;
@@ -53,7 +54,7 @@ public class CycleResultRLEBuffer implements CycleResultSegment {
 
         @Override
         public boolean hasNext() {
-            return ((rleNextCycle<rleMaxCycleLimit) || (dataOffset + datalen <buf.limit()));
+            return ((rleNextCycle<rleMaxCycleLimit) || (dataOffset + datalen <buf.remaining()));
         }
 
         @Override

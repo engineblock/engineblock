@@ -10,6 +10,6 @@ public enum ErrorResponse {
     stop,      // Rethrow this error to the runtime, forcing it to handle the error or stop
     warn,      // log a warning with some details about this error
     retry,     // resubmit this operation up to the available tries
-    count,     // count this metric separatelycount,     // count this metric separately
+    count,     // getChainSize this metric separatelycount,     // getChainSize this metric separately
     ignore     // do nothing
 }

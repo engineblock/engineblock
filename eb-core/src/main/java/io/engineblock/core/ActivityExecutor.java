@@ -15,13 +15,17 @@
 package io.engineblock.core;
 
 import io.engineblock.activityapi.*;
+import io.engineblock.activityapi.ProgressMeter;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.activityimpl.SlotStateTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -44,6 +48,7 @@ import java.util.stream.Collectors;
  *     <li>Motors may not receive parameter updates before their owning activities are initialized.</li>
  * </ul>
  */
+
 public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);
     private final List<Motor> motors = new ArrayList<>();
@@ -101,6 +106,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         motors.forEach(Motor::requestStop);
         motors.forEach(m -> awaitRequiredMotorState(m, 30000, 50, RunState.Stopped, RunState.Finished));
         activity.shutdownActivity();
+        activity.closeAutoCloseables();
         logger.info("stopped: " + this.getActivityDef().getAlias() + " with " + motors.size() + " slots");
     }
 
@@ -124,6 +130,8 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         List<Runnable> runnables = executorService.shutdownNow();
 
         activity.shutdownActivity();
+        activity.closeAutoCloseables();
+
         logger.debug(runnables.size() + " threads never started.");
 
         if (stoppingException!=null) {
@@ -145,6 +153,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
             logger.warn("while waiting termination of activity " + activity.getAlias() + ", " + ie.getMessage());
         } finally {
             activity.shutdownActivity();
+            activity.closeAutoCloseables();
         }
         if (stoppingException!=null) {
             throw stoppingException;

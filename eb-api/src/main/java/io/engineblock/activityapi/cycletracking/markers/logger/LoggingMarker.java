@@ -17,7 +17,7 @@
 
 package io.engineblock.activityapi.cycletracking.markers.logger;
 
-import io.engineblock.activityapi.cycletracking.Marker;
+import io.engineblock.activityapi.cycletracking.markers.Marker;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,4 +45,7 @@ public class LoggingMarker implements Marker {
         return true;
     }
 
+    @Override
+    public void close() throws Exception {
+    }
 }

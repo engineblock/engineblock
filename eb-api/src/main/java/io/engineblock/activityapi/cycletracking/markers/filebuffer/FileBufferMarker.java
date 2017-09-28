@@ -17,7 +17,8 @@
 
 package io.engineblock.activityapi.cycletracking.markers.filebuffer;
 
-import io.engineblock.activityapi.cycletracking.Marker;
+import io.engineblock.activityapi.cycletracking.buffers.CycleSegment;
+import io.engineblock.activityapi.cycletracking.markers.SegmentMarker;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class FileBufferMarker implements Marker {
+public class FileBufferMarker implements SegmentMarker {
     private final static Logger logger = LoggerFactory.getLogger(FileBufferMarker.class);
     private MappedByteBuffer mbb;
     private RandomAccessFile file;
@@ -74,7 +75,6 @@ public class FileBufferMarker implements Marker {
     }
 
 
-    @Override
     public boolean onCycleResult(long completedCycle, int result) {
         if (completedCycle>=currentSize) {
             synchronized (this) {
@@ -90,22 +90,35 @@ public class FileBufferMarker implements Marker {
         return true;
     }
 
+    @Override
+    public void onCycleSegment(CycleSegment segment) {
+        for (int i = 0; i < segment.codes.length; i++) {
+            onCycleResult(i+segment.cycle,segment.codes[i]);
+        }
+    }
+
+
+    @Override
+    public void close() throws Exception {
+        file.close();
+    }
+
     private class FileBufferConfig {
         public final String filename; // Where the
         public final long size; // The initial size
         public final long growsize; // logical chunksize boundary to fill to on overrun
 
         public FileBufferConfig(ActivityDef activityDef) {
-            Optional<String> marker = activityDef.getParams().getOptionalString("tracker");
+            Optional<String> marker = activityDef.getParams().getOptionalString("marker");
             marker.orElseThrow(() -> new RuntimeException("marker parameter is missing?"));
             logger.debug("parsing marker config:" +marker.get());
             Map<String, String> params =
                     Arrays.stream(marker.get().split(",",2)[1].split(","))
                             .map(s -> s.split("="))
                             .collect(Collectors.toMap(o -> o[0], o -> o[1]));
-            this.filename = params.getOrDefault("filename", activityDef.getAlias() + "-buffer.tracker");
+            this.filename = params.getOrDefault("file", activityDef.getAlias())  + ".markers";
             this.size = Long.valueOf(params.getOrDefault("size","1024"));
-            this.growsize= Long.valueOf(params.getOrDefault("growsize",String.valueOf(1024*1024)));
+            this.growsize= Long.valueOf(params.getOrDefault("extentSize",String.valueOf(1024*1024)));
         }
 
     }

@@ -90,7 +90,7 @@ public class Unit {
             if (unitpart != null) {
                 Count specifierUnit = Count.valueOfSuffix(unitpart);
                 if (specifierUnit == null) {
-                    throw new RuntimeException("Unable to recognized count unit:" + unitpart);
+                    throw new RuntimeException("Unable to recognized getChainSize unit:" + unitpart);
                 }
                 double specifierScale = specifierUnit.getMultiplier();
                 double resultScale = resultUnit.getMultiplier();

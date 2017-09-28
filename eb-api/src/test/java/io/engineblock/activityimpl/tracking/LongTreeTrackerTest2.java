@@ -1,7 +1,7 @@
 package io.engineblock.activityimpl.tracking;
 
-import io.engineblock.activityimpl.tracking.longheap.LongTreeTracker;
-import io.engineblock.activityimpl.tracking.longheap.LongTreeTrackerAtomic;
+import io.engineblock.activityimpl.marker.longheap.LongTreeTracker;
+import io.engineblock.activityimpl.marker.longheap.LongTreeTrackerAtomic;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -130,7 +130,7 @@ public class LongTreeTrackerTest2 {
     /**
      * Last result on a mobile i7 CPU:
      * <pre>
-     *  count: 1073741824
+     *  getChainSize: 1073741824
      *  duration ms: 13730.785213
      *  rate/ms: 78199.593639
      *  rate/s: 78199593.638928
@@ -150,7 +150,7 @@ public class LongTreeTrackerTest2 {
         long t2=System.nanoTime();
         double duration = ((double) t2 - (double) t1)/1000000.0d;
         double rate = ((double) count) / duration;
-        System.out.format("count: %d\n",count);
+        System.out.format("getChainSize: %d\n",count);
         System.out.format("duration ms: %f\n", duration);
         System.out.format("rate/ms: %f\n", rate);
         System.out.format("rate/s: %f\n", rate * 1000.0d);
@@ -169,7 +169,7 @@ public class LongTreeTrackerTest2 {
         long t2=System.nanoTime();
         double duration = ((double) t2 - (double) t1)/1000000.0d;
         double rate = ((double) count) / duration;
-        System.out.format("count: %d\n",count);
+        System.out.format("getChainSize: %d\n",count);
         System.out.format("duration ms: %f\n", duration);
         System.out.format("rate/ms: %f\n", rate);
         System.out.format("rate/s: %f\n", rate * 1000.0d);
