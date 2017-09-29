@@ -91,7 +91,9 @@ public class FileBufferRLEMarker implements SegmentMarker {
 
     @Override
     public void close() throws Exception {
+        flush();
         file.close();
+        file=null;
     }
 
 
