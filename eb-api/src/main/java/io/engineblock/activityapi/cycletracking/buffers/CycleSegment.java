@@ -69,8 +69,19 @@ public class CycleSegment implements Iterable<CycleResult> {
 
         @Override
         public CycleResult next() {
-            return null;
+            CycleSegmentResult cycleSegmentResult = new CycleSegmentResult(cycle + index, codes[index]);
+            index++;
+            return cycleSegmentResult;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "CycleSegment{" +
+                "cycle=" + cycle +
+                ", codes=" +
+                ( codes.length<100 ? Arrays.toString(codes) : Arrays.toString(Arrays.copyOfRange(codes,0,100))) +
+                '}';
     }
 
     private class CycleSegmentResult implements CycleResult {
@@ -90,6 +101,14 @@ public class CycleSegment implements Iterable<CycleResult> {
         @Override
         public int getResult() {
             return result;
+        }
+
+        @Override
+        public String toString() {
+            return "CycleSegmentResult{" +
+                    "cycle=" + cycle +
+                    ", result=" + result +
+                    '}';
         }
     }
 

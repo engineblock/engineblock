@@ -18,6 +18,7 @@
 package io.engineblock.activityimpl.marker;
 
 import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.cycletracking.buffers.CycleSegment;
 import io.engineblock.activityapi.cycletracking.markers.SegmentMarker;
 import io.engineblock.activityapi.cycletracking.markers.Marker;
 import org.slf4j.Logger;
@@ -73,8 +74,8 @@ public class CoreMarker implements Marker {
         this.min = new AtomicLong(activity.getActivityDef().getStartCycle());
         this.nextMin = new AtomicLong(activity.getActivityDef().getEndCycle());
         long stride = activity.getParams().getOptionalLong("stride").orElse(1L);
-        long cycleCount = nextMin.get()-min.get();
-        if ((cycleCount%stride)!=0) {
+        long cycleCount = nextMin.get() - min.get();
+        if ((cycleCount % stride) != 0) {
             throw new RuntimeException("stride must evenly divide into cycles.");
             // TODO: Consider setting cycles to " ...
         }
@@ -96,6 +97,7 @@ public class CoreMarker implements Marker {
 
     @Override
     public boolean onCycleResult(long completedCycle, int result) {
+        try {
         while (true) {
             ByteTrackerExtent extent = this.markingExtents.get();
             long unmarked = extent.markResult(completedCycle, result);
@@ -112,13 +114,19 @@ public class CoreMarker implements Marker {
                             throw new RuntimeException("Unable to swap head extent.");
                         }
                         onFullyFilled(head);
-                        head=this.markingExtents.get();
+                        head = this.markingExtents.get();
                     }
                     mutex.release();
                 } catch (InterruptedException ignored) {
+                } catch (Throwable t) {
+                    throw t;
                 }
                 return true;
+            } else {
+                System.out.println("whoops");
             }
+        } } catch (Throwable t) {
+            throw t;
         }
     }
 
@@ -131,12 +139,21 @@ public class CoreMarker implements Marker {
             e = e.getNextExtent().get();
         }
         mutex.release();
+
+        for (SegmentMarker reader : this.readers) {
+            logger.debug("closing downstream reader: " + reader);
+            reader.close();
+        }
+
     }
 
     private void onFullyFilled(ByteTrackerExtent extent) {
         logger.debug("MARKER>: fully filled: " + extent);
         for (SegmentMarker reader : readers) {
-            reader.onCycleSegment(extent.getSegment());
+            CycleSegment remainingSegment = extent.getRemainingSegment();
+            if (remainingSegment!=null) {
+                reader.onCycleSegment(remainingSegment);
+            }
         }
     }
 
@@ -153,16 +170,27 @@ public class CoreMarker implements Marker {
     }
 
     private int calculateExtentSize(long cycleCount, long stride) {
-        if (cycleCount<=2000000) {
+        if (cycleCount <= 2000000) {
             return (int) cycleCount;
         }
-        for (int cs=2000000;  cs>500000;  cs--) {
-            if ((cycleCount%cs)==0 && (cs%stride)==0) {
+        for (int cs = 2000000; cs > 500000; cs--) {
+            if ((cycleCount % cs) == 0 && (cs % stride) == 0) {
                 return cs;
             }
         }
-        throw new RuntimeException("no even divisor of cycleCount and Stride between 500K and 2M, with cycles=" + cycleCount +",  and stride=" + stride);
+        throw new RuntimeException("no even divisor of cycleCount and Stride between 500K and 2M, with cycles=" + cycleCount + ",  and stride=" + stride);
     }
 
 
+    @Override
+    public String toString() {
+        return "CoreMarker{" +
+                "extentSize=" + extentSize +
+                ", maxExtents=" + maxExtents +
+                ", readers=" + readers +
+                ", min=" + min +
+                ", nextMin=" + nextMin +
+                ", markingExtents/Chain=" + markingExtents.get().getChainSize() +
+                '}';
+    }
 }

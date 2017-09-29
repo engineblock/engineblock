@@ -22,11 +22,15 @@ import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.cycletracking.markers.Marker;
 import io.engineblock.activityapi.cycletracking.markers.MarkerDispenser;
 import io.engineblock.activityimpl.marker.CoreMarker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO: Create one dispenser per activity
 
 @AutoService(MarkerDispenser.class)
 public class FileBufferMarkerRLEDispenser implements MarkerDispenser {
+
+    private final static Logger logger = LoggerFactory.getLogger(FileBufferMarkerRLEDispenser.class);
 
     private Activity activity;
 
@@ -45,6 +49,7 @@ public class FileBufferMarkerRLEDispenser implements MarkerDispenser {
         CoreMarker coreAdapter = new CoreMarker(activity);
         FileBufferRLEMarker fileBufferExtentMarker = new FileBufferRLEMarker(activity.getActivityDef());
         coreAdapter.addExtentReader(fileBufferExtentMarker);
+        logger.trace("new marker:" + coreAdapter);
         return coreAdapter;
     }
 }

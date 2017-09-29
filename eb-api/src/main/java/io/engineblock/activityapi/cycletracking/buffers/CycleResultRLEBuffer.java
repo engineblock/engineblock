@@ -20,6 +20,7 @@ package io.engineblock.activityapi.cycletracking.buffers;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.util.Iterator;
 
 /**
@@ -33,10 +34,18 @@ import java.util.Iterator;
 public class CycleResultRLEBuffer implements CycleResultSegment {
 
     private final ByteBuffer buf;
-    private final static int datalen = Long.BYTES + Long.BYTES + Byte.BYTES;
+    public final static int BYTES = Long.BYTES + Long.BYTES + Byte.BYTES;
 
     public CycleResultRLEBuffer(ByteBuffer buf) {
         this.buf = buf;
+    }
+
+    public CycleResultRLEBuffer(int readsize, MappedByteBuffer src) {
+        readsize = (readsize/BYTES) * BYTES;
+        int bufsize = Math.min(readsize, src.remaining());
+        byte[] bbuf=new byte[bufsize];
+        src.get(bbuf);
+        this.buf = ByteBuffer.wrap(bbuf);
     }
 
     @NotNull
@@ -47,20 +56,20 @@ public class CycleResultRLEBuffer implements CycleResultSegment {
 
 
     private class Iter implements Iterator<CycleResult> {
-        private int dataOffset =-datalen;
+        private int dataOffset =-BYTES;
         private long rleNextCycle = 0;
         private long rleMaxCycleLimit = 0;
         private int result;
 
         @Override
         public boolean hasNext() {
-            return ((rleNextCycle<rleMaxCycleLimit) || (dataOffset + datalen <buf.remaining()));
+            return ((rleNextCycle<rleMaxCycleLimit) || (dataOffset + BYTES <buf.remaining()));
         }
 
         @Override
         public CycleResult next() {
             if (rleNextCycle >=rleMaxCycleLimit) {
-                dataOffset += datalen;
+                dataOffset += BYTES;
                 rleNextCycle =buf.getLong(dataOffset);
                 rleMaxCycleLimit=buf.getLong(dataOffset+Long.BYTES);
                 result=buf.get(dataOffset+Long.BYTES+Long.BYTES);

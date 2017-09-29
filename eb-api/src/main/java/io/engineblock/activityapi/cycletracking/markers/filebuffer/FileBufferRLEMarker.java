@@ -56,11 +56,11 @@ public class FileBufferRLEMarker implements SegmentMarker {
     private MappedByteBuffer mbb;
     private RandomAccessFile file;
     private FileBufferConfig config;
-
-    private CycleResultRLETargetBuffer targetBuffer = new CycleResultRLETargetBuffer();
+    private CycleResultRLETargetBuffer targetBuffer;
 
     public FileBufferRLEMarker(ActivityDef activityDef) {
         config = new FileBufferConfig(activityDef);
+        targetBuffer = new CycleResultRLETargetBuffer(config.extentSize);
     }
 
 
@@ -81,7 +81,7 @@ public class FileBufferRLEMarker implements SegmentMarker {
 
     private void flush() {
         ByteBuffer nextFileExtent = targetBuffer.toByteBuffer();
-        logger.trace("RLE result extent is " + nextFileExtent.remaining() + " bytes ("
+        logger.debug("RLE result extent is " + nextFileExtent.remaining() + " bytes ("
                 + (nextFileExtent.remaining() / CycleResultRLETargetBuffer.BYTES)
                 + ") tuples");
         this.ensureCapacity((mbb == null ? 0 : mbb.capacity()) + nextFileExtent.remaining());
@@ -105,12 +105,14 @@ public class FileBufferRLEMarker implements SegmentMarker {
                 }
                 file = new RandomAccessFile(config.filename, "rw");
                 file.seek(0);
+                mbb = file.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, newCapacity);
             } else {
-                long pos = mbb.position();
+                int pos = mbb.position();
                 file.setLength(newCapacity);
                 file.seek(pos);
+                mbb = file.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, newCapacity);
+                mbb.position(pos);
             }
-            mbb = file.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, newCapacity);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -134,7 +136,21 @@ public class FileBufferRLEMarker implements SegmentMarker {
             extentSize = suggested_extentsize*CycleResultRLETargetBuffer.BYTES;
         }
 
+        @Override
+        public String toString() {
+            return "FileBufferConfig{" +
+                    "filename='" + filename + '\'' +
+                    ", extentSize=" + extentSize +
+                    '}';
+        }
     }
 
-
+    @Override
+    public String toString() {
+        return "FileBufferRLEMarker{" +
+                "mbb=" + mbb +
+                ", file=" + file +
+                ", config=" + config +
+                '}';
+    }
 }

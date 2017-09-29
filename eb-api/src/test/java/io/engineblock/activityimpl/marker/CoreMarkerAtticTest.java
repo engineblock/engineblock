@@ -39,14 +39,14 @@ public class CoreMarkerAtticTest {
 //        ct4.onCycleResult(1,1);
 //        ct4.onCycleResult(2,2);
 //        ct4.onCycleResult(3,3);
-//        CycleSegment segment1 = ct4.getSegment(4); // without this, will block here due to lack of segment allowance
+//        CycleSegment segment1 = ct4.getRemainingSegment(4); // without this, will block here due to lack of segment allowance
 //        ct4.onCycleResult(4,4);
 //        ct4.onCycleResult(5,5);
 //        ct4.onCycleResult(6,6);
 //        ct4.onCycleResult(7,7);
-//        CycleSegment segment2 = ct4.getSegment(4);
-////        CycleSegment segment2 = ct4.getSegment(2);
-////        CycleSegment segment3 = ct4.getSegment(2);
+//        CycleSegment segment2 = ct4.getRemainingSegment(4);
+////        CycleSegment segment2 = ct4.getRemainingSegment(2);
+////        CycleSegment segment3 = ct4.getRemainingSegment(2);
 ////        ct4.flush();
 //
 //    }
@@ -62,7 +62,7 @@ public class CoreMarkerAtticTest {
 //            public void run() {
 //                long start = System.currentTimeMillis();
 //                for (int i = 0; i <= 99; i++) {
-//                    CycleSegment segment = ct.getSegment(1);
+//                    CycleSegment segment = ct.getRemainingSegment(1);
 //                    readCount.incrementAndGet();
 //                    readSegments.add(segment);
 //                }
@@ -108,7 +108,7 @@ public class CoreMarkerAtticTest {
 //            public void run() {
 //                long start = System.currentTimeMillis();
 //                for (long i = min; i < max; i++) {
-//                    CycleSegment segment = ct.getSegment(1);
+//                    CycleSegment segment = ct.getRemainingSegment(1);
 //                    readCount.incrementAndGet();
 //                    readSegments.add(segment);
 //                }

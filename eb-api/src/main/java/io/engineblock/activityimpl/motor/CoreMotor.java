@@ -170,80 +170,88 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     @Override
     public void run() {
 
-        Timer cyclesTimer = ActivityMetrics.timer(activityDef, "cycles");
-        Timer phasesTimer = ActivityMetrics.timer(activityDef, "phases");
-        Timer stridesTimer = ActivityMetrics.timer(activityDef, "strides");
+        try {
+            Timer cyclesTimer = ActivityMetrics.timer(activityDef, "cycles");
+            Timer phasesTimer = ActivityMetrics.timer(activityDef, "phases");
+            Timer stridesTimer = ActivityMetrics.timer(activityDef, "strides");
 
-        if (slotState.get() == Finished) {
-            logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
-        }
-
-        slotStateTracker.enterState(Running);
-
-        MultiPhaseAction multiPhaseAction = null;
-        if (action instanceof MultiPhaseAction) {
-            multiPhaseAction = ((MultiPhaseAction) action);
-        }
-
-        long cyclenum;
-        AtomicLong cycleMax = input.getMaxCycle();
-
-        action.init();
-
-        while (slotState.get() == Running) {
-
-            long thisIntervalStart = input.getCycleInterval(stride);
-            long nextIntervalStart = thisIntervalStart + stride;
-
-            if (action instanceof StrideAware) {
-                ((StrideAware)action).setInterval(thisIntervalStart,stride);
+            if (slotState.get() == Finished) {
+                logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
             }
 
-            if (thisIntervalStart >= cycleMax.get()) {
-                logger.trace("input exhausted (input " + thisIntervalStart + "), stopping motor thread " + slotId);
-                slotStateTracker.enterState(Finished);
-                continue;
+            slotStateTracker.enterState(Running);
+
+            MultiPhaseAction multiPhaseAction = null;
+            if (action instanceof MultiPhaseAction) {
+                multiPhaseAction = ((MultiPhaseAction) action);
             }
 
-            try (Timer.Context stridesTime = stridesTimer.time()) {
+            long cyclenum;
+            AtomicLong cycleMax = input.getMaxCycle();
 
-                for (cyclenum = thisIntervalStart; cyclenum < nextIntervalStart; cyclenum++) {
+            action.init();
 
-                    if (slotState.get() != Running) {
-                        logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
-                        continue;
-                    }
-                    int result=-1;
-                    try (Timer.Context cycleTime = cyclesTimer.time()) {
+            while (slotState.get() == Running) {
 
-                        //logger.trace("cycle " + cyclenum);
-                        try (Timer.Context phaseTime = phasesTimer.time()) {
-                            result=action.runCycle(cyclenum);
+                long thisIntervalStart = input.getCycleInterval(stride);
+                long nextIntervalStart = thisIntervalStart + stride;
+
+                if (action instanceof StrideAware) {
+                    ((StrideAware) action).setInterval(thisIntervalStart, stride);
+                }
+
+                if (thisIntervalStart >= cycleMax.get()) {
+                    logger.trace("input exhausted (input " + thisIntervalStart + "), stopping motor thread " + slotId);
+                    slotStateTracker.enterState(Finished);
+                    continue;
+                }
+
+                try (Timer.Context stridesTime = stridesTimer.time()) {
+
+                    for (cyclenum = thisIntervalStart; cyclenum < nextIntervalStart; cyclenum++) {
+
+                        if (slotState.get() != Running) {
+                            logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
+                            continue;
                         }
+                        int result = -1;
+                        try (Timer.Context cycleTime = cyclesTimer.time()) {
 
-                        if (multiPhaseAction != null) {
-                            while (multiPhaseAction.incomplete()) {
-                                if (rateLimiter != null) {
-                                    rateLimiter.acquire();
-                                }
-                                try (Timer.Context phaseTime = phasesTimer.time()) {
-                                    result=multiPhaseAction.runPhase(cyclenum);
+                            //logger.trace("cycle " + cyclenum);
+                            try (Timer.Context phaseTime = phasesTimer.time()) {
+                                result = action.runCycle(cyclenum);
+                            }
+
+                            if (multiPhaseAction != null) {
+                                while (multiPhaseAction.incomplete()) {
+                                    if (rateLimiter != null) {
+                                        rateLimiter.acquire();
+                                    }
+                                    try (Timer.Context phaseTime = phasesTimer.time()) {
+                                        result = multiPhaseAction.runPhase(cyclenum);
+                                    }
                                 }
                             }
-                        }
 
-                        if (marker !=null) {
-                            marker.onCycleResult(cyclenum,result);
+                            try {
+                                if (marker != null) {
+                                    marker.onCycleResult(cyclenum, result);
+                                }
+                            } catch (Exception t) {
+                                throw t;
+                            }
                         }
                     }
                 }
+
             }
 
-        }
-
-        //MetricsContext.getInstance().getMetrics().getTimers().get("foo").getMeanRate();
-        if (slotState.get() == Stopping) {
-            slotStateTracker.enterState(Stopped);
+            //MetricsContext.getInstance().getMetrics().getTimers().get("foo").getMeanRate();
+            if (slotState.get() == Stopping) {
+                slotStateTracker.enterState(Stopped);
+            }
+        } catch (Throwable t) {
+            throw t;
         }
     }
 

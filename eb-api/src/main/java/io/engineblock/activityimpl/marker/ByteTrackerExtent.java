@@ -101,17 +101,22 @@ public class ByteTrackerExtent implements SegmentedInputSource {
         return (size - i);
     }
 
-    public CycleSegment getSegment() {
-        if (!filled) {
-            filled = isFullyFilled(); // eagerly evaluate fill until it is known to be filled
-            if (!filled) {
-                return null;
-            }
-        }
+    public CycleSegment getRemainingSegment() {
 
+//        if (!filled) {
+//            filled = isFullyFilled(); // eagerly evaluate fill until it is known to be filled
+//            if (!filled) {
+//                return null;
+//            }
+//        }
+//
         int current = totalServed.get();
-        if (totalServed.compareAndSet(current, markerData.length)) {
-            return CycleSegment.forData(current + min, markerData, current, markerData.length);
+        int next = totalMarked.get();
+        if (next - current == 0) {
+             return null;
+        }
+        if (totalServed.compareAndSet(current, next)) {
+            return CycleSegment.forData(current + min, markerData, current, next);
         } else {
             throw new RuntimeException("error while attempting to consume remainder of data in extent from position " + current);
         }
@@ -213,6 +218,6 @@ public class ByteTrackerExtent implements SegmentedInputSource {
     }
 
     public String rangeSummary() {
-        return "[" + min + "," + min + size + ")";
+        return "[" + min + "," + (min + size) + ")";
     }
 }

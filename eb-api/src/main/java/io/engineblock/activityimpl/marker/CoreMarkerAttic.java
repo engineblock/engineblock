@@ -279,7 +279,7 @@ public class CoreMarkerAttic {
     }
 
     public long getCycleInterval(int stride) {
-        // TODO: Rebuild this method separate from getSegment for efficiency
+        // TODO: Rebuild this method separate from getRemainingSegment for efficiency
         return getSegment(stride).cycle;
     }
 

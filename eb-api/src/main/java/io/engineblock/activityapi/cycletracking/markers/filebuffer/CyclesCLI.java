@@ -19,7 +19,6 @@ package io.engineblock.activityapi.cycletracking.markers.filebuffer;
 
 import io.engineblock.activityapi.cycletracking.buffers.CycleResult;
 import io.engineblock.activityapi.cycletracking.buffers.CycleResultRLEBuffer;
-import io.engineblock.activityapi.cycletracking.buffers.CycleResultRLETargetBuffer;
 
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -51,8 +50,7 @@ public class CyclesCLI {
 
         int readsize=100;
         while (mbb.remaining()>0) {
-            CycleResultRLETargetBuffer target = new CycleResultRLETargetBuffer(readsize, mbb);
-            CycleResultRLEBuffer readable = target.toReadable();
+            CycleResultRLEBuffer readable = new CycleResultRLEBuffer(readsize, mbb);
             for (CycleResult cycleResult : readable) {
                 System.out.println(cycleResult.getCycle() + ": " + cycleResult.getResult());
             }

@@ -71,14 +71,6 @@ public class CycleResultRLETargetBuffer implements Marker {
         this(ByteBuffer.allocate((size / BYTES) * BYTES));
     }
 
-    public CycleResultRLETargetBuffer(int size, ByteBuffer src) {
-        size=(size/BYTES)*BYTES;
-        int bufsize = Math.min(size, src.remaining());
-        byte[] bbuf=new byte[bufsize];
-        src.get(bbuf);
-        this.buf = ByteBuffer.wrap(bbuf);
-    }
-
     /**
      * Convert the contents of this RLE buffer to a readable and
      * invalide it for writing.

@@ -33,7 +33,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     private long reportModulo;
     private int phasesPerCycle;
     private int completedPhase;
-    private int errormodulo = Integer.MAX_VALUE;
+    private int errormodulo = Integer.MIN_VALUE;
 
     public DiagAction(int slot, ActivityDef activityDef, DiagActivity diagActivity) {
         this.activityDef = activityDef;
@@ -93,7 +93,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     public void onActivityDefUpdate(ActivityDef activityDef) {
         updateReportTime();
         updatePhases();
-        this.errormodulo=activityDef.getParams().getOptionalInteger("errormodulo").orElse(1000);
+        this.errormodulo=activityDef.getParams().getOptionalInteger("errormodulo").orElse(Integer.MIN_VALUE);
     }
 
     @Override
@@ -123,10 +123,17 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
         }
         completedPhase++;
 
-        if ((value % errormodulo)==0) {
-            return 1;
+        int result = 0;
+        if (errormodulo>=0) {
+            if ((value % errormodulo)==0) {
+                result=1;
+            } else {
+                result=0;
+            }
+        } else {
+            result= (byte) value % 128;
         }
-        return 0;
+        return result;
     }
 
 //    @Override
