@@ -3,7 +3,7 @@ package io.engineblock.activitycore;
 import io.engineblock.activityapi.Action;
 import io.engineblock.activityapi.Motor;
 import io.engineblock.activityapi.RunState;
-import io.engineblock.activitycore.fortesting.BlockingCycleValueSupplier;
+import io.engineblock.activitycore.fortesting.BlockingSegmentInput;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.motor.CoreMotor;
 import org.testng.annotations.Test;
@@ -33,7 +33,7 @@ public class CoreMotorTest {
 
     @Test
     public void testBasicActivityMotor() {
-        BlockingCycleValueSupplier lockstepper = new BlockingCycleValueSupplier();
+        BlockingSegmentInput lockstepper = new BlockingSegmentInput();
         Motor cm = new CoreMotor(ActivityDef.parseActivityDef("alias=foo"), 5L, lockstepper);
         AtomicLong observableAction = new AtomicLong(-3L);
         cm.setAction(getTestConsumer(observableAction));
@@ -45,14 +45,14 @@ public class CoreMotorTest {
             Thread.sleep(1000);  // allow action time to be waiting in monitor for test fixture
         } catch (InterruptedException ignored) {}
 
-        lockstepper.setForSingleReader(5L);
+        lockstepper.publishSegment(5L);
         boolean result = awaitCondition(atomicInteger -> (atomicInteger.get()==5L),observableAction,5000,100);
         assertThat(observableAction.get()).isEqualTo(5L);
     }
 
     @Test
     public void testIteratorStride() {
-        BlockingCycleValueSupplier lockstepper = new BlockingCycleValueSupplier();
+        BlockingSegmentInput lockstepper = new BlockingSegmentInput();
         Motor cm1 = new CoreMotor(ActivityDef.parseActivityDef("stride=3"),1L, lockstepper);
         AtomicLongArray ary = new AtomicLongArray(10);
         Action a1 = getTestArrayConsumer(ary);
@@ -66,7 +66,8 @@ public class CoreMotorTest {
             Thread.sleep(500); // allow action time to be waiting in monitor for test fixture
         } catch (InterruptedException ignored) {}
 
-        lockstepper.setForSingleReader(11L);
+        lockstepper.publishSegment(11L,12L,13L,0L);
+
         boolean result = awaitAryCondition(ala -> (ala.get(2)==13L),ary,5000,100);
         assertThat(ary.get(0)).isEqualTo(11L);
         assertThat(ary.get(1)).isEqualTo(12L);

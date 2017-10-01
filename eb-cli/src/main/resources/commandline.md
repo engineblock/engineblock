@@ -25,13 +25,14 @@ to that command.
 These options help you learn more about running PROG, and
 about the plugins that are present in your particular version.
 
+Get a list of additional help topics that have more detailed
+documentation:
+
+    PROG help topics
+
 Provide specific help for the named activity type:
 
-    --help <activity type>
-
-Provide advanced help that explains more than this screen.
-
-    --advanced-help
+    PROG help <activity type>
 
 List the available activity types
 

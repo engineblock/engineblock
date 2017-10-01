@@ -19,15 +19,20 @@ package io.engineblock.activityimpl.motor;
 import com.codahale.metrics.Timer;
 import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.markers.Marker;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultSegmentBuffer;
+import io.engineblock.activityapi.output.Output;
+import io.engineblock.activityapi.input.Input;
+import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.input.RateLimiterProvider;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntPredicate;
 
 import static io.engineblock.activityapi.RunState.*;
 
@@ -50,7 +55,8 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private AtomicReference<RunState> slotState;
     private RateLimiter rateLimiter; // Only for use in phasing
     private int stride = 1;
-    private Marker marker;
+    private Output output;
+    private IntPredicate outputPredicate;
 
     /**
      * Create an ActivityMotor.
@@ -89,6 +95,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         this(activityDef, slotId, input);
         setAction(action);
     }
+
     /**
      * Create an ActivityMotor.
      *
@@ -96,18 +103,20 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      * @param action      An LongConsumer which is applied to the input for each cycle.
-     * @param marker     An optional tracker.
+     * @param output      An optional tracker.
      */
     public CoreMotor(
             ActivityDef activityDef,
             long slotId,
             Input input,
             Action action,
-            Marker marker
+            Output output,
+            IntPredicate resultFilter
     ) {
         this(activityDef, slotId, input);
         setAction(action);
-        setResultSink(marker);
+        setResultOutput(output);
+        setResultFilter(resultFilter);
     }
 
     /**
@@ -156,18 +165,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     }
 
     @Override
-    public Motor setResultSink(Marker marker) {
-        this.marker = marker;
-        return this;
-    }
-
-    @Override
-    public Marker getResultSink() {
-        return this.marker;
-    }
-
-
-    @Override
     public void run() {
 
         try {
@@ -187,28 +184,49 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             }
 
             long cyclenum;
-            AtomicLong cycleMax = input.getMaxCycle();
+//            AtomicLong cycleMax = input.getMaxCycle();
 
             action.init();
 
             while (slotState.get() == Running) {
 
-                long thisIntervalStart = input.getCycleInterval(stride);
-                long nextIntervalStart = thisIntervalStart + stride;
+                CycleSegment cycleSegment = input.getInputSegment(stride);
 
-                if (action instanceof StrideAware) {
-                    ((StrideAware) action).setInterval(thisIntervalStart, stride);
-                }
-
-                if (thisIntervalStart >= cycleMax.get()) {
-                    logger.trace("input exhausted (input " + thisIntervalStart + "), stopping motor thread " + slotId);
+                if (cycleSegment == null) {
+                    logger.trace("input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
                     slotStateTracker.enterState(Finished);
                     continue;
                 }
 
-                try (Timer.Context stridesTime = stridesTimer.time()) {
+                CycleResultSegmentBuffer segBuffer = new CycleResultSegmentBuffer(stride);
 
-                    for (cyclenum = thisIntervalStart; cyclenum < nextIntervalStart; cyclenum++) {
+
+//                long thisIntervalStart = input.getCycleInterval(stride);
+//                long nextIntervalStart = thisIntervalStart + stride;
+//
+//                if (action instanceof StrideAware) {
+//                    ((StrideAware) action).setInterval(thisIntervalStart, stride);
+//                }
+//
+//                if (thisIntervalStart >= cycleMax.get()) {
+//                    logger.trace("input exhausted (input " + thisIntervalStart + "), stopping motor thread " + slotId);
+//                    slotStateTracker.enterState(Finished);
+//                    continue;
+//                }
+
+                try (Timer.Context stridesTime = stridesTimer.time()) {
+                    while (!cycleSegment.isExhausted()) {
+                        cyclenum = cycleSegment.nextCycle();
+                        if (cyclenum < 0) {
+                            if (cycleSegment.isExhausted()) {
+                                logger.trace("input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
+                                slotStateTracker.enterState(Finished);
+                                continue;
+                            }
+                        }
+
+//                    }
+//                    for (cyclenum = thisIntervalStart; cyclenum < nextIntervalStart; cyclenum++) {
 
                         if (slotState.get() != Running) {
                             logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
@@ -233,17 +251,21 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                                 }
                             }
 
-                            try {
-                                if (marker != null) {
-                                    marker.onCycleResult(cyclenum, result);
-                                }
-                            } catch (Exception t) {
-                                throw t;
-                            }
                         }
+                        segBuffer.update(cyclenum, result);
                     }
+
                 }
 
+                if (output != null) {
+                    CycleResultsSegment outputBuffer = segBuffer.toReader();
+                    try {
+                        output.onCycleResultSegment(segBuffer.toReader());
+                    } catch (Exception t) {
+                        logger.error("Error while feeding result segment " + outputBuffer + " to output '" + output + "', error:" + t.getMessage());
+                        throw t;
+                    }
+                }
             }
 
             //MetricsContext.getInstance().getMetrics().getTimers().get("foo").getMeanRate();
@@ -251,6 +273,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                 slotStateTracker.enterState(Stopped);
             }
         } catch (Throwable t) {
+            logger.error("Error in core motor loop:" + t.getMessage());
             throw t;
         }
     }
@@ -263,11 +286,10 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
-        if (input instanceof ActivityDefObserver) {
-            ((ActivityDefObserver) input).onActivityDefUpdate(activityDef);
-        }
-        if (action instanceof ActivityDefObserver) {
-            ((ActivityDefObserver) action).onActivityDefUpdate(activityDef);
+        for (Object component : (new Object[]{input, action, output})) {
+            if (component != null && component instanceof ActivityDefObserver) {
+                ((ActivityDefObserver) component).onActivityDefUpdate(activityDef);
+            }
         }
 
         if (input instanceof RateLimiterProvider) {
@@ -290,10 +312,17 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             }
             slotStateTracker.enterState(RunState.Stopping);
         } else {
-            if (slotState.get()!=Stopped && slotState.get() !=Stopping) {
+            if (slotState.get() != Stopped && slotState.get() != Stopping) {
                 logger.warn("attempted to stop motor " + this.getSlotId() + ": from non Running state:" + slotState.get());
             }
         }
     }
 
+    public void setResultOutput(Output resultOutput) {
+        this.output = resultOutput;
+    }
+
+    public void setResultFilter(IntPredicate resultFilter) {
+        this.outputPredicate = resultFilter;
+    }
 }

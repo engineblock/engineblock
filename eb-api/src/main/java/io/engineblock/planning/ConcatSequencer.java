@@ -25,7 +25,7 @@ import java.util.function.ToLongFunction;
  * This sequencer just repeats a number of elements, one element after
  * another.
  *
- * @param <T>
+ * @param <T> The type of op or element being sequenced
  */
 public class ConcatSequencer<T> implements ElementSequencer<T> {
 

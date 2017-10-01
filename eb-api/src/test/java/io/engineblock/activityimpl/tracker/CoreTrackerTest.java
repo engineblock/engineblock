@@ -17,7 +17,7 @@
 
 package io.engineblock.activityimpl.tracker;
 
-import io.engineblock.activityapi.cycletracking.buffers.CycleSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
 import io.engineblock.activityimpl.marker.ByteTrackerExtent;
 import io.engineblock.activityimpl.marker.CoreTracker;
 import org.testng.annotations.Test;
@@ -31,7 +31,7 @@ public class CoreTrackerTest {
     public void testBasicTracking() {
         CoreTracker ct = new CoreTracker();
         ct.onExtent(new ByteTrackerExtent(3, new int[] {13,14,15,16,17}));
-        CycleSegment s = ct.getSegment(5);
+        CycleResultsIntervalSegment s = ct.getCycleResultsSegment(5);
         assertThat(s.cycle).isEqualTo(3L);
         assertThat(s.codes).containsExactly((byte)13,(byte)14,(byte)15,(byte)16,(byte)17);
     }

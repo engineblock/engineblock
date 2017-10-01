@@ -237,6 +237,7 @@ public class ActivityMetrics {
     public static void closeMetrics() {
         logger.trace("Closing all registered metrics closable objects.");
         for (MetricsCloseable metricsCloseable : metricsCloseables) {
+            logger.trace("closing metrics closeable: " + metricsCloseable);
             metricsCloseable.closeMetrics();
         }
     }

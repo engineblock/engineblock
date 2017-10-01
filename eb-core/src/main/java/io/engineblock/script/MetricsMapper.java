@@ -18,7 +18,6 @@ import com.codahale.metrics.*;
 import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.ActivityType;
 import io.engineblock.activityimpl.ActivityDef;
-import io.engineblock.core.ActivityTypeFinder;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
 import org.slf4j.Logger;
@@ -45,7 +44,7 @@ public class MetricsMapper {
         ActivityDef activityDef = ActivityDef.parseActivityDef(activitySpec);
         logger.info("introspecting metric names for " +  activitySpec);
 
-        Optional<ActivityType> activityType = ActivityTypeFinder.instance().get(activityDef.getActivityType());
+        Optional<ActivityType> activityType = ActivityType.FINDER.get(activityDef.getActivityType());
 
         if (!activityType.isPresent()) {
             throw new RuntimeException("Activity type '" + activityDef.getActivityType() + "' does not exist in this runtime.");

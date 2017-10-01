@@ -1,15 +1,17 @@
 package io.engineblock.core;
 
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.markers.MarkerDispenser;
+import io.engineblock.activityapi.output.OutputDispenser;
+import io.engineblock.activityapi.input.Input;
+import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityimpl.CoreServices;
+import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.action.CoreActionDispenser;
 import io.engineblock.activityimpl.input.CoreInputDispenser;
 import io.engineblock.activityimpl.input.TargetRateInput;
 import io.engineblock.activityimpl.motor.CoreMotor;
-import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.motor.CoreMotorDispenser;
-import io.engineblock.activityimpl.marker.CoreMarkerDispenser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -39,13 +41,14 @@ public class ActivityExecutorTest {
     @Test
     public void testDelayedStartSanity() {
         ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test;cycles=10000;initdelay=10000;");
-        Optional<ActivityType> activityType = ActivityTypeFinder.instance().get(ad.getActivityType());
+        Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
         Activity a = new DelayedInitActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
-        MarkerDispenser tdisp = new CoreMarkerDispenser(a);
-        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
+        OutputDispenser tdisp = CoreServices.getOutputDispenser(a).orElse(null);
+        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp,null);
         a.setActionDispenserDelegate(adisp);
+        a.setMarkerDispenserDelegate(tdisp);
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
 
@@ -53,7 +56,7 @@ public class ActivityExecutorTest {
         ad.setThreads(1);
         ae.startActivity();
         ae.awaitCompletion(15000);
-        assertThat(idisp.getInput(10).getPendingCycle()).isEqualTo(10001L);
+        assertThat(idisp.getInput(10).getInputSegment(3)).isNull();
 
     }
 
@@ -61,7 +64,7 @@ public class ActivityExecutorTest {
     @Test(enabled=true)
     public void testNewActivityExecutor() {
         ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test;cycles=1000;");
-        Optional<ActivityType> activityType = ActivityTypeFinder.instance().get(ad.getActivityType());
+        Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
         Input longSupplier = new TargetRateInput(ad);
         MotorDispenser cmf = getActivityMotorFactory(
                 ad, motorActionDelay(999), longSupplier
@@ -69,8 +72,8 @@ public class ActivityExecutorTest {
         Activity a = new SimpleActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
-        MarkerDispenser tdisp = new CoreMarkerDispenser(a);
-        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
+        OutputDispenser tdisp = CoreServices.getOutputDispenser(a).orElse(null);
+        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp, null);
         a.setActionDispenserDelegate(adisp);
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);

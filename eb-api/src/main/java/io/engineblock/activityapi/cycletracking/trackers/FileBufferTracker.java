@@ -17,12 +17,12 @@
 
 package io.engineblock.activityapi.cycletracking.trackers;
 
-import io.engineblock.activityapi.cycletracking.buffers.CycleSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
 
 public class FileBufferTracker implements Tracker {
 
     @Override
-    public CycleSegment getSegment(int stride) {
+    public CycleResultsIntervalSegment getCycleResultsSegment(int stride) {
         return null;
     }
 }

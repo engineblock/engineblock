@@ -17,8 +17,8 @@
 
 package io.engineblock.activityimpl.marker;
 
-import io.engineblock.activityapi.cycletracking.buffers.CycleSegment;
-import io.engineblock.activityapi.cycletracking.buffers.SegmentedInputSource;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
+import io.engineblock.activityapi.cycletracking.buffers.CycleResultSegmentsReadable;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * A simple bytebuffer marker implementation
  */
-public class ByteTrackerExtent implements SegmentedInputSource {
+public class ByteTrackerExtent implements CycleResultSegmentsReadable {
 
     private final long min; // The maximum value to be dispatched
     private final AtomicInteger totalMarked; // The total number of marked values
@@ -101,7 +101,7 @@ public class ByteTrackerExtent implements SegmentedInputSource {
         return (size - i);
     }
 
-    public CycleSegment getRemainingSegment() {
+    public CycleResultsIntervalSegment getRemainingSegment() {
 
 //        if (!filled) {
 //            filled = isFullyFilled(); // eagerly evaluate fill until it is known to be filled
@@ -116,14 +116,14 @@ public class ByteTrackerExtent implements SegmentedInputSource {
              return null;
         }
         if (totalServed.compareAndSet(current, next)) {
-            return CycleSegment.forData(current + min, markerData, current, next);
+            return CycleResultsIntervalSegment.forData(current + min, markerData, current, next);
         } else {
             throw new RuntimeException("error while attempting to consume remainder of data in extent from position " + current);
         }
     }
 
     @Override
-    public CycleSegment getSegment(int stride) {
+    public CycleResultsIntervalSegment getCycleResultsSegment(int stride) {
         if (!filled) {
             filled = isFullyFilled(); // eagerly evaluate fill until it is known to be filled
             if (!filled) {
@@ -136,7 +136,7 @@ public class ByteTrackerExtent implements SegmentedInputSource {
             int next = current + stride;
             if (next <= totalMarked.get()) {
                 if (totalServed.compareAndSet(current, next)) {
-                    return CycleSegment.forData(current + min, markerData, current, stride);
+                    return CycleResultsIntervalSegment.forData(current + min, markerData, current, stride);
                 }
             }
         }
@@ -148,7 +148,7 @@ public class ByteTrackerExtent implements SegmentedInputSource {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("(").append(min).append(",").append(min + size).append("): ")
-                .append(", size=").append(this.size)
+                .append(", getCount=").append(this.size)
                 .append(", marked=").append(this.totalMarked.get())
                 .append(", served=").append(this.totalServed.get());
         if (markerData.length < 1024 * 50) {
@@ -181,7 +181,7 @@ public class ByteTrackerExtent implements SegmentedInputSource {
 
     /**
      * Find the last known extent, and add another after it, account for
-     * contiguous ranges and extent size. Note that this does not mean
+     * contiguous ranges and extent getCount. Note that this does not mean
      * necessarily that the extent will be added immediately after the current one.
      *
      * @return The new extent that was created.

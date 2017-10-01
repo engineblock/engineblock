@@ -62,7 +62,7 @@ public class MarkdownDocInfo {
     }
 
     public String forActivityInstance(String s) {
-        ActivityType activityType = ActivityTypeFinder.instance().getOrThrow(s);
+        ActivityType activityType = ActivityType.FINDER.getOrThrow(s);
         return forResourceMarkdown(activityType.getName()+".md", "docs/");
     }
 

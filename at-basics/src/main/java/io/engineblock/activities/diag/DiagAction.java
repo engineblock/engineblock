@@ -134,7 +134,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
                 result=0;
             }
         } else {
-            result= (byte) value % 128;
+            result= (byte) (value % 128);
         }
 
         if (erroroncycle==value) {

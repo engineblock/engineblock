@@ -20,7 +20,6 @@ package io.engineblock.resources;
 import com.codahale.metrics.annotation.Timed;
 import io.engineblock.activityapi.ActivityType;
 import io.engineblock.core.MarkdownDocInfo;
-import io.engineblock.core.ActivityTypeFinder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -49,7 +48,7 @@ public class ActivityTypeResources {
     @Timed
     @ApiOperation(value = "List the available activity types by canonical name.")
     public List<String> getAvailableActivityTypes() {
-        return ActivityTypeFinder.instance().getAll().stream()
+        return ActivityType.FINDER.getAll().stream()
                 .map(ActivityType::getName)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
@@ -64,7 +63,7 @@ public class ActivityTypeResources {
             @ApiParam("The name of the activity type")
                     String activityTypeName) {
 
-        Optional<ActivityType> activityType = ActivityTypeFinder.instance().get(activityTypeName);
+        Optional<ActivityType> activityType = ActivityType.FINDER.get(activityTypeName);
         if (activityType.isPresent()) {
             Parser parser = Parser.builder().build();
             Optional<String> activityMarkdown = MarkdownDocInfo.forHelpTopic(activityTypeName);

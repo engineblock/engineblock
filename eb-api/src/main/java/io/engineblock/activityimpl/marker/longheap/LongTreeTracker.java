@@ -4,14 +4,14 @@ package io.engineblock.activityimpl.marker.longheap;
  * <p>Using the 64 bit structure of a long as a heap addressed
  * tracker, where the leaf nodes represent marked values and
  * all others are used to consolidate state.</p>
- * <p>
+ *
  * <p>One bit is ignored, the 2s compliment sign, leaving 63 bits:
  * 31 bits for root and path and 32 bits as leaf nodes.</p>
- * <p>
+ *
  * <p>Each time a leaf node is marked as complete, it's sibling
  * is checked for the same. While both are marked, the same
  * process is checked for its parent and its sibling, and so forth</p>
- * <p>
+ *
  * <p>This approach assumes that it is good to lower contention and
  * retries for atomics when there are many threads active against
  * the tracker. It should be benchmarked with simpler methods

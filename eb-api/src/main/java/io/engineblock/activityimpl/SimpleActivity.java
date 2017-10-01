@@ -1,7 +1,9 @@
 package io.engineblock.activityimpl;
 
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.markers.MarkerDispenser;
+import io.engineblock.activityapi.cycletracking.filters.IntPredicateDispenser;
+import io.engineblock.activityapi.output.OutputDispenser;
+import io.engineblock.activityapi.input.InputDispenser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,8 @@ public class SimpleActivity implements Activity {
     private MotorDispenser motorDispenser;
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
-    private MarkerDispenser markerDispenser;
+    private OutputDispenser markerDispenser;
+    private IntPredicateDispenser resultFilterDispenser;
     protected ActivityDef activityDef;
     private RunState runState = RunState.Uninitialized;
 
@@ -63,12 +66,22 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
-    public MarkerDispenser getMarkerDispenserDelegate() {
+    public IntPredicateDispenser getResultFilterDispenserDelegate() {
+        return resultFilterDispenser;
+    }
+
+    @Override
+    public void setResultFilterDispenserDelegate(IntPredicateDispenser resultFilterDispenser) {
+        this.resultFilterDispenser = resultFilterDispenser;
+    }
+
+    @Override
+    public OutputDispenser getMarkerDispenserDelegate() {
         return this.markerDispenser;
     }
 
     @Override
-    public void setMarkerDispenserDelegate(MarkerDispenser markerDispenser) {
+    public void setMarkerDispenserDelegate(OutputDispenser markerDispenser) {
         this.markerDispenser = markerDispenser;
     }
 

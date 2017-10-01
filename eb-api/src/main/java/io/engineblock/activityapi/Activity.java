@@ -1,6 +1,8 @@
 package io.engineblock.activityapi;
 
-import io.engineblock.activityapi.cycletracking.markers.MarkerDispenser;
+import io.engineblock.activityapi.cycletracking.filters.IntPredicateDispenser;
+import io.engineblock.activityapi.output.OutputDispenser;
+import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.activityimpl.SimpleActivity;
@@ -35,9 +37,13 @@ public interface Activity extends Comparable<Activity> {
 
     void setActionDispenserDelegate(ActionDispenser actionDispenser);
 
-    MarkerDispenser getMarkerDispenserDelegate();
+    IntPredicateDispenser getResultFilterDispenserDelegate();
 
-    void setMarkerDispenserDelegate(MarkerDispenser markerDispenser);
+    void setResultFilterDispenserDelegate(IntPredicateDispenser resultFilterDispenser);
+
+    OutputDispenser getMarkerDispenserDelegate();
+
+    void setMarkerDispenserDelegate(OutputDispenser markerDispenser);
 
     ActivityDef getActivityDef();
 

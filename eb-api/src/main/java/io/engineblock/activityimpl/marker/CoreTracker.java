@@ -17,7 +17,7 @@
 
 package io.engineblock.activityimpl.marker;
 
-import io.engineblock.activityapi.cycletracking.buffers.CycleSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
 import io.engineblock.activityapi.cycletracking.trackers.Tracker;
 
 import java.util.LinkedList;
@@ -32,7 +32,7 @@ public class CoreTracker implements Tracker {
     private Condition extentsAvailable = lock.newCondition();
 
     @Override
-    public CycleSegment getSegment(int stride) {
+    public CycleResultsIntervalSegment getCycleResultsSegment(int stride) {
 
         while (true) {
 
@@ -45,7 +45,7 @@ public class CoreTracker implements Tracker {
                 extent = extents.peekFirst();
             }
 
-            CycleSegment segment = extent.getSegment(stride);
+            CycleResultsIntervalSegment segment = extent.getCycleResultsSegment(stride);
 
             if (extent.isFullyServed()) {
                 extents.removeFirst();

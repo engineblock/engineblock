@@ -17,9 +17,14 @@
 package io.engineblock.activityimpl.motor;
 
 import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.markers.Marker;
-import io.engineblock.activityapi.cycletracking.markers.MarkerDispenser;
+import io.engineblock.activityapi.cycletracking.filters.IntPredicateDispenser;
+import io.engineblock.activityapi.output.Output;
+import io.engineblock.activityapi.output.OutputDispenser;
+import io.engineblock.activityapi.input.Input;
+import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityimpl.ActivityDef;
+
+import java.util.function.IntPredicate;
 
 /**
  * Produce index ActivityMotor instances with an input and action,
@@ -30,24 +35,34 @@ public class CoreMotorDispenser implements MotorDispenser {
     private final Activity activity;
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
-    private MarkerDispenser markerDispenser;
+    private OutputDispenser markerDispenser;
+    private IntPredicateDispenser resultFilterDispenser;
 
     public CoreMotorDispenser(Activity activity,
                               InputDispenser inputDispenser,
                               ActionDispenser actionDispenser,
-                              MarkerDispenser markerDispenser) {
+                              OutputDispenser markerDispenser,
+                              IntPredicateDispenser resultFilterDispenser) {
         this.activity = activity;
         this.inputDispenser = inputDispenser;
         this.actionDispenser = actionDispenser;
         this.markerDispenser = markerDispenser;
+        this.resultFilterDispenser = resultFilterDispenser;
     }
 
     @Override
     public Motor getMotor(ActivityDef activityDef, int slotId) {
         Action action = actionDispenser.getAction(slotId);
         Input input = inputDispenser.getInput(slotId);
-        Marker marker = markerDispenser.getMarker(slotId);
-        Motor am = new CoreMotor(activity.getActivityDef(), slotId, input, action, marker);
+        Output output = null;
+        if (markerDispenser!=null) {
+            output = markerDispenser.getMarker(slotId);
+        }
+        IntPredicate resultFilter = null;
+        if (resultFilterDispenser!=null) {
+            resultFilter = resultFilterDispenser.getIntPredicate(slotId);
+        }
+        Motor am = new CoreMotor(activity.getActivityDef(), slotId, input, action, output, resultFilter);
         return am;
     }
 }

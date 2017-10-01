@@ -1,14 +1,16 @@
 package io.engineblock.cli;
 
 import io.engineblock.activityapi.ActivityType;
+import io.engineblock.activityapi.OutputType;
+import io.engineblock.activityapi.cycletracking.outputs.cyclelog.CycleLogDumperUtility;
+import io.engineblock.activityapi.input.InputType;
 import io.engineblock.core.MarkdownDocInfo;
-import io.engineblock.core.ActivityTypeFinder;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricReporters;
-import io.engineblock.script.Scenario;
 import io.engineblock.script.MetricsMapper;
+import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +45,7 @@ public class EBCLI {
         }
 
         if (options.wantsAdvancedHelp()) {
-            System.out.println(loadHelpFile("advancedhelp.md"));
+            System.out.println(loadHelpFile("cli_scripting.md"));
             System.exit(0);
         }
 
@@ -54,7 +56,22 @@ public class EBCLI {
         }
 
         if (options.wantsActivityTypes()) {
-            ActivityTypeFinder.instance().getAll().stream().map(ActivityType::getName).forEach(System.out::println);
+            ActivityType.FINDER.getAll().stream().map(ActivityType::getName).forEach(System.out::println);
+            System.exit(0);
+        }
+
+        if (options.wantsInputTypes()) {
+            InputType.FINDER.getAll().stream().map(InputType::getName).forEach(System.out::println);
+            System.exit(0);
+        }
+
+        if (options.wantsMarkerTypes()) {
+            OutputType.FINDER.getAll().stream().map(OutputType::getName).forEach(System.out::println);
+            System.exit(0);
+        }
+
+        if (options.wantsToDumpRLEFile()) {
+            CycleLogDumperUtility.main(new String[] {options.rleFileToDump()});
             System.exit(0);
         }
 

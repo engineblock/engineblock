@@ -19,8 +19,9 @@ package io.engineblock.activityimpl.input;
 import com.codahale.metrics.Gauge;
 import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.ActivityDefObserver;
-import io.engineblock.activityapi.Input;
-import io.engineblock.activityapi.RateLimiterProvider;
+import io.engineblock.activityapi.input.ContiguousInput;
+import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.input.RateLimiterProvider;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import java.security.InvalidParameterException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * <p>TODO: This documentation is out of date as of 2.0.0
  * <p>This input will provide threadsafe access to a sequence of long values.</p>
  * <p>If the targetrate parameter is set on the activity def, then the rate of
  * grants will also be throttled to that rate.</p>
@@ -44,7 +46,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * after the max value. They simply expose it to callers. It is up to the
  * caller to check the value to determine when the input is deemed "used up."</p>
  */
-public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterProvider {
+public class TargetRateInput implements ContiguousInput, ActivityDefObserver, RateLimiterProvider {
     private final static Logger logger = LoggerFactory.getLogger(TargetRateInput.class);
 
     private final AtomicLong cycleValue = new AtomicLong(0L);
@@ -59,46 +61,29 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
         onActivityDefUpdate(activityDef);
     }
 
-
-    private TargetRateInput setNextValue(long newValue) {
-        if (newValue < min.get() || newValue > max.get()) {
-            throw new RuntimeException(
-                    "new value (" + newValue + ") must be within min..max range: [" + min + ".." + max + "]"
-            );
+    @Override
+    public CycleSegment getInputSegment(int stride) {
+        while (true) {
+            long current = this.cycleValue.get();
+            long next = current + stride;
+            if (next >=max.get()) {
+                return null;
+            }
+            if (cycleValue.compareAndSet(current,next)) {
+                return new InputInterval.Segment(current,next);
+            }
         }
-        cycleValue.set(newValue);
-        return this;
     }
 
     @Override
-    public long getCycle() {
-        if (rateLimiter != null) {
-            rateLimiter.acquire();
-        }
-        return cycleValue.getAndIncrement();
-    }
-
-    @Override
-    public long getCycleInterval(int stride) {
-        if (rateLimiter != null) {
-            rateLimiter.acquire();
-        }
-        return cycleValue.getAndAdd(stride);
-    }
-
-    @Override
-    public AtomicLong getMinCycle() {
-        return min;
-    }
-
-    @Override
-    public AtomicLong getMaxCycle() {
-        return max;
-    }
-
-    @Override
-    public long getPendingCycle() {
-        return cycleValue.get();
+    public String toString() {
+        return "TargetRateInput{" +
+                "cycleValue=" + cycleValue +
+                ", min=" + min +
+                ", max=" + max +
+                ", rateLimiter=" + rateLimiter +
+                ", activity=" + activityDef.getAlias() +
+                '}';
     }
 
     @Override
@@ -116,7 +101,7 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
 
         if (min.get() != startCycle) {
             min.set(startCycle);
-            setNextValue(min.get());
+            cycleValue.set(min.get());
         }
 
         updateRateLimiter(activityDef);

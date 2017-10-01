@@ -17,11 +17,11 @@
 
 package io.engineblock.activityapi.cycletracking.trackers;
 
-import io.engineblock.activityapi.cycletracking.buffers.SegmentedInputSource;
+import io.engineblock.activityapi.cycletracking.buffers.CycleResultSegmentsReadable;
 
 /**
  * A cycle result source provides specific cycles to consumers.
  */
-public interface Tracker extends SegmentedInputSource {
+public interface Tracker extends CycleResultSegmentsReadable {
 
 }

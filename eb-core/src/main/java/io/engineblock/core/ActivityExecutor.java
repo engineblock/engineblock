@@ -16,9 +16,11 @@ package io.engineblock.core;
 
 import io.engineblock.activityapi.*;
 import io.engineblock.activityapi.ProgressMeter;
+import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.activityimpl.SlotStateTracker;
+import io.engineblock.activityimpl.input.ProgressCapable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -415,17 +417,21 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         double startCycle = getActivityDef().getStartCycle();
         double endCycle = getActivityDef().getEndCycle();
         double totalCycles = endCycle - startCycle;
-        double count = inputs.size();
 
         double total = 0.0D;
 
+        double progress=0.0D;
         for (Input input : inputs) {
-            double done = (input.getPendingCycle() - startCycle);
-            double fractional = (done / totalCycles);
-            total += fractional;
+            if (input instanceof ProgressCapable) {
+                double ip = ((ProgressCapable)input).getProgress();
+                progress+=ip;
+            } else {
+                return Double.NaN;
+            }
         }
 
-        return total;
+        long inputCount = inputs.stream().distinct().count();
+        return progress / (double) inputCount;
     }
 
     @Override

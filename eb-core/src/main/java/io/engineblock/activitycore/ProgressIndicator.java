@@ -76,7 +76,7 @@ public class ProgressIndicator implements Runnable {
         Collection<ProgressMeter> progressMeters = sc.getProgressMeters();
         for (ProgressMeter meter : progressMeters) {
             String progress = meter.getProgressName() + ": " +
-                    String.format(Locale.US, "%3.2f%%", (100.0 * meter.getProgress())) + "/" + meter.getProgressState();
+                    String.format(Locale.US, "%s%%", formatProgress(meter.getProgress())) + "/" + meter.getProgressState();
             switch (indicatorMode) {
                 case console:
                     System.out.println(progress);
@@ -84,6 +84,13 @@ public class ProgressIndicator implements Runnable {
                     logger.info(progress);
             }
         }
+    }
+
+    private String formatProgress(double progress) {
+        if (Double.isNaN(progress)) {
+            return "Unknown";
+        }
+        return String.format(Locale.US, "%3.2f%%", (100.0 * progress));
     }
 
     public String toString() {

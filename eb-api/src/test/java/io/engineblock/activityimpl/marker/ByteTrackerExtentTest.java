@@ -17,7 +17,7 @@
 
 package io.engineblock.activityimpl.marker;
 
-import io.engineblock.activityapi.cycletracking.buffers.CycleSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,12 +39,12 @@ public class ByteTrackerExtentTest {
         assertThat(bt4.getMarkerData()[1]).isEqualTo((byte)1);
         assertThat(bt4.isFullyFilled()).isTrue();
 
-        CycleSegment seg1 = bt4.getSegment(2);
+        CycleResultsIntervalSegment seg1 = bt4.getCycleResultsSegment(2);
         assertThat(seg1.cycle).isEqualTo(33);
         assertThat(seg1.codes.length).isEqualTo(2);
         assertThat(seg1.codes[0]).isEqualTo((byte)0);
         assertThat(bt4.isFullyServed()).isFalse();
-        CycleSegment seg2 = bt4.getSegment(2);
+        CycleResultsIntervalSegment seg2 = bt4.getCycleResultsSegment(2);
         assertThat(bt4.isFullyServed()).isTrue();
     }
 

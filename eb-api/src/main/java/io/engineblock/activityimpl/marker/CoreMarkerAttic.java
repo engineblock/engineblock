@@ -17,7 +17,7 @@
 
 package io.engineblock.activityimpl.marker;
 
-import io.engineblock.activityapi.cycletracking.buffers.CycleSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +75,7 @@ public class CoreMarkerAttic {
             extent = extent.extend();
             logger.debug("added tracker extent " + extent.rangeSummary());
         }
-        logger.info("using " + maxExtents + " max extents with size: " + extentSize);
+        logger.info("using " + maxExtents + " max extents with getCount: " + extentSize);
     }
 
     private void onFullyServed(ByteTrackerExtent firstReadable) {
@@ -192,8 +192,8 @@ public class CoreMarkerAttic {
         logger.debug("MARKER>: fully filled: " + extent);
     }
 
-    public CycleSegment getSegment(int stride) {
-        CycleSegment segment = null;
+    public CycleResultsIntervalSegment getSegment(int stride) {
+        CycleResultsIntervalSegment segment = null;
 
         while (true) {
 
@@ -217,7 +217,7 @@ public class CoreMarkerAttic {
                 logger.trace("TRACKER: extent set, proceeding");
             }
 
-            segment = extent.getSegment(stride);
+            segment = extent.getCycleResultsSegment(stride);
             if (segment != null) {
                 return segment;
             } else {

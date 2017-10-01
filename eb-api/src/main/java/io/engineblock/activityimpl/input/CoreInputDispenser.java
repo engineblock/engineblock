@@ -19,23 +19,13 @@ package io.engineblock.activityimpl.input;
 
 import io.engineblock.activityapi.ActivitiesAware;
 import io.engineblock.activityapi.Activity;
-import io.engineblock.activityapi.Input;
-import io.engineblock.activityapi.InputDispenser;
+import io.engineblock.activityapi.input.Input;
+import io.engineblock.activityapi.input.InputDispenser;
+import io.engineblock.activityapi.input.InputType;
+import io.engineblock.util.SimpleConfig;
 
 import java.util.Map;
 
-/**
- * This dispenser assumes one input per activity. It will choose an appropriate input implementation
- * depending on the activity parameters.
- *
- * Presently, it supports:
- * <UL>
- *     <LI>{@link TargetRateInput} - selected by use of the parameter <em>targetrate</em></LI>
- *     <LI>{@link LinkedInput} - selected by use of the parameter <em>linkinput</em></LI>
- * </UL>
- *
- * See the respective javadoc on those classes for more dteails.
- */
 public class CoreInputDispenser implements InputDispenser, ActivitiesAware {
 
     private Activity activity;
@@ -55,21 +45,14 @@ public class CoreInputDispenser implements InputDispenser, ActivitiesAware {
     }
 
     private synchronized Input createInput(long slot) {
-        String linkinput = activity.getParams().getOptionalString("linkinput").orElse("");
-        Input input=null;
-        if (linkinput.isEmpty()) {
-            input =new TargetRateInput(activity.getActivityDef());
-        } else {
-            Activity linkedActivity = activities.get(linkinput);
-            if (linkedActivity==null) {
-                throw new RuntimeException("To link input of activity " + activity.getAlias() + " to the input of " +
-                linkinput +", it first has to exist. Create non-linked activities first.");
-            }
-            input = new LinkedInput(
-                    activity.getActivityDef(),
-                    linkedActivity.getInputDispenserDelegate().getInput(slot)
-            );
+        SimpleConfig conf = new SimpleConfig(activity, "input");
+        String inputType = conf.getString("type").orElse("targetrate");
+        InputType inputTypeImpl = InputType.FINDER.getOrThrow(inputType);
+        InputDispenser inputDispenser = inputTypeImpl.getInputDispenser(activity);
+        if (inputDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware)inputDispenser).setActivitiesMap(activities);
         }
+        Input input = inputDispenser.getInput(slot);
         return input;
     }
 
@@ -77,4 +60,5 @@ public class CoreInputDispenser implements InputDispenser, ActivitiesAware {
     public void setActivitiesMap(Map<String, Activity> activities) {
         this.activities = activities;
     }
+
 }

@@ -18,15 +18,19 @@
 
 package io.engineblock.activityapi;
 
-import io.engineblock.activityapi.cycletracking.markers.MarkerDispenser;
+import io.engineblock.activityapi.cycletracking.filters.IntPredicateDispenser;
+import io.engineblock.activityapi.input.InputDispenser;
+import io.engineblock.activityapi.output.OutputDispenser;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityimpl.CoreServices;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.action.CoreActionDispenser;
-import io.engineblock.activityimpl.input.CoreInputDispenser;
-import io.engineblock.activityimpl.marker.CoreMarkerDispenser;
 import io.engineblock.activityimpl.motor.CoreMotorDispenser;
+import io.engineblock.util.Named;
+import io.engineblock.util.SimpleServiceLoader;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * <p>An ActivityType is the central extension point in EngineBlock for new
@@ -36,7 +40,9 @@ import java.util.Map;
  * an action dispenser. Default implementations of input and motor dispensers are provided,
  * and by extension, default inputs and motors.</p>
  */
-public interface ActivityType<A extends Activity> {
+public interface ActivityType<A extends Activity> extends Named {
+
+    public static SimpleServiceLoader<ActivityType> FINDER = new SimpleServiceLoader<>(ActivityType.class);
     /**
      * Return the short name of this activity type. The fully qualified name of an activity type is
      * this value, prefixed by the package of the implementing class.
@@ -80,13 +86,20 @@ public interface ActivityType<A extends Activity> {
         }
         activity.setActionDispenserDelegate(actionDispenser);
 
-        MarkerDispenser markerDispenser = getMarkerDispenser(activity);
-        if (markerDispenser instanceof ActivitiesAware) {
-            ((ActivitiesAware) markerDispenser).setActivitiesMap(activities);
+        IntPredicateDispenser resultFilterDispenser = getResultFilterDispenser(activity).orElse(null);
+        if (resultFilterDispenser != null && resultFilterDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware) actionDispenser).setActivitiesMap(activities);
         }
-        activity.setMarkerDispenserDelegate(markerDispenser);
+        activity.setResultFilterDispenserDelegate(resultFilterDispenser);
 
-        MotorDispenser motorDispenser = getMotorDispenser(activity, inputDispenser, actionDispenser, markerDispenser);
+
+        OutputDispenser outputDispenser = getMarkerDispenser(activity).orElse(null);
+        if (outputDispenser !=null && outputDispenser instanceof ActivitiesAware) {
+            ((ActivitiesAware) outputDispenser).setActivitiesMap(activities);
+        }
+        activity.setMarkerDispenserDelegate(outputDispenser);
+
+        MotorDispenser motorDispenser = getMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser, resultFilterDispenser);
         if (motorDispenser instanceof ActivitiesAware) {
             ((ActivitiesAware) motorDispenser).setActivitiesMap(activities);
         }
@@ -95,14 +108,19 @@ public interface ActivityType<A extends Activity> {
         return activity;
     }
 
+
+    default Optional<IntPredicateDispenser> getResultFilterDispenser(A activity) {
+        return CoreServices.getResultFilterDispenser(activity);
+    }
+
     /**
      * This method will be called <em>once</em> per action instance.
      *
      * @param activity The activity instance that will parameterize the returned MarkerDispenser instance.
      * @return an instance of MarkerDispenser
      */
-    default MarkerDispenser getMarkerDispenser(A activity) {
-        return new CoreMarkerDispenser(activity);
+    default Optional<OutputDispenser> getMarkerDispenser(A activity) {
+        return CoreServices.getOutputDispenser(activity);
     }
 
 
@@ -124,15 +142,16 @@ public interface ActivityType<A extends Activity> {
      * @return the InputDispenser for the associated activity
      */
     default InputDispenser getInputDispenser(A activity) {
-        return new CoreInputDispenser(activity);
+        return CoreServices.getInputDispenser(activity);
     }
 
     default MotorDispenser getMotorDispenser(
             A activity,
             InputDispenser inputDispenser,
             ActionDispenser actionDispenser,
-            MarkerDispenser markerDispenser) {
-        return new CoreMotorDispenser(activity, inputDispenser, actionDispenser, markerDispenser);
+            OutputDispenser outputDispenser,
+            IntPredicateDispenser outputFilterDispenser ) {
+        return new CoreMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser, outputFilterDispenser);
     }
 
 

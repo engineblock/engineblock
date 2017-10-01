@@ -26,6 +26,8 @@ public class EBCLIOptions {
     private static final String ADVANCED_HELP = "--advanced-help";
     private static final String METRICS = "--list-metrics";
     private static final String ACTIVITY_TYPES = "--list-activity-types";
+    private static final String WANTS_INPUT_TYPES = "--list-input-types";
+    private static final String WANTS_MARKER_TYPES = "--list-marker-types";
     private static final String WANTS_VERSION_LONG = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
     private static final String LOG_HISTO = "--log-histograms";
@@ -38,6 +40,7 @@ public class EBCLIOptions {
     private static final String STOP_ACTIVITY = "stop";
     private static final String AWAIT_ACTIVITY = "await";
     private static final String WAIT_MILLIS = "waitmillis";
+    private static final String DUMP_RLE_FILE = "--dump-cycle-log";
 
     // Execution Options
     private static final String SCRIPT = "script";
@@ -79,6 +82,9 @@ public class EBCLIOptions {
     private List<String> statsLoggerConfigs = new ArrayList<>();
     private String progressSpec = "console:1m";
     private String logDirectory = "logs";
+    private boolean wantsInputTypes=false;
+    private boolean wantsMarkerTypes=false;
+    private String rleFileToDump = null;
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -176,8 +182,12 @@ public class EBCLIOptions {
                         logger.info("getting basic help");
                     } else {
                         wantsActivityHelp = true;
-                        wantsActivityHelpFor = arglist.removeFirst();
+                        wantsActivityHelpFor = readWordOrThrow(arglist,"topic");
                     }
+                    break;
+                case DUMP_RLE_FILE:
+                    arglist.removeFirst();
+                    rleFileToDump = readWordOrThrow(arglist,"rlefile");
                     break;
                 case LOG_HISTO:
                     arglist.removeFirst();
@@ -204,6 +214,14 @@ public class EBCLIOptions {
                 case ACTIVITY_TYPES:
                     arglist.removeFirst();
                     wantsActivityTypes = true;
+                    break;
+                case WANTS_INPUT_TYPES:
+                    arglist.removeFirst();
+                    wantsInputTypes = true;
+                    break;
+                case WANTS_MARKER_TYPES:
+                    arglist.removeFirst();
+                    wantsMarkerTypes = true;
                     break;
                 case WANTS_DEBUG_CONSOLE_LOGGING:
                     consoleLevel = Level.DEBUG;
@@ -376,6 +394,22 @@ public class EBCLIOptions {
 
     public int getMaxLogs() {
         return maxLogs;
+    }
+
+    public boolean wantsInputTypes() {
+        return this.wantsInputTypes;
+    }
+
+    public boolean wantsMarkerTypes() {
+        return wantsMarkerTypes;
+    }
+
+    public boolean wantsToDumpRLEFile() {
+        return rleFileToDump!=null && !rleFileToDump.isEmpty();
+    }
+
+    public String rleFileToDump() {
+        return rleFileToDump;
     }
 
     public static enum CmdType {
