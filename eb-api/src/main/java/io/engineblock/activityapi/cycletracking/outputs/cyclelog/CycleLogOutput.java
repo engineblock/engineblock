@@ -168,7 +168,7 @@ public class CycleLogOutput implements Output {
                     Arrays.stream(marker.get().split(",", 2)[1].split(","))
                             .map(s -> s.split("="))
                             .collect(Collectors.toMap(o -> o[0], o -> o[1]));
-            this.filename = params.getOrDefault("file", activityDef.getAlias()) + ".rlemarkers";
+            this.filename = params.getOrDefault("file", activityDef.getAlias()) + ".cyclelog";
             int suggested_extentsize = Integer.valueOf(params.getOrDefault("extentSize", String.valueOf(1024 * 1024)));
             extentSize = suggested_extentsize * CycleResultsRLEBufferTarget.BYTES;
 

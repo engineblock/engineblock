@@ -46,7 +46,7 @@ public class CycleLogReader implements SegmentedInput, AutoCloseable {
     public CycleLogReader(Activity activity) {
         this.activity = activity;
         SimpleConfig conf = new SimpleConfig(activity, "input");
-        mbb = initMappedBuffer(conf.getString("file").orElse(activity.getAlias() + "-input"));
+        mbb = initMappedBuffer(conf.getString("file").orElse(activity.getAlias() + "-input")+".cyclelog");
         activity.registerAutoCloseable(this);
     }
 
