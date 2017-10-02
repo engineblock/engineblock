@@ -37,18 +37,13 @@ later use, you can specify a cycle log as its output. This is configured as:
 
     ... output=type:cyclelog,file:somefile ...
 
-#### output filtering
+### Using cycle logs as inputs
 
-If you want to limit the cycles that are recorded in a cycle log,
-you can add an inputlog parameter like this:
+You can have all the cycles in a cycle log as the input cycles of an activity like this:
 
-    .... outputfilter=range:5..10
+    ... input=type:cyclelog,file:somefile ...
 
-This will cause the cycle log to contain only cycle ranges or cycles
-which have results within the specified range, inclusive.
-
-### rlefile output
-
-When you want an
-
-When you want a
+Note, that when you use cycle logs as inputs, not all cycles are guaranteed to be
+in order. In most cases, they will be, due to reordering support on RLE encoding. However,
+that uses a sliding-window buffer, and in some cases RLE spans can occur out of
+order in a cycle log.
