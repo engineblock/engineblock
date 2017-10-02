@@ -51,7 +51,7 @@ public class CycleLogOutputType implements OutputType {
         public Dispenser(Activity activity) {
             this.activity = activity;
             Input input = activity.getInputDispenserDelegate().getInput(0);
-            CycleLogOutput rleFileWriter = new CycleLogOutput(activity.getActivityDef());
+            CycleLogOutput rleFileWriter = new CycleLogOutput(activity);
             if (input instanceof ContiguousInput) {
                 logger.debug("pre-buffering output extents contiguously before RLE buffering");
                 ReorderingContiguousOutputChunker reorderingContiguousOutputChunker = new ReorderingContiguousOutputChunker(activity);

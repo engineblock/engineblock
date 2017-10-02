@@ -33,14 +33,24 @@ public class CycleLogDumperUtility {
             System.out.println("USAGE: CyclesCLI <filename>");
         }
         String filename = args[0];
-        new CycleLogDumperUtility().dumpData(filename);
+
+        DisplayType displayType = DisplayType.cycles;
+        if (args.length >= 2) {
+            displayType = DisplayType.valueOf(args[1]);
+        }
+        new CycleLogDumperUtility().dumpData(filename, displayType);
     }
 
-    private void dumpData(String filename) {
+    private void dumpData(String filename, DisplayType displayType) {
         File filepath = new File(filename);
         MappedByteBuffer mbb = null;
         if (!filepath.exists()) {
-            throw new RuntimeException("file path '" + filename + "' does not exist!");
+            if (!filepath.getPath().endsWith(".cyclelog")) {
+                filepath = new File(filename+".cyclelog");
+                if (!filepath.exists()) {
+                    throw new RuntimeException("neither '" + filename + "' nor  '" + filename + ".cyclelog' exists!");
+                }
+            }
         }
         try {
             RandomAccessFile raf = new RandomAccessFile(filepath, "rw");
@@ -57,8 +67,16 @@ public class CycleLogDumperUtility {
                 readable = new CycleResultsRLEBufferReadable(readsize, mbb);
 
                 for (CycleResultsSegment segment : readable) {
-                    for (CycleResult cycleResult : segment) {
-                        System.out.println(cycleResult);
+                    switch (displayType) {
+                        case cycles:
+                            for (CycleResult cycleResult : segment) {
+                                System.out.println(cycleResult);
+                            }
+                            break;
+                        case spans:
+                            System.out.println(segment.toString());
+                            break;
+
                     }
 
                 }
@@ -66,5 +84,10 @@ public class CycleLogDumperUtility {
 
         }
 
+    }
+
+    static enum DisplayType {
+        cycles,
+        spans
     }
 }

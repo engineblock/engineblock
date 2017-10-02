@@ -84,7 +84,7 @@ public class EBCLIOptions {
     private String logDirectory = "logs";
     private boolean wantsInputTypes=false;
     private boolean wantsMarkerTypes=false;
-    private String rleFileToDump = null;
+    private String[] rleDumpOptions = new String[0];
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -187,7 +187,7 @@ public class EBCLIOptions {
                     break;
                 case DUMP_RLE_FILE:
                     arglist.removeFirst();
-                    rleFileToDump = readWordOrThrow(arglist,"rlefile");
+                    rleDumpOptions = readAllWords(arglist);
                     break;
                 case LOG_HISTO:
                     arglist.removeFirst();
@@ -338,6 +338,12 @@ public class EBCLIOptions {
         return arglist.removeFirst();
     }
 
+    private String[] readAllWords(LinkedList<String> arglist) {
+        String[] args = arglist.toArray(new String[0]);
+        arglist.clear();
+        return args;
+    }
+
     private Cmd parseScriptCmd(LinkedList<String> arglist) {
         String cmdType = arglist.removeFirst();
         String scriptName = readWordOrThrow(arglist, "script name");
@@ -405,11 +411,11 @@ public class EBCLIOptions {
     }
 
     public boolean wantsToDumpRLEFile() {
-        return rleFileToDump!=null && !rleFileToDump.isEmpty();
+        return rleDumpOptions.length>0;
     }
 
-    public String rleFileToDump() {
-        return rleFileToDump;
+    public String[] rleDumpOptions() {
+        return rleDumpOptions;
     }
 
     public static enum CmdType {

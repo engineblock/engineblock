@@ -71,7 +71,7 @@ public class EBCLI {
         }
 
         if (options.wantsToDumpRLEFile()) {
-            CycleLogDumperUtility.main(new String[] {options.rleFileToDump()});
+            CycleLogDumperUtility.main(options.rleDumpOptions());
             System.exit(0);
         }
 

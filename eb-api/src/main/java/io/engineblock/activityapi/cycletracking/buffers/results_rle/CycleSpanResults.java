@@ -47,6 +47,10 @@ public class CycleSpanResults implements CycleResultsSegment {
         return min;
     }
 
+    public String toString() {
+        return "[" + min + "," + nextMin + ")->" + result;
+    }
+
     @NotNull
     @Override
     public Iterator<CycleResult> iterator() {
@@ -71,5 +75,6 @@ public class CycleSpanResults implements CycleResultsSegment {
         public CycleResult next() {
             return new SimpleCycleResult(next++,result);
         }
+
     }
 }
