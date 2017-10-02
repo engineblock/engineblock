@@ -49,9 +49,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * This implementation needs to be adapted to handle early exit of either
  * marker or tracker threads with no deadlock.
  */
-public class ConcurrentOutputSegmenter implements Output  {
+public class ContiguousOutputChunker implements Output  {
 
-    private final static Logger logger = LoggerFactory.getLogger(ConcurrentOutputSegmenter.class);
+    private final static Logger logger = LoggerFactory.getLogger(ContiguousOutputChunker.class);
     private final int extentSize;
     private final int maxExtents;
     private List<Output> readers = new ArrayList<>();
@@ -62,7 +62,7 @@ public class ConcurrentOutputSegmenter implements Output  {
     private Condition nowMarking = lock.newCondition();
     private Semaphore mutex = new Semaphore(1, false);
 
-    public ConcurrentOutputSegmenter(long min, long nextRangeMin, int extentSize, int maxExtents) {
+    public ContiguousOutputChunker(long min, long nextRangeMin, int extentSize, int maxExtents) {
         this.min = new AtomicLong(min);
         this.nextMin = new AtomicLong(nextRangeMin);
         this.extentSize = extentSize;
@@ -70,7 +70,7 @@ public class ConcurrentOutputSegmenter implements Output  {
         initExtents();
     }
 
-    public ConcurrentOutputSegmenter(Activity activity) {
+    public ContiguousOutputChunker(Activity activity) {
 
         if (!(activity.getInputDispenserDelegate().getInput(0) instanceof ContiguousInput)) {
             throw new RuntimeException("This type of marker may not be used with non-contiguous inputs yet.");
@@ -191,7 +191,7 @@ public class ConcurrentOutputSegmenter implements Output  {
 
     @Override
     public String toString() {
-        return "CoreMarker{" +
+        return "ConcurrentOutputSegmenter{" +
                 "extentSize=" + extentSize +
                 ", maxExtents=" + maxExtents +
                 ", readers=" + readers +
