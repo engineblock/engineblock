@@ -17,8 +17,14 @@
 
 package io.engineblock.activityimpl.marker;
 
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,13 +45,24 @@ public class ByteTrackerExtentTest {
         assertThat(bt4.getMarkerData()[1]).isEqualTo((byte)1);
         assertThat(bt4.isFullyFilled()).isTrue();
 
-        CycleResultsIntervalSegment seg1 = bt4.getCycleResultsSegment(2);
-        assertThat(seg1.cycle).isEqualTo(33);
-        assertThat(seg1.codes.length).isEqualTo(2);
-        assertThat(seg1.codes[0]).isEqualTo((byte)0);
-        assertThat(bt4.isFullyServed()).isFalse();
-        CycleResultsIntervalSegment seg2 = bt4.getCycleResultsSegment(2);
-        assertThat(bt4.isFullyServed()).isTrue();
+        List<CycleResult> cycleResults = new ArrayList<>();
+        List<CycleResultsSegment> segments = StreamSupport.stream(bt4.spliterator(), false)
+                .collect(Collectors.toList());
+        for (CycleResultsSegment segment : segments) {
+            segment.forEach(cycleResults::add);
+        }
+        long[] cycles = cycleResults.stream().mapToLong(CycleResult::getCycle).toArray();
+        int[] results= cycleResults.stream().mapToInt(CycleResult::getResult).toArray();
+
+        assertThat(cycles).containsExactly(33L,34L,35L,36L);
+        assertThat(results).containsExactly(0,1,2,3);
+//        CycleResultsSegment seg1 = iterator;
+//        assertThat(seg1.cycle).isEqualTo(33);
+//        assertThat(seg1.codes.length).isEqualTo(2);
+//        assertThat(seg1.codes[0]).isEqualTo((byte)0);
+//        assertThat(bt4.isFullyServed()).isFalse();
+//        CycleResultsIntervalSegment seg2 = bt4.getCycleResultsSegment(2);
+//        assertThat(bt4.isFullyServed()).isTrue();
     }
 
 

@@ -28,17 +28,11 @@ import java.util.Iterator;
  */
 public class CycleResultsSegmentReadable implements CycleResultsSegment {
 
-    private final ByteBuffer buf;
     private final static int BYTES = Long.BYTES + Byte.BYTES;
+    private final ByteBuffer buf;
 
     public CycleResultsSegmentReadable(ByteBuffer buf) {
         this.buf = buf;
-    }
-
-    @NotNull
-    @Override
-    public Iterator<CycleResult> iterator() {
-        return new Iter();
     }
 
     public static CycleResultsSegment forCycleResult(long completedCycle, int result) {
@@ -48,31 +42,51 @@ public class CycleResultsSegmentReadable implements CycleResultsSegment {
         return new CycleResultsSegmentReadable(single);
     }
 
+    @NotNull
     @Override
-    public int getCount() {
-        return buf.position()/BYTES;
+    public Iterator<CycleResult> iterator() {
+        return new Iter();
+    }
+
+    @Override
+    public String toString() {
+        ByteBuffer bb = ByteBuffer.wrap(buf.array());
+        StringBuilder sb = new StringBuilder();
+        while (bb.remaining() > 0) {
+            long cycle = bb.getLong();
+            byte value = bb.get();
+            sb.append(cycle).append("=>").append(value).append("\n");
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public long getCount() {
+        return (buf.limit())/ BYTES;
     }
 
     @Override
     public long getMinCycle() {
-        if (buf!=null && buf.limit()>0) {
+        if (buf != null && buf.limit() > 0) {
             return buf.getLong(0);
         }
         return Long.MIN_VALUE;
     }
 
     private class Iter implements Iterator<CycleResult> {
-        private int offset=-BYTES;
+        private int offset = 0;
 
         @Override
         public boolean hasNext() {
-            return (offset+ BYTES <buf.limit());
+            return (offset + BYTES <= buf.limit());
         }
 
         @Override
         public CycleResult next() {
-            offset+= BYTES;
-            return new BBCycleResult(offset);
+            BBCycleResult cycleResult = new BBCycleResult(offset);
+            offset += BYTES;
+            return cycleResult;
+
         }
     }
 
@@ -81,7 +95,7 @@ public class CycleResultsSegmentReadable implements CycleResultsSegment {
         private int offset;
 
         BBCycleResult(int offset) {
-            this.offset=offset;
+            this.offset = offset;
         }
 
         @Override
@@ -91,7 +105,7 @@ public class CycleResultsSegmentReadable implements CycleResultsSegment {
 
         @Override
         public int getResult() {
-            return buf.get(offset+Long.BYTES);
+            return buf.get(offset + Long.BYTES);
         }
     }
 

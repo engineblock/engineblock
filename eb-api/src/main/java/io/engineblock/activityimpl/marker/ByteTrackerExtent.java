@@ -17,9 +17,12 @@
 
 package io.engineblock.activityimpl.marker;
 
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
 import io.engineblock.activityapi.cycletracking.buffers.CycleResultSegmentsReadable;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -122,27 +125,27 @@ public class ByteTrackerExtent implements CycleResultSegmentsReadable {
         }
     }
 
-    @Override
-    public CycleResultsIntervalSegment getCycleResultsSegment(int stride) {
-        if (!filled) {
-            filled = isFullyFilled(); // eagerly evaluate fill until it is known to be filled
-            if (!filled) {
-                return null;
-            }
-        }
-
-        while (totalServed.get() < size) {
-            int current = totalServed.get();
-            int next = current + stride;
-            if (next <= totalMarked.get()) {
-                if (totalServed.compareAndSet(current, next)) {
-                    return CycleResultsIntervalSegment.forData(current + min, markerData, current, stride);
-                }
-            }
-        }
-
-        return null;
-    }
+//    @Override
+//    public CycleResultsIntervalSegment getCycleResultsSegment(int stride) {
+//        if (!filled) {
+//            filled = isFullyFilled(); // eagerly evaluate fill until it is known to be filled
+//            if (!filled) {
+//                return null;
+//            }
+//        }
+//
+//        while (totalServed.get() < size) {
+//            int current = totalServed.get();
+//            int next = current + stride;
+//            if (next <= totalMarked.get()) {
+//                if (totalServed.compareAndSet(current, next)) {
+//                    return CycleResultsIntervalSegment.forData(current + min, markerData, current, stride);
+//                }
+//            }
+//        }
+//
+//        return null;
+//    }
 
     @Override
     public String toString() {
@@ -165,10 +168,10 @@ public class ByteTrackerExtent implements CycleResultSegmentsReadable {
         return (totalMarked.get() == size);
     }
 
-    public boolean isFullyServed() {
-        return (totalServed.get() == size);
-    }
-
+//    public boolean isFullyServed() {
+//        return (totalServed.get() == size);
+//    }
+//
 
     public AtomicReference<ByteTrackerExtent> getNextExtent() {
         return nextExtent;
@@ -219,5 +222,33 @@ public class ByteTrackerExtent implements CycleResultSegmentsReadable {
 
     public String rangeSummary() {
         return "[" + min + "," + (min + size) + ")";
+    }
+
+    @NotNull
+    @Override
+    public Iterator<CycleResultsSegment> iterator() {
+        return new SegmentIterator(min, this.markerData);
+    }
+
+    private class SegmentIterator implements Iterator<CycleResultsSegment> {
+        private long cycle;
+        private byte[] markerData;
+
+        public SegmentIterator(long cycle, byte[] markerData) {
+            this.cycle = cycle;
+            this.markerData = markerData;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return (markerData!=null);
+        }
+
+        @Override
+        public CycleResultsSegment next() {
+            CycleResultsIntervalSegment cycleResults = CycleResultsIntervalSegment.forData(cycle, markerData);
+            markerData=null;
+            return cycleResults;
+        }
     }
 }

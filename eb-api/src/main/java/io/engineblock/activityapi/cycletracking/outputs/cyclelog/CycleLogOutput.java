@@ -17,9 +17,9 @@
 
 package io.engineblock.activityapi.cycletracking.outputs.cyclelog;
 
-import io.engineblock.activityapi.cycletracking.buffers.results_rle.CycleResultsRLEBufferTarget;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results_rle.CycleResultsRLEBufferTarget;
 import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -60,6 +61,19 @@ public class CycleLogOutput implements Output {
     public CycleLogOutput(ActivityDef activityDef) {
         config = new FileBufferConfig(activityDef);
         targetBuffer = new CycleResultsRLEBufferTarget(config.extentSize);
+        removeIfPresent(config.filename);
+    }
+
+    private void removeIfPresent(String filename) {
+        try {
+            if (Files.deleteIfExists(Paths.get(filename))) {
+                logger.warn("removed extant file '" + config.filename + "'");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 
     @Override
@@ -88,22 +102,27 @@ public class CycleLogOutput implements Output {
         logger.debug("RLE result extent is " + nextFileExtent.remaining() + " bytes ("
                 + (nextFileExtent.remaining() / CycleResultsRLEBufferTarget.BYTES)
                 + ") tuples");
-        this.ensureCapacity((mbb == null ? 0 : mbb.capacity()) + nextFileExtent.remaining());
+        int targetCapacity = (mbb == null ? 0 : mbb.capacity()) + nextFileExtent.remaining();
+        logger.trace("ensuring capacity for " + targetCapacity);
+        this.ensureCapacity(targetCapacity);
         mbb.put(nextFileExtent);
         logger.trace("extent appended");
+        logger.trace("mbb position now at " + mbb.position());
+
     }
 
     @Override
     public void close() throws Exception {
         flush();
-        if (file!=null) {
-            file.getFD().sync();;
+        mbb.force();
+        if (file != null) {
+            file.getFD().sync();
+            file.close();
+            file = null;
         }
-        file.close();
-        file=null;
     }
 
-    private synchronized MappedByteBuffer ensureCapacity(long newCapacity) {
+    private synchronized void ensureCapacity(long newCapacity) {
         try {
             logger.info("resizing marking file from " + (mbb == null ? 0 : mbb.capacity()) + " to " + newCapacity);
             if (file == null) {
@@ -121,10 +140,20 @@ public class CycleLogOutput implements Output {
                 mbb = file.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, newCapacity);
                 mbb.position(pos);
             }
+            logger.trace("mbb position now at " + mbb.position());
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return mbb;
+    }
+
+    @Override
+    public String toString() {
+        return "FileBufferRLEMarker{" +
+                "mbb=" + mbb +
+                ", file=" + file +
+                ", config=" + config +
+                '}';
     }
 
     private class FileBufferConfig {
@@ -141,7 +170,8 @@ public class CycleLogOutput implements Output {
                             .collect(Collectors.toMap(o -> o[0], o -> o[1]));
             this.filename = params.getOrDefault("file", activityDef.getAlias()) + ".rlemarkers";
             int suggested_extentsize = Integer.valueOf(params.getOrDefault("extentSize", String.valueOf(1024 * 1024)));
-            extentSize = suggested_extentsize* CycleResultsRLEBufferTarget.BYTES;
+            extentSize = suggested_extentsize * CycleResultsRLEBufferTarget.BYTES;
+
         }
 
         @Override
@@ -151,14 +181,5 @@ public class CycleLogOutput implements Output {
                     ", extentSize=" + extentSize +
                     '}';
         }
-    }
-
-    @Override
-    public String toString() {
-        return "FileBufferRLEMarker{" +
-                "mbb=" + mbb +
-                ", file=" + file +
-                ", config=" + config +
-                '}';
     }
 }

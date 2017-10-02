@@ -18,7 +18,6 @@
 package io.engineblock.activityapi.cycletracking.buffers.results_rle;
 
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
-import io.engineblock.activityapi.cycletracking.buffers.results_rle.CycleResultsRLEBufferReadable;
 import io.engineblock.activityapi.output.Output;
 
 import java.nio.ByteBuffer;
@@ -54,21 +53,21 @@ public class CycleResultsRLEBufferTarget implements Output {
         this.buf = buf;
     }
 
-    /**
-     * Create a buffer with an automatic capacity of around 1MiB.
-     */
-    public CycleResultsRLEBufferTarget() {
-        this(1024 * 1024);
-    }
-
+//    /**
+//     * Create a buffer with an automatic capacity of around 1MiB.
+//     */
+//    public CycleResultsRLEBufferTarget() {
+//        this(1024 * 1024);
+//    }
+//
     /**
      * Create a target RLE buffer for the specified getCount in memory,
      * rounded to the nearest record getCount.
      *
-     * @param size The approximate getCount for the new buffer
+     * @param elementCount The number of elements to buffer.
      */
-    public CycleResultsRLEBufferTarget(int size) {
-        this(ByteBuffer.allocate((size / BYTES) * BYTES));
+    public CycleResultsRLEBufferTarget(int elementCount) {
+        this(ByteBuffer.allocate(elementCount * BYTES));
     }
 
     /**
@@ -83,7 +82,8 @@ public class CycleResultsRLEBufferTarget implements Output {
     }
 
     public ByteBuffer toByteBuffer() {
-        ByteBuffer readable = buf.asReadOnlyBuffer();
+        flush();
+        ByteBuffer readable = buf.duplicate();
         readable.flip();
         buf = null;
         return readable;
@@ -102,12 +102,12 @@ public class CycleResultsRLEBufferTarget implements Output {
     @Override
     public boolean onCycleResult(long cycle, int result) {
         if (buf == null) {
-            throw new RuntimeException("Attempt to update a buffer that is active for reading with cycle:" + cycle + " result:" +result);
+            throw new RuntimeException("Attempt to append a buffer that is active for reading with cycle:" + cycle + " result:" +result);
         }
         if (buf.remaining()<BYTES) {
             return false;
         }
-        if (lastCycle != cycle + 1 || lastResult != result) {
+        if (cycle != lastCycle + 1 || lastResult != result) {
             if (lastCycle != Long.MIN_VALUE) {
                 checkpoint(lastCycle + 1 - runlength, lastCycle + 1, lastResult);
             }
@@ -138,7 +138,7 @@ public class CycleResultsRLEBufferTarget implements Output {
      *
      * @return the getCount of the current buffer, in bytes.
      */
-    public int flush() {
+    private int flush() {
         if (!flushed) {
             checkpoint(lastCycle + 1 - runlength, lastCycle + 1, lastResult);
             flushed = true;
@@ -154,4 +154,6 @@ public class CycleResultsRLEBufferTarget implements Output {
     public boolean onCycleResult(CycleResult cycleResult) {
         return this.onCycleResult(cycleResult.getCycle(),cycleResult.getResult());
     }
+
+
 }

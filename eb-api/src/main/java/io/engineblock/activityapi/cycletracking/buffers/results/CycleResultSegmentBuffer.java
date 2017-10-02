@@ -26,24 +26,25 @@ import java.nio.ByteBuffer;
  */
 public class CycleResultSegmentBuffer {
 
-    private final ByteBuffer buf;
+    private ByteBuffer buf;
     private final static int BYTES = Long.BYTES + Byte.BYTES;
 
     public CycleResultSegmentBuffer(int resultCount) {
         this.buf = ByteBuffer.allocate(resultCount*BYTES);
     }
 
-    public void update(long cycle, int result) {
+    public void append(long cycle, int result) {
         buf.putLong(cycle).put((byte) result);
     }
 
-    public void update(CycleResult result) {
+    public void append(CycleResult result) {
         buf.putLong(result.getCycle()).put((byte) result.getResult());
     }
 
     public CycleResultsSegment toReader() {
         buf.flip();
         CycleResultsSegmentReadable readable = new CycleResultsSegmentReadable(buf);
+        buf=null;
         return readable;
     }
 

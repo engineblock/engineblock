@@ -252,7 +252,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                             }
 
                         }
-                        segBuffer.update(cyclenum, result);
+                        segBuffer.append(cyclenum, result);
                     }
 
                 }
@@ -260,7 +260,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                 if (output != null) {
                     CycleResultsSegment outputBuffer = segBuffer.toReader();
                     try {
-                        output.onCycleResultSegment(segBuffer.toReader());
+                        output.onCycleResultSegment(outputBuffer);
                     } catch (Exception t) {
                         logger.error("Error while feeding result segment " + outputBuffer + " to output '" + output + "', error:" + t.getMessage());
                         throw t;

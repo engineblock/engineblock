@@ -20,6 +20,7 @@ package io.engineblock.activityapi.cycletracking.inputs.cyclelog;
 import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegmentBuffer;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultStrider;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.cycletracking.buffers.results_rle.CycleResultsRLEBufferReadable;
 import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegment;
@@ -40,6 +41,7 @@ public class CycleLogReader implements SegmentedInput, AutoCloseable {
     private MappedByteBuffer mbb;
     private Activity activity;
     CycleResultsRLEBufferReadable currentBuffer;
+    CycleResultStrider strider;
 
     public CycleLogReader(Activity activity) {
         this.activity = activity;
@@ -75,9 +77,11 @@ public class CycleLogReader implements SegmentedInput, AutoCloseable {
                 if (currentBuffer == null) {
                     // or return null if none are left
                     return null;
+                } else {
+                    strider = new CycleResultStrider(currentBuffer.getCycleResultIterable().iterator());
                 }
             }
-            CycleResultsSegment cycleResultsSegment = currentBuffer.getCycleResultsSegment(remaining);
+            CycleResultsSegment cycleResultsSegment = strider.getCycleResultsSegment(remaining);
             if (cycleResultsSegment!=null) {
                 for (CycleResult cycleResult : cycleResultsSegment) {
                     csb.append(cycleResult.getCycle());

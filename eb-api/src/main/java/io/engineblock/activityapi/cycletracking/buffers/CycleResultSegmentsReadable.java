@@ -17,13 +17,52 @@
 
 package io.engineblock.activityapi.cycletracking.buffers;
 
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
+import org.jetbrains.annotations.NotNull;
 
-public interface CycleResultSegmentsReadable {
-    /**
-     * @param stride The number of contiguous cycles that must be provided
-     * @return a {@link CycleResultsIntervalSegment}
-     */
-    CycleResultsSegment getCycleResultsSegment(int stride);
+import java.util.Iterator;
+
+public interface CycleResultSegmentsReadable extends Iterable<CycleResultsSegment> {
+//    /**
+//     * @param stride The number of contiguous cycles that must be provided
+//     * @return a {@link CycleResultsIntervalSegment}
+//     */
+//    CycleResultsSegment getCycleResultsSegment(int stride);
+
+    default Iterable<CycleResult> getCycleResultIterable() {
+        return new Iterable<CycleResult>() {
+            @NotNull
+            @Override
+            public Iterator<CycleResult> iterator() {
+                return new Iterator<CycleResult>() {
+                    Iterator<CycleResultsSegment> iterSegment = CycleResultSegmentsReadable.this.iterator();
+                    Iterator<CycleResult> innerIter=iterSegment.next().iterator();
+
+                    @Override
+                    public boolean hasNext() {
+                        while(!innerIter.hasNext()&&iterSegment.hasNext()) {
+                            innerIter=iterSegment.next().iterator();
+                        }
+                        return innerIter.hasNext();
+//
+//                        if (iterSegment == null || (innerIter!=null && !innerIter.hasNext())) {
+//                            iterSegment = CycleResultSegmentsReadable.this.iterator();
+//                            if (iterSegment.hasNext()) {
+//                                innerIter = iterSegment.next().iterator();
+//                            } else {
+//                                return false;
+//                            }
+//                        }
+//                        return innerIter.hasNext();
+                    }
+
+                    @Override
+                    public CycleResult next() {
+                        return innerIter.next();
+                    }
+                };
+            }
+        };
+    }
 }

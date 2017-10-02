@@ -19,7 +19,6 @@ package io.engineblock.activityapi.cycletracking.buffers.results_rle;
 
 import io.engineblock.activityapi.cycletracking.buffers.CycleResultSegmentsReadable;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultSegmentBuffer;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,26 +33,26 @@ import java.util.Iterator;
  * <p>This is <em>not</em> a threadsafe iterator. It references buffer data
  * that is presumed to be access by only one reader for the sake of efficiency.
  */
-public class CycleResultsRLEBufferReadable implements CycleResultSegmentsReadable, Iterable<CycleResult> {
+public class CycleResultsRLEBufferReadable implements CycleResultSegmentsReadable {
 
-    private final ByteBuffer buf;
-    private Iter it=new Iter();
     public final static int BYTES = Long.BYTES + Long.BYTES + Byte.BYTES;
+    private final ByteBuffer buf;
+    private Iterator<CycleResult> it;
 
     public CycleResultsRLEBufferReadable(ByteBuffer buf) {
         this.buf = buf;
     }
 
     public CycleResultsRLEBufferReadable(int readsize, ByteBuffer src) {
-        readsize = (readsize/BYTES) * BYTES;
+        readsize = (readsize / BYTES) * BYTES;
         int bufsize = Math.min(readsize, src.remaining());
-        byte[] bbuf=new byte[bufsize];
+        byte[] bbuf = new byte[bufsize];
         src.get(bbuf);
         this.buf = ByteBuffer.wrap(bbuf);
     }
 
     public static CycleResultsRLEBufferReadable forOneRleSpan(ByteBuffer src) {
-        if (src.remaining()>=BYTES) {
+        if (src.remaining() >= BYTES) {
             byte[] segbuf = new byte[BYTES];
             src.get(segbuf);
             return new CycleResultsRLEBufferReadable(ByteBuffer.wrap(segbuf));
@@ -62,48 +61,92 @@ public class CycleResultsRLEBufferReadable implements CycleResultSegmentsReadabl
         }
     }
 
-    @Override
-    public CycleResultsSegment getCycleResultsSegment(int stride) {
-        CycleResultSegmentBuffer resultBuffer = new CycleResultSegmentBuffer(stride);
-        for (int i = 0; i < stride; i++) {
-            if (it.hasNext()) {
-                CycleResult next = it.next();
-                resultBuffer.update(next);
-            } else {
-                throw new RuntimeException("Unable to fill stride '" + stride + "' will values");
-            }
-        }
-        return resultBuffer.toReader();
-    }
-
     @NotNull
     @Override
-    public Iterator<CycleResult> iterator() {
-        return new Iter();
+    public Iterator<CycleResultsSegment> iterator() {
+        return new SegmentIterator(buf.duplicate());
     }
 
-    private class Iter implements Iterator<CycleResult> {
-        private int dataOffset =-BYTES;
-        private long rleNextCycle = 0;
-        private long rleMaxCycleLimit = 0;
-        private int result;
+    private static class SegmentIterator implements Iterator<CycleResultsSegment> {
+
+        private ByteBuffer sibuf;
+
+        private SegmentIterator(ByteBuffer sibuf) {
+            this.sibuf = sibuf;
+        }
 
         @Override
         public boolean hasNext() {
-            return ((rleNextCycle<rleMaxCycleLimit) || (dataOffset + BYTES <buf.remaining()));
+            return sibuf.remaining()>0;
         }
 
         @Override
-        public CycleResult next() {
-            if (rleNextCycle >=rleMaxCycleLimit) {
-                dataOffset += BYTES;
-                rleNextCycle =buf.getLong(dataOffset);
-                rleMaxCycleLimit=buf.getLong(dataOffset+Long.BYTES);
-                result=buf.get(dataOffset+Long.BYTES+Long.BYTES);
+        public CycleResultsSegment next() {
+            if (sibuf.remaining()<=0) {
+                return null;
             }
-            return new BasicCycleResult(rleNextCycle++,result);
+            long min = sibuf.getLong();
+            long nextMin =sibuf.getLong();
+            int result = sibuf.get();
+            return new CycleSpanResults(min,nextMin,result);
         }
     }
+
+//    @Override
+//    public CycleResultsSegment getCycleResultsSegment(int stride) {
+//        if (it==null) {
+//            it = this.getCycleResultIterable().iterator();
+//        }
+//        CycleResultSegmentBuffer resultBuffer = new CycleResultSegmentBuffer(stride);
+//        for (int i = 0; i < stride; i++) {
+//            if (it.hasNext()) {
+//                CycleResult next = it.next();
+//                resultBuffer.append(next);
+//            } else {
+//                it = null;
+//                return null;
+//            }
+//        }
+//        return resultBuffer.toReader();
+//    }
+
+//    public @NotNull Iterable<CycleResult> cycleResultIterable() {
+//        return new Iterable<CycleResult>() {
+//            @NotNull
+//            @Override
+//            public Iterator<CycleResult> iterator() {
+//                return new ResultIterator(buf.duplicate());
+//            }
+//        };
+//    }
+//
+//    private class ResultIterator implements Iterator<CycleResult> {
+//
+//        private final ByteBuffer iterbuf;
+//        private long rleNextCycle = 0;
+//        private long rleMaxCycleLimit = 0;
+//        private int result;
+//
+//
+//        public ResultIterator(ByteBuffer iterbuf) {
+//            this.iterbuf = iterbuf;
+//        }
+//
+//        @Override
+//        public boolean hasNext() {
+//            return ((rleNextCycle < rleMaxCycleLimit) || (iterbuf.hasRemaining()));
+//        }
+//
+//        @Override
+//        public CycleResult next() {
+//            if (rleNextCycle >= rleMaxCycleLimit) {
+//                rleNextCycle = iterbuf.getLong();
+//                rleMaxCycleLimit = iterbuf.getLong();
+//                result = iterbuf.get();
+//            }
+//            return new BasicCycleResult(rleNextCycle++, result);
+//        }
+//    }
 
     private class BasicCycleResult implements CycleResult {
 

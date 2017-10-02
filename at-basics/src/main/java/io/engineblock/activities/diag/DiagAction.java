@@ -1,17 +1,17 @@
 /*
-*   Copyright 2016 jshook
-*   Licensed under the Apache License, Version 2.0 (the "License");
-*   you may not use this file except in compliance with the License.
-*   You may obtain a copy of the License at
-*
-*       http://www.apache.org/licenses/LICENSE-2.0
-*
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-*/
+ *   Copyright 2016 jshook
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package io.engineblock.activities.diag;
 
 import io.engineblock.activityapi.Action;
@@ -35,6 +35,8 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     private int completedPhase;
     private int resultmodulo = Integer.MIN_VALUE;
     private long erroroncycle = Long.MIN_VALUE;
+    private boolean logcycle;
+    private int staticvalue = Integer.MIN_VALUE;
 
     public DiagAction(int slot, ActivityDef activityDef, DiagActivity diagActivity) {
         this.activityDef = activityDef;
@@ -45,8 +47,8 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     }
 
     /**
-     * idempotently assign the last update reference time and the interval which, when added to it, represent when this
-     * diagnostic thread should take its turn to log cycle info. Also, update the modulo parameter.
+     * idempotently assign the last append reference time and the interval which, when added to it, represent when this
+     * diagnostic thread should take its turn to log cycle info. Also, append the modulo parameter.
      */
     private void updateReportTime() {
         reportModulo = activityDef.getParams().getOptionalLong("modulo").orElse(10000000L);
@@ -59,11 +61,13 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     private void updatePhases() {
         phasesPerCycle = activityDef.getParams().getOptionalInteger("phases").orElse(1);
     }
+
     /**
-     * Calculate a reference point in the past which would have been this thread's time to update,
+     * Calculate a reference point in the past which would have been this thread's time to append,
      * for use as a discrete reference point upon which the quantizedIntervals can be stacked to find the
      * ideal schedule.
-     * @param timeslot - This thread's offset within the scheduled rotation, determined simply by thread enumeration
+     *
+     * @param timeslot    - This thread's offset within the scheduled rotation, determined simply by thread enumeration
      * @param activityDef - the def for this activity instance
      * @return last time this thread would have updated
      */
@@ -74,8 +78,9 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     }
 
     /**
-     * Calculate how frequently a thread needs to update in order to achieve an aggregate update interval for
+     * Calculate how frequently a thread needs to append in order to achieve an aggregate append interval for
      * a given number of cooperating threads.
+     *
      * @param activityDef - the def for this activity instance
      * @return long ms interval for this thread (the same for all threads, but calculated independently for each)
      */
@@ -94,13 +99,15 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     public void onActivityDefUpdate(ActivityDef activityDef) {
         updateReportTime();
         updatePhases();
-        this.resultmodulo =activityDef.getParams().getOptionalInteger("resultmodulo").orElse(Integer.MIN_VALUE);
-        this.erroroncycle=activityDef.getParams().getOptionalLong("erroroncycle").orElse(Long.MIN_VALUE);
+        this.resultmodulo = activityDef.getParams().getOptionalInteger("resultmodulo").orElse(Integer.MIN_VALUE);
+        this.erroroncycle = activityDef.getParams().getOptionalLong("erroroncycle").orElse(Long.MIN_VALUE);
+        this.logcycle = activityDef.getParams().getOptionalBoolean("logcycle").orElse(false);
+        this.staticvalue = activityDef.getParams().getOptionalInteger("staticvalue").orElse(-1);
     }
 
     @Override
     public boolean incomplete() {
-        return (completedPhase<phasesPerCycle);
+        return (completedPhase < phasesPerCycle);
     }
 
     @Override
@@ -110,13 +117,16 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
 
     @Override
     public int runCycle(long value) {
+        if (logcycle) {
+            logger.trace("cycle " + value);
+        }
         long now = System.currentTimeMillis();
-        if (completedPhase>=phasesPerCycle) {
-            completedPhase=0;
+        if (completedPhase >= phasesPerCycle) {
+            completedPhase = 0;
         }
         if ((now - lastUpdate) > quantizedInterval) {
             long delay = ((now - lastUpdate) - quantizedInterval);
-            logger.info("diag action interval, input=" + value + ", phase=" + completedPhase +", report delay=" + delay);
+            logger.info("diag action interval, input=" + value + ", phase=" + completedPhase + ", report delay=" + delay);
             lastUpdate += quantizedInterval;
             diagActivity.delayHistogram.update(delay);
         }
@@ -127,17 +137,19 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
 
         int result = 0;
 
-        if (resultmodulo >=0) {
-            if ((value % resultmodulo)==0) {
-                result=1;
+        if (resultmodulo >= 0) {
+            if ((value % resultmodulo) == 0) {
+                result = 1;
             } else {
-                result=0;
+                result = 0;
             }
+        } else if (staticvalue >= 0) {
+            return staticvalue;
         } else {
-            result= (byte) (value % 128);
+            result = (byte) (value % 128);
         }
 
-        if (erroroncycle==value) {
+        if (erroroncycle == value) {
             throw new RuntimeException("Diag was asked to error on cycle " + erroroncycle);
         }
 
@@ -154,7 +166,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
 //            long delay = ((now - lastUpdate) - quantizedInterval);
 //            logger.info("diag action interval, input=" + value + ", phase=" + completedPhase +", report delay=" + delay);
 //            lastUpdate += quantizedInterval;
-//            diagActivity.delayHistogram.update(delay);
+//            diagActivity.delayHistogram.append(delay);
 //        }
 //        if ((value % reportModulo) == 0) {
 //            logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);

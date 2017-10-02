@@ -137,7 +137,7 @@ public class LongTreeTrackerTest2 {
      * </pre>
      */
 
-    @Test
+    @Test(enabled=false)
     public void speedcheckThreadLocal() {
         long t1=System.nanoTime();
         LongTreeTracker t = new LongTreeTracker();
@@ -156,7 +156,7 @@ public class LongTreeTrackerTest2 {
         System.out.format("rate/s: %f\n", rate * 1000.0d);
     }
 
-    @Test
+    @Test(enabled=false)
     public void speedcheckConcurrentLocal() {
         long t1=System.nanoTime();
         LongTreeTracker t = new LongTreeTrackerAtomic();

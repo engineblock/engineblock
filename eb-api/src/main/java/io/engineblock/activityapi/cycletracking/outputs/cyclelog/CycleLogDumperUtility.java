@@ -29,7 +29,7 @@ import java.nio.channels.FileChannel;
 public class CycleLogDumperUtility {
 
     public static void main(String[] args) {
-        if (args.length==0) {
+        if (args.length == 0) {
             System.out.println("USAGE: CyclesCLI <filename>");
         }
         String filename = args[0];
@@ -38,7 +38,7 @@ public class CycleLogDumperUtility {
 
     private void dumpData(String filename) {
         File filepath = new File(filename);
-        MappedByteBuffer mbb=null;
+        MappedByteBuffer mbb = null;
         if (!filepath.exists()) {
             throw new RuntimeException("file path '" + filename + "' does not exist!");
         }
@@ -49,13 +49,21 @@ public class CycleLogDumperUtility {
             throw new RuntimeException(e);
         }
 
-        int readsize=100;
-        while (mbb.remaining()>0) {
-            CycleResultsRLEBufferReadable readable = new CycleResultsRLEBufferReadable(readsize, mbb);
-            CycleResultsSegment segment = readable.getCycleResultsSegment(1);
-            for (CycleResult cycleResult : segment) {
-                System.out.println(cycleResult.getCycle() + ": " + cycleResult.getResult());
+        int readsize = 100;
+
+        if (mbb.remaining() > 0) {
+            CycleResultsRLEBufferReadable readable = null;
+            while (mbb.remaining() > 0) {
+                readable = new CycleResultsRLEBufferReadable(readsize, mbb);
+
+                for (CycleResultsSegment segment : readable) {
+                    for (CycleResult cycleResult : segment) {
+                        System.out.println(cycleResult);
+                    }
+
+                }
             }
+
         }
 
     }

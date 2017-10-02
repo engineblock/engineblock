@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 /**
  * This is just a typed-data holder for efficient transfer of tracked data.
- * It holds a base cycle value, and a byte buffer view of result values.
+ * It holds a base cycle value, and a byte array view of result values.
  */
 public class CycleResultsIntervalSegment implements CycleResultsSegment {
 
@@ -59,7 +59,7 @@ public class CycleResultsIntervalSegment implements CycleResultsSegment {
     }
 
     @Override
-    public int getCount() {
+    public long getCount() {
         return codes.length;
     }
 

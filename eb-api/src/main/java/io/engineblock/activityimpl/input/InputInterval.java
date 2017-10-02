@@ -49,12 +49,18 @@ public class InputInterval implements ContiguousInput {
         }
     }
 
+    public String toString() {
+        return "InputInterval[" + min + "," + nextMin + "), next=" + next.intValue();
+    }
+
     public static class Segment implements CycleSegment {
 
         private final long afterEnd;
+        private final long start;
         private long next;
 
         public Segment(long start, long afterEnd) {
+            this.start = start;
             this.afterEnd = afterEnd;
             this.next = start;
         }
@@ -70,6 +76,10 @@ public class InputInterval implements ContiguousInput {
         @Override
         public boolean isExhausted() {
             return next >= afterEnd;
+        }
+
+        public String toString() {
+            return "InputInterval.Segment(" + start + "," + afterEnd + "]: next=" + next;
         }
     }
 }

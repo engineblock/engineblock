@@ -34,7 +34,7 @@ public class CoreOutputTest {
 
     @Test
     public void testCoreSimple0to4() {
-        ConcurrentOutputSegmenter ct4 = new ConcurrentOutputSegmenter(0,3,4,1);
+        ReorderingContiguousOutputChunker ct4 = new ReorderingContiguousOutputChunker(0,3,4,1);
         TestReader r = new TestReader();
         ct4.addExtentReader(r);
         ct4.onCycleResult(0,0);
@@ -57,7 +57,7 @@ public class CoreOutputTest {
         @Override
         public boolean onCycleResult(long completedCycle, int result) {
             CycleResultSegmentBuffer b = new CycleResultSegmentBuffer(1);
-            b.update(completedCycle,result);
+            b.append(completedCycle,result);
             onCycleResultSegment(b.toReader());
             return true;
         }

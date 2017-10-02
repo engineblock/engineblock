@@ -17,11 +17,13 @@
 
 package io.engineblock.activityapi.cycletracking.buffers.results;
 
+import org.jetbrains.annotations.NotNull;
+
 public interface CycleResultsSegment extends Comparable<CycleResultsSegment>, Iterable<CycleResult> {
-    int getCount();
+    long getCount();
     long getMinCycle();
 
-    default int compareTo(CycleResultsSegment other) {
+    default int compareTo(@NotNull CycleResultsSegment other) {
         return Long.compare(getMinCycle(),other.getMinCycle());
     }
 

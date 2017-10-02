@@ -23,6 +23,7 @@ import io.engineblock.activityapi.cycletracking.buffers.results_rle.CycleResults
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,17 +32,20 @@ public class CycleResultsRLEBufferTargetTest {
 
     @Test
     public void testBasicRLEncoding() {
-        CycleResultsRLEBufferTarget tb = new CycleResultsRLEBufferTarget();
+        CycleResultsRLEBufferTarget tb = new CycleResultsRLEBufferTarget(1024);
 
-        assertThat(tb.getBufferCapacity()).isEqualTo(1048560);
+        assertThat(tb.getBufferCapacity()).isEqualTo(17408);
 
         tb.onCycleResult(0L,0);
         tb.onCycleResult(1L,1);
         CycleResultsRLEBufferReadable r = tb.toReadable();
 
         ArrayList<CycleResult> cycles = new ArrayList<>();
-        r.iterator().forEachRemaining(cycles::add);
-
+        Iterable<CycleResult> ci = r.getCycleResultIterable();
+        Iterator<CycleResult> cit = ci.iterator();
+        while (cit.hasNext()) {
+            cycles.add(cit.next());
+        }
         long[] cycleValues = cycles.stream().mapToLong(CycleResult::getCycle).toArray();
         assertThat(cycleValues).containsExactly(0L,1L);
 
@@ -52,7 +56,7 @@ public class CycleResultsRLEBufferTargetTest {
     public void testGappedIntervalRLEEncoding() {
         CycleResultsRLEBufferTarget tb = new CycleResultsRLEBufferTarget(100000);
 
-        assertThat(tb.getBufferCapacity()).isEqualTo(99994);
+        assertThat(tb.getBufferCapacity()).isEqualTo(1700000);
 
         tb.onCycleResult(0L,0);
         tb.onCycleResult(13L,1);
@@ -67,7 +71,7 @@ public class CycleResultsRLEBufferTargetTest {
         CycleResultsRLEBufferReadable r = tb.toReadable();
 
         ArrayList<CycleResult> cycles = new ArrayList<>();
-        r.iterator().forEachRemaining(cycles::add);
+        r.getCycleResultIterable().iterator().forEachRemaining(cycles::add);
 
         long[] cycleValues = cycles.stream().mapToLong(CycleResult::getCycle).toArray();
         assertThat(cycleValues).containsExactly(0L,13L,14L,15L,28L,29L,100L,101L,102L);

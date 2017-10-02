@@ -27,7 +27,7 @@ import javax.script.ScriptContext;
 public class ScriptingMetricsPluginData implements ScriptingPluginInfo<ScriptingMetrics> {
     @Override
     public String getDescription() {
-        return "Allows you to create and update metrics within your scenario scripts";
+        return "Allows you to create and append metrics within your scenario scripts";
     }
 
     @Override

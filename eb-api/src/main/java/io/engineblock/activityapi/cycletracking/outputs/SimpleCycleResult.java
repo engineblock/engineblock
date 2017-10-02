@@ -43,4 +43,9 @@ public class SimpleCycleResult implements CycleResult, Comparable<SimpleCycleRes
     public int compareTo(@NotNull SimpleCycleResult o) {
         return Long.compare(cycle,o.getCycle());
     }
+
+    public String toString() {
+        return this.cycle +"->" + this.result;
+    }
+
 }

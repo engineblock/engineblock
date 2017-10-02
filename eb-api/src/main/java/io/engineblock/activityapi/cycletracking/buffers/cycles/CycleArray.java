@@ -22,6 +22,9 @@ import io.engineblock.activityapi.input.SegmentedInput;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Just cycle numbers in a long array.
+ */
 public class CycleArray implements SegmentedInput {
 
     private AtomicInteger offset=new AtomicInteger();

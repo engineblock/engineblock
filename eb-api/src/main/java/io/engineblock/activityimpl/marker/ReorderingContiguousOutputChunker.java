@@ -18,7 +18,9 @@
 package io.engineblock.activityimpl.marker;
 
 import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.input.ContiguousInput;
 import io.engineblock.activityapi.output.Output;
 import org.slf4j.Logger;
@@ -49,9 +51,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * This implementation needs to be adapted to handle early exit of either
  * marker or tracker threads with no deadlock.
  */
-public class ContiguousOutputChunker implements Output  {
+public class ReorderingContiguousOutputChunker implements Output  {
 
-    private final static Logger logger = LoggerFactory.getLogger(ContiguousOutputChunker.class);
+    private final static Logger logger = LoggerFactory.getLogger(ReorderingContiguousOutputChunker.class);
     private final int extentSize;
     private final int maxExtents;
     private List<Output> readers = new ArrayList<>();
@@ -62,7 +64,7 @@ public class ContiguousOutputChunker implements Output  {
     private Condition nowMarking = lock.newCondition();
     private Semaphore mutex = new Semaphore(1, false);
 
-    public ContiguousOutputChunker(long min, long nextRangeMin, int extentSize, int maxExtents) {
+    public ReorderingContiguousOutputChunker(long min, long nextRangeMin, int extentSize, int maxExtents) {
         this.min = new AtomicLong(min);
         this.nextMin = new AtomicLong(nextRangeMin);
         this.extentSize = extentSize;
@@ -70,13 +72,13 @@ public class ContiguousOutputChunker implements Output  {
         initExtents();
     }
 
-    public ContiguousOutputChunker(Activity activity) {
+    public ReorderingContiguousOutputChunker(Activity activity) {
 
         if (!(activity.getInputDispenserDelegate().getInput(0) instanceof ContiguousInput)) {
             throw new RuntimeException("This type of marker may not be used with non-contiguous inputs yet.");
             // If you are looking at this code, it's because we count updates to extents to provide
             // efficient marker extent handling. The ability to use segmented inputs with markers will
-            // come in a future update.
+            // come in a future append.
         }
         this.min = new AtomicLong(activity.getActivityDef().getStartCycle());
         this.nextMin = new AtomicLong(activity.getActivityDef().getEndCycle());
@@ -103,7 +105,17 @@ public class ContiguousOutputChunker implements Output  {
 
 
     @Override
-    public boolean onCycleResult(long completedCycle, int result) {
+    public synchronized void onCycleResultSegment(CycleResultsSegment segment) {
+        logger.trace("on-cycle-result-segment: (" +segment +")");
+        for (CycleResult cr : segment) {
+            onCycleResult(cr.getCycle(),cr.getResult());
+        }
+    }
+
+    @Override
+    public synchronized boolean onCycleResult(long completedCycle, int result) {
+        logger.trace("on-cycle-result: (" + completedCycle + "," + result +")");
+
         try {
         while (true) {
             ByteTrackerExtent extent = this.markingExtents.get();
@@ -138,7 +150,7 @@ public class ContiguousOutputChunker implements Output  {
     }
 
     @Override
-    public void close() throws Exception {
+    public synchronized void close() throws Exception {
         mutex.acquire();
         ByteTrackerExtent e = this.markingExtents.get();
         while (e != null) {
@@ -172,7 +184,7 @@ public class ContiguousOutputChunker implements Output  {
         this.readers.add(reader);
     }
 
-    public void removeExtentReader(Output reader) {
+    public synchronized void removeExtentReader(Output reader) {
         this.readers.remove(reader);
     }
 

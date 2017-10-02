@@ -66,7 +66,7 @@ public class TargetRateInput implements ContiguousInput, ActivityDefObserver, Ra
         while (true) {
             long current = this.cycleValue.get();
             long next = current + stride;
-            if (next >=max.get()) {
+            if (next >max.get()) {
                 return null;
             }
             if (cycleValue.compareAndSet(current,next)) {

@@ -20,6 +20,8 @@ package io.engineblock.activityapi.cycletracking.outputs;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegmentReadable;
 import io.engineblock.activityapi.output.Output;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -29,6 +31,8 @@ import java.util.LinkedList;
  * according to a sliding window.
  */
 public class ReorderingConcurrentResultBuffer implements Output {
+
+    private final static Logger logger = LoggerFactory.getLogger(ReorderingConcurrentResultBuffer.class);
 
     private LinkedList<CycleResultsSegment> segments = new LinkedList<>();
     private Output downstream;
@@ -53,13 +57,19 @@ public class ReorderingConcurrentResultBuffer implements Output {
         segments.add(segment);
         currentCount+=segment.getCount();
         if (currentCount>=threshold) {
+            logger.trace("Reordering threshold met: " + currentCount +"/" + threshold + ", sorting and pushing. (" + segments.size() + " segments)");
             Collections.sort(segments);
+            while(currentCount>=threshold) {
+                CycleResultsSegment head = segments.removeFirst();
+                currentCount-=head.getCount();
+                downstream.onCycleResultSegment(head);
+            }
         }
-        downstream.onCycleResultSegment(segments.removeFirst());
     }
 
     @Override
-    public void close() throws Exception {
+    public synchronized void close() throws Exception {
+        logger.trace("closing and flushing " + segments.size() + " segments");
         for (CycleResultsSegment segment : segments) {
             downstream.onCycleResultSegment(segment);
         }

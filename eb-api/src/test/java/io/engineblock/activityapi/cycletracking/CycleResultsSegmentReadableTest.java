@@ -32,11 +32,11 @@ public class CycleResultsSegmentReadableTest {
     @Test
     public void testCycleResultSegmentReader() {
         CycleResultSegmentBuffer bb = new CycleResultSegmentBuffer(5);
-        bb.update(33L, 0);
-        bb.update(34L, 1);
-        bb.update(35L, 2);
-        bb.update(36L, 1);
-        bb.update(39L, 0);
+        bb.append(33L, 0);
+        bb.append(34L, 1);
+        bb.append(35L, 2);
+        bb.append(36L, 1);
+        bb.append(39L, 0);
         CycleResultsSegment cycleResults = bb.toReader();
 
         long[] cycles = StreamSupport.stream(cycleResults.spliterator(), false)
