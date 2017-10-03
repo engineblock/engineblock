@@ -158,8 +158,7 @@ public class CycleLogOutput implements Output {
         return "FileBufferRLEMarker{" +
                 "mbb=" + mbb +
                 ", file=" + file +
-                ", pos=" + mbb.position() +
-                ", limit=" + mbb.limit() +
+                ", mbb=" + (mbb==null ? "null" : "(pos=" + mbb.position() +", limit=" + mbb.limit() +", capacity=" + mbb.capacity()+")") +
                 '}';
     }
 
