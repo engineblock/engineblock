@@ -61,6 +61,7 @@ public interface CycleResultSegmentsReadable extends Iterable<CycleResultsSegmen
                     public CycleResult next() {
                         return innerIter.next();
                     }
+
                 };
             }
         };

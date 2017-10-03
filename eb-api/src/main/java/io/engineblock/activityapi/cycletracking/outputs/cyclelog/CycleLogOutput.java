@@ -21,6 +21,7 @@ import io.engineblock.activityapi.Activity;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.cycletracking.buffers.results_rle.CycleResultsRLEBufferTarget;
+import io.engineblock.activityapi.cycletracking.buffers.results_rle.CycleSpanResults;
 import io.engineblock.activityapi.output.Output;
 import io.engineblock.util.SimpleConfig;
 import org.slf4j.Logger;
@@ -48,7 +49,6 @@ public class CycleLogOutput implements Output {
 
     // For use in allocating file data, etc
     private final static Logger logger = LoggerFactory.getLogger(CycleLogOutput.class);
-    private final SimpleConfig conf;
     private MappedByteBuffer mbb;
     private RandomAccessFile file;
 //    private FileBufferConfig config;
@@ -57,10 +57,19 @@ public class CycleLogOutput implements Output {
     private File outputFile;
 
     public CycleLogOutput(Activity activity) {
-        this.conf = new SimpleConfig(activity,"output");
+
+        SimpleConfig conf = new SimpleConfig(activity,"output");
         this.extentSizeInSpans = conf.getInteger("extentSize").orElse(1000);
         this.outputFile = new File(conf.getString("file").orElse(activity.getAlias())+".cyclelog");
 
+
+        targetBuffer = new CycleResultsRLEBufferTarget(extentSizeInSpans);
+        removeIfPresent(outputFile);
+    }
+
+    public CycleLogOutput(File outputFile, int extentSizeInSpans) {
+        this.extentSizeInSpans = extentSizeInSpans;
+        this.outputFile = outputFile;
         targetBuffer = new CycleResultsRLEBufferTarget(extentSizeInSpans);
         removeIfPresent(outputFile);
     }
@@ -79,9 +88,9 @@ public class CycleLogOutput implements Output {
 
     @Override
     public boolean onCycleResult(long completedCycle, int result) {
-        return false;
+        onCycleResultSegment(new CycleSpanResults(completedCycle,completedCycle+1,result));
+        return true;
     }
-
 
     @Override
     public void onCycleResultSegment(CycleResultsSegment segment) {
@@ -149,7 +158,8 @@ public class CycleLogOutput implements Output {
         return "FileBufferRLEMarker{" +
                 "mbb=" + mbb +
                 ", file=" + file +
-                ", conf=" + conf +
+                ", pos=" + mbb.position() +
+                ", limit=" + mbb.limit() +
                 '}';
     }
 

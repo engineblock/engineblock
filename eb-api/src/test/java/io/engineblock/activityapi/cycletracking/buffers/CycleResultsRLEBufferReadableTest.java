@@ -30,7 +30,7 @@ import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
+@Test(singleThreaded = true)
 public class CycleResultsRLEBufferReadableTest {
 
     @Test
@@ -50,6 +50,7 @@ public class CycleResultsRLEBufferReadableTest {
         assertThat(resultValues).containsExactly(127, 53, 53, 27, 27, 27);
     }
 
+    @Test
     public void testMultipleRanges() {
         CycleResultsRLEBufferTarget t = new CycleResultsRLEBufferTarget(1000);
         t.onCycleResult(1L, 1);
@@ -59,10 +60,10 @@ public class CycleResultsRLEBufferReadableTest {
         t.onCycleResult(13L, 2);
         t.onCycleResult(7L, 7);
 
-        CycleResultsRLEBufferReadable cr = t.toReadable();
-        long[] cycleValues = StreamSupport.stream(cr.spliterator(),false).flatMap(r->StreamSupport.stream(r.spliterator(),false))
+//        CycleResultsRLEBufferReadable cr = t.toReadable();
+        long[] cycleValues = StreamSupport.stream(t.toReadable().spliterator(),false).flatMap(r->StreamSupport.stream(r.spliterator(),false))
                 .mapToLong(CycleResult::getCycle).toArray();
-        int[] resultValues = StreamSupport.stream(cr.spliterator(),false).flatMap(s->StreamSupport.stream(s.spliterator(),false))
+        int[] resultValues = StreamSupport.stream(t.toReadable().spliterator(),false).flatMap(s->StreamSupport.stream(s.spliterator(),false))
                 .mapToInt(CycleResult::getResult).toArray();
 
         assertThat(cycleValues).containsExactly(1L, 2L, 10L, 11L, 13L, 7L);
@@ -85,7 +86,7 @@ public class CycleResultsRLEBufferReadableTest {
     }
 
     @Test
-    public void testCyclicIterator() {
+    public void testIteratorExhausted() {
         CycleResultsRLEBufferTarget t = new CycleResultsRLEBufferTarget(1000);
         t.onCycleResult(1L, 5);
         t.onCycleResult(2L, 6);
@@ -99,9 +100,7 @@ public class CycleResultsRLEBufferReadableTest {
         assertThat(s2.getCount()).isEqualTo(1);
         CycleResultsSegment s3 = iterator.next();
         assertThat(s3.getCount()).isEqualTo(1);
-
-        CycleResultsSegment s4 = iterator.next();
-        assertThat((Object)s4).isNull();
+        assertThat(iterator.hasNext()).isFalse();
 
 //        long[] cycleValues = StreamSupport.stream(cr.spliterator(), false)
 //                .mapToLong(CycleResult::getCycle).toArray();

@@ -22,25 +22,40 @@ import java.util.Arrays;
 public class CycleSegmentBuffer {
 
     long[] cycleNumbers;
-    int pos=0;
+    int pos = 0;
 
     public CycleSegmentBuffer(int size) {
         cycleNumbers = new long[size];
     }
 
     public void append(long cycleNumber) {
-        cycleNumbers[pos++]=cycleNumber;
+        cycleNumbers[pos++] = cycleNumber;
     }
 
     public CycleSegment toReadable() {
-        if(pos==cycleNumbers.length) {
-            return new CycleArray.Segment(cycleNumbers);
+        if (pos == cycleNumbers.length) {
+            return new CycleArray.ArraySegment(cycleNumbers);
         } else {
-            return new CycleArray.Segment(Arrays.copyOfRange(cycleNumbers,0,pos));
+            return new CycleArray.ArraySegment(Arrays.copyOfRange(cycleNumbers, 0, pos));
         }
     }
 
     public int remaining() {
         return cycleNumbers.length - pos;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CycleSegmentBuffer (size=").append(cycleNumbers.length).append(")=>");
+
+        if (cycleNumbers.length > 100) {
+            sb.append(Arrays.toString(Arrays.copyOfRange(cycleNumbers, 0, 20)))
+                    .append(", ..., ")
+                    .append(Arrays.toString(Arrays.copyOfRange(cycleNumbers, cycleNumbers.length - 21, cycleNumbers.length - 1)));
+        } else {
+            sb.append(Arrays.toString(cycleNumbers));
+        }
+        return sb.toString();
+
     }
 }

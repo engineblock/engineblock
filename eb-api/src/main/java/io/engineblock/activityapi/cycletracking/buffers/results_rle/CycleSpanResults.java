@@ -22,6 +22,9 @@ import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegm
 import io.engineblock.activityapi.cycletracking.outputs.SimpleCycleResult;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Compact encoding of a result that doesn't change over a range of one or more cycles.
+ */
 import java.util.Iterator;
 
 public class CycleSpanResults implements CycleResultsSegment {

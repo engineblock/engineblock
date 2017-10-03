@@ -18,14 +18,14 @@
 package io.engineblock.activityapi.cycletracking.inputs.cyclelog;
 
 import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegment;
 import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegmentBuffer;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultStrider;
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.cycletracking.buffers.results_rle.CycleResultsRLEBufferReadable;
-import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegment;
 import io.engineblock.activityapi.input.SegmentedInput;
 import io.engineblock.util.SimpleConfig;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,22 +33,77 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Iterator;
 
-public class CycleLogReader implements SegmentedInput, AutoCloseable {
+public class CycleLogReader implements SegmentedInput, AutoCloseable, Iterable<CycleResultsSegment> {
     private final static Logger logger = LoggerFactory.getLogger(CycleLogReader.class);
     private RandomAccessFile raf;
 
     private MappedByteBuffer mbb;
-    private Activity activity;
-    CycleResultsRLEBufferReadable currentBuffer;
-    CycleResultStrider strider;
+    private final Iterator<CycleResultsSegment> cycleResultSegmentIterator;
+    private Iterator<CycleResult> segmentIter;
 
     public CycleLogReader(Activity activity) {
-        this.activity = activity;
         SimpleConfig conf = new SimpleConfig(activity, "input");
-        mbb = initMappedBuffer(conf.getString("file").orElse(activity.getAlias() + "-input")+".cyclelog");
-        activity.registerAutoCloseable(this);
+        mbb = initMappedBuffer(conf.getString("file").orElse(activity.getAlias())+".cyclelog");
+        cycleResultSegmentIterator= new CycleResultsRLEBufferReadable(mbb).iterator();
+        segmentIter =cycleResultSegmentIterator.next().iterator();
     }
+
+    public CycleLogReader(String filename) {
+        File cycleFile=null;
+        try {
+            cycleFile = new File(filename);
+            if (!cycleFile.exists()) {
+                cycleFile=new File(cycleFile+".cyclelog");
+                if (!cycleFile.exists()) {
+                    throw new RuntimeException("Cyclelog file does not exist:" + filename);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        mbb = initMappedBuffer(cycleFile.getPath());
+        cycleResultSegmentIterator= new CycleResultsRLEBufferReadable(mbb).iterator();
+        segmentIter =cycleResultSegmentIterator.next().iterator();
+    }
+
+    @Override
+    public synchronized CycleSegment getInputSegment(int segmentLength) {
+
+        CycleSegmentBuffer csb = new CycleSegmentBuffer(segmentLength);
+
+        while (csb.remaining()>0) {
+
+            while(!segmentIter.hasNext()&&cycleResultSegmentIterator.hasNext()) {
+                segmentIter = cycleResultSegmentIterator.next().iterator();
+            }
+            if (segmentIter.hasNext()) {
+                csb.append(segmentIter.next().getCycle());
+            }
+        }
+        return csb.toReadable();
+    }
+
+//            // acquire a buffered interval result
+//            if (currentBuffer == null) {
+//                currentBuffer = CycleResultsRLEBufferReadable.forOneRleSpan(mbb);
+//                if (currentBuffer == null) {
+//                    // or return null if none are left
+//                    return null;
+//                } else {
+//                    strider = new CycleResultStrider(currentBuffer.getCycleResultIterable().iterator());
+//                }
+//            }
+//            CycleResultsSegment cycleResultsSegment = strider.getCycleResultsSegment(remaining);
+//            if (cycleResultsSegment!=null) {
+//                for (CycleResult cycleResult : cycleResultsSegment) {
+//                    csb.append(cycleResult.getCycle());
+//                }
+//            }
+//            // else try again, because there are apparently more RLESegments to read.
+//
+//            remaining = csb.remaining();
 
     private MappedByteBuffer initMappedBuffer(String filename) {
         File filepath = new File(filename);
@@ -56,42 +111,12 @@ public class CycleLogReader implements SegmentedInput, AutoCloseable {
             throw new RuntimeException("file path '" + filename + "' does not exist!");
         }
         try {
-            raf = new RandomAccessFile(filepath, "rw");
+            raf = new RandomAccessFile(filepath, "r");
             mbb = raf.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, raf.length());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return mbb;
-    }
-
-    @Override
-    public synchronized CycleSegment getInputSegment(int segmentLength) {
-        CycleSegmentBuffer csb = new CycleSegmentBuffer(segmentLength);
-
-        int remaining = csb.remaining();
-        while (remaining>0) {
-
-            // acquire a buffered interval result
-            if (currentBuffer == null) {
-                currentBuffer = CycleResultsRLEBufferReadable.forOneRleSpan(mbb);
-                if (currentBuffer == null) {
-                    // or return null if none are left
-                    return null;
-                } else {
-                    strider = new CycleResultStrider(currentBuffer.getCycleResultIterable().iterator());
-                }
-            }
-            CycleResultsSegment cycleResultsSegment = strider.getCycleResultsSegment(remaining);
-            if (cycleResultsSegment!=null) {
-                for (CycleResult cycleResult : cycleResultsSegment) {
-                    csb.append(cycleResult.getCycle());
-                }
-            }
-            // else try again, because there are apparently more RLESegments to read.
-
-            remaining = csb.remaining();
-        }
-        return csb.toReadable();
     }
 
     @Override
@@ -101,4 +126,12 @@ public class CycleLogReader implements SegmentedInput, AutoCloseable {
             mbb = null;
         }
     }
+
+    @NotNull
+    @Override
+    public Iterator<CycleResultsSegment> iterator() {
+        CycleResultsRLEBufferReadable cycleResultsSegments = new CycleResultsRLEBufferReadable(mbb.duplicate());
+        return  cycleResultsSegments.iterator();
+    }
+
 }

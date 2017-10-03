@@ -43,18 +43,18 @@ public class CycleArray implements SegmentedInput {
                 return null;
             }
             if (offset.compareAndSet(current,nextOffset)) {
-                return new Segment(Arrays.copyOfRange(cycles,current,nextOffset));
+                return new ArraySegment(Arrays.copyOfRange(cycles,current,nextOffset));
             }
             // in all other cases, there was a CAS race condition, and we want to retry
         }
     }
 
-    public static class Segment implements CycleSegment {
+    public static class ArraySegment implements CycleSegment {
 
         private long[] values;
         private int offset=0;
 
-        public Segment(long[] values) {
+        public ArraySegment(long[] values) {
             this.values = values;
         }
 
@@ -70,5 +70,6 @@ public class CycleArray implements SegmentedInput {
         public boolean isExhausted() {
             return (offset>=values.length);
         }
+
     }
 }

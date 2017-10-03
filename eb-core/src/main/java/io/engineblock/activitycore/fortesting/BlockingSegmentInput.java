@@ -44,7 +44,7 @@ public class BlockingSegmentInput implements SegmentedInput {
     }
 
     public void publishSegment(long... cycleValues) {
-        this.segment = new CycleArray.Segment(cycleValues);
+        this.segment = new CycleArray.ArraySegment(cycleValues);
         synchronized (this) {
             this.notify();
         }

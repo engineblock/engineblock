@@ -171,6 +171,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             Timer cyclesTimer = ActivityMetrics.timer(activityDef, "cycles");
             Timer phasesTimer = ActivityMetrics.timer(activityDef, "phases");
             Timer stridesTimer = ActivityMetrics.timer(activityDef, "strides");
+            Timer inputTimer = ActivityMetrics.timer(activityDef,"read-input");
 
             if (slotState.get() == Finished) {
                 logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
@@ -190,7 +191,11 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
             while (slotState.get() == Running) {
 
-                CycleSegment cycleSegment = input.getInputSegment(stride);
+                CycleSegment cycleSegment = null;
+
+                try (Timer.Context inputTime = inputTimer.time()) {
+                    cycleSegment = input.getInputSegment(stride);
+                }
 
                 if (cycleSegment == null) {
                     logger.trace("input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
@@ -262,7 +267,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                     try {
                         output.onCycleResultSegment(outputBuffer);
                     } catch (Exception t) {
-                        logger.error("Error while feeding result segment " + outputBuffer + " to output '" + output + "', error:" + t.getMessage());
+                        logger.error("Error while feeding result segment " + outputBuffer + " to output '" + output + "', error:" + t);
                         throw t;
                     }
                 }
@@ -273,7 +278,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                 slotStateTracker.enterState(Stopped);
             }
         } catch (Throwable t) {
-            logger.error("Error in core motor loop:" + t.getMessage());
+            logger.error("Error in core motor loop:" + t);
             throw t;
         }
     }

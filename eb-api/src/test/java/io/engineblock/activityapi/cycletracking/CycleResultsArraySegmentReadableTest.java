@@ -15,8 +15,11 @@
  * /
  */
 
-package io.engineblock.activityapi.cycletracking.buffers.results;
+package io.engineblock.activityapi.cycletracking;
 
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
+import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultSegmentBuffer;
 import org.testng.annotations.Test;
 
 import java.util.stream.StreamSupport;
@@ -24,22 +27,25 @@ import java.util.stream.StreamSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
-public class CycleResultSegmentBufferTest {
+public class CycleResultsArraySegmentReadableTest {
 
     @Test
-    public void testBasicBuffering() {
-        CycleResultSegmentBuffer buf = new CycleResultSegmentBuffer(3);
-        buf.append(302,3);
-        buf.append(305,2);
-        buf.append(23L,1);
-        CycleResultsSegment cycleResults = buf.toReader();
+    public void testCycleResultSegmentReader() {
+        CycleResultSegmentBuffer bb = new CycleResultSegmentBuffer(5);
+        bb.append(33L, 0);
+        bb.append(34L, 1);
+        bb.append(35L, 2);
+        bb.append(36L, 1);
+        bb.append(39L, 0);
+        CycleResultsSegment cycleResults = bb.toReader();
+
         long[] cycles = StreamSupport.stream(cycleResults.spliterator(), false)
                 .mapToLong(CycleResult::getCycle).toArray();
         int[] results = StreamSupport.stream(cycleResults.spliterator(), false)
                 .mapToInt(CycleResult::getResult).toArray();
+        assertThat(cycles).containsExactly(33L, 34L, 35L, 36L, 39L);
+        assertThat(results).containsExactly(0, 1, 2, 1, 0);
 
-        assertThat(cycles).containsExactly(302L,305L,23L);
-        assertThat(results).containsExactly(3,2,1);
 
     }
 

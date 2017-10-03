@@ -77,16 +77,16 @@ public class CycleResultsRLEBufferTarget implements Output {
      */
     public CycleResultsRLEBufferReadable toReadable() {
         flush();
-        CycleResultsRLEBufferReadable newbuf = new CycleResultsRLEBufferReadable(toByteBuffer());
-        return newbuf;
+        ByteBuffer readable = buf.duplicate();
+        readable.flip();
+        return new CycleResultsRLEBufferReadable(readable);
     }
 
     public ByteBuffer toByteBuffer() {
         flush();
-        ByteBuffer readable = buf.duplicate();
-        readable.flip();
-        buf = null;
-        return readable;
+        ByteBuffer bb = buf.duplicate();
+        bb.flip();
+        return bb;
     }
 
     /**
