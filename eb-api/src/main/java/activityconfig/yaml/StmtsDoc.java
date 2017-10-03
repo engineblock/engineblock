@@ -20,16 +20,16 @@ package activityconfig.yaml;
 import activityconfig.rawyaml.RawStmtsBlock;
 import activityconfig.rawyaml.RawStmtsDoc;
 import io.engineblock.util.Tagged;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * AssembledStmtsDoc creates a logical view of a raw statements doc that includes
- * the overrides and filtering between the document layer and block layer.
+ * StmtsDoc creates a logical view of a statements doc that includes
+ * all inherited and overridden values for bindings, tags, and params.
  */
-public class StmtsDoc implements Tagged {
+public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
 
     private RawStmtsDoc rawStmtsDoc;
 
@@ -37,35 +37,70 @@ public class StmtsDoc implements Tagged {
         this.rawStmtsDoc = rawStmtsDoc;
     }
 
+    /**
+     * @return a usable list of blocks, including inherited bindings, params, and tags
+     * from the parent doc
+     */
     public List<StmtsBlock> getBlocks() {
         List<StmtsBlock> blocks = new ArrayList<>();
 
-        int blockIdx=0;
+        int blockIdx = 0;
         for (RawStmtsBlock rawStmtsBlock : rawStmtsDoc.getBlocks()) {
             String compositeName = rawStmtsDoc.getName() +
                     (rawStmtsBlock.getName().isEmpty() ? "" : "-" + rawStmtsBlock.getName());
-            StmtsBlock compositeBlock = new StmtsBlock(compositeName, rawStmtsBlock,this,++blockIdx);
+            StmtsBlock compositeBlock = new StmtsBlock(compositeName, rawStmtsBlock, this, ++blockIdx);
             blocks.add(compositeBlock);
         }
 
         return blocks;
     }
 
+    /**
+     * @return a usable map of tags, including those inherited from the parent doc
+     */
     @Override
     public Map<String, String> getTags() {
         return rawStmtsDoc.getTags();
     }
 
+    /**
+     * @return a usable map of parameters, including those inherited from the parent doc
+     */
     public Map<String, String> getParams() {
         return rawStmtsDoc.getParams();
     }
 
+    /**
+     * @return a usable map of bindings, including those inherited from the parent doc
+     */
     public Map<String, String> getBindings() {
         return rawStmtsDoc.getBindings();
     }
 
+    /**
+s     * @return the name of this block
+     */
     public String getName() {
         return rawStmtsDoc.getName();
     }
+
+    /**
+     * @return The list of all included statements for all included block in this document,
+     * including the inherited and overridden values from the this doc and the parent block.
+     */
+    public List<StmtDef> getStmts() {
+        return getBlocks().stream().flatMap(b -> b.getStmts().stream()).collect(Collectors.toList());
+    }
+
+    /**
+     * Allow StmtsDoc to be used in iterable loops.
+     * @return An iterator of {@link StmtsBlock}
+     */
+    @NotNull
+    @Override
+    public Iterator<StmtsBlock> iterator() {
+        return getBlocks().iterator();
+    }
+
 
 }

@@ -19,12 +19,14 @@ package activityconfig.yaml;
 
 import activityconfig.MultiMapLookup;
 import activityconfig.rawyaml.RawStmtsBlock;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class StmtsBlock {
+public class StmtsBlock implements Iterable<StmtDef> {
 
     private final RawStmtsBlock rawStmtsBlock;
     private final String blockName;
@@ -77,4 +79,9 @@ public class StmtsBlock {
         return new MultiMapLookup(rawStmtsBlock.getBindings(), rawStmtsDoc.getBindings());
     }
 
+    @NotNull
+    @Override
+    public Iterator<StmtDef> iterator() {
+        return getStmts().iterator();
+    }
 }

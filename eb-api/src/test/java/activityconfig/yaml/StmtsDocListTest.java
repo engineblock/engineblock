@@ -116,4 +116,11 @@ public class StmtsDocListTest {
                 MapEntry.entry("foobar","overized-beez"));
     }
 
+    @Test
+    public void testStmtsGetter() {
+        StmtsDoc doc1 = doclist.getStmtDocs().get(1);
+        List<StmtDef> stmts = doc1.getStmts();
+        assertThat(stmts).hasSize(3);
+    }
+
 }
