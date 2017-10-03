@@ -40,7 +40,8 @@ public class EBCLIOptions {
     private static final String STOP_ACTIVITY = "stop";
     private static final String AWAIT_ACTIVITY = "await";
     private static final String WAIT_MILLIS = "waitmillis";
-    private static final String DUMP_RLE_FILE = "--dump-cycle-log";
+    private static final String DUMP_CYCLELOG = "--export-cycle-log";
+    private static final String IMPORT_CYCLELOG = "--import-cycle-log";
 
     // Execution Options
     private static final String SCRIPT = "script";
@@ -85,6 +86,7 @@ public class EBCLIOptions {
     private boolean wantsInputTypes=false;
     private boolean wantsMarkerTypes=false;
     private String[] rleDumpOptions = new String[0];
+    private String[] cyclelogImportOptions = new String[0];
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -185,9 +187,13 @@ public class EBCLIOptions {
                         wantsActivityHelpFor = readWordOrThrow(arglist,"topic");
                     }
                     break;
-                case DUMP_RLE_FILE:
+                case DUMP_CYCLELOG:
                     arglist.removeFirst();
                     rleDumpOptions = readAllWords(arglist);
+                    break;
+                case IMPORT_CYCLELOG:
+                    arglist.removeFirst();
+                    cyclelogImportOptions = readAllWords(arglist);
                     break;
                 case LOG_HISTO:
                     arglist.removeFirst();
@@ -410,11 +416,17 @@ public class EBCLIOptions {
         return wantsMarkerTypes;
     }
 
-    public boolean wantsToDumpRLEFile() {
+    public boolean wantsToDumpCyclelog() {
         return rleDumpOptions.length>0;
     }
+    public boolean wantsToImportCycleLog() {
+        return cyclelogImportOptions.length>0;
+    }
 
-    public String[] rleDumpOptions() {
+    public String[] getCyclelogImportOptions() {
+        return cyclelogImportOptions;
+    }
+    public String[] getCycleLogExporterOptions() {
         return rleDumpOptions;
     }
 

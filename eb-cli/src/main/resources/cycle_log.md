@@ -9,13 +9,15 @@ as low-overhead when running scenarios.
 
 All cycle logfiles have the *.cyclelog* suffix.
 
+### export cycle_log to text format
+
 You can dump an rlefile to the screen to see the content in text form
 by running a command like this:
 
-    PROG --dump-cycle-log <filename> [spans|cycles]
+    PROG --export-cycle-log <filename> [spans|cycles]
 
 You do not need to specify the extension. If you do not specify either
-optional format at the end, then *cycles* is assumed. It will print output like this:
+optional format at the end, then *spans* is assumed. It will print output like this:
 
     0->3
     1->3
@@ -30,12 +32,23 @@ like this:
 This format uses the '[x,y)' notation to remind you that the spans are all closed-open
 intervals, including the starting cycle number but not the ending one.
 
+### importing text format to a cycle_log
+
+If you need to modify and then re-use a cycle log, you can do this with simple text tools.
+Once you have modified the file, you can import it back to the native format with:
+
+    PROG --import-cycle-log <infile.txt> <outfile.cyclelog>
+
+The importer recognizes both formats listed above.
+
 ### Using cycle logs as outputs
 
 When you want an activity to record its per-cycle result for
 later use, you can specify a cycle log as its output. This is configured as:
 
     ... output=type:cyclelog,file:somefile ...
+
+If you do not specify the file parameter, then the alias of the activity is used.
 
 ### Using cycle logs as inputs
 
@@ -47,3 +60,5 @@ Note, that when you use cycle logs as inputs, not all cycles are guaranteed to b
 in order. In most cases, they will be, due to reordering support on RLE encoding. However,
 that uses a sliding-window buffer, and in some cases RLE spans can occur out of
 order in a cycle log.
+
+If you do not specify the fie parameter, then the alias of the activity is used.

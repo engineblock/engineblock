@@ -34,7 +34,7 @@ public class CycleLogDumperUtility {
         }
         String filename = args[0];
 
-        DisplayType displayType = DisplayType.cycles;
+        DisplayType displayType = DisplayType.spans;
         if (args.length >= 2) {
             displayType = DisplayType.valueOf(args[1]);
         }

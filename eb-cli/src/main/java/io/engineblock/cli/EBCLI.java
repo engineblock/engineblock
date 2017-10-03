@@ -3,6 +3,7 @@ package io.engineblock.cli;
 import io.engineblock.activityapi.ActivityType;
 import io.engineblock.activityapi.OutputType;
 import io.engineblock.activityapi.cycletracking.outputs.cyclelog.CycleLogDumperUtility;
+import io.engineblock.activityapi.cycletracking.outputs.cyclelog.CycleLogImporterUtility;
 import io.engineblock.activityapi.input.InputType;
 import io.engineblock.core.MarkdownDocInfo;
 import io.engineblock.core.ScenarioLogger;
@@ -70,8 +71,13 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsToDumpRLEFile()) {
-            CycleLogDumperUtility.main(options.rleDumpOptions());
+        if (options.wantsToDumpCyclelog()) {
+            CycleLogDumperUtility.main(options.getCycleLogExporterOptions());
+            System.exit(0);
+        }
+
+        if (options.wantsToImportCycleLog()) {
+            CycleLogImporterUtility.main(options.getCyclelogImportOptions());
             System.exit(0);
         }
 

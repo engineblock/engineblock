@@ -122,7 +122,10 @@ public class CycleResultsRLEBufferTarget implements Output {
 
     private void checkpoint(long istart, long iend, long lastResult) {
         if (lastResult > Byte.MAX_VALUE) {
-            throw new RuntimeException("Unable to encode values greater than Byte.MAX_VALUE.");
+            throw new RuntimeException("Unable to encode result values greater than Byte.MAX_VALUE.");
+        }
+        if (lastCycle<0) {
+            throw new RuntimeException("Unable to encode cycle values less than 0");
         }
         buf.putLong(istart).putLong(iend).put((byte) lastResult);
         runlength = 0;
