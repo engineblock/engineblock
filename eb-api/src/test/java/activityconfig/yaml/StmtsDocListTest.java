@@ -120,7 +120,7 @@ public class StmtsDocListTest {
     public void testStmtsGetter() {
         StmtsDoc doc1 = doclist.getStmtDocs().get(1);
         List<StmtDef> stmts = doc1.getStmts();
-        assertThat(stmts).hasSize(3);
+        assertThat(stmts).hasSize(4);
     }
 
 }
