@@ -17,9 +17,11 @@
 
 package activityconfig.yaml;
 
+import io.engineblock.util.Tagged;
+
 import java.util.Map;
 
-public class StmtDef {
+public class StmtDef implements Tagged {
 
     private StmtsBlock block;
     private String name;

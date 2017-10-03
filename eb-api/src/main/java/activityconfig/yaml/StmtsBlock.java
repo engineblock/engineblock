@@ -19,6 +19,7 @@ package activityconfig.yaml;
 
 import activityconfig.MultiMapLookup;
 import activityconfig.rawyaml.RawStmtsBlock;
+import io.engineblock.util.Tagged;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class StmtsBlock implements Iterable<StmtDef> {
+public class StmtsBlock implements Tagged, Iterable<StmtDef> {
 
     private final RawStmtsBlock rawStmtsBlock;
     private final String blockName;
