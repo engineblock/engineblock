@@ -27,7 +27,7 @@ import java.io.File;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
-public class CycleLogReaderTest {
+public class CycleLogInputTest {
 
     private final static String filepath="cycle-log-reader-test";
     private File cyclefile;
@@ -54,24 +54,25 @@ public class CycleLogReaderTest {
 
     @Test
     public void testReader() {
-        CycleLogReader cycleLogReader = new CycleLogReader(cyclefile.getPath());
+        CycleLogInput cycleLogInput = new CycleLogInput(cyclefile.getPath());
         CycleSegment i1;
         long c;
-        i1 = cycleLogReader.getInputSegment(1);
+        i1 = cycleLogInput.getInputSegment(1);
         c = i1.nextCycle();
         assertThat(c).isEqualTo(1L);
-        i1 = cycleLogReader.getInputSegment(1);
+        i1 = cycleLogInput.getInputSegment(1);
         c = i1.nextCycle();
         assertThat(c).isEqualTo(2L);
-        i1 = cycleLogReader.getInputSegment(1);
+        i1 = cycleLogInput.getInputSegment(1);
         c = i1.nextCycle();
         assertThat(c).isEqualTo(3L);
-        i1 = cycleLogReader.getInputSegment(1);
+        i1 = cycleLogInput.getInputSegment(1);
         c = i1.nextCycle();
         assertThat(c).isEqualTo(4L);
-        i1 = cycleLogReader.getInputSegment(1);
+        i1 = cycleLogInput.getInputSegment(1);
         c = i1.nextCycle();
         assertThat(c).isEqualTo(5L);
+        assertThat(i1.isExhausted()).isTrue();
 
 
     }

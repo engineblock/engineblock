@@ -35,27 +35,26 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
 
-public class CycleLogReader implements SegmentedInput, AutoCloseable, Iterable<CycleResultsSegment> {
-    private final static Logger logger = LoggerFactory.getLogger(CycleLogReader.class);
-    private RandomAccessFile raf;
-
-    private MappedByteBuffer mbb;
+public class CycleLogInput implements SegmentedInput, AutoCloseable, Iterable<CycleResultsSegment> {
+    private final static Logger logger = LoggerFactory.getLogger(CycleLogInput.class);
     private final Iterator<CycleResultsSegment> cycleResultSegmentIterator;
+    private RandomAccessFile raf;
+    private MappedByteBuffer mbb;
     private Iterator<CycleResult> segmentIter;
 
-    public CycleLogReader(Activity activity) {
+    public CycleLogInput(Activity activity) {
         SimpleConfig conf = new SimpleConfig(activity, "input");
-        mbb = initMappedBuffer(conf.getString("file").orElse(activity.getAlias())+".cyclelog");
-        cycleResultSegmentIterator= new CycleResultsRLEBufferReadable(mbb).iterator();
-        segmentIter =cycleResultSegmentIterator.next().iterator();
+        mbb = initMappedBuffer(conf.getString("file").orElse(activity.getAlias()) + ".cyclelog");
+        cycleResultSegmentIterator = new CycleResultsRLEBufferReadable(mbb).iterator();
+        segmentIter = cycleResultSegmentIterator.next().iterator();
     }
 
-    public CycleLogReader(String filename) {
-        File cycleFile=null;
+    public CycleLogInput(String filename) {
+        File cycleFile = null;
         try {
             cycleFile = new File(filename);
             if (!cycleFile.exists()) {
-                cycleFile=new File(cycleFile+".cyclelog");
+                cycleFile = new File(cycleFile + ".cyclelog");
                 if (!cycleFile.exists()) {
                     throw new RuntimeException("Cyclelog file does not exist:" + filename);
                 }
@@ -64,8 +63,8 @@ public class CycleLogReader implements SegmentedInput, AutoCloseable, Iterable<C
             throw new RuntimeException(e);
         }
         mbb = initMappedBuffer(cycleFile.getPath());
-        cycleResultSegmentIterator= new CycleResultsRLEBufferReadable(mbb).iterator();
-        segmentIter =cycleResultSegmentIterator.next().iterator();
+        cycleResultSegmentIterator = new CycleResultsRLEBufferReadable(mbb).iterator();
+        segmentIter = cycleResultSegmentIterator.next().iterator();
     }
 
     @Override
@@ -73,13 +72,19 @@ public class CycleLogReader implements SegmentedInput, AutoCloseable, Iterable<C
 
         CycleSegmentBuffer csb = new CycleSegmentBuffer(segmentLength);
 
-        while (csb.remaining()>0) {
+        while (csb.remaining() > 0) {
 
-            while(!segmentIter.hasNext()&&cycleResultSegmentIterator.hasNext()) {
+            while (!segmentIter.hasNext() && cycleResultSegmentIterator.hasNext()) {
                 segmentIter = cycleResultSegmentIterator.next().iterator();
             }
             if (segmentIter.hasNext()) {
                 csb.append(segmentIter.next().getCycle());
+            } else {
+                if (csb.remaining() == segmentLength) {
+                    return null;
+                } else {
+                    break;
+                }
             }
         }
         return csb.toReadable();
@@ -131,7 +136,7 @@ public class CycleLogReader implements SegmentedInput, AutoCloseable, Iterable<C
     @Override
     public Iterator<CycleResultsSegment> iterator() {
         CycleResultsRLEBufferReadable cycleResultsSegments = new CycleResultsRLEBufferReadable(mbb.duplicate());
-        return  cycleResultsSegments.iterator();
+        return cycleResultsSegments.iterator();
     }
 
 }

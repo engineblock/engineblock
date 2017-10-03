@@ -42,7 +42,7 @@ public class CycleLogInputType implements InputType {
 
         public Dispenser(Activity activity) {
             this.activity = activity;
-            this.input = new CycleLogReader(activity);
+            this.input = new CycleLogInput(activity);
         }
 
         @Override
