@@ -34,7 +34,7 @@ public class CycleResultsRLEBufferTargetTest {
     public void testBasicRLEncoding() {
         CycleResultsRLEBufferTarget tb = new CycleResultsRLEBufferTarget(1024);
 
-        assertThat(tb.getBufferCapacity()).isEqualTo(17408);
+        assertThat(tb.getRawBufferCapacity()).isEqualTo(17408);
 
         tb.onCycleResult(0L,0);
         tb.onCycleResult(1L,1);
@@ -56,7 +56,7 @@ public class CycleResultsRLEBufferTargetTest {
     public void testGappedIntervalRLEEncoding() {
         CycleResultsRLEBufferTarget tb = new CycleResultsRLEBufferTarget(100000);
 
-        assertThat(tb.getBufferCapacity()).isEqualTo(1700000);
+        assertThat(tb.getRawBufferCapacity()).isEqualTo(1700000);
 
         tb.onCycleResult(0L,0);
         tb.onCycleResult(13L,1);
@@ -78,6 +78,27 @@ public class CycleResultsRLEBufferTargetTest {
 
         int[] resultValues = cycles.stream().mapToInt(CycleResult::getResult).toArray();
         assertThat(resultValues).containsExactly(0,1,1,1,2,2,5,6,7);
+
+    }
+
+    @Test
+    public void testResize() {
+        CycleResultsRLEBufferTarget tb = new CycleResultsRLEBufferTarget(3);
+
+        assertThat(tb.getRawBufferCapacity()).isEqualTo(51);
+
+        tb.onCycleResult(0L,0);
+        tb.onCycleResult(13L,1);
+        tb.onCycleResult(14L,2);
+        tb.onCycleResult(15L,3);
+        assertThat(tb.getRecordCapacity()).isEqualTo(3);
+        tb.onCycleResult(19L,19);
+        assertThat(tb.getRecordCapacity()).isEqualTo(6);
+        tb.onCycleResult(20L,10);
+        tb.onCycleResult(21L,21);
+        tb.onCycleResult(22L,22);
+        assertThat(tb.getRecordCapacity()).isEqualTo(12);
+
 
     }
 

@@ -19,6 +19,8 @@ package io.engineblock.activityapi.cycletracking.buffers.results_rle;
 
 import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
 import io.engineblock.activityapi.output.Output;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
@@ -35,6 +37,7 @@ import java.nio.ByteBuffer;
  * will be deemed invalid and will cause an exception to be thrown.
  */
 public class CycleResultsRLEBufferTarget implements Output {
+    private final static Logger logger = LoggerFactory.getLogger(CycleResultsRLEBufferTarget.class);
 
     public final static int BYTES = Long.BYTES + Long.BYTES + Byte.BYTES;
 
@@ -101,12 +104,12 @@ public class CycleResultsRLEBufferTarget implements Output {
      */
     @Override
     public boolean onCycleResult(long cycle, int result) {
-        if (buf == null) {
-            throw new RuntimeException("Attempt to append a buffer that is active for reading with cycle:" + cycle + " result:" +result);
-        }
-        if (buf.remaining()<BYTES) {
-            return false;
-        }
+//        if (buf == null) {
+//            throw new RuntimeException("Attempt to append a buffer that is active for reading with cycle:" + cycle + " result:" +result);
+//        }
+//        if (buf.remaining()<BYTES) {
+//            return false;
+//        }
         if (cycle != lastCycle + 1 || lastResult != result) {
             if (lastCycle != Long.MIN_VALUE) {
                 checkpoint(lastCycle + 1 - runlength, lastCycle + 1, lastResult);
@@ -121,6 +124,9 @@ public class CycleResultsRLEBufferTarget implements Output {
     }
 
     private void checkpoint(long istart, long iend, long lastResult) {
+        if (buf.remaining()==0) {
+            buf=resize(buf);
+        }
         if (lastResult > Byte.MAX_VALUE) {
             throw new RuntimeException("Unable to encode result values greater than Byte.MAX_VALUE.");
         }
@@ -131,8 +137,20 @@ public class CycleResultsRLEBufferTarget implements Output {
         runlength = 0;
     }
 
-    public int getBufferCapacity() {
+    private ByteBuffer resize(ByteBuffer buf) {
+        ByteBuffer doubled=ByteBuffer.allocate(buf.capacity()*2);
+        buf.flip();
+        doubled.put(buf);
+        logger.warn("resized buffer to " + doubled + " to ensure capacity.");
+        return doubled;
+    }
+
+    public int getRawBufferCapacity() {
         return buf.capacity();
+    }
+
+    public int getRecordCapacity() {
+        return buf.capacity() / BYTES;
     }
 
     /**

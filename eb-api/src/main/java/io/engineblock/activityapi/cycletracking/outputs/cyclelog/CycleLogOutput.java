@@ -116,6 +116,7 @@ public class CycleLogOutput implements Output {
         logger.trace("ensuring capacity for " + targetCapacity);
         this.ensureCapacity(targetCapacity);
         mbb.put(nextFileExtent);
+        mbb.force();
         logger.trace("extent appended");
         logger.trace("mbb position now at " + mbb.position());
 
@@ -125,10 +126,6 @@ public class CycleLogOutput implements Output {
     public synchronized void close() throws Exception {
         try {
         flush();
-        if (mbb!=null) {
-            mbb.force();
-            mbb=null;
-        }
         if (file != null) {
             file.getFD().sync();
             file.close();
