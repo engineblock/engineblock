@@ -47,7 +47,7 @@ public class ReorderingConcurrentResultBuffer implements Output {
     }
 
     @Override
-    public boolean onCycleResult(long completedCycle, int result) {
+    public synchronized boolean onCycleResult(long completedCycle, int result) {
         this.onCycleResultSegment(CycleResultsSegmentReadable.forCycleResult(completedCycle, result));
         return true;
     }

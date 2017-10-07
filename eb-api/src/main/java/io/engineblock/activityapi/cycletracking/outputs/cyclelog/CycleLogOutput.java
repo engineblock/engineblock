@@ -122,7 +122,7 @@ public class CycleLogOutput implements Output {
     }
 
     @Override
-    public void close() throws Exception {
+    public synchronized void close() throws Exception {
         try {
         flush();
         if (mbb!=null) {
