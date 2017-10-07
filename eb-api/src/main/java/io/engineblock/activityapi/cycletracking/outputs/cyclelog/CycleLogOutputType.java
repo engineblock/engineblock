@@ -25,7 +25,7 @@ import io.engineblock.activityapi.input.ContiguousInput;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityapi.output.OutputDispenser;
-import io.engineblock.activityimpl.marker.ReorderingContiguousOutputChunker;
+import io.engineblock.activityimpl.marker.ContiguousOutputChunker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +54,9 @@ public class CycleLogOutputType implements OutputType {
             CycleLogOutput rleFileWriter = new CycleLogOutput(activity);
             if (input instanceof ContiguousInput) {
                 logger.debug("pre-buffering output extents contiguously before RLE buffering");
-                ReorderingContiguousOutputChunker reorderingContiguousOutputChunker = new ReorderingContiguousOutputChunker(activity);
-                reorderingContiguousOutputChunker.addExtentReader(rleFileWriter);
-                this.output = reorderingContiguousOutputChunker;
+                ContiguousOutputChunker contiguousOutputChunker = new ContiguousOutputChunker(activity);
+                contiguousOutputChunker.addExtentReader(rleFileWriter);
+                this.output = contiguousOutputChunker;
             }
             else {
                 logger.debug("pre-buffering output extends with best-effort before RLE buffering");

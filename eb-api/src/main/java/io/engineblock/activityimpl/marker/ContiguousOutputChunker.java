@@ -51,9 +51,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * This implementation needs to be adapted to handle early exit of either
  * marker or tracker threads with no deadlock.
  */
-public class ReorderingContiguousOutputChunker implements Output  {
+public class ContiguousOutputChunker implements Output {
 
-    private final static Logger logger = LoggerFactory.getLogger(ReorderingContiguousOutputChunker.class);
+    private final static Logger logger = LoggerFactory.getLogger(ContiguousOutputChunker.class);
     private final int extentSize;
     private final int maxExtents;
     private List<Output> readers = new ArrayList<>();
@@ -64,7 +64,7 @@ public class ReorderingContiguousOutputChunker implements Output  {
     private Condition nowMarking = lock.newCondition();
     private Semaphore mutex = new Semaphore(1, false);
 
-    public ReorderingContiguousOutputChunker(long min, long nextRangeMin, int extentSize, int maxExtents) {
+    public ContiguousOutputChunker(long min, long nextRangeMin, int extentSize, int maxExtents) {
         this.min = new AtomicLong(min);
         this.nextMin = new AtomicLong(nextRangeMin);
         this.extentSize = extentSize;
@@ -72,7 +72,7 @@ public class ReorderingContiguousOutputChunker implements Output  {
         initExtents();
     }
 
-    public ReorderingContiguousOutputChunker(Activity activity) {
+    public ContiguousOutputChunker(Activity activity) {
 
         if (!(activity.getInputDispenserDelegate().getInput(0) instanceof ContiguousInput)) {
             throw new RuntimeException("This type of marker may not be used with non-contiguous inputs yet.");
@@ -93,7 +93,7 @@ public class ReorderingContiguousOutputChunker implements Output  {
         initExtents();
     }
 
-    private void initExtents() {
+    private synchronized void initExtents() {
         ByteTrackerExtent extent = new ByteTrackerExtent(min.get(), (min.get() + extentSize));
         this.markingExtents.set(extent);
         for (int i = 0; i < maxExtents; i++) {
@@ -106,63 +106,71 @@ public class ReorderingContiguousOutputChunker implements Output  {
 
     @Override
     public synchronized void onCycleResultSegment(CycleResultsSegment segment) {
-        logger.trace("on-cycle-result-segment: (" +segment +")");
+        logger.trace("on-cycle-result-segment: (" + segment + ")");
         for (CycleResult cr : segment) {
-            onCycleResult(cr.getCycle(),cr.getResult());
+            onCycleResult(cr.getCycle(), cr.getResult());
         }
     }
 
     @Override
     public synchronized boolean onCycleResult(long completedCycle, int result) {
-        logger.trace("on-cycle-result: (" + completedCycle + "," + result +")");
+        logger.trace("on-cycle-result: (" + completedCycle + "," + result + ")");
 
         try {
-        while (true) {
-            ByteTrackerExtent extent = this.markingExtents.get();
-            long unmarked = extent.markResult(completedCycle, result);
+            while (true) {
+                ByteTrackerExtent extent = this.markingExtents.get();
+                long unmarked = extent.markResult(completedCycle, result);
 
-            if (unmarked > 0) {
-                return true;
-            } else if (unmarked == 0) {
-                try {
-                    mutex.acquire();
-                    ByteTrackerExtent head = this.markingExtents.get();
-                    while (head.isFullyFilled()) {
-                        head.extend();
-                        if (!this.markingExtents.compareAndSet(head, head.getNextExtent().get())) {
-                            throw new RuntimeException("Unable to swap head extent.");
+                if (unmarked > 0) {
+                    return true;
+                } else if (unmarked == 0) {
+                    try {
+                        mutex.acquire();
+                        ByteTrackerExtent head = this.markingExtents.get();
+                        while (head.isFullyFilled()) {
+                            head.extend();
+                            if (!this.markingExtents.compareAndSet(head, head.getNextExtent().get())) {
+                                throw new RuntimeException("Unable to swap head extent.");
+                            }
+                            onFullyFilled(head);
+                            head = this.markingExtents.get();
                         }
-                        onFullyFilled(head);
-                        head = this.markingExtents.get();
+                        mutex.release();
+                    } catch (InterruptedException ignored) {
+                    } catch (Throwable t) {
+                        throw t;
                     }
-                    mutex.release();
-                } catch (InterruptedException ignored) {
-                } catch (Throwable t) {
-                    throw t;
+                    return true;
+                } else {
+                    System.out.println("whoops");
                 }
-                return true;
-            } else {
-                System.out.println("whoops");
             }
-        } } catch (Throwable t) {
-            throw t;
+        } catch (Throwable t) {
+            throw t; // for debugging
         }
     }
 
     @Override
     public synchronized void close() throws Exception {
-        mutex.acquire();
-        ByteTrackerExtent e = this.markingExtents.get();
-        while (e != null) {
-            onFullyFilled(e);
-            e = e.getNextExtent().get();
-        }
-        mutex.release();
+        try {
 
-        for (Output reader : this.readers) {
-            logger.debug("closing downstream reader: " + reader);
-            reader.close();
+            mutex.acquire();
+            ByteTrackerExtent e = this.markingExtents.get();
+            while (e != null) {
+                onFullyFilled(e);
+                e = e.getNextExtent().get();
+            }
+            mutex.release();
+
+            for (Output reader : this.readers) {
+                logger.debug("closing downstream reader: " + reader);
+                reader.close();
+            }
+        } catch (Throwable t) {
+            logger.error("Error while attempting to close " +this + ": " + t, t);
+            throw t;
         }
+
 
     }
 
@@ -170,7 +178,7 @@ public class ReorderingContiguousOutputChunker implements Output  {
         logger.debug("MARKER>: fully filled: " + extent);
         for (Output reader : readers) {
             CycleResultsIntervalSegment remainingSegment = extent.getRemainingSegment();
-            if (remainingSegment!=null) {
+            if (remainingSegment != null) {
                 reader.onCycleResultSegment(remainingSegment);
             }
         }
@@ -180,7 +188,7 @@ public class ReorderingContiguousOutputChunker implements Output  {
         logger.debug("TRACKER: fully tracked: " + firstReadable);
     }
 
-    public void addExtentReader(Output reader) {
+    public synchronized void addExtentReader(Output reader) {
         this.readers.add(reader);
     }
 
@@ -203,7 +211,7 @@ public class ReorderingContiguousOutputChunker implements Output  {
 
     @Override
     public String toString() {
-        return "ConcurrentOutputSegmenter{" +
+        return ContiguousOutputChunker.class.getSimpleName() + "{" +
                 "extentSize=" + extentSize +
                 ", maxExtents=" + maxExtents +
                 ", readers=" + readers +

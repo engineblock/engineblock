@@ -34,7 +34,7 @@ public class CoreOutputTest {
 
     @Test
     public void testCoreSimple0to4() {
-        ReorderingContiguousOutputChunker ct4 = new ReorderingContiguousOutputChunker(0,3,4,1);
+        ContiguousOutputChunker ct4 = new ContiguousOutputChunker(0,3,4,1);
         TestReader r = new TestReader();
         ct4.addExtentReader(r);
         ct4.onCycleResult(0,0);

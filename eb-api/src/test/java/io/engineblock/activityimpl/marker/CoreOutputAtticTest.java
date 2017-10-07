@@ -24,7 +24,7 @@ public class CoreOutputAtticTest {
 
     @Test
     public void testCoreSimple0to4() {
-        ReorderingContiguousOutputChunker ct4 = new ReorderingContiguousOutputChunker(0,3,4,1);
+        ContiguousOutputChunker ct4 = new ContiguousOutputChunker(0,3,4,1);
         ct4.onCycleResult(0,0);
         ct4.onCycleResult(1,1);
         ct4.onCycleResult(2,2);

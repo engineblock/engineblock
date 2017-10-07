@@ -123,13 +123,22 @@ public class CycleLogOutput implements Output {
 
     @Override
     public void close() throws Exception {
+        try {
         flush();
-        mbb.force();
+        if (mbb!=null) {
+            mbb.force();
+            mbb=null;
+        }
         if (file != null) {
             file.getFD().sync();
             file.close();
             file = null;
         }
+        } catch (Throwable t) {
+            logger.error("Error while closing CycleLogOutput: " + t, t);
+            throw t;
+        }
+
     }
 
     private synchronized void ensureCapacity(long newCapacity) {
@@ -155,7 +164,7 @@ public class CycleLogOutput implements Output {
 
     @Override
     public String toString() {
-        return "FileBufferRLEMarker{" +
+        return "CycleLogOutput{" +
                 "mbb=" + mbb +
                 ", file=" + file +
                 ", mbb=" + (mbb==null ? "null" : "(pos=" + mbb.position() +", limit=" + mbb.limit() +", capacity=" + mbb.capacity()+")") +

@@ -278,7 +278,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                 slotStateTracker.enterState(Stopped);
             }
         } catch (Throwable t) {
-            logger.error("Error in core motor loop:" + t);
+            logger.error("Error in core motor loop:" + t, t);
             throw t;
         }
     }
