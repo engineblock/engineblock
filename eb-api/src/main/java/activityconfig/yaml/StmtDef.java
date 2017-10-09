@@ -53,4 +53,9 @@ public class StmtDef implements Tagged {
         return block.getTags();
 
     }
+
+    @Override
+    public String toString() {
+        return "stmt(name:" + name + ", stmt:" + stmt + ", tags:(" + getTags() + "), params:(" + getParams() +"), bindings:(" + getBindings()+"))";
+    }
 }

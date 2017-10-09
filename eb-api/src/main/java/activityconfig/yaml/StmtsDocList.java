@@ -19,11 +19,13 @@ package activityconfig.yaml;
 
 import activityconfig.rawyaml.RawStmtsDocList;
 import io.engineblock.util.TagFilter;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class StmtsDocList {
+public class StmtsDocList implements Iterable<StmtsDoc> {
 
     private RawStmtsDocList rawStmtsDocList;
 
@@ -42,5 +44,25 @@ public class StmtsDocList {
         return rawStmtsDocList.getStmtsDocs().stream()
                 .map(StmtsDoc::new)
                 .collect(Collectors.toList());
+    }
+
+    public List<StmtDef> getStmts() {
+        return getStmts("");
+    }
+
+    public List<StmtDef> getStmts(String tagFilterSpec) {
+        TagFilter ts = new TagFilter(tagFilterSpec);
+
+        List<StmtDef> stmts = getStmtDocs().stream()
+                .flatMap(d -> d.getStmts().stream())
+                .filter(ts::matchesTagged)
+                .collect(Collectors.toList());
+        return stmts;
+    }
+
+    @NotNull
+    @Override
+    public Iterator<StmtsDoc> iterator() {
+        return getStmtDocs().iterator();
     }
 }

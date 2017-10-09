@@ -121,5 +121,9 @@ public class MultiMapLookup implements Map<String, String> {
         return new RuntimeException("This map is not meant to be mutable.");
     }
 
-
+    @Override
+    public String toString() {
+        return entrySet().stream().map(e -> (e.getKey() + ":" + e.getValue()))
+                .collect(Collectors.joining(","));
+    }
 }

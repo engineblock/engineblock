@@ -123,4 +123,12 @@ public class StmtsDocListTest {
         assertThat(stmts).hasSize(4);
     }
 
+    @Test
+    public void testFilteredStmts() {
+        List<StmtDef> stmts = doclist.getStmts("");
+        assertThat(stmts).hasSize(6);
+        stmts = doclist.getStmts("root1:value23");
+        assertThat(stmts).hasSize(2);
+    }
+
 }

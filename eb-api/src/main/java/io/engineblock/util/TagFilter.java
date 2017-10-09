@@ -49,8 +49,8 @@ import java.util.stream.Collectors;
  * set of filters.
  */
 public class TagFilter {
-    private Map<String, String> filter = new LinkedHashMap<>();
     public static TagFilter MATCH_ALL = new TagFilter("");
+    private Map<String, String> filter = new LinkedHashMap<>();
 
     /**
      * Create a new tag filter. A tag filter is comprised of zero or more tag names, each with an
@@ -93,9 +93,12 @@ public class TagFilter {
                 String[] keyvalue = assignment.split("[:=]", 2);
                 String key = keyvalue[0];
                 String value = keyvalue.length > 1 ? keyvalue[1] : null;
-                if (value != null
-                        && ((value.indexOf("\'") == 0) && ((value.indexOf("\'", 1) == (value.length() - 1))))) {
-                    value = value.substring(1, value.length() - 1);
+                if (value != null) {
+                    if ((value.indexOf("\'") == 0) && ((value.indexOf("\'", 1) == (value.length() - 1)))) {
+                        value = value.substring(1, value.length() - 1);
+                    } else {
+                        value = value.trim();
+                    }
                 }
                 filter.put(key, value);
             }
@@ -123,7 +126,7 @@ public class TagFilter {
             String detail = "filter(" + filterkey +
                     ((filterval != null) ? ":" + filterval : "") + ") " +
                     "tag(" + ((tags.containsKey(filterkey) ? filterkey : "") +
-                    (((tags.get(filterkey)!=null) ? ":" + tags.get(filterkey) : "")))
+                    (((tags.get(filterkey) != null) ? ":" + tags.get(filterkey) : "")))
                     + ")";
 
             if (filterval == null) {
