@@ -61,6 +61,8 @@ public class HistoIntervalLoggerTest {
         hil.onHistogramRemoved("histo1");
         moments.add(System.currentTimeMillis()); // 6
 
+        hil.closeMetrics();
+
         HistogramLogReader hlr = new HistogramLogReader(tempFile.getAbsolutePath());
         List<EncodableHistogram> histos = new ArrayList<>();
         EncodableHistogram histogram;
