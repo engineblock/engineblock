@@ -16,12 +16,11 @@
  */
 package io.engineblock.activityimpl.motor;
 
-import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.filters.IntPredicateDispenser;
-import io.engineblock.activityapi.output.Output;
-import io.engineblock.activityapi.output.OutputDispenser;
+import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.input.InputDispenser;
+import io.engineblock.activityapi.output.Output;
+import io.engineblock.activityapi.output.OutputDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 
 import java.util.function.IntPredicate;
@@ -36,18 +35,16 @@ public class CoreMotorDispenser implements MotorDispenser {
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
     private OutputDispenser markerDispenser;
-    private IntPredicateDispenser resultFilterDispenser;
 
     public CoreMotorDispenser(Activity activity,
                               InputDispenser inputDispenser,
                               ActionDispenser actionDispenser,
-                              OutputDispenser markerDispenser,
-                              IntPredicateDispenser resultFilterDispenser) {
+                              OutputDispenser markerDispenser
+                              ) {
         this.activity = activity;
         this.inputDispenser = inputDispenser;
         this.actionDispenser = actionDispenser;
         this.markerDispenser = markerDispenser;
-        this.resultFilterDispenser = resultFilterDispenser;
     }
 
     @Override
@@ -56,13 +53,10 @@ public class CoreMotorDispenser implements MotorDispenser {
         Input input = inputDispenser.getInput(slotId);
         Output output = null;
         if (markerDispenser!=null) {
-            output = markerDispenser.getMarker(slotId);
+            output = markerDispenser.getOutput(slotId);
         }
         IntPredicate resultFilter = null;
-        if (resultFilterDispenser!=null) {
-            resultFilter = resultFilterDispenser.getIntPredicate(slotId);
-        }
-        Motor am = new CoreMotor(activity.getActivityDef(), slotId, input, action, output, resultFilter);
+        Motor am = new CoreMotor(activity.getActivityDef(), slotId, input, action, output);
         return am;
     }
 }

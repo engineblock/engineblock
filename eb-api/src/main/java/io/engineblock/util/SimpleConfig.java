@@ -17,7 +17,7 @@
 
 package io.engineblock.util;
 
-import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.core.Activity;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -33,8 +33,8 @@ public class SimpleConfig {
         this.params = parseParams(configdata);
     }
 
-    public SimpleConfig(Activity activity, String input) {
-        this(activity.getParams().getOptionalString(input).orElse(""));
+    public SimpleConfig(Activity activity, String param) {
+        this(activity.getParams().getOptionalString(param).orElse(""));
     }
 
     private Map<String, String> parseParams(String configdata) {

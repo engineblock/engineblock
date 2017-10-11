@@ -3,7 +3,7 @@ package io.engineblock.activities.csv;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.engineblock.activities.csv.statements.*;
-import io.engineblock.activityapi.ActivityDefObserver;
+import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.activityimpl.SimpleActivity;

@@ -17,9 +17,9 @@
 
 package io.engineblock.activityimpl.marker;
 
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultSegmentBuffer;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.output.Output;
 import org.testng.annotations.Test;
 

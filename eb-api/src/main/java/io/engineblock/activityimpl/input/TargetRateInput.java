@@ -18,9 +18,9 @@ package io.engineblock.activityimpl.input;
 
 import com.codahale.metrics.Gauge;
 import com.google.common.util.concurrent.RateLimiter;
-import io.engineblock.activityapi.ActivityDefObserver;
-import io.engineblock.activityapi.input.ContiguousInput;
-import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.core.ActivityDefObserver;
+import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.input.RateLimiterProvider;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.ActivityMetrics;
@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * after the max value. They simply expose it to callers. It is up to the
  * caller to check the value to determine when the input is deemed "used up."</p>
  */
-public class TargetRateInput implements ContiguousInput, ActivityDefObserver, RateLimiterProvider {
+public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterProvider {
     private final static Logger logger = LoggerFactory.getLogger(TargetRateInput.class);
 
     private final AtomicLong cycleValue = new AtomicLong(0L);
@@ -134,4 +134,8 @@ public class TargetRateInput implements ContiguousInput, ActivityDefObserver, Ra
         return rateLimiter;
     }
 
+    @Override
+    public boolean isContiguous() {
+        return true;
+    }
 }

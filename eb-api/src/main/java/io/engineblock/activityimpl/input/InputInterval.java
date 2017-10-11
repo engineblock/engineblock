@@ -17,12 +17,12 @@
 
 package io.engineblock.activityimpl.input;
 
-import io.engineblock.activityapi.input.ContiguousInput;
-import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.input.Input;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class InputInterval implements ContiguousInput {
+public class InputInterval implements Input {
 
     private final long min;
     private final long nextMin;
@@ -73,6 +73,7 @@ public class InputInterval implements ContiguousInput {
             return -100;
         }
 
+
         @Override
         public boolean isExhausted() {
             return next >= afterEnd;
@@ -81,5 +82,10 @@ public class InputInterval implements ContiguousInput {
         public String toString() {
             return "InputInterval.Segment(" + start + "," + afterEnd + "]: next=" + next;
         }
+    }
+
+    @Override
+    public boolean isContiguous() {
+        return true;
     }
 }

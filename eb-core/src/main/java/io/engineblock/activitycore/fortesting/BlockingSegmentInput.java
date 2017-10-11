@@ -14,9 +14,9 @@
 */
 package io.engineblock.activitycore.fortesting;
 
-import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegment;
-import io.engineblock.activityapi.input.SegmentedInput;
-import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleArray;
+import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleArray;
+import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityimpl.input.InputInterval;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * for each value that is set from the controlling producer. This is just
  * for testing. The convenience notify methods are to make tests more obvious.
  */
-public class BlockingSegmentInput implements SegmentedInput {
+public class BlockingSegmentInput implements Input {
 
     private final AtomicLong cycle = new AtomicLong(0L);
     private final InputInterval inputInterval = new InputInterval(0,Long.MAX_VALUE);

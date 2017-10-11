@@ -15,8 +15,8 @@
 package io.engineblock.script;
 
 import com.codahale.metrics.*;
-import io.engineblock.activityapi.Activity;
-import io.engineblock.activityapi.ActivityType;
+import io.engineblock.activityapi.core.Activity;
+import io.engineblock.activityapi.core.ActivityType;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;

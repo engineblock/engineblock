@@ -18,7 +18,7 @@
 package io.engineblock;
 
 import com.codahale.metrics.MetricRegistry;
-import io.engineblock.activityapi.MetricRegistryService;
+import io.engineblock.activityapi.core.MetricRegistryService;
 
 /**
  * Provide a local MetricRegistryService for tests

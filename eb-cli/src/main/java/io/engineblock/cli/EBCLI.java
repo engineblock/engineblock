@@ -1,9 +1,9 @@
 package io.engineblock.cli;
 
-import io.engineblock.activityapi.ActivityType;
-import io.engineblock.activityapi.OutputType;
-import io.engineblock.activityapi.cycletracking.outputs.cyclelog.CycleLogDumperUtility;
-import io.engineblock.activityapi.cycletracking.outputs.cyclelog.CycleLogImporterUtility;
+import io.engineblock.activityapi.core.ActivityType;
+import io.engineblock.activityapi.output.OutputType;
+import io.engineblock.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
+import io.engineblock.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.engineblock.activityapi.input.InputType;
 import io.engineblock.core.MarkdownDocInfo;
 import io.engineblock.core.ScenarioLogger;

@@ -17,11 +17,10 @@
 
 package io.engineblock.activityimpl.marker;
 
-import io.engineblock.activityapi.Activity;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
-import io.engineblock.activityapi.input.ContiguousInput;
+import io.engineblock.activityapi.core.Activity;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsIntervalSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.output.Output;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +73,7 @@ public class ContiguousOutputChunker implements Output {
 
     public ContiguousOutputChunker(Activity activity) {
 
-        if (!(activity.getInputDispenserDelegate().getInput(0) instanceof ContiguousInput)) {
+        if (!(activity.getInputDispenserDelegate().getInput(0).isContiguous())) {
             throw new RuntimeException("This type of marker may not be used with non-contiguous inputs yet.");
             // If you are looking at this code, it's because we count updates to extents to provide
             // efficient marker extent handling. The ability to use segmented inputs with markers will
@@ -175,7 +174,7 @@ public class ContiguousOutputChunker implements Output {
     }
 
     private void onFullyFilled(ByteTrackerExtent extent) {
-        logger.debug("MARKER>: fully filled: " + extent);
+        logger.trace("MARKER>: fully filled: " + extent);
         for (Output reader : readers) {
             CycleResultsIntervalSegment remainingSegment = extent.getRemainingSegment();
             if (remainingSegment != null) {

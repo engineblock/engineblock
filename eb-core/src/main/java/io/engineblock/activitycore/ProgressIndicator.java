@@ -17,7 +17,7 @@
 
 package io.engineblock.activitycore;
 
-import io.engineblock.activityapi.ProgressMeter;
+import io.engineblock.activityapi.core.ProgressMeter;
 import io.engineblock.core.ScenarioController;
 import io.engineblock.metrics.IndicatorMode;
 import io.engineblock.metrics.PeriodicRunnable;

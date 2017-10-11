@@ -19,7 +19,7 @@ package io.engineblock.metrics;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.auto.service.AutoService;
-import io.engineblock.activityapi.MetricRegistryService;
+import io.engineblock.activityapi.core.MetricRegistryService;
 
 @AutoService(MetricRegistryService.class)
 public class MetricsContext implements MetricRegistryService {

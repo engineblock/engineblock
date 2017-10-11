@@ -18,13 +18,13 @@ package io.engineblock.activityimpl.motor;
 
 import com.codahale.metrics.Timer;
 import com.google.common.util.concurrent.RateLimiter;
-import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultSegmentBuffer;
-import io.engineblock.activityapi.output.Output;
+import io.engineblock.activityapi.core.*;
+import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.input.Input;
-import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegment;
 import io.engineblock.activityapi.input.RateLimiterProvider;
+import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
@@ -32,9 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.IntPredicate;
 
-import static io.engineblock.activityapi.RunState.*;
+import static io.engineblock.activityapi.core.RunState.*;
 
 /**
  * <p>ActivityMotor is a Runnable which runs in one of an activity's many threads.
@@ -56,7 +55,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private RateLimiter rateLimiter; // Only for use in phasing
     private int stride = 1;
     private Output output;
-    private IntPredicate outputPredicate;
 
     /**
      * Create an ActivityMotor.
@@ -110,13 +108,11 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             long slotId,
             Input input,
             Action action,
-            Output output,
-            IntPredicate resultFilter
+            Output output
     ) {
         this(activityDef, slotId, input);
         setAction(action);
         setResultOutput(output);
-        setResultFilter(resultFilter);
     }
 
     /**
@@ -327,7 +323,4 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         this.output = resultOutput;
     }
 
-    public void setResultFilter(IntPredicate resultFilter) {
-        this.outputPredicate = resultFilter;
-    }
 }

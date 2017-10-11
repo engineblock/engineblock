@@ -16,8 +16,8 @@
 package io.engineblock.activities.diag;
 
 import com.google.auto.service.AutoService;
-import io.engineblock.activityapi.ActionDispenser;
-import io.engineblock.activityapi.ActivityType;
+import io.engineblock.activityapi.core.ActionDispenser;
+import io.engineblock.activityapi.core.ActivityType;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

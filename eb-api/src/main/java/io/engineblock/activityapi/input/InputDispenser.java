@@ -31,5 +31,5 @@ public interface InputDispenser {
      * @param slot The numbered slot within the activity instance for this action.
      * @return A new or cached Input for the specified slot.
      */
-    public Input getInput(long slot);
+    Input getInput(long slot);
 }

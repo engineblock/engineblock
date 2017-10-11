@@ -17,7 +17,7 @@
 
 package io.engineblock.activityimpl;
 
-import io.engineblock.activityapi.RunState;
+import io.engineblock.activityapi.core.RunState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

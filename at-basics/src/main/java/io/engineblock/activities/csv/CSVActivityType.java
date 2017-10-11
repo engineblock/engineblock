@@ -1,8 +1,8 @@
 package io.engineblock.activities.csv;
 
 import com.google.auto.service.AutoService;
-import io.engineblock.activityapi.ActionDispenser;
-import io.engineblock.activityapi.ActivityType;
+import io.engineblock.activityapi.core.ActionDispenser;
+import io.engineblock.activityapi.core.ActivityType;
 import io.engineblock.activityimpl.ActivityDef;
 
 import java.util.Optional;

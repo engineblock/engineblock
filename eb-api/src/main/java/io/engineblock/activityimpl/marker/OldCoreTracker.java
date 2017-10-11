@@ -17,8 +17,8 @@
 
 package io.engineblock.activityimpl.marker;
 
-import io.engineblock.activityapi.cycletracking.buffers.CycleResultSegmentsReadable;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
+import io.engineblock.activityapi.cyclelog.buffers.CycleResultSegmentsReadable;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;

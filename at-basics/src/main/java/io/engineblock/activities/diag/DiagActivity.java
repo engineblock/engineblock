@@ -15,7 +15,7 @@
 package io.engineblock.activities.diag;
 
 import com.codahale.metrics.Histogram;
-import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.metrics.ActivityMetrics;

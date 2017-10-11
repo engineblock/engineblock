@@ -17,7 +17,7 @@
 
 package io.engineblock.activityapi.input;
 
-import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.core.Activity;
 import io.engineblock.util.Named;
 import io.engineblock.util.SimpleServiceLoader;
 

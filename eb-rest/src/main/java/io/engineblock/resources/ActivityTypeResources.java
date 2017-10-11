@@ -18,7 +18,7 @@
 package io.engineblock.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import io.engineblock.activityapi.ActivityType;
+import io.engineblock.activityapi.core.ActivityType;
 import io.engineblock.core.MarkdownDocInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

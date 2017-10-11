@@ -17,14 +17,8 @@
 
 package io.engineblock.activityapi.input;
 
-import io.engineblock.activityapi.cycletracking.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
 
-/**
- * The core input type, which is essentially an iterator pattern
- * over segment iterators. Input should not implement this interface
- * directly, but should implement one of either {@link SegmentedInput}
- * or {@link ContiguousInput}, but <em>not both.</em>
- */
 public interface Input {
 
     /**
@@ -35,6 +29,10 @@ public interface Input {
      * @return a segment, or null if none available.
      */
     CycleSegment getInputSegment(int segmentLength);
+
+    default boolean isContiguous() {
+        return false;
+    }
 }
 
 

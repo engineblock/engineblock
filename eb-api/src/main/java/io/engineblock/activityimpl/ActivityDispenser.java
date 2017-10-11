@@ -17,7 +17,7 @@
 
 package io.engineblock.activityimpl;
 
-import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.core.Activity;
 
 public interface ActivityDispenser {
     Activity getActivity(ActivityDef activityDef);

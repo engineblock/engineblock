@@ -1,7 +1,10 @@
 package io.engineblock.activityimpl;
 
-import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.cycletracking.filters.IntPredicateDispenser;
+import io.engineblock.activityapi.core.ActionDispenser;
+import io.engineblock.activityapi.core.Activity;
+import io.engineblock.activityapi.core.MotorDispenser;
+import io.engineblock.activityapi.core.RunState;
+import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.engineblock.activityapi.output.OutputDispenser;
 import io.engineblock.activityapi.input.InputDispenser;
 
@@ -81,7 +84,7 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
-    public void setMarkerDispenserDelegate(OutputDispenser markerDispenser) {
+    public void setOutputDispenserDelegate(OutputDispenser markerDispenser) {
         this.markerDispenser = markerDispenser;
     }
 

@@ -17,11 +17,12 @@
 
 package io.engineblock.activityimpl.marker;
 
-import io.engineblock.activityapi.cycletracking.buffers.CycleResultSegmentsReadable;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsIntervalSegment;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
+import io.engineblock.activityapi.cyclelog.buffers.CycleResultSegmentsReadable;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsIntervalSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -116,7 +117,7 @@ public class ByteTrackerExtent implements CycleResultSegmentsReadable {
         int current = totalServed.get();
         int next = totalMarked.get();
         if (next - current == 0) {
-             return null;
+            return null;
         }
         if (totalServed.compareAndSet(current, next)) {
             return CycleResultsIntervalSegment.forData(current + min, markerData, current, next);
@@ -154,12 +155,21 @@ public class ByteTrackerExtent implements CycleResultSegmentsReadable {
                 .append(", getCount=").append(this.size)
                 .append(", marked=").append(this.totalMarked.get())
                 .append(", served=").append(this.totalServed.get());
-        if (markerData.length < 1024 * 50) {
-            sb.append(" data=");
+        sb.append(" data=");
+        if (markerData.length < 100) {
             for (int i = 0; i < this.markerData.length; i++) {
                 sb.append(markerData[i]).append(",");
             }
-
+        } else {
+            byte[] front = Arrays.copyOfRange(markerData, 0, 50);
+            for (int i = 0; i < front.length; i++) {
+                sb.append(front[i]).append(",");
+            }
+            sb.append(" . . ., ");
+            byte[] back = Arrays.copyOfRange(markerData, 0, 50);
+            for (int i = 0; i < back.length; i++) {
+                sb.append(back[i]).append(",");
+            }
         }
         return sb.toString();
     }
@@ -241,13 +251,13 @@ public class ByteTrackerExtent implements CycleResultSegmentsReadable {
 
         @Override
         public boolean hasNext() {
-            return (markerData!=null);
+            return (markerData != null);
         }
 
         @Override
         public CycleResultsSegment next() {
             CycleResultsIntervalSegment cycleResults = CycleResultsIntervalSegment.forData(cycle, markerData);
-            markerData=null;
+            markerData = null;
             return cycleResults;
         }
     }

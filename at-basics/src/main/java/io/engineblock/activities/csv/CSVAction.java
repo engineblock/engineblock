@@ -3,7 +3,7 @@ package io.engineblock.activities.csv;
 import com.codahale.metrics.Timer;
 import io.engineblock.activities.csv.errorhandling.ErrorResponse;
 import io.engineblock.activities.csv.statements.ReadyCSVStatement;
-import io.engineblock.activityapi.Action;
+import io.engineblock.activityapi.core.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,6 +1,6 @@
 package io.engineblock.core;
 
-import io.engineblock.activityapi.*;
+import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.output.OutputDispenser;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.input.InputDispenser;
@@ -46,9 +46,9 @@ public class ActivityExecutorTest {
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
         OutputDispenser tdisp = CoreServices.getOutputDispenser(a).orElse(null);
-        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp,null);
+        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
         a.setActionDispenserDelegate(adisp);
-        a.setMarkerDispenserDelegate(tdisp);
+        a.setOutputDispenserDelegate(tdisp);
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
 
@@ -73,7 +73,7 @@ public class ActivityExecutorTest {
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
         OutputDispenser tdisp = CoreServices.getOutputDispenser(a).orElse(null);
-        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp, null);
+        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
         a.setActionDispenserDelegate(adisp);
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);

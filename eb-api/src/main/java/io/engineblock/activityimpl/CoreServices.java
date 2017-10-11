@@ -17,31 +17,54 @@
 
 package io.engineblock.activityimpl;
 
-import io.engineblock.activityapi.Activity;
-import io.engineblock.activityapi.OutputType;
-import io.engineblock.activityapi.cycletracking.filters.IntPredicateDispenser;
-import io.engineblock.activityapi.cycletracking.filters.ResultFilterType;
+import io.engineblock.activityapi.core.Activity;
+import io.engineblock.activityapi.cyclelog.buffers.results.ResultReadable;
+import io.engineblock.activityapi.cyclelog.filters.ExperimentalResultFilterType;
+import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
+import io.engineblock.activityapi.cyclelog.filters.ResultFilterDispenser;
+import io.engineblock.activityapi.cyclelog.filters.ResultValueFilterType;
 import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityapi.input.InputType;
 import io.engineblock.activityapi.output.OutputDispenser;
+import io.engineblock.activityapi.output.OutputType;
 import io.engineblock.util.SimpleConfig;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class CoreServices {
 
     public static <A extends Activity> Optional<OutputDispenser> getOutputDispenser(A activity) {
-        Optional<OutputDispenser> outputDispenser = new SimpleConfig(activity, "output").getString("type")
+        OutputDispenser outputDispenser = new SimpleConfig(activity, "output").getString("type")
                 .flatMap(OutputType.FINDER::get)
-                .map(mt -> mt.getMarkerDispenser(activity));
-        return outputDispenser;
+                .map(mt -> mt.getMarkerDispenser(activity)).orElse(null);
+        if (outputDispenser==null) {
+            return null;
+        }
+
+        Optional<Predicate<ResultReadable>> outputFilterDispenser = getOutputFilterDispenser(activity);
+        if (outputFilterDispenser.isPresent()) {
+            outputDispenser = new FilteringOutputDispenser(outputDispenser, outputFilterDispenser.get());
+        }
+
+        return Optional.ofNullable(outputDispenser);
     }
+
+    public static <A extends Activity> Optional<Predicate<ResultReadable>> getOutputFilterDispenser(A activity) {
+        String paramdata= activity.getParams().getOptionalString("of")
+                .orElse(activity.getParams().getOptionalString("outputfilter").orElse(null));
+        if (paramdata==null) {
+            return Optional.empty();
+        }
+        return getFilterPredicate(paramdata);
+    }
+
 
 
     public static <A extends Activity> Optional<IntPredicateDispenser> getResultFilterDispenser(A activity) {
         Optional<IntPredicateDispenser> intPredicateDispenser = new SimpleConfig(activity, "resultfilter")
                 .getString("type")
-                .flatMap(ResultFilterType.FINDER::get)
+                .flatMap(ExperimentalResultFilterType.FINDER::get)
                 .map(rft -> rft.getFilterDispenser(activity));
         return intPredicateDispenser;
     }
@@ -50,6 +73,29 @@ public class CoreServices {
         String inputTypeName = new SimpleConfig(activity, "input").getString("type").orElse("targetrate");
         InputType inputType = InputType.FINDER.getOrThrow(inputTypeName);
         InputDispenser dispenser = inputType.getInputDispenser(activity);
+        Optional<Predicate<ResultReadable>> inputFilterDispenser = getInputFilterDispenser(activity);
+        if (inputFilterDispenser.isPresent()) {
+            dispenser = new FilteringInputDispenser(dispenser, inputFilterDispenser.get());
+        }
         return dispenser;
     }
+
+    public static <A extends Activity> Optional<Predicate<ResultReadable>> getInputFilterDispenser(A activity) {
+        String paramdata= activity.getParams().getOptionalString("if")
+                .orElse(activity.getParams().getOptionalString("inputfilter").orElse(null));
+        if (paramdata==null) {
+            return Optional.empty();
+        }
+        return getFilterPredicate(paramdata);
+    }
+
+    private static Optional<Predicate<ResultReadable>> getFilterPredicate(String paramdata) {
+        String type = new SimpleConfig(paramdata).getString("type").orElse("core");
+        Optional<ResultValueFilterType> cycleResultFilterType = ResultValueFilterType.FINDER.get(type);
+        Optional<ResultFilterDispenser> crfd = cycleResultFilterType.map(crft -> crft.getDispenser(paramdata));
+        Optional<Predicate<ResultReadable>> predicate = crfd.map(ResultFilterDispenser::getResultFilter);
+        return predicate;
+
+    }
+
 }

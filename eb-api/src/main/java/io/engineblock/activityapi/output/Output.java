@@ -17,8 +17,8 @@
 
 package io.engineblock.activityapi.output;
 
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 
 /**
  * A cycle marker is simply a type that knows how to do something

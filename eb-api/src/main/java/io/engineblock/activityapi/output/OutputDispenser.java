@@ -20,5 +20,5 @@ package io.engineblock.activityapi.output;
 import io.engineblock.activityapi.output.Output;
 
 public interface OutputDispenser {
-    Output getMarker(long slot);
+    Output getOutput(long slot);
 }

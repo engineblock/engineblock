@@ -18,7 +18,7 @@
 package io.engineblock.metrics;
 
 import com.codahale.metrics.*;
-import io.engineblock.activityapi.MetricRegistryService;
+import io.engineblock.activityapi.core.MetricRegistryService;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.util.Unit;
 import org.HdrHistogram.Recorder;

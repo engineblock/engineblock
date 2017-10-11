@@ -27,7 +27,7 @@ import java.util.Objects;
 public class RuntimeCheck {
     public static void sanityCheck() {
         try {
-            Class<?> activityTypeClass = Class.forName("io.engineblock.activityapi.ActivityType");
+            Class<?> activityTypeClass = Class.forName("io.engineblock.activityapi.core.ActivityType");
             Objects.requireNonNull(activityTypeClass);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();

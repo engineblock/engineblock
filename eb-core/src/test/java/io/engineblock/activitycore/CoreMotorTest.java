@@ -1,8 +1,8 @@
 package io.engineblock.activitycore;
 
-import io.engineblock.activityapi.Action;
-import io.engineblock.activityapi.Motor;
-import io.engineblock.activityapi.RunState;
+import io.engineblock.activityapi.core.Action;
+import io.engineblock.activityapi.core.Motor;
+import io.engineblock.activityapi.core.RunState;
 import io.engineblock.activitycore.fortesting.BlockingSegmentInput;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.motor.CoreMotor;

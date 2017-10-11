@@ -17,8 +17,8 @@
 
 package io.engineblock.activityimpl.marker;
 
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResult;
-import io.engineblock.activityapi.cycletracking.buffers.results.CycleResultsSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;

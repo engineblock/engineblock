@@ -1,7 +1,7 @@
 package io.engineblock.activities.csv;
 
-import io.engineblock.activityapi.Action;
-import io.engineblock.activityapi.ActionDispenser;
+import io.engineblock.activityapi.core.Action;
+import io.engineblock.activityapi.core.ActionDispenser;
 
 public class CSVActionDispenser implements ActionDispenser {
 

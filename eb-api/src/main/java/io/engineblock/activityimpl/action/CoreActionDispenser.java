@@ -16,9 +16,9 @@
  */
 package io.engineblock.activityimpl.action;
 
-import io.engineblock.activityapi.Action;
-import io.engineblock.activityapi.ActionDispenser;
-import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.core.Action;
+import io.engineblock.activityapi.core.ActionDispenser;
+import io.engineblock.activityapi.core.Activity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

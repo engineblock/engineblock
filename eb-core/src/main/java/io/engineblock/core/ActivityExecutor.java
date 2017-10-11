@@ -14,8 +14,7 @@
 */
 package io.engineblock.core;
 
-import io.engineblock.activityapi.*;
-import io.engineblock.activityapi.ProgressMeter;
+import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;

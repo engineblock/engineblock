@@ -17,8 +17,8 @@
 
 package io.engineblock.activityimpl.input;
 
-import io.engineblock.activityapi.ActivitiesAware;
-import io.engineblock.activityapi.Activity;
+import io.engineblock.activityapi.core.ActivitiesAware;
+import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityapi.input.InputType;
