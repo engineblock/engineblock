@@ -39,7 +39,7 @@ public class CoreServices {
                 .flatMap(OutputType.FINDER::get)
                 .map(mt -> mt.getMarkerDispenser(activity)).orElse(null);
         if (outputDispenser==null) {
-            return null;
+            return Optional.empty();
         }
 
         Optional<Predicate<ResultReadable>> outputFilterDispenser = getOutputFilterDispenser(activity);
