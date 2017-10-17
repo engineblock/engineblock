@@ -7,5 +7,6 @@
 **/*.log
 **/logs
 **/*.csv
+**/*.*log
 metrics/**
 bin/**
