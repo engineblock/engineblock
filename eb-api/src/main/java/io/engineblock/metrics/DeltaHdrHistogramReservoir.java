@@ -30,43 +30,26 @@ import org.slf4j.LoggerFactory;
  * since it was most recently asked for with the getDeltaSnapshot(...) method.
  * This provides local snapshot timing, but with a consistent view for reporting channels about what those snapshots
  * most recently looked like.
- *
- * <p>This implementation also supports attaching a single log writer. If a log writer is attached, each
- * time an interval is snapshotted internally, the data will also be written to an hdr log via the writer.</p>
- *
  */
 public final class DeltaHdrHistogramReservoir implements Reservoir {
     private final static Logger logger = LoggerFactory.getLogger(DeltaHdrHistogramReservoir.class);
 
     private final Recorder recorder;
     private Histogram lastHistogram;
-    private int signifantDigits;
 
     private Histogram intervalHistogram;
     private long intervalHistogramEndTime = System.currentTimeMillis();
-    private String metricName;
-    private HistogramLogWriter writer;
+    private final String metricName;
 
     /**
      * Create a reservoir with a default recorder. This recorder should be suitable for most usage.
      *
      * @param name the name to give to the reservoir, for logging purposes
-     * @param signifantDigits how many significant digits to track in the reservoir
+     * @param significantDigits how many significant digits to track in the reservoir
      */
-    public DeltaHdrHistogramReservoir(String name, int signifantDigits) {
-        this(name, new Recorder(signifantDigits));
-        this.signifantDigits = signifantDigits;
-    }
-
-    /**
-     * Create a reservoir with a user-specified recorder.
-     *
-     * @param name the name to give to the reservoir for logging purposes
-     * @param recorder Recorder to use
-     */
-    public DeltaHdrHistogramReservoir(String name, Recorder recorder) {
+    public DeltaHdrHistogramReservoir(String name, int significantDigits) {
         this.metricName = name;
-        this.recorder = recorder;
+        this.recorder = new Recorder(significantDigits);
 
         /*
          * Start by flipping the recorder's interval histogram.
@@ -96,8 +79,7 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
     @Override
     public Snapshot getSnapshot() {
         lastHistogram = getNextHdrHistogram();
-        DeltaHistogramSnapshot snapshot = new DeltaHistogramSnapshot(lastHistogram);
-        return snapshot;
+        return new DeltaHistogramSnapshot(lastHistogram);
     }
 
     public Histogram getNextHdrHistogram() {
@@ -127,9 +109,6 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
         lastHistogram = intervalHistogram.copy();
         lastHistogram.setTag(metricName);
 
-        if (writer!=null) {
-            writer.outputIntervalHistogram(lastHistogram);
-        }
         return lastHistogram;
     }
 
@@ -142,14 +121,6 @@ public final class DeltaHdrHistogramReservoir implements Reservoir {
     }
 
     public DeltaHdrHistogramReservoir copySettings() {
-        return new DeltaHdrHistogramReservoir(this.metricName, new Recorder(signifantDigits));
-    }
-
-    public void attachLogWriter(HistogramLogWriter logWriter) {
-        this.writer = logWriter;
-    }
-
-    public Histogram getLastHistogram() {
-        return lastHistogram;
+        return new DeltaHdrHistogramReservoir(this.metricName, intervalHistogram.getNumberOfSignificantValueDigits());
     }
 }
