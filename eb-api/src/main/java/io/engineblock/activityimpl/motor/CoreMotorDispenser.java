@@ -34,17 +34,17 @@ public class CoreMotorDispenser implements MotorDispenser {
     private final Activity activity;
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
-    private OutputDispenser markerDispenser;
+    private OutputDispenser outputDispenser;
 
     public CoreMotorDispenser(Activity activity,
                               InputDispenser inputDispenser,
                               ActionDispenser actionDispenser,
-                              OutputDispenser markerDispenser
+                              OutputDispenser outputDispenser
                               ) {
         this.activity = activity;
         this.inputDispenser = inputDispenser;
         this.actionDispenser = actionDispenser;
-        this.markerDispenser = markerDispenser;
+        this.outputDispenser = outputDispenser;
     }
 
     @Override
@@ -52,8 +52,8 @@ public class CoreMotorDispenser implements MotorDispenser {
         Action action = actionDispenser.getAction(slotId);
         Input input = inputDispenser.getInput(slotId);
         Output output = null;
-        if (markerDispenser!=null) {
-            output = markerDispenser.getOutput(slotId);
+        if (outputDispenser !=null) {
+            output = outputDispenser.getOutput(slotId);
         }
         IntPredicate resultFilter = null;
         Motor am = new CoreMotor(activity.getActivityDef(), slotId, input, action, output);

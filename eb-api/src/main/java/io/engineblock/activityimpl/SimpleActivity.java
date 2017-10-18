@@ -84,8 +84,8 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
-    public void setOutputDispenserDelegate(OutputDispenser markerDispenser) {
-        this.markerDispenser = markerDispenser;
+    public void setOutputDispenserDelegate(OutputDispenser outputDispenser) {
+        this.markerDispenser = outputDispenser;
     }
 
     @Override

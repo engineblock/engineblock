@@ -34,7 +34,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * This is the default cycle marker implementation for EngineBlock.
+ * This is the default cycle output implementation for EngineBlock when
+ * the input cycles are known to be contiguous.
  * <p>
  * This cycle marker wraps another tracking structure in order to
  * allow for flexible buffering methods. The extents are buffer segments
@@ -74,7 +75,7 @@ public class ContiguousOutputChunker implements Output {
     public ContiguousOutputChunker(Activity activity) {
 
         if (!(activity.getInputDispenserDelegate().getInput(0).isContiguous())) {
-            throw new RuntimeException("This type of marker may not be used with non-contiguous inputs yet.");
+            throw new RuntimeException("This type of output may not be used with non-contiguous inputs yet.");
             // If you are looking at this code, it's because we count updates to extents to provide
             // efficient marker extent handling. The ability to use segmented inputs with markers will
             // come in a future append.

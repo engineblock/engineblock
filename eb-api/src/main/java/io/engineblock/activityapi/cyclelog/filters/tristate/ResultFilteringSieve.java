@@ -50,7 +50,7 @@ public class ResultFilteringSieve implements TristateFilter<ResultReadable> {
         return new ExclusiveFilterPredicate(this);
     }
 
-    public Predicate<ResultReadable> toPredicate(Policy defaultPolicy) {
+    public Predicate<ResultReadable> toDefaultingPredicate(Policy defaultPolicy) {
         if (defaultPolicy==Policy.Discard) return toExclusivePredicate();
         return toInclusivePredicate();
     }

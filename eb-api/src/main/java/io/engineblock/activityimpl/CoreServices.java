@@ -19,8 +19,6 @@ package io.engineblock.activityimpl;
 
 import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.cyclelog.buffers.results.ResultReadable;
-import io.engineblock.activityapi.cyclelog.filters.ExperimentalResultFilterType;
-import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.engineblock.activityapi.cyclelog.filters.ResultFilterDispenser;
 import io.engineblock.activityapi.cyclelog.filters.ResultValueFilterType;
 import io.engineblock.activityapi.input.InputDispenser;
@@ -42,7 +40,7 @@ public class CoreServices {
             return Optional.empty();
         }
 
-        Optional<Predicate<ResultReadable>> outputFilterDispenser = getOutputFilterDispenser(activity);
+        Optional<Predicate<ResultReadable>> outputFilterDispenser = getOutputFilter(activity);
         if (outputFilterDispenser.isPresent()) {
             outputDispenser = new FilteringOutputDispenser(outputDispenser, outputFilterDispenser.get());
         }
@@ -50,7 +48,7 @@ public class CoreServices {
         return Optional.ofNullable(outputDispenser);
     }
 
-    public static <A extends Activity> Optional<Predicate<ResultReadable>> getOutputFilterDispenser(A activity) {
+    public static <A extends Activity> Optional<Predicate<ResultReadable>> getOutputFilter(A activity) {
         String paramdata= activity.getParams().getOptionalString("of")
                 .orElse(activity.getParams().getOptionalString("outputfilter").orElse(null));
         if (paramdata==null) {
@@ -59,28 +57,26 @@ public class CoreServices {
         return getFilterPredicate(paramdata);
     }
 
-
-
-    public static <A extends Activity> Optional<IntPredicateDispenser> getResultFilterDispenser(A activity) {
-        Optional<IntPredicateDispenser> intPredicateDispenser = new SimpleConfig(activity, "resultfilter")
-                .getString("type")
-                .flatMap(ExperimentalResultFilterType.FINDER::get)
-                .map(rft -> rft.getFilterDispenser(activity));
-        return intPredicateDispenser;
-    }
-
+//    public static <A extends Activity> Optional<IntPredicateDispenser> getResultFilterDispenser(A activity) {
+//        Optional<IntPredicateDispenser> intPredicateDispenser = new SimpleConfig(activity, "resultfilter")
+//                .getString("type")
+//                .flatMap(ExperimentalResultFilterType.FINDER::get)
+//                .map(rft -> rft.getFilterDispenser(activity));
+//        return intPredicateDispenser;
+//    }
+//
     public static <A extends Activity> InputDispenser getInputDispenser(A activity) {
         String inputTypeName = new SimpleConfig(activity, "input").getString("type").orElse("targetrate");
         InputType inputType = InputType.FINDER.getOrThrow(inputTypeName);
         InputDispenser dispenser = inputType.getInputDispenser(activity);
-        Optional<Predicate<ResultReadable>> inputFilterDispenser = getInputFilterDispenser(activity);
+        Optional<Predicate<ResultReadable>> inputFilterDispenser = getInputFilter(activity);
         if (inputFilterDispenser.isPresent()) {
             dispenser = new FilteringInputDispenser(dispenser, inputFilterDispenser.get());
         }
         return dispenser;
     }
 
-    public static <A extends Activity> Optional<Predicate<ResultReadable>> getInputFilterDispenser(A activity) {
+    public static <A extends Activity> Optional<Predicate<ResultReadable>> getInputFilter(A activity) {
         String paramdata= activity.getParams().getOptionalString("if")
                 .orElse(activity.getParams().getOptionalString("inputfilter").orElse(null));
         if (paramdata==null) {

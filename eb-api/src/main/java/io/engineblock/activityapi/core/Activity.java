@@ -60,7 +60,7 @@ public interface Activity extends Comparable<Activity> {
 
     OutputDispenser getMarkerDispenserDelegate();
 
-    void setOutputDispenserDelegate(OutputDispenser markerDispenser);
+    void setOutputDispenserDelegate(OutputDispenser outputDispenser);
 
     ActivityDef getActivityDef();
 

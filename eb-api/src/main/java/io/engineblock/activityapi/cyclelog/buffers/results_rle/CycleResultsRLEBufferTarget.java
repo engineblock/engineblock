@@ -108,7 +108,8 @@ public class CycleResultsRLEBufferTarget implements Output,CanFilterResultValue 
      */
     @Override
     public boolean onCycleResult(long cycle, int result) {
-        if (filter!=null && !filter.test(new ResultReadableWrapper(result))) {
+        ResultReadableWrapper resultReadableWrapper = new ResultReadableWrapper(result);
+        if (filter!=null && !filter.test(resultReadableWrapper)) {
             return true;
         }
         if (cycle != lastCycle + 1 || lastResult != result) {
@@ -145,7 +146,7 @@ public class CycleResultsRLEBufferTarget implements Output,CanFilterResultValue 
 
     private static class ResultReadableWrapper implements ResultReadable {
         private int result;
-        public ResultReadableWrapper(int result) {
+        ResultReadableWrapper(int result) {
             this.result = result;
         }
         public int getResult() { return result; }
@@ -189,7 +190,6 @@ public class CycleResultsRLEBufferTarget implements Output,CanFilterResultValue 
     public boolean onCycleResult(CycleResult cycleResult) {
         return this.onCycleResult(cycleResult.getCycle(),cycleResult.getResult());
     }
-
 
     @Override
     public void setFilter(Predicate<ResultReadable> filter) {

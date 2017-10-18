@@ -27,7 +27,7 @@ public class EBCLIOptions {
     private static final String METRICS = "--list-metrics";
     private static final String ACTIVITY_TYPES = "--list-activity-types";
     private static final String WANTS_INPUT_TYPES = "--list-input-types";
-    private static final String WANTS_MARKER_TYPES = "--list-marker-types";
+    private static final String WANTS_OUTPUT_TYPES = "--list-output-types";
     private static final String WANTS_VERSION_LONG = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
     private static final String LOG_HISTO = "--log-histograms";
@@ -225,7 +225,7 @@ public class EBCLIOptions {
                     arglist.removeFirst();
                     wantsInputTypes = true;
                     break;
-                case WANTS_MARKER_TYPES:
+                case WANTS_OUTPUT_TYPES:
                     arglist.removeFirst();
                     wantsMarkerTypes = true;
                     break;

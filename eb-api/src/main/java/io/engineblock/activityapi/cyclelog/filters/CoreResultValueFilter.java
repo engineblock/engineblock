@@ -59,7 +59,7 @@ public class CoreResultValueFilter implements ResultValueFilterType {
             ResultFilteringSieve.Builder builder = new ResultFilteringSieve.Builder();
             includesAndExcludes.forEach(s -> mapPredicate(s,builder));
             ResultFilteringSieve sieve = builder.build();
-            predicate = sieve.toPredicate(getDefaultFromHead(includesAndExcludes.get(0)));
+            predicate = sieve.toDefaultingPredicate(getDefaultFromHead(includesAndExcludes.get(0)));
         }
 
         @Override

@@ -40,7 +40,7 @@ import java.util.function.Predicate;
 /**
  * A {@link Output} that writes cycles and results to an RLE-based file format.
  *
- * This marker creates a file on disk and appends one or more (long,long,byte)
+ * This output creates a file on disk and appends one or more (long,long,byte)
  * tuples to it as buffering extents are filled. This tuple format represents
  * the closed-open interval of cycles and the result associated with them.
  * The file is expected to contain only cycle ranges in order.

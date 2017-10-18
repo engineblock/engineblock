@@ -18,6 +18,7 @@
 package io.engineblock.activityapi.cyclelog.filters.tristate;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * A tri-state filter allows for flexible configuration of
@@ -39,10 +40,21 @@ import java.util.function.Function;
  *     <li>Use both "keep" and "discard" predicates together in sequence.</li>
  * </ul>
  *
- * The two techniques above are not mutually exclusive. In practice a tri-state
- * filter will already include a default override for cases in which no
- * predicate matched an element. These are known as "inclusive" or "exclusive"
- * with respect to their default policy.
+ * The two techniques above are not mutually exclusive. In practice, tri-state
+ * filters are used to build up chains of filters which can delegate down
+ * the chain if up-stream filters do not have enough information to make
+ * a keep or discard determination. Even in chained filters will have a
+ * default policy that will override the "ignore" outcome.
+ *
+ * Filter chains that
+ * have a default "exclude" policy that overrides "ignore" policies are
+ * called "exclusive" filters. Their counterparts are "inclusive" filters.
+ * In other words, Exclusive tri-state filters include an element if and only
+ * if there was a matching include rule before any matching exclude rules
+ * or the end of the filter chain.
+ * Inclusive tri-state filters exclude an element if and only if there was
+ * a matching exclude rule before any matching include rules or the end of
+ * the filter chain.
  */
 public interface TristateFilter<T> extends Function<T, TristateFilter.Policy> {
 
@@ -50,8 +62,6 @@ public interface TristateFilter<T> extends Function<T, TristateFilter.Policy> {
     Policy apply(T cycleResult);
 
     /**
-     * If the predicate for this filter matches, then the action associated
-     * with it will
      * The filter action determines what action is taken for a given
      * element that matches the predicate. If the whether to include or exclude a result
      * of the filter matching. If the filter does not match, then neither
@@ -62,5 +72,60 @@ public interface TristateFilter<T> extends Function<T, TristateFilter.Policy> {
         Discard,
         Ignore
     }
+
+    /**
+     * Create a predicate that will override any Ignore outcomes with the provided policy.
+     * @param defaultPolicy The policy that will override non-actionable outcomes
+     * @return a Predicate that can be used to filter elements
+     */
+    default Predicate<T> toDefaultingPredicate(Policy defaultPolicy) {
+        return new DefaultingPredicate<>(this,defaultPolicy);
+    }
+
+    class DefaultingPredicate<T> implements Predicate<T> {
+        private final TristateFilter<T> filter;
+        private final Policy defaultPolicy;
+
+        public DefaultingPredicate(TristateFilter<T> filter, Policy defaultPolicy) {
+            this.filter = filter;
+            this.defaultPolicy = defaultPolicy;
+        }
+
+        @Override
+        public boolean test(T t) {
+            Policy policyResult = filter.apply(t);
+            if (policyResult==Policy.Ignore) {
+                policyResult= defaultPolicy;
+            }
+            return policyResult==Policy.Keep;
+        }
+    }
+
+
+    /**
+     * Create a predicate that will return true if and only if the filter
+     * outcome matches the provided policy.
+     * @param matchingPolicy The policy that will signal true in the predicate.
+     * @return a Predicate that can be used to filter elements
+     */
+    default Predicate<T> toMatchingPredicate(Policy matchingPolicy) {
+        return new MatchingPredicate<>(this,matchingPolicy);
+    }
+
+    class MatchingPredicate<T> implements Predicate<T> {
+        private final TristateFilter<T> filter;
+        private final Policy matchOn;
+
+        public MatchingPredicate(TristateFilter<T> filter, Policy matchOn) {
+            this.filter = filter;
+            this.matchOn = matchOn;
+        }
+
+        @Override
+        public boolean test(T t) {
+            return filter.apply(t)==matchOn;
+        }
+    }
+
 
 }
