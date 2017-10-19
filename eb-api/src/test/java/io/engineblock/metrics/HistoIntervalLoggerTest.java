@@ -42,7 +42,7 @@ public class HistoIntervalLoggerTest {
         HistoIntervalLogger hil = new HistoIntervalLogger("loggertest", tempFile, Pattern.compile(".*"), 1000);
 
         NicerHistogram nicerHistogram = new NicerHistogram(
-                "histo1", new DeltaHdrHistogramReservoir("histo1", 4));
+                "histo1", new DeltaHdrHistogramReservoir("histo1", new Recorder(4)));
 
         hil.onHistogramAdded("histo1",nicerHistogram);
 
@@ -60,8 +60,6 @@ public class HistoIntervalLoggerTest {
         moments.add(System.currentTimeMillis()); // 5
         hil.onHistogramRemoved("histo1");
         moments.add(System.currentTimeMillis()); // 6
-
-        hil.closeMetrics();
 
         HistogramLogReader hlr = new HistogramLogReader(tempFile.getAbsolutePath());
         List<EncodableHistogram> histos = new ArrayList<>();

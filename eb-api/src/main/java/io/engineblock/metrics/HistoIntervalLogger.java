@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
@@ -42,7 +41,6 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
     //    private final long intervalMillis;
     private long intervalLength;
     private File logfile;
-    private PrintStream logStream;
     private HistogramLogWriter writer;
     private Pattern pattern;
 
@@ -70,8 +68,7 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
      */
     public void startLogging() {
         try {
-            logStream = new PrintStream(logfile);
-            writer = new HistogramLogWriter(logStream);
+            writer = new HistogramLogWriter(logfile);
             writer.outputComment("logging histograms for session " + sessionName);
             writer.outputLogFormatVersion();
             long currentTimeMillis = System.currentTimeMillis();
@@ -123,7 +120,6 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
 
     @Override
     public void closeMetrics() {
-        executor.close();
         long potentialWriteTime = System.currentTimeMillis();
         if (lastRunTime +1000 < potentialWriteTime) {
             logger.debug("Writing last partial histo log:" + this);
@@ -131,7 +127,6 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
         } else {
             logger.debug("Not writing last partial histo log <1s:" + this);
         }
-        logStream.close();
     }
 
     private static class WriterTarget implements Comparable<WriterTarget> {

@@ -17,20 +17,18 @@
 
 package io.engineblock.metrics;
 
-import com.google.common.util.concurrent.Uninterruptibles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This is a simple and light way to run a periodic task run
  */
-public class PeriodicRunnable<T extends Runnable> implements Runnable, AutoCloseable {
+public class PeriodicRunnable<T extends Runnable> implements Runnable {
     private static Logger logger = LoggerFactory.getLogger(PeriodicRunnable.class);
 
     private long intervalMillis;
     private T action;
     private Thread thread;
-    private volatile boolean running = false;
 
     public PeriodicRunnable(long intervalMillis, T action) {
         this.action = action;
@@ -45,14 +43,7 @@ public class PeriodicRunnable<T extends Runnable> implements Runnable, AutoClose
         return this;
     }
 
-    @Override
-    public synchronized void close()
-    {
-        running = false;
-        Uninterruptibles.joinUninterruptibly(thread);
-    }
-
-    public synchronized PeriodicRunnable<T> startMainThread() {
+    public synchronized  PeriodicRunnable<T> startMainThread() {
         thread = new Thread(this);
         thread.setName(action.toString());
         thread.start();
@@ -65,9 +56,8 @@ public class PeriodicRunnable<T extends Runnable> implements Runnable, AutoClose
 
     @Override
     public void run() {
-        running = true;
         long nextEventTime = System.currentTimeMillis() + intervalMillis;
-        while (running) {
+        while (true) {
             nextEventTime = awaitTime(intervalMillis, nextEventTime);
             logger.trace("invoking interval runnable " + action);
             action.run();
