@@ -39,6 +39,8 @@ public class FilteringOutputDispenser implements OutputDispenser {
         Output output = outputDispenser.getOutput(slot);
         if (output instanceof CanFilterResultValue) {
             ((CanFilterResultValue)output).setFilter(resultReadablePredicate);
+        } else {
+            throw new RuntimeException("Unable to set result filterPredicate on output '" + output + ", filterPredicate '" + resultReadablePredicate + "'");
         }
         return output;
     }

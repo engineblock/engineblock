@@ -26,6 +26,6 @@ public interface OutputType extends Named {
     public static SimpleServiceLoader<OutputType> FINDER =
             new SimpleServiceLoader<>(OutputType.class);
 
-    OutputDispenser getMarkerDispenser(Activity activity);
+    OutputDispenser getOutputDispenser(Activity activity);
 
 }

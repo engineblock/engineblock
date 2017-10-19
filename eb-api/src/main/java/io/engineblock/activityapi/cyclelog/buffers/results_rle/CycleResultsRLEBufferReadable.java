@@ -38,6 +38,8 @@ public class CycleResultsRLEBufferReadable implements CycleResultSegmentsReadabl
 
     public final static int BYTES = Long.BYTES + Long.BYTES + Byte.BYTES;
     private final ByteBuffer buf;
+//    private long count = Long.MIN_VALUE;
+//    private long min = Long.MAX_VALUE;
 
     public CycleResultsRLEBufferReadable(ByteBuffer buf) {
         this.buf = buf;
@@ -55,6 +57,24 @@ public class CycleResultsRLEBufferReadable implements CycleResultSegmentsReadabl
         return new ResultSpanIterator(buf,filter);
     }
 
+//    public long getMin() {
+//        if (min==Long.MAX_VALUE) {
+//            long min=Long.MAX_VALUE;
+//            Optional<CycleResultsSegment> minSeg = StreamSupport.stream(spliterator(), false).min(CycleResultsSegment::compareTo);
+//            min=minSeg.map(CycleResultsSegment::getMinCycle).orElse(Long.MAX_VALUE);
+//        }
+//        return min;
+//    }
+//
+//    public long getCount() {
+//        if (count<=0) {
+//            LongAccumulator acc = new LongAccumulator((l1,l2)->l1+l2,0);
+//            iterator().forEachRemaining(crs -> acc.accumulate(crs.getCount()));
+//            count = acc.get();
+//        }
+//        return count;
+//    }
+//
     @NotNull
     @Override
     public Iterator<CycleResultsSegment> iterator() {

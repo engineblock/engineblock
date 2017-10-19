@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
  * Compact encoding of a result that doesn't change over a range of one or more cycles.
  */
 import java.util.Iterator;
+import java.util.function.Predicate;
 
 public class CycleSpanResults implements CycleResultsSegment, ResultReadable {
 
@@ -58,6 +59,15 @@ public class CycleSpanResults implements CycleResultsSegment, ResultReadable {
 
     public String toString() {
         return "[" + min + "," + nextMin + ")->" + result;
+    }
+
+    @Override
+    public CycleResultsSegment filter(Predicate<ResultReadable> filter) {
+        if (filter.test(this)) {
+            return this;
+        } else {
+            return CycleResultsSegment.EMPTY;
+        }
     }
 
     @NotNull

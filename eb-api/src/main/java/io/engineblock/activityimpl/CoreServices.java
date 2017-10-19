@@ -35,7 +35,7 @@ public class CoreServices {
     public static <A extends Activity> Optional<OutputDispenser> getOutputDispenser(A activity) {
         OutputDispenser outputDispenser = new SimpleConfig(activity, "output").getString("type")
                 .flatMap(OutputType.FINDER::get)
-                .map(mt -> mt.getMarkerDispenser(activity)).orElse(null);
+                .map(mt -> mt.getOutputDispenser(activity)).orElse(null);
         if (outputDispenser==null) {
             return Optional.empty();
         }

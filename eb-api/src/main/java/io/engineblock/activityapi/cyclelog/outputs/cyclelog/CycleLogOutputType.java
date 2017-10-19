@@ -19,12 +19,11 @@ package io.engineblock.activityapi.cyclelog.outputs.cyclelog;
 
 import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.core.Activity;
-import io.engineblock.activityapi.output.OutputType;
 import io.engineblock.activityapi.cyclelog.outputs.ReorderingConcurrentResultBuffer;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityapi.output.OutputDispenser;
-import io.engineblock.activityimpl.marker.ContiguousOutputChunker;
+import io.engineblock.activityapi.output.OutputType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ public class CycleLogOutputType implements OutputType {
     }
 
     @Override
-    public OutputDispenser getMarkerDispenser(Activity activity) {
+    public OutputDispenser getOutputDispenser(Activity activity) {
         return new Dispenser(activity);
     }
 
@@ -51,18 +50,20 @@ public class CycleLogOutputType implements OutputType {
             this.activity = activity;
             Input input = activity.getInputDispenserDelegate().getInput(0);
             CycleLogOutput rleFileWriter = new CycleLogOutput(activity);
-            if (input.isContiguous()) {
-                logger.debug("pre-buffering output extents contiguously before RLE buffering");
-                ContiguousOutputChunker contiguousOutputChunker = new ContiguousOutputChunker(activity);
-                contiguousOutputChunker.addExtentReader(rleFileWriter);
-                this.output = contiguousOutputChunker;
-            }
-            else {
-                logger.debug("pre-buffering output extends with best-effort before RLE buffering");
+
+            // TODO: Rework this so that the contiguous marking chunker can handle filtering
+//            if (input.isContiguous()) {
+//                logger.debug("pre-buffering output extents contiguously before RLE buffering");
+//                ContiguousOutputChunker contiguousOutputChunker = new ContiguousOutputChunker(activity);
+//                contiguousOutputChunker.addExtentReader(rleFileWriter);
+//                this.output = contiguousOutputChunker;
+//            }
+//            else {
+                logger.debug("pre-buffering output extents with best-effort before RLE buffering");
                 ReorderingConcurrentResultBuffer prebuffer =
-                        new ReorderingConcurrentResultBuffer(rleFileWriter,1000);
+                        new ReorderingConcurrentResultBuffer(rleFileWriter);
                 this.output=prebuffer;
-            }
+//            }
             activity.registerAutoCloseable(output);
         }
 

@@ -21,6 +21,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+import java.util.function.Predicate;
+import java.util.stream.StreamSupport;
 
 /**
  * Implements a cycle result segment in a basic buffer
@@ -71,6 +73,13 @@ public class CycleResultsSegmentReadable implements CycleResultsSegment {
             return buf.getLong(0);
         }
         return Long.MIN_VALUE;
+    }
+
+    // TODO: Make this work with RLE segments
+    @Override
+    public CycleResultsSegment filter(Predicate<ResultReadable> filter) {
+        CycleResult[] filteredResults = StreamSupport.stream(spliterator(), false).filter(filter).toArray(CycleResult[]::new);
+        return new CycleResultArray(filteredResults);
     }
 
     private class Iter implements Iterator<CycleResult> {

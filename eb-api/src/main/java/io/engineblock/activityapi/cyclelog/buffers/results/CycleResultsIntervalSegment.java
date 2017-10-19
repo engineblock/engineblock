@@ -68,6 +68,7 @@ public class CycleResultsIntervalSegment implements CycleResultsSegment {
         return cycle;
     }
 
+
     private class CycleSegmentIterator implements Iterator<CycleResult> {
 
         private int index=0;

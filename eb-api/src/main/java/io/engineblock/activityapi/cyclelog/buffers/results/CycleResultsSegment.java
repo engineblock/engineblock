@@ -19,12 +19,42 @@ package io.engineblock.activityapi.cyclelog.buffers.results;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.function.Predicate;
+import java.util.stream.StreamSupport;
+
 public interface CycleResultsSegment extends Comparable<CycleResultsSegment>, Iterable<CycleResult> {
     long getCount();
     long getMinCycle();
+
+    // TODO: Specialize this for push-down performance
+    default CycleResultsSegment filter(Predicate<ResultReadable> filter) {
+        CycleResult[] filteredResults = StreamSupport.stream(spliterator(), false).filter(filter).toArray(CycleResult[]::new);
+        return new CycleResultArray(filteredResults);
+    }
 
     default int compareTo(@NotNull CycleResultsSegment other) {
         return Long.compare(getMinCycle(),other.getMinCycle());
     }
 
+    CycleResultsSegment EMPTY = new EmptySegment();
+
+    public class EmptySegment implements CycleResultsSegment {
+        @Override
+        public long getCount() {
+            return 0;
+        }
+
+        @Override
+        public long getMinCycle() {
+            return Long.MAX_VALUE;
+        }
+
+        @NotNull
+        @Override
+        public Iterator<CycleResult> iterator() {
+            return Collections.emptyIterator();
+        }
+    }
 }

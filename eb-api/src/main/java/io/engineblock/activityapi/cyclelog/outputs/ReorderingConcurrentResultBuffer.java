@@ -20,18 +20,21 @@ package io.engineblock.activityapi.cyclelog.outputs;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultArray;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegmentReadable;
+import io.engineblock.activityapi.cyclelog.buffers.results.ResultReadable;
+import io.engineblock.activityapi.cyclelog.inputs.cyclelog.CanFilterResultValue;
 import io.engineblock.activityapi.output.Output;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.function.Predicate;
 
 /**
  * This will implement a result buffer that puts cycles in order when possible,
  * according to a sliding window.
  */
-public class ReorderingConcurrentResultBuffer implements Output {
+public class ReorderingConcurrentResultBuffer implements Output, CanFilterResultValue {
 
     private final static Logger logger = LoggerFactory.getLogger(ReorderingConcurrentResultBuffer.class);
 
@@ -39,6 +42,12 @@ public class ReorderingConcurrentResultBuffer implements Output {
     private Output downstream;
     private final int threshold;
     private int currentCount;
+    private int segmentCount;
+    private Predicate<ResultReadable> resultFilter;
+
+    public ReorderingConcurrentResultBuffer(Output downstream) {
+        this(downstream,1000);
+    }
 
     public ReorderingConcurrentResultBuffer(Output downstream, int threshold) {
         this.downstream = downstream;
@@ -53,19 +62,24 @@ public class ReorderingConcurrentResultBuffer implements Output {
 
     @Override
     public synchronized void onCycleResultSegment(CycleResultsSegment segment) {
+        if (resultFilter!=null) {
+            segment = segment.filter(resultFilter);
+        }
         if (!(segment instanceof CanSortCycles)) {
             segment = new CycleResultArray(segment);
         }
         ((CanSortCycles)segment).sort();
         segments.add(segment);
+        segmentCount++;
         currentCount+=segment.getCount();
         if (currentCount>=threshold) {
             logger.trace("Reordering threshold met: " + currentCount +"/" + threshold + ", sorting and pushing. (" + segments.size() + " segments)");
             Collections.sort(segments);
             while(currentCount>=threshold) {
                 CycleResultsSegment head = segments.removeFirst();
-                currentCount-=head.getCount();
                 downstream.onCycleResultSegment(head);
+                segmentCount--;
+                currentCount-=head.getCount();
             }
         }
     }
@@ -73,10 +87,19 @@ public class ReorderingConcurrentResultBuffer implements Output {
     @Override
     public synchronized void close() throws Exception {
         logger.trace("closing and flushing " + segments.size() + " segments");
+        Collections.sort(segments);
         for (CycleResultsSegment segment : segments) {
             downstream.onCycleResultSegment(segment);
+            segmentCount--;
+            currentCount-=segment.getCount();
         }
         downstream.close();
+
+    }
+
+    @Override
+    public void setFilter(Predicate<ResultReadable> filter) {
+        this.resultFilter = filter;
 
     }
 }

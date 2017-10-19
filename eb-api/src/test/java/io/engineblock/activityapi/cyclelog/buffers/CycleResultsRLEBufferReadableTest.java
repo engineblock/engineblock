@@ -60,10 +60,10 @@ public class CycleResultsRLEBufferReadableTest {
         t.onCycleResult(13L, 2);
         t.onCycleResult(7L, 7);
 
-//        CycleResultsRLEBufferReadable cr = t.toReadable();
-        long[] cycleValues = StreamSupport.stream(t.toReadable().spliterator(),false).flatMap(r->StreamSupport.stream(r.spliterator(),false))
+//        CycleResultsRLEBufferReadable cr = t.toSegmentsReadable();
+        long[] cycleValues = StreamSupport.stream(t.toSegmentsReadable().spliterator(),false).flatMap(r->StreamSupport.stream(r.spliterator(),false))
                 .mapToLong(CycleResult::getCycle).toArray();
-        int[] resultValues = StreamSupport.stream(t.toReadable().spliterator(),false).flatMap(s->StreamSupport.stream(s.spliterator(),false))
+        int[] resultValues = StreamSupport.stream(t.toSegmentsReadable().spliterator(),false).flatMap(s->StreamSupport.stream(s.spliterator(),false))
                 .mapToInt(CycleResult::getResult).toArray();
 
         assertThat(cycleValues).containsExactly(1L, 2L, 10L, 11L, 13L, 7L);
@@ -80,7 +80,7 @@ public class CycleResultsRLEBufferReadableTest {
         t.onCycleResult(13L, 2);
         t.onCycleResult(7L, 7);
 
-        CycleResultsRLEBufferReadable readable = t.toReadable();
+        CycleResultsRLEBufferReadable readable = t.toSegmentsReadable();
 
         CycleResultsSegment s1 = readable.iterator().next();
     }
@@ -92,7 +92,7 @@ public class CycleResultsRLEBufferReadableTest {
         t.onCycleResult(2L, 6);
         t.onCycleResult(4L, 8);
 
-        CycleResultsRLEBufferReadable cr = t.toReadable();
+        CycleResultsRLEBufferReadable cr = t.toSegmentsReadable();
         Iterator<CycleResultsSegment> iterator = cr.iterator();
         CycleResultsSegment s1 = iterator.next();
         assertThat(s1.getCount()).isEqualTo(1);

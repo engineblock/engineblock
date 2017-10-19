@@ -24,11 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 
 public interface CycleResultSegmentsReadable extends Iterable<CycleResultsSegment> {
-//    /**
-//     * @param stride The number of contiguous cycles that must be provided
-//     * @return a {@link CycleResultsIntervalSegment}
-//     */
-//    CycleResultsSegment getCycleResultsSegment(int stride);
 
     default Iterable<CycleResult> getCycleResultIterable() {
         return new Iterable<CycleResult>() {
@@ -45,16 +40,6 @@ public interface CycleResultSegmentsReadable extends Iterable<CycleResultsSegmen
                             innerIter=iterSegment.next().iterator();
                         }
                         return innerIter.hasNext();
-//
-//                        if (iterSegment == null || (innerIter!=null && !innerIter.hasNext())) {
-//                            iterSegment = CycleResultSegmentsReadable.this.iterator();
-//                            if (iterSegment.hasNext()) {
-//                                innerIter = iterSegment.next().iterator();
-//                            } else {
-//                                return false;
-//                            }
-//                        }
-//                        return innerIter.hasNext();
                     }
 
                     @Override

@@ -35,7 +35,7 @@ import java.util.function.Predicate;
  *
  * It is recommended to use the {@link AutoCloseable} method to ensure that
  * partial runs are flushed automatically. Access the buffer for read via either
- * the {@link #toByteBuffer()} or the {@link #toReadable()} methods will
+ * the {@link #toByteBuffer()} or the {@link #toSegmentsReadable()} methods will
  * automatically {@link #flush()} and invalidate the writable buffer, so further writes
  * will be deemed invalid and will cause an exception to be thrown.
  */
@@ -49,6 +49,8 @@ public class CycleResultsRLEBufferTarget implements Output,CanFilterResultValue 
     private long lastResult = Integer.MIN_VALUE;
     private long runlength = 0L;
     private boolean flushed = false;
+    private long count=0L;
+    private long min=Long.MAX_VALUE;
     private Predicate<ResultReadable> filter;
 
     /**
@@ -82,7 +84,7 @@ public class CycleResultsRLEBufferTarget implements Output,CanFilterResultValue 
      * invalide it for writing.
      * @return a CycleResultRLEBuffer
      */
-    public CycleResultsRLEBufferReadable toReadable() {
+    public CycleResultsRLEBufferReadable toSegmentsReadable() {
         flush();
         ByteBuffer readable = buf.duplicate();
         readable.flip();

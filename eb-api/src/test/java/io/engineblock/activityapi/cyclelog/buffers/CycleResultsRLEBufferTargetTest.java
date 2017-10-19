@@ -38,7 +38,7 @@ public class CycleResultsRLEBufferTargetTest {
 
         tb.onCycleResult(0L,0);
         tb.onCycleResult(1L,1);
-        CycleResultsRLEBufferReadable r = tb.toReadable();
+        CycleResultsRLEBufferReadable r = tb.toSegmentsReadable();
 
         ArrayList<CycleResult> cycles = new ArrayList<>();
         Iterable<CycleResult> ci = r.getCycleResultIterable();
@@ -68,7 +68,7 @@ public class CycleResultsRLEBufferTargetTest {
         tb.onCycleResult(101L,6);
         tb.onCycleResult(102L,7);
 
-        CycleResultsRLEBufferReadable r = tb.toReadable();
+        CycleResultsRLEBufferReadable r = tb.toSegmentsReadable();
 
         ArrayList<CycleResult> cycles = new ArrayList<>();
         r.getCycleResultIterable().iterator().forEachRemaining(cycles::add);
