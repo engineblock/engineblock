@@ -21,6 +21,8 @@ import activityconfig.rawyaml.RawStmtsDocList;
 import activityconfig.rawyaml.RawYamlStatementLoader;
 import activityconfig.yaml.StmtsDocList;
 
+import java.util.function.Function;
+
 public class StatementsLoader {
 
     public static StmtsDocList load(String path, String... searchPaths) {
@@ -29,4 +31,12 @@ public class StatementsLoader {
         StmtsDocList layered = new StmtsDocList(rawDocList);
         return layered;
     }
+
+    public static StmtsDocList load(String path, Function<String, String> stringTransformer, String... searchPaths) {
+        RawYamlStatementLoader loader = new RawYamlStatementLoader(stringTransformer);
+        RawStmtsDocList rawDocList = loader.load(path, searchPaths);
+        StmtsDocList layered = new StmtsDocList(rawDocList);
+        return layered;
+    }
+
 }

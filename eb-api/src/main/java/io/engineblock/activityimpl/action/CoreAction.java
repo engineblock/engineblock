@@ -39,6 +39,8 @@ public class CoreAction implements Action {
     public int runCycle(long value) {
         if ((value % interval) == 0) {
             logger.info(activityDef.getAlias() + "[" + slot + "]: cycle=" + value);
+        } else {
+            logger.trace(activityDef.getAlias() + "[" + slot + "]: cycle=" + value);
         }
         return 0;
     }

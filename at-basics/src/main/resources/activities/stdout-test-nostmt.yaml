@@ -1,0 +1,10 @@
+tags:
+ type: testtag
+ kind: somekind
+ oevure: bananas
+name: outerblock
+bindings:
+  thread: ThreadNumToLong()
+  bar: NumberNameToString()
+  foo: NumberNameToString()
+  customer: NumberNameToString()

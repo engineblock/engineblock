@@ -21,8 +21,10 @@ import activityconfig.rawyaml.RawStmtsDocList;
 import io.engineblock.util.TagFilter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class StmtsDocList implements Iterable<StmtsDoc> {
@@ -50,6 +52,10 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
         return getStmts("");
     }
 
+    /**
+     * @return The list of all included statements for all included blocks of  in this document,
+     * including the inherited and overridden values from the this doc and the parent block.
+     */
     public List<StmtDef> getStmts(String tagFilterSpec) {
         TagFilter ts = new TagFilter(tagFilterSpec);
 
@@ -64,5 +70,18 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     @Override
     public Iterator<StmtsDoc> iterator() {
         return getStmtDocs().iterator();
+    }
+
+    /**
+     * Return the list of all bindings combined across all docs, not including
+     * the block or statement level bindings.
+     * @return A map of all bindings at the doc level.
+     */
+    public Map<String,String> getDocBindings() {
+        return this.getStmtDocs().stream()
+                .map(StmtsDoc::getBindings)
+                .map(Map::entrySet)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(Map.Entry::getKey,Map.Entry::getValue));
     }
 }

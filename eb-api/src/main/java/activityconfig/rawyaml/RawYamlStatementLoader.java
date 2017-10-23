@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,15 +37,24 @@ import java.util.stream.Collectors;
 public class RawYamlStatementLoader {
 
     private final static Logger logger = LoggerFactory.getLogger(RawYamlStatementLoader.class);
-    List<Function<String, String>> imageTransformers = new ArrayList<>();
     List<Function<String, String>> stringTransformers = new ArrayList<>();
 
     public RawYamlStatementLoader() {
     }
 
+    public RawYamlStatementLoader(Function<String, String> stringTransformer) {
+        this.transformWith(stringTransformer);
+    }
+
+    private RawYamlStatementLoader transformWith(Function<String, String>... transformers) {
+        stringTransformers.addAll(Arrays.asList(transformers));
+        return this;
+    }
+
+
     public RawStmtsDocList load(String fromPath, String... searchPaths) {
         InputStream stream = EngineBlockFiles.findRequiredStreamOrFile(fromPath, "yaml", searchPaths);
-        String data = "";
+        String data;
 
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream))) {
             data = buffer.lines().collect(Collectors.joining("\n"));

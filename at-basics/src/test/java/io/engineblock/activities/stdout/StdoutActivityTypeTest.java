@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activities.csv;
+package io.engineblock.activities.stdout;
 
 import io.engineblock.activityapi.core.Action;
 import io.engineblock.activityapi.core.ActionDispenser;
@@ -27,17 +27,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by sebastianestevez on 5/5/17.
  */
-public class CSVActivityTypeTest {
+public class StdoutActivityTypeTest {
     @Test
     public void testDiagActivity() {
-        CSVActivityType csvAt = new CSVActivityType();
-        String atname = csvAt.getName();
-        assertThat(atname.equals("csv"));
-        ActivityDef ad = ActivityDef.parseActivityDef("type=csv; yaml=csv-test;");
-        CSVActivity csvActivity = csvAt.getActivity(ad);
-        ActionDispenser actionDispenser = csvAt.getActionDispenser(csvActivity);
+        StdoutActivityType stdoutAt = new StdoutActivityType();
+        String atname = stdoutAt.getName();
+        assertThat(atname.equals("stdout"));
+        ActivityDef ad = ActivityDef.parseActivityDef("type=stdout; yaml=stdout-test;");
+        StdoutActivity stdoutActivity = stdoutAt.getActivity(ad);
+        ActionDispenser actionDispenser = stdoutAt.getActionDispenser(stdoutActivity);
         Action action = actionDispenser.getAction(1);
-        //csvActivity.initActivity();
-        //action.accept(1L);
     }
 }
