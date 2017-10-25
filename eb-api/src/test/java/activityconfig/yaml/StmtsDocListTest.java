@@ -19,6 +19,8 @@ package activityconfig.yaml;
 
 import activityconfig.StatementsLoader;
 import org.assertj.core.data.MapEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -30,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
 public class StmtsDocListTest {
+    private static final Logger logger = LoggerFactory.getLogger(StmtsDocListTest.class);
 
     private StmtsDocList doclist;
 
@@ -49,7 +52,7 @@ public class StmtsDocListTest {
 
     @BeforeClass
     public void testLoadYaml() {
-        doclist = StatementsLoader.load("testdocs/everything.yaml");
+        doclist = StatementsLoader.load(logger, "testdocs/everything.yaml");
     }
 
     @Test

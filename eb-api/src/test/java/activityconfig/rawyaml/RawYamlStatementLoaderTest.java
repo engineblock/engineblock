@@ -17,6 +17,8 @@
 
 package activityconfig.rawyaml;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -25,11 +27,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
 public class RawYamlStatementLoaderTest {
+    private final static Logger logger = LoggerFactory.getLogger(RawYamlStatementLoaderTest.class);
 
     @Test
     public void tetLoadPropertiesBlock() {
         RawYamlStatementLoader ysl = new RawYamlStatementLoader();
-        RawStmtsDocList rawBlockDocs = ysl.load("testdocs/rawblock.yaml");
+        RawStmtsDocList rawBlockDocs = ysl.load(logger, "testdocs/rawblock.yaml");
         assertThat(rawBlockDocs.getStmtsDocs()).hasSize(1);
         RawStmtsDoc rawBlockDoc = rawBlockDocs.getStmtsDocs().get(0);
         assertThat(rawBlockDoc.getStatements()).hasSize(1);
@@ -42,7 +45,7 @@ public class RawYamlStatementLoaderTest {
     @Test
     public void testLoadFullFormat() {
         RawYamlStatementLoader ysl = new RawYamlStatementLoader();
-        RawStmtsDocList erthing = ysl.load("testdocs/everything.yaml");
+        RawStmtsDocList erthing = ysl.load(logger, "testdocs/everything.yaml");
         List<RawStmtsDoc> rawStmtsDocs = erthing.getStmtsDocs();
         assertThat(rawStmtsDocs).hasSize(2);
         RawStmtsDoc rawStmtsDoc = rawStmtsDocs.get(0);

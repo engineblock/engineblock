@@ -20,7 +20,6 @@ package activityconfig.rawyaml;
 import io.engineblock.activityimpl.ActivityInitializationError;
 import io.engineblock.util.EngineBlockFiles;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -33,9 +32,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class RawYamlStatementLoader implements RawStatementsLoader {
+public class RawYamlStatementLoader {
 
-    private final static Logger logger = LoggerFactory.getLogger(RawYamlStatementLoader.class);
     List<Function<String, String>> stringTransformers = new ArrayList<>();
 
     public RawYamlStatementLoader() {
@@ -45,12 +43,11 @@ public class RawYamlStatementLoader implements RawStatementsLoader {
         this.addTransformer(stringTransformer);
     }
 
-    @Override
     public void addTransformer(Function<String, String> transformer) {
         stringTransformers.add(transformer);
     }
 
-    protected String loadAndTransform(String fromPath, String... searchPaths) {
+    protected String loadAndTransform(Logger logger, String fromPath, String... searchPaths) {
         InputStream stream = EngineBlockFiles.findRequiredStreamOrFile(fromPath, "yaml", searchPaths);
         String data;
 
@@ -62,20 +59,19 @@ public class RawYamlStatementLoader implements RawStatementsLoader {
 
         for (Function<String, String> xform : stringTransformers) {
             try {
-                logger.debug("Applying string transformer to yaml data:" + xform);
+                if (logger!=null) logger.debug("Applying string transformer to yaml data:" + xform);
                 data = xform.apply(data);
             } catch (Exception e) {
                 RuntimeException t = new ActivityInitializationError("Error applying string transform to input", e);
-                logger.error(t.getMessage(), t);
+                if (logger!=null) logger.error(t.getMessage(), t);
                 throw t;
             }
         }
         return data;
     }
 
-    @Override
-    public RawStmtsDocList load(String fromPath, String... searchPaths) {
-        String data = loadAndTransform(fromPath,searchPaths);
+    public RawStmtsDocList load(Logger logger, String fromPath, String... searchPaths) {
+        String data = loadAndTransform(logger, fromPath,searchPaths);
 
         Yaml yaml = getCustomYaml();
 
@@ -88,7 +84,7 @@ public class RawYamlStatementLoader implements RawStatementsLoader {
             }
             return new RawStmtsDocList(stmtListList);
         } catch (Exception e) {
-            logger.error("Error loading yaml from " + fromPath, e);
+            if (logger!=null) logger.error("Error loading yaml from " + fromPath, e);
             throw e;
         }
     }

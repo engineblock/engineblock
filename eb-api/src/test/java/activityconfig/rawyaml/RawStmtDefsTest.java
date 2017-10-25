@@ -22,6 +22,8 @@ import activityconfig.yaml.StmtDef;
 import activityconfig.yaml.StmtsBlock;
 import activityconfig.yaml.StmtsDoc;
 import activityconfig.yaml.StmtsDocList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -31,10 +33,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Test
 public class RawStmtDefsTest {
 
+    private final static Logger logger = LoggerFactory.getLogger(RawStmtDefsTest.class);
     @Test
     public void testLayering() {
 
-        StmtsDocList all = StatementsLoader.load("testdocs/everything.yaml");
+        StmtsDocList all = StatementsLoader.load(logger, "testdocs/everything.yaml");
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(2);
         StmtsDoc doc1 = all.getStmtDocs().get(0);
@@ -61,7 +64,7 @@ public class RawStmtDefsTest {
 
     @Test
     public void testStatementRendering() {
-        StmtsDocList all = StatementsLoader.load("testdocs/everything.yaml");
+        StmtsDocList all = StatementsLoader.load(logger, "testdocs/everything.yaml");
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(2);
         StmtsDoc doc1 = all.getStmtDocs().get(0);
