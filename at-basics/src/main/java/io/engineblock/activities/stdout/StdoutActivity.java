@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +35,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     public Timer resultTimer;
     public Histogram triesHisto;
     private List<StringBindingsTemplate> templates = new ArrayList<>();
-    private PrintWriter pw;
+    private Writer pw;
     private String fileName;
     private ExceptionMeterMetrics exceptionMeterMetrics;
     private int retry_delay = 0;
@@ -51,7 +52,13 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
     @Override
     public void shutdownActivity() {
-        pw.close();
+        try {
+            if (pw!=null) {
+                pw.close();
+            }
+        } catch (Exception e) {
+            logger.warn("error closing writer:" + e, e);
+        }
     }
 
     @Override
@@ -71,7 +78,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
     }
 
-    protected PrintWriter createPrintWriter() {
+    protected Writer createPrintWriter() {
         PrintWriter pw = null;
         if (fileName.toLowerCase().equals("stdout")) {
             pw = new PrintWriter(System.out);
@@ -138,7 +145,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 pw = createPrintWriter();
             }
             try {
-                pw.print(statement);
+                pw.write(statement);
                 pw.flush();
                 return;
             } catch (Exception error) {

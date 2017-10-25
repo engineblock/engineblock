@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activities.socket;
+package io.engineblock.activities.tcpclient;
 
 import io.engineblock.activities.stdout.StdoutActivity;
 import io.engineblock.activityimpl.ActivityDef;
@@ -30,9 +30,6 @@ import java.net.Socket;
 
 public class TCPClientActivity extends StdoutActivity {
     private final static Logger logger = LoggerFactory.getLogger(TCPClientActivity.class);
-    private Boolean sslEnabled;
-    private SocketFactory socketFactory = SocketFactory.getDefault();
-
 
     public TCPClientActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -41,18 +38,22 @@ public class TCPClientActivity extends StdoutActivity {
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
-        this.sslEnabled = activityDef.getParams().getOptionalBoolean("ssl").orElse(false);
     }
 
     @Override
     protected PrintWriter createPrintWriter() {
+
+        SocketFactory socketFactory = SocketFactory.getDefault();
+        boolean sslEnabled = activityDef.getParams().getOptionalBoolean("ssl").orElse(false);
+        if (sslEnabled) {
+            socketFactory = SSLSocketFactory.getDefault();
+        }
+
         String host = getActivityDef().getParams().getOptionalString("host").orElse("localhost");
         int port = getActivityDef().getParams().getOptionalInteger("port").orElse(12345);
+
         try {
-            if (sslEnabled) {
-                socketFactory = SSLSocketFactory.getDefault();
-            }
-            Socket socket = socketFactory.createSocket(host,port);
+            Socket socket = socketFactory.createSocket(host, port);
             logger.info("connected to " + socket.toString());
             return new PrintWriter(socket.getOutputStream());
         } catch (IOException e) {

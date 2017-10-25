@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activities.socket;
+package io.engineblock.activities.tcpclient;
 
 import com.google.auto.service.AutoService;
 import io.engineblock.activities.stdout.StdoutAction;
@@ -27,6 +27,7 @@ import io.engineblock.activityimpl.ActivityDef;
 
 @AutoService(ActivityType.class)
 public class TCPClientActivityType implements ActivityType<TCPClientActivity> {
+
     @Override
     public String getName() {
         return "tcpclient";

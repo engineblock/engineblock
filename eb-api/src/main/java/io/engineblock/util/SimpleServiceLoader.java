@@ -53,12 +53,16 @@ public class SimpleServiceLoader<T extends Named> {
             ClassLoader cl = getClass().getClassLoader();
             logger.debug("loading service types for " + serviceType.getSimpleName());
             ServiceLoader<? extends T> sl = ServiceLoader.load(serviceType);
-            for (T inputType : sl) {
-                if (types.get(inputType.getName()) != null) {
-                    throw new RuntimeException("ActivityType '" + inputType.getName()
-                            + "' is already defined.");
+            try {
+                for (T inputType : sl) {
+                    if (types.get(inputType.getName()) != null) {
+                        throw new RuntimeException("ActivityType '" + inputType.getName()
+                                + "' is already defined.");
+                    }
+                    types.put(inputType.getName(),inputType);
                 }
-                types.put(inputType.getName(),inputType);
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
             }
         }
         logger.info("Loaded Types:" + types.keySet());
