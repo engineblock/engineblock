@@ -17,13 +17,18 @@
 
 package activityconfig;
 
+import activityconfig.rawyaml.RawStatementsLoader;
 import activityconfig.rawyaml.RawStmtsDocList;
 import activityconfig.rawyaml.RawYamlStatementLoader;
 import activityconfig.yaml.StmtsDocList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Function;
 
 public class StatementsLoader {
+
+    private final static Logger logger = LoggerFactory.getLogger(StatementsLoader.class);
 
     public static StmtsDocList load(String path, String... searchPaths) {
         RawYamlStatementLoader loader = new RawYamlStatementLoader();
@@ -32,11 +37,31 @@ public class StatementsLoader {
         return layered;
     }
 
-    public static StmtsDocList load(String path, Function<String, String> stringTransformer, String... searchPaths) {
-        RawYamlStatementLoader loader = new RawYamlStatementLoader(stringTransformer);
+    public static StmtsDocList load(String path, Function<String, String> transformer, String... searchPaths) {
+        RawYamlStatementLoader loader = new RawYamlStatementLoader(transformer);
         RawStmtsDocList rawDocList = loader.load(path, searchPaths);
         StmtsDocList layered = new StmtsDocList(rawDocList);
         return layered;
+    }
+
+    public static StmtsDocList loadWithAlternateImpl(RawStatementsLoader alternateLoader, String path,
+                                                     Function<String, String> transformer, String... searchPaths) {
+        try {
+            RawYamlStatementLoader loader = new RawYamlStatementLoader(transformer);
+            RawStmtsDocList rawDocList = loader.load(path, searchPaths);
+            StmtsDocList layered = new StmtsDocList(rawDocList);
+            return layered;
+        } catch (Exception e) {
+            try {
+                RawStmtsDocList loaded = alternateLoader.load(path, searchPaths);
+                logger.warn("Loaded yaml " + path + " with compatibility mode. This will be deprecated in a future release." +
+                        " Please refer to http://docs.engineblock.io/user-guide/standard_yaml/ for more details.");
+                return new StmtsDocList(loaded);
+            } catch (Exception e2) {
+                logger.error("Unable to load " + path + " with uniform or previous loader:" + e2, e2);
+                throw (e2);
+            }
+        }
     }
 
 }

@@ -29,12 +29,11 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class RawYamlStatementLoader {
+public class RawYamlStatementLoader implements RawStatementsLoader {
 
     private final static Logger logger = LoggerFactory.getLogger(RawYamlStatementLoader.class);
     List<Function<String, String>> stringTransformers = new ArrayList<>();
@@ -43,16 +42,15 @@ public class RawYamlStatementLoader {
     }
 
     public RawYamlStatementLoader(Function<String, String> stringTransformer) {
-        this.transformWith(stringTransformer);
+        this.addTransformer(stringTransformer);
     }
 
-    private RawYamlStatementLoader transformWith(Function<String, String>... transformers) {
-        stringTransformers.addAll(Arrays.asList(transformers));
-        return this;
+    @Override
+    public void addTransformer(Function<String, String> transformer) {
+        stringTransformers.add(transformer);
     }
 
-
-    public RawStmtsDocList load(String fromPath, String... searchPaths) {
+    protected String loadAndTransform(String fromPath, String... searchPaths) {
         InputStream stream = EngineBlockFiles.findRequiredStreamOrFile(fromPath, "yaml", searchPaths);
         String data;
 
@@ -72,6 +70,12 @@ public class RawYamlStatementLoader {
                 throw t;
             }
         }
+        return data;
+    }
+
+    @Override
+    public RawStmtsDocList load(String fromPath, String... searchPaths) {
+        String data = loadAndTransform(fromPath,searchPaths);
 
         Yaml yaml = getCustomYaml();
 
@@ -89,7 +93,7 @@ public class RawYamlStatementLoader {
         }
     }
 
-    private Yaml getCustomYaml() {
+    protected Yaml getCustomYaml() {
         Constructor constructor = new Constructor(RawStmtsDoc.class);
         TypeDescription tds = new TypeDescription(RawStmtsDoc.class);
         tds.putListPropertyType("blocks", RawStmtsBlock.class);
