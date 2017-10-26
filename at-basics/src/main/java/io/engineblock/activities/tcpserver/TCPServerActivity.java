@@ -23,8 +23,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -42,7 +42,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class TCPServerActivity extends StdoutActivity {
 
     private final static Logger logger = LoggerFactory.getLogger(TCPServerActivity.class);
-    private final SocketFactory socketFactory;
+    private final ServerSocketFactory socketFactory;
     private BlockingQueue<String> queue = new LinkedBlockingQueue<>(10);
     private ServerSocket listenerSocket;
     private List<Shutdown> managedShutdown = new ArrayList<>();
@@ -53,9 +53,9 @@ public class TCPServerActivity extends StdoutActivity {
         boolean sslEnabled = activityDef.getParams().getOptionalBoolean("ssl").orElse(false);
 
         if (sslEnabled) {
-            socketFactory = SSLSocketFactory.getDefault();
+            socketFactory = SSLServerSocketFactory.getDefault();
         } else {
-            socketFactory = SocketFactory.getDefault();
+            socketFactory = ServerSocketFactory.getDefault().getDefault();
         }
     }
 
@@ -94,7 +94,10 @@ public class TCPServerActivity extends StdoutActivity {
         if (listenerSocket == null || listenerSocket.isClosed()) {
             try {
                 InetAddress hostAddr = InetAddress.getByName(host);
-                listenerSocket = new ServerSocket(port, 10, hostAddr);
+                listenerSocket = socketFactory.createServerSocket(port, 10, hostAddr);
+                if (socketFactory instanceof SSLServerSocketFactory) {
+                    logger.info("SSL enabled on server socket " + listenerSocket);
+                }
                 SocketAcceptor socketAcceptor = new SocketAcceptor(queue, listenerSocket);
                 managedShutdown.add(socketAcceptor);
                 Thread acceptorThread = new Thread(socketAcceptor);
