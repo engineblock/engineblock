@@ -81,7 +81,7 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
     }
 
     /**
-s     * @return the name of this block
+     * @return the name of this block
      */
     public String getName() {
         return rawStmtsDoc.getName();

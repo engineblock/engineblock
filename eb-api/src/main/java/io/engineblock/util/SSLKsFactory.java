@@ -62,6 +62,8 @@ public class SSLKsFactory {
             tmf.init(ks);
 
             SSLContext sc = SSLContext.getInstance(tlsVersion);
+            sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
             return sc;
         } catch (Exception e) {
             throw new RuntimeException(e);

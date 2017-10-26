@@ -55,6 +55,7 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
     /**
      * @return The list of all included statements for all included blocks of  in this document,
      * including the inherited and overridden values from the this doc and the parent block.
+     * @param tagFilterSpec a comma-separated tag filter spec
      */
     public List<StmtDef> getStmts(String tagFilterSpec) {
         TagFilter ts = new TagFilter(tagFilterSpec);

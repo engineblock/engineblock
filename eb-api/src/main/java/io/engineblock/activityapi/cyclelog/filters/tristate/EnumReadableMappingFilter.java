@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  * If you have an Enum that implements ResultReadable, then you can easily create
  * an enum-aware filter for it with this class.
  *
- * @param <E>
+ * @param <E> The type of the Enum which implements TristateFilter
  */
 public class EnumReadableMappingFilter<E extends Enum<E> & ResultReadable> implements TristateFilter<ResultReadable> {
     private final static Logger logger = LoggerFactory.getLogger(EnumReadableMappingFilter.class);
