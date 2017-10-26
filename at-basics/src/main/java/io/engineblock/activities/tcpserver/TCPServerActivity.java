@@ -132,7 +132,7 @@ public class TCPServerActivity extends StdoutActivity {
             try {
                 outputStream = connectedSocket.getOutputStream();
                 this.writer = new OutputStreamWriter(outputStream);
-                connectedSocket.shutdownInput();
+                //connectedSocket.shutdownInput();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
