@@ -19,6 +19,7 @@ package io.engineblock.activities.tcpserver;
 
 import io.engineblock.activities.stdout.StdoutActivity;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.util.SSLKsFactory;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class TCPServerActivity extends StdoutActivity {
         if (sslEnabled) {
             socketFactory = SSLServerSocketFactory.getDefault();
         } else {
-            socketFactory = ServerSocketFactory.getDefault().getDefault();
+            socketFactory = SSLKsFactory.get().createSSLServerSocketFactory(activityDef);
         }
     }
 
@@ -143,7 +144,7 @@ public class TCPServerActivity extends StdoutActivity {
 
         @Override
         public void run() {
-            try (Writer writer = this.writer){
+            try (Writer writer = this.writer) {
                 while (true) {
                     while (!sourceQueue.isEmpty() || running) {
                         try {

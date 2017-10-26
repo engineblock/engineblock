@@ -19,11 +19,11 @@ package io.engineblock.activities.tcpclient;
 
 import io.engineblock.activities.stdout.StdoutActivity;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.util.SSLKsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -46,7 +46,7 @@ public class TCPClientActivity extends StdoutActivity {
         SocketFactory socketFactory = SocketFactory.getDefault();
         boolean sslEnabled = activityDef.getParams().getOptionalBoolean("ssl").orElse(false);
         if (sslEnabled) {
-            socketFactory = SSLSocketFactory.getDefault();
+            socketFactory = SSLKsFactory.get().createSocketFactory(activityDef);
         }
 
         String host = getActivityDef().getParams().getOptionalString("host").orElse("localhost");
