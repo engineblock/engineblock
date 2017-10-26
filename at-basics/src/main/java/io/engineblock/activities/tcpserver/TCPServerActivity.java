@@ -54,9 +54,9 @@ public class TCPServerActivity extends StdoutActivity {
         boolean sslEnabled = activityDef.getParams().getOptionalBoolean("ssl").orElse(false);
 
         if (sslEnabled) {
-            socketFactory = SSLServerSocketFactory.getDefault();
-        } else {
             socketFactory = SSLKsFactory.get().createSSLServerSocketFactory(activityDef);
+        } else {
+            socketFactory = ServerSocketFactory.getDefault();
         }
     }
 

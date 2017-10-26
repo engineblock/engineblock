@@ -40,7 +40,6 @@ public class SSLKsFactory {
 
     public ServerSocketFactory createSSLServerSocketFactory(ActivityDef def) {
         return getContext(def).getServerSocketFactory();
-
     }
 
     public SocketFactory createSocketFactory(ActivityDef def) {
