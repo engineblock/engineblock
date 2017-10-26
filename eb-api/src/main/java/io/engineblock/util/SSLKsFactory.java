@@ -46,7 +46,7 @@ public class SSLKsFactory {
         return getContext(def).getSocketFactory();
     }
 
-    private SSLContext getContext(ActivityDef def) {
+    public SSLContext getContext(ActivityDef def) {
         String keystorePath = def.getParams().getOptionalString("keystore").orElse("JKS");
         String keystorePass = def.getParams().getOptionalString("kspass").orElse("NONE");
         String tlsVersion = def.getParams().getOptionalString("tlsversion").orElse("TLSv1.2");
