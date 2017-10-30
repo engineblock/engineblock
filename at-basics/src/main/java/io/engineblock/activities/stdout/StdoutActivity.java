@@ -14,6 +14,7 @@ import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.ExceptionMeterMetrics;
 import io.engineblock.planning.OpSequence;
 import io.engineblock.planning.SequencePlanner;
+import io.engineblock.planning.SequencerType;
 import io.engineblock.util.StrInterpolater;
 import io.virtdata.core.AllDataMapperLibraries;
 import io.virtdata.core.BindingsTemplate;
@@ -103,7 +104,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
     private OpSequence<StringBindings> createTemplates() {
         //List<StringBindingsTemplate> stringBindingsTemplates = new ArrayList<>();
-        SequencePlanner.SequencerType sequencerType = SequencePlanner.SequencerType.valueOf(
+        SequencerType sequencerType = SequencerType.valueOf(
                 getParams().getOptionalString("seq").orElse("bucket")
         );
         SequencePlanner<StringBindings> sequencer = new SequencePlanner<>(sequencerType);
@@ -133,8 +134,8 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         OpSequence<StringBindings> opSequence = sequencer.resolve();
         if (getActivityDef().getCycleCount() == 0) {
             logger.debug("Adjusting cycle getChainSize for " + activityDef.getAlias() + " to " +
-                    opSequence.opCount());
-            getActivityDef().setCycles(String.valueOf(opSequence.opCount()));
+                    opSequence.getOps().size());
+            getActivityDef().setCycles(String.valueOf(opSequence.getOps().size()));
         }
 
         return opSequence;

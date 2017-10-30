@@ -30,12 +30,6 @@ public class SequencePlanner<T> {
     private List<Long> ratios;
     private int[] elementIndex;
 
-    public enum SequencerType {
-        bucket,
-        interval,
-        concat
-    }
-
     public SequencePlanner(SequencerType sequencerType) {
         this.sequencerType = sequencerType;
     }
@@ -54,59 +48,27 @@ public class SequencePlanner<T> {
         switch (sequencerType) {
             case bucket:
                 logger.trace("sequencing elements by simple round-robin");
-                this.elementIndex = new BucketSequencer<T>().seqIndexesByRatios(elements,ratios);
+                this.elementIndex = new BucketSequencer<T>().seqIndexesByRatios(elements, ratios);
                 break;
             case interval:
                 logger.trace("sequencing elements by interval and position");
-                this.elementIndex = new IntervalSequencer<T>().seqIndexesByRatios(elements,ratios);
+                this.elementIndex = new IntervalSequencer<T>().seqIndexesByRatios(elements, ratios);
                 break;
             case concat:
                 logger.trace("sequencing elements by concatenation");
-                this.elementIndex = new ConcatSequencer<T>().seqIndexesByRatios(elements,ratios);
+                this.elementIndex = new ConcatSequencer<T>().seqIndexesByRatios(elements, ratios);
         }
         this.elements = elements;
-        return new Sequence<>(elements,elementIndex);
+        return new Sequence<>(sequencerType, elements, elementIndex);
     }
 
-//    public SequencePlanner(List<T> elements, List<Long> ratios, SequencerType sequencerType) {
-//        switch (sequencerType) {
-//            case bucket:
-//                logger.trace("sequencing elements by simple round-robin");
-//                this.elementIndex = new BucketSequencer<T>().seqIndexesByRatios(elements,ratios);
-//                break;
-//            case interval:
-//                logger.trace("sequencing elements by interval and position");
-//                this.elementIndex = new IntervalSequencer<T>().seqIndexesByRatios(elements,ratios);
-//                break;
-//            case concat:
-//                logger.trace("sequencing elements by concatenation");
-//                this.elementIndex = new ConcatSequencer<T>().seqIndexesByRatios(elements,ratios);
-//        }
-//        this.elements = elements;
-//    }
-//
-//    public SequencePlanner(List<T> elements, ToLongFunction<T> ratioFunc, SequencerType sequencerType) {
-//        switch (sequencerType) {
-//            case bucket:
-//                logger.trace("sequencing elements by simple round-robin");
-//                this.elementIndex = new BucketSequencer<T>().seqIndexByRatioFunc(elements,ratioFunc);
-//                break;
-//            case interval:
-//                logger.trace("sequencing elements by interval and position");
-//                this.elementIndex = new IntervalSequencer<T>().seqIndexByRatioFunc(elements,ratioFunc);
-//                break;
-//            case concat:
-//                logger.trace("sequencing elements by concatenation");
-//                this.elementIndex = new ConcatSequencer<T>().seqIndexByRatioFunc(elements,ratioFunc);
-//        }
-//        this.elements = elements;
-//    }
-//
     public static class Sequence<T> implements OpSequence<T> {
+        private final SequencerType type;
         private final List<T> elems;
         private final int[] seq;
 
-        public Sequence(List<T> elems, int[] seq) {
+        Sequence(SequencerType type, List<T> elems, int[] seq) {
+            this.type = type;
             this.elems = elems;
             this.seq = seq;
         }
@@ -118,10 +80,20 @@ public class SequencePlanner<T> {
             return elems.get(index);
         }
 
-    @Override
-    public int opCount() {
-        return elems.size();
+        @Override
+        public List<T> getOps() {
+            return elems;
+        }
+
+        @Override
+        public int[] getSequence() {
+            return seq;
+        }
+
+        public SequencerType getSequencerType() {
+            return type;
+        }
+
     }
-}
 
 }
