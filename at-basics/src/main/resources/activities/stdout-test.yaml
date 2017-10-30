@@ -1,8 +1,4 @@
-statements:
-  - "{cycle},{thread},{foo},{bar},{customer}\n"
 bindings:
-  cycle: Identity()
-  thread: ThreadNumToLong()
-  bar: NumberNameToString()
-  foo: NumberNameToString()
-  customer: NumberNameToString()
+ alpha: Identity()
+ beta: NumberNameToString()
+ gamma: Combinations('0-9A-F;0-9;A-Z;_;p;r;o;')

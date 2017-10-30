@@ -12,9 +12,12 @@ import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.ExceptionMeterMetrics;
+import io.engineblock.planning.OpSequence;
+import io.engineblock.planning.SequencePlanner;
 import io.engineblock.util.StrInterpolater;
 import io.virtdata.core.AllDataMapperLibraries;
 import io.virtdata.core.BindingsTemplate;
+import io.virtdata.templates.StringBindings;
 import io.virtdata.templates.StringBindingsTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +46,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     private int retry_delay = 0;
     private int retries;
     private RateLimiter rateLimiter;
+    private OpSequence<StringBindings> opSequence;
 
     public StdoutActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -71,7 +75,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
         onActivityDefUpdate(activityDef);
 
-        templates = createTemplates();
+        opSequence = createTemplates();
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
         resultTimer = ActivityMetrics.timer(activityDef, "result");
@@ -97,35 +101,43 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         return pw;
     }
 
-    private List<StringBindingsTemplate> createTemplates() {
-        List<StringBindingsTemplate> stringBindingsTemplates = new ArrayList<>();
+    private OpSequence<StringBindings> createTemplates() {
+        //List<StringBindingsTemplate> stringBindingsTemplates = new ArrayList<>();
+        SequencePlanner.SequencerType sequencerType = SequencePlanner.SequencerType.valueOf(
+                getParams().getOptionalString("seq").orElse("bucket")
+        );
+        SequencePlanner<StringBindings> sequencer = new SequencePlanner<>(sequencerType);
+
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
         List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
         if (stmts.size() > 0) {
             for (StmtDef stmt : stmts) {
                 BindingsTemplate bt = new BindingsTemplate(AllDataMapperLibraries.get(), stmt.getBindings());
                 StringBindingsTemplate sbt = new StringBindingsTemplate(stmt.getStmt(), bt);
-                stringBindingsTemplates.add(sbt);
+                StringBindings sb = sbt.resolve();
+                sequencer.addOp(sb,Long.valueOf(stmt.getParams().getOrDefault("ratio","1")));
             }
         } else if (stmtsDocList.getDocBindings().size() > 0) {
             logger.debug("Creating stdout statement template from bindings, since none is otherwise defined.");
-            String generatedStmt = stmtsDocList.getDocBindings().values()
+            String generatedStmt = stmtsDocList.getDocBindings().keySet()
                     .stream().map(s -> "{" + s + "}")
                     .collect(Collectors.joining(",", "", "\n"));
             BindingsTemplate bt = new BindingsTemplate(AllDataMapperLibraries.get(), stmtsDocList.getDocBindings());
             StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
-            stringBindingsTemplates.add(sbt);
+            StringBindings sb = sbt.resolve();
+            sequencer.addOp(sb,1L);
         } else {
-            logger.error("Unable to create a stdout statement if you have no statements or bindings in your document.");
+            logger.error("Unable to create a stdout statement if you have no active statements or bindings configured.");
         }
 
+        OpSequence<StringBindings> opSequence = sequencer.resolve();
         if (getActivityDef().getCycleCount() == 0) {
             logger.debug("Adjusting cycle getChainSize for " + activityDef.getAlias() + " to " +
-                    stringBindingsTemplates.size());
-            getActivityDef().setCycles(String.valueOf(stringBindingsTemplates.size()));
+                    opSequence.opCount());
+            getActivityDef().setCycles(String.valueOf(opSequence.opCount()));
         }
 
-        return stringBindingsTemplates;
+        return opSequence;
     }
 
     public List<StringBindingsTemplate> getTemplates() {

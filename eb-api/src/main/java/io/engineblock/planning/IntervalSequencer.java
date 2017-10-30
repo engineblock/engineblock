@@ -71,13 +71,23 @@ public class IntervalSequencer<T> implements ElementSequencer<T> {
     private ToLongFunction<T> ratioFunc;
 
     @Override
-    public int[] sequenceByIndex(List<T> elements, ToLongFunction<T> ratioFunc) {
+    public int[] seqIndexByRatioFunc(List<T> elements, ToLongFunction<T> ratioFunc) {
 
-        List<IntervalSequencer.OpSlot<T>> ops = new ArrayList<>();
-
+        List<Long> ratios = new ArrayList<>();
         for (int i = 0; i < elements.size(); i++) {
             T elem = elements.get(i);
-            long freq = ratioFunc.applyAsLong(elem);
+            ratios.add(ratioFunc.applyAsLong(elem));
+        }
+        return seqIndexesByRatios(elements, ratios);
+    }
+
+    @Override
+    public int[] seqIndexesByRatios(List<T> elems, List<Long> ratios) {
+        List<IntervalSequencer.OpSlot<T>> ops = new ArrayList<>();
+
+        for (int i = 0; i < elems.size(); i++) {
+            T elem = elems.get(i);
+            long freq = ratios.get(i);
             for (int p = 0; p < freq; p++) {
                 double pos = (double) p / (double) freq;
                 ops.add(new IntervalSequencer.OpSlot<>(elem, pos, i));

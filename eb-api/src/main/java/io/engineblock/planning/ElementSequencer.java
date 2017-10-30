@@ -24,15 +24,17 @@ import java.util.stream.Collectors;
 
 public interface ElementSequencer<T> {
 
-    int[] sequenceByIndex(List<T> elems, ToLongFunction<T> ratioFunc);
+    int[] seqIndexByRatioFunc(List<T> elems, ToLongFunction<T> ratioFunc);
+    int[] seqIndexesByRatios(List<T> elems, List<Long> ratios);
 
-    default List<T> sequenceByElement(List<T> elems, ToLongFunction<T> ratioFunc) {
-        int[] ints = sequenceByIndex(elems, ratioFunc);
+    default List<T> seqElementsByRatioFunc(List<T> elems, ToLongFunction<T> ratioFunc) {
+        int[] ints = seqIndexByRatioFunc(elems, ratioFunc);
         return Arrays.stream(ints).mapToObj(elems::get).collect(Collectors.toList());
     }
 
     default String sequenceSummary(List<T> elems, ToLongFunction<T> ratioFunc, String delim) {
-        return sequenceByElement(elems,ratioFunc)
+        return seqElementsByRatioFunc(elems,ratioFunc)
                 .stream().map(String::valueOf).collect(Collectors.joining(delim));
     }
+
 }

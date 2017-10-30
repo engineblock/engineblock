@@ -30,13 +30,26 @@ import java.util.function.ToLongFunction;
 public class ConcatSequencer<T> implements ElementSequencer<T> {
 
     @Override
-    public int[] sequenceByIndex(List<T> elems, ToLongFunction<T> ratioFunc) {
+    public int[] seqIndexByRatioFunc(List<T> elems, ToLongFunction<T> ratioFunc) {
 
         List<Integer> sequence = new ArrayList<>();
 
         for (int elemIndex = 0; elemIndex < elems.size(); elemIndex++) {
             long runLength = ratioFunc.applyAsLong(elems.get(elemIndex));
             for (int i = 0; i < runLength; i++) {
+                sequence.add(i);
+            }
+        }
+        return sequence.stream().mapToInt(i -> (int)i).toArray();
+    }
+
+    @Override
+    public int[] seqIndexesByRatios(List<T> elems, List<Long> ratios) {
+        List<Integer> sequence = new ArrayList<>();
+
+        for (int elemIndex = 0; elemIndex < elems.size(); elemIndex++) {
+            long runLength = ratios.get(elemIndex);
+            for (int i = 0; i< runLength; i++) {
                 sequence.add(i);
             }
         }

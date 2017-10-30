@@ -25,8 +25,9 @@ import java.util.function.ToLongFunction;
 
 public class SequencePlanner<T> {
     private final static Logger logger = LoggerFactory.getLogger(SequencePlanner.class);
-
-    private final List<T> elements;
+    private SequencerType sequencerType;
+    private List<T> elements;
+    private List<Long> ratios;
     private int[] elementIndex;
 
     public enum SequencerType {
@@ -35,26 +36,92 @@ public class SequencePlanner<T> {
         concat
     }
 
-    public SequencePlanner(List<T> elements, ToLongFunction<T> ratioFunc, SequencerType sequencerType) {
+    public SequencePlanner(SequencerType sequencerType) {
+        this.sequencerType = sequencerType;
+    }
+
+    public void addOp(T elem, ToLongFunction<T> ratioFunc) {
+        this.elements.add(elem);
+        this.ratios.add(ratioFunc.applyAsLong(elem));
+    }
+
+    public void addOp(T elem, long func) {
+        this.elements.add(elem);
+        this.ratios.add(func);
+    }
+
+    public OpSequence<T> resolve() {
         switch (sequencerType) {
             case bucket:
                 logger.trace("sequencing elements by simple round-robin");
-                this.elementIndex = new BucketSequencer<T>().sequenceByIndex(elements,ratioFunc);
+                this.elementIndex = new BucketSequencer<T>().seqIndexesByRatios(elements,ratios);
                 break;
             case interval:
                 logger.trace("sequencing elements by interval and position");
-                this.elementIndex = new IntervalSequencer<T>().sequenceByIndex(elements,ratioFunc);
+                this.elementIndex = new IntervalSequencer<T>().seqIndexesByRatios(elements,ratios);
                 break;
             case concat:
                 logger.trace("sequencing elements by concatenation");
-                this.elementIndex = new ConcatSequencer<T>().sequenceByIndex(elements,ratioFunc);
+                this.elementIndex = new ConcatSequencer<T>().seqIndexesByRatios(elements,ratios);
         }
         this.elements = elements;
+        return new Sequence<>(elements,elementIndex);
     }
 
-    public T get(long selector) {
-        int index = (int) (selector % elementIndex.length);
-        index = elementIndex[index];
-        return elements.get(index);
+//    public SequencePlanner(List<T> elements, List<Long> ratios, SequencerType sequencerType) {
+//        switch (sequencerType) {
+//            case bucket:
+//                logger.trace("sequencing elements by simple round-robin");
+//                this.elementIndex = new BucketSequencer<T>().seqIndexesByRatios(elements,ratios);
+//                break;
+//            case interval:
+//                logger.trace("sequencing elements by interval and position");
+//                this.elementIndex = new IntervalSequencer<T>().seqIndexesByRatios(elements,ratios);
+//                break;
+//            case concat:
+//                logger.trace("sequencing elements by concatenation");
+//                this.elementIndex = new ConcatSequencer<T>().seqIndexesByRatios(elements,ratios);
+//        }
+//        this.elements = elements;
+//    }
+//
+//    public SequencePlanner(List<T> elements, ToLongFunction<T> ratioFunc, SequencerType sequencerType) {
+//        switch (sequencerType) {
+//            case bucket:
+//                logger.trace("sequencing elements by simple round-robin");
+//                this.elementIndex = new BucketSequencer<T>().seqIndexByRatioFunc(elements,ratioFunc);
+//                break;
+//            case interval:
+//                logger.trace("sequencing elements by interval and position");
+//                this.elementIndex = new IntervalSequencer<T>().seqIndexByRatioFunc(elements,ratioFunc);
+//                break;
+//            case concat:
+//                logger.trace("sequencing elements by concatenation");
+//                this.elementIndex = new ConcatSequencer<T>().seqIndexByRatioFunc(elements,ratioFunc);
+//        }
+//        this.elements = elements;
+//    }
+//
+    public static class Sequence<T> implements OpSequence<T> {
+        private final List<T> elems;
+        private final int[] seq;
+
+        public Sequence(List<T> elems, int[] seq) {
+            this.elems = elems;
+            this.seq = seq;
+        }
+
+        @Override
+        public T get(long selector) {
+            int index = (int) (selector % seq.length);
+            index = seq[index];
+            return elems.get(index);
+        }
+
+    @Override
+    public int opCount() {
+        return elems.size();
     }
+}
+
 }

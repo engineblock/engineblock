@@ -21,10 +21,7 @@ import activityconfig.rawyaml.RawStmtsDocList;
 import io.engineblock.util.TagFilter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class StmtsDocList implements Iterable<StmtsDoc> {
@@ -79,10 +76,10 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
      * @return A map of all bindings at the doc level.
      */
     public Map<String,String> getDocBindings() {
-        return this.getStmtDocs().stream()
+        LinkedHashMap<String,String> docBindings= new LinkedHashMap<>();
+        getStmtDocs().stream()
                 .map(StmtsDoc::getBindings)
-                .map(Map::entrySet)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toMap(Map.Entry::getKey,Map.Entry::getValue));
+                .forEach(docBindings::putAll);
+        return docBindings;
     }
 }

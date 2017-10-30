@@ -61,14 +61,29 @@ public class BucketSequencer<T> implements ElementSequencer<T> {
     private ToLongFunction<T> ratioFunc;
 
     @Override
-    public int[] sequenceByIndex(List<T> elems, ToLongFunction<T> ratioFunc) {
+    public int[] seqIndexByRatioFunc(List<T> elems, ToLongFunction<T> ratioFunc) {
 
+        List<Long> ratios = new ArrayList<>();
+        for (int i = 0; i< elems.size(); i++) {
+            T elem = elems.get(i);
+            ratios.add(ratioFunc.applyAsLong(elem));
+        }
+        return seqIndexesByRatios(elems,ratios);
+    }
+
+    @Override
+    public int[] seqIndexesByRatios(List<T> elems, List<Long> ratios) {
         List<OpBucket<T>> buckets = new ArrayList<>();
         List<Integer> sequence = new ArrayList<>();
 
+        if (elems.size()!=ratios.size()) {
+            throw new RuntimeException("Elements and Ratios must be pair-wise.");
+        }
+
         for (int i = 0; i < elems.size(); i++) {
             T elem = elems.get(i);
-            buckets.add(new OpBucket<>(elem,i,ratioFunc.applyAsLong(elem)));
+            long ratio = ratios.get(i);
+            buckets.add(new OpBucket<>(elem,i,ratio));
         }
 
         while(!buckets.isEmpty()) {
