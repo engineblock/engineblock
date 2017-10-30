@@ -17,8 +17,20 @@
 
 package io.engineblock.planning;
 
+/**
+ * Sequencer types are used to control the type of ordering used with a set of
+ * operations.
+ */
 public enum SequencerType {
+
+    /** Dispense all of the first element, then all of the second, and so forth. */
+    concat,
+
+    /** Dispense elements from pre-filled buckets in rotation until they are all empty. */
     bucket,
-    interval,
-    concat
+
+    /** Space out elements each according to their frequency over the unit interval, with
+    // order of appearance taking precedence over equal timing, then take all events in
+    // the order that they appear on the unit interval. */
+    interval
 }

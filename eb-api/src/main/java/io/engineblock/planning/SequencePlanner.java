@@ -20,14 +20,15 @@ package io.engineblock.planning;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.ToLongFunction;
 
 public class SequencePlanner<T> {
     private final static Logger logger = LoggerFactory.getLogger(SequencePlanner.class);
     private SequencerType sequencerType;
-    private List<T> elements;
-    private List<Long> ratios;
+    private List<T> elements = new ArrayList<>();
+    private List<Long> ratios = new ArrayList<>();
     private int[] elementIndex;
 
     public SequencePlanner(SequencerType sequencerType) {
