@@ -47,6 +47,11 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     private int retry_delay = 0;
     private int retries;
     private RateLimiter rateLimiter;
+
+    public OpSequence<StringBindings> getOpSequence() {
+        return opSequence;
+    }
+
     private OpSequence<StringBindings> opSequence;
 
     public StdoutActivity(ActivityDef activityDef) {
@@ -76,7 +81,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
         onActivityDefUpdate(activityDef);
 
-        opSequence = createTemplates();
+        opSequence = initOpSequencer();
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
         resultTimer = ActivityMetrics.timer(activityDef, "result");
@@ -102,7 +107,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         return pw;
     }
 
-    private OpSequence<StringBindings> createTemplates() {
+    private OpSequence<StringBindings> initOpSequencer() {
         //List<StringBindingsTemplate> stringBindingsTemplates = new ArrayList<>();
         SequencerType sequencerType = SequencerType.valueOf(
                 getParams().getOptionalString("seq").orElse("bucket")
@@ -139,10 +144,6 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         }
 
         return opSequence;
-    }
-
-    public List<StringBindingsTemplate> getTemplates() {
-        return templates;
     }
 
     @Override
