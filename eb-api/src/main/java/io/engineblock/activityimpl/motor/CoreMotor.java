@@ -181,8 +181,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             }
 
             long cyclenum;
-//            AtomicLong cycleMax = input.getMaxCycle();
-
             action.init();
 
             while (slotState.get() == Running) {
@@ -201,20 +199,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
                 CycleResultSegmentBuffer segBuffer = new CycleResultSegmentBuffer(stride);
 
-
-//                long thisIntervalStart = input.getCycleInterval(stride);
-//                long nextIntervalStart = thisIntervalStart + stride;
-//
-//                if (action instanceof StrideAware) {
-//                    ((StrideAware) action).setInterval(thisIntervalStart, stride);
-//                }
-//
-//                if (thisIntervalStart >= cycleMax.get()) {
-//                    logger.trace("input exhausted (input " + thisIntervalStart + "), stopping motor thread " + slotId);
-//                    slotStateTracker.enterState(Finished);
-//                    continue;
-//                }
-
                 try (Timer.Context stridesTime = stridesTimer.time()) {
                     while (!cycleSegment.isExhausted()) {
                         cyclenum = cycleSegment.nextCycle();
@@ -226,9 +210,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                             }
                         }
 
-//                    }
-//                    for (cyclenum = thisIntervalStart; cyclenum < nextIntervalStart; cyclenum++) {
-
                         if (slotState.get() != Running) {
                             logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
                             continue;
@@ -236,7 +217,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                         int result = -1;
                         try (Timer.Context cycleTime = cyclesTimer.time()) {
 
-                            //logger.trace("cycle " + cyclenum);
+                            logger.trace("cycle " + cyclenum);
                             try (Timer.Context phaseTime = phasesTimer.time()) {
                                 result = action.runCycle(cyclenum);
                             }
@@ -269,7 +250,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                 }
             }
 
-            //MetricsContext.getInstance().getMetrics().getTimers().get("foo").getMeanRate();
             if (slotState.get() == Stopping) {
                 slotStateTracker.enterState(Stopped);
             }

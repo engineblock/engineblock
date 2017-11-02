@@ -63,6 +63,9 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
 
     @Override
     public CycleSegment getInputSegment(int stride) {
+        if (rateLimiter!=null) {
+            rateLimiter.acquire();
+        }
         while (true) {
             long current = this.cycleValue.get();
             long next = current + stride;
