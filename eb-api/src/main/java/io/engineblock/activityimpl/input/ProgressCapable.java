@@ -22,4 +22,5 @@ package io.engineblock.activityimpl.input;
  */
 public interface ProgressCapable {
     double getProgress();
+    double getTotal();
 }
