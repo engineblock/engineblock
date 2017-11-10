@@ -82,7 +82,7 @@ public class HistoStatsCSVWriter {
     }
 
     public void outputLegend() {
-        writer.format(Locale.US, "#Tag,Interval_Start,Interval_Length,getChainSize,min,p25,p50,p75,p90,p95,p98,p99,p999,p9999,max\n");
+        writer.format(Locale.US, "#Tag,Interval_Start,Interval_Length,count,min,p25,p50,p75,p90,p95,p98,p99,p999,p9999,max\n");
     }
 
     public void writeInterval(Histogram h) {
