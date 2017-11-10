@@ -112,25 +112,24 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
     }
 
     private void updateRateLimiter(ActivityDef activityDef) {
-        double rate = activityDef.getParams().getOptionalDoubleUnitCount("targetrate").orElse(Double.NaN);
-        if (!Double.isNaN(rate)) {
+        activityDef.getParams().getOptionalDoubleUnitCount("targetrate").ifPresent(
+        rate -> {
             if (rateLimiter==null) {
                 rateLimiter = RateLimiter.create(rate);
             } else {
+                double oldRate = rateLimiter.getRate();
                 rateLimiter.setRate(rate);
-            }
-
-            Gauge<Double> rateGauge = new Gauge<Double>() {
-                @Override
-                public Double getValue() {
-                    return rateLimiter.getRate();
+                double newRate = rateLimiter.getRate();
+                // RateLimiter turns 30000.0 into 29999.999999999996 so we check if the internal value changed here
+                if(oldRate == newRate)
+                {
+                    return;
                 }
-            };
-
+            }
+            Gauge<Double> rateGauge = () -> rateLimiter.getRate();
             ActivityMetrics.gauge(activityDef,"targetrate",rateGauge);
-
-            logger.info("targetrate was set to:" + rate);
-        }
+            logger.info("targetrate was set to: " + rate);
+        });
     }
 
     public RateLimiter getRateLimiter() {
