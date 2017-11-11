@@ -18,6 +18,7 @@
 package io.engineblock.metrics;
 
 import org.HdrHistogram.EncodableHistogram;
+import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogReader;
 import org.HdrHistogram.Recorder;
 import org.testng.annotations.Test;
@@ -41,8 +42,10 @@ public class HistoIntervalLoggerTest {
 
         HistoIntervalLogger hil = new HistoIntervalLogger("loggertest", tempFile, Pattern.compile(".*"), 1000);
 
+        final int significantDigits = 4;
+
         NicerHistogram nicerHistogram = new NicerHistogram(
-                "histo1", new DeltaHdrHistogramReservoir("histo1", new Recorder(4)));
+                "histo1", new DeltaHdrHistogramReservoir("histo1", significantDigits));
 
         hil.onHistogramAdded("histo1",nicerHistogram);
 
@@ -61,6 +64,8 @@ public class HistoIntervalLoggerTest {
         hil.onHistogramRemoved("histo1");
         moments.add(System.currentTimeMillis()); // 6
 
+        hil.closeMetrics();
+
         HistogramLogReader hlr = new HistogramLogReader(tempFile.getAbsolutePath());
         List<EncodableHistogram> histos = new ArrayList<>();
         EncodableHistogram histogram;
@@ -71,9 +76,10 @@ public class HistoIntervalLoggerTest {
             }
             histos.add(histogram);
         };
+
         assertThat(histos.size()).isEqualTo(2);
-
-
+        assertThat(histos.get(0)).isInstanceOf(Histogram.class);
+        assertThat(((Histogram)histos.get(0)).getNumberOfSignificantValueDigits()).isEqualTo(significantDigits);
     }
 
     private void delay(int i) {
