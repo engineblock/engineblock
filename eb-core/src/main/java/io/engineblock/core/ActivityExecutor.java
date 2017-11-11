@@ -418,19 +418,21 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         double totalCycles = endCycle - startCycle;
 
         double total = 0.0D;
+        double progress = 0.0D;
 
-        double progress=0.0D;
         for (Input input : inputs) {
             if (input instanceof ProgressCapable) {
-                double ip = ((ProgressCapable)input).getProgress();
-                progress+=ip;
+                ProgressCapable progressInput = (ProgressCapable) input;
+                total += progressInput.getTotal();
+                progress += progressInput.getProgress();
+
             } else {
+                logger.warn("input does not support activity progress: " + input);
                 return Double.NaN;
             }
         }
 
-        long inputCount = inputs.stream().distinct().count();
-        return progress / (double) inputCount;
+        return progress / total;
     }
 
     @Override

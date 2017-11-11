@@ -75,8 +75,7 @@ public class ProgressIndicator implements Runnable {
     public void run() {
         Collection<ProgressMeter> progressMeters = sc.getProgressMeters();
         for (ProgressMeter meter : progressMeters) {
-            String progress = meter.getProgressName() + ": " +
-                    String.format(Locale.US, "%s%%", formatProgress(meter.getProgress())) + "/" + meter.getProgressState();
+            String progress = meter.getProgressName() + ": " + formatProgress(meter.getProgress()) + "/" + meter.getProgressState();
             switch (indicatorMode) {
                 case console:
                     System.out.println(progress);
