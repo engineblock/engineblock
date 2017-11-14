@@ -119,6 +119,11 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         if (stmts.size() > 0) {
             for (StmtDef stmt : stmts) {
                 BindingsTemplate bt = new BindingsTemplate(AllDataMapperLibraries.get(), stmt.getBindings());
+                String statement = stmt.getStmt();
+                if (!statement.endsWith("\n") && getParams().getOptionalBoolean("newline").orElse(true)) {
+                    statement = statement+"\n";
+                }
+
                 StringBindingsTemplate sbt = new StringBindingsTemplate(stmt.getStmt(), bt);
                 StringBindings sb = sbt.resolve();
                 sequencer.addOp(sb,Long.valueOf(stmt.getParams().getOrDefault("ratio","1")));
@@ -127,7 +132,11 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
             logger.debug("Creating stdout statement template from bindings, since none is otherwise defined.");
             String generatedStmt = stmtsDocList.getDocBindings().keySet()
                     .stream().map(s -> "{" + s + "}")
-                    .collect(Collectors.joining(",", "", "\n"));
+                    .collect(Collectors.joining(","));
+            if (getParams().getOptionalBoolean("newline").orElse(true)) {
+                generatedStmt=generatedStmt+"\n";
+            }
+
             BindingsTemplate bt = new BindingsTemplate(AllDataMapperLibraries.get(), stmtsDocList.getDocBindings());
             StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
             StringBindings sb = sbt.resolve();
