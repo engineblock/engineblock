@@ -14,6 +14,8 @@
 */
 package io.engineblock.core;
 
+import io.engineblock.activityapi.IShutdown;
+
 import java.util.LinkedList;
 
 /**

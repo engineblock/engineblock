@@ -20,7 +20,7 @@ package io.engineblock.metrics;
 import com.codahale.metrics.*;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
-import io.engineblock.core.IShutdown;
+import io.engineblock.activityapi.IShutdown;
 import io.engineblock.core.ShutdownManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
