@@ -21,7 +21,6 @@ import com.codahale.metrics.*;
 import io.engineblock.activityapi.core.MetricRegistryService;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.util.Unit;
-import org.HdrHistogram.Recorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -256,6 +255,10 @@ public class ActivityMetrics {
                 .build();
         consoleReporter.report();
         out.println("====================   END-METRIC-LOG   ====================");
+    }
+
+    public static void mountSubRegistry(String mountPrefix, MetricRegistry subRegistry) {
+        new MetricsRegistryMount(getMetricRegistry(),subRegistry,mountPrefix);
     }
 
 }
