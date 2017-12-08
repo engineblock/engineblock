@@ -78,6 +78,10 @@ Specify the graphite destination and enable reporting
 
     --report-graphite-to <addr>[:<port>]
 
+Specify the interval for graphite or CSV reporting in seconds (default: 10)
+
+    --report-interval <interval-seconds>
+
 Specify the metrics name prefix for graphite reporting
 
     --metrics-prefix <metrics-prefix>

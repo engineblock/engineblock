@@ -21,10 +21,12 @@ public class TestEBCLIOptions {
 
     @Test
     public void shouldParseLongActivityForm() {
-        EBCLIOptions opts = new EBCLIOptions(new String[]{"start", "param1=param2", "param3=param4", "--report-graphite-to", "woot"});
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"start", "param1=param2", "param3=param4",
+                                                          "--report-graphite-to", "woot", "--report-interval", "23"});
         assertThat(opts.getCommands().size()).isEqualTo(1);
         assertThat(opts.getCommands().get(0).getCmdSpec()).isEqualTo("param1=param2;param3=param4;");
         assertThat(opts.wantsReportGraphiteTo()).isEqualTo("woot");
+        assertThat(opts.getReportInterval()).isEqualTo(23);
     }
 
     @Test
