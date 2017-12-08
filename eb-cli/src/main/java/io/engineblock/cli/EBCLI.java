@@ -107,7 +107,7 @@ public class EBCLI {
             if (options.wantsReportCsvTo() != null) {
                 reporters.addCSVReporter(options.wantsReportCsvTo(), options.wantsMetricsPrefix());
             }
-            reporters.start(10, 10);
+            reporters.start(10, options.getReportInterval());
         }
 
         String timestamp = String.valueOf(System.currentTimeMillis());

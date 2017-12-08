@@ -51,6 +51,7 @@ public class EBCLIOptions {
     private static final String WANTS_INFO_CONSOLE_LOGGING = "-v";
     private static final String WANTS_DEBUG_CONSOLE_LOGGING = "-vv";
     private static final String WANTS_TRACE_CONSOLE_LOGGING = "-vvv";
+    private static final String REPORT_INTERVAL = "--report-interval";
     private static final String REPORT_GRAPHITE_TO = "--report-graphite-to";
     private static final String REPORT_CSV_TO = "--report-csv-to";
     private static final String METRICS_PREFIX = "--metrics-prefix";
@@ -73,6 +74,7 @@ public class EBCLIOptions {
     private boolean wantsBasicHelp = false;
     private String reportGraphiteTo = null;
     private String reportCsvTo = null;
+    private int reportInterval = 10;
     private String metricsPrefix = "engineblock.";
     private String wantsMetricsForActivity;
     private boolean wantsAdvancedHelp = false;
@@ -205,6 +207,10 @@ public class EBCLIOptions {
                     String logStatsTo = arglist.removeFirst();
                     statsLoggerConfigs.add(logStatsTo);
                     break;
+                case REPORT_INTERVAL:
+                    arglist.removeFirst();
+                    reportInterval = Integer.valueOf(readWordOrThrow(arglist, "report interval"));
+                    break;
                 case REPORT_CSV_TO:
                     arglist.removeFirst();
                     reportCsvTo = arglist.removeFirst();
@@ -299,6 +305,10 @@ public class EBCLIOptions {
 
     public boolean wantsAdvancedHelp() {
         return wantsAdvancedHelp;
+    }
+
+    public int getReportInterval() {
+        return reportInterval;
     }
 
     public String wantsReportGraphiteTo() {
