@@ -70,6 +70,13 @@ Specify a limit on logfiles (old files will be purged)
 
     --log-max <count>
 
+Specify the logging pattern:
+
+    --with-logging-pattern '%date %level [%thread] %logger{10} [%file:%line] %msg%n'
+
+    ( default: '%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n' )
+    ( See https://logback.qos.ch/manual/layouts.html#ClassicPatternLayout for format options )
+
 Specify a directory and enable CSV reporting of metrics:
 
     --report-csv-to <dirname>

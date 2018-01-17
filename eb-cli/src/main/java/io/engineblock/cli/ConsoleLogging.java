@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConsoleLogging {
 
-    public static void enableConsoleLogging(Level level) {
+    public static void enableConsoleLogging(Level level, String loggingPattern) {
 
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         //List<LoggerContextListener> copyOfListenerList = loggerContext.getCopyOfListenerList();
@@ -39,8 +39,7 @@ public class ConsoleLogging {
         ca.setContext(loggerContext);
 
         PatternLayoutEncoder ple = new PatternLayoutEncoder();
-//        ple.setPattern("%date %level [%thread] %logger{10} [%file:%line] %msg%n");
-        ple.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
+        ple.setPattern(loggingPattern);
         ple.setContext(loggerContext);
         ple.start();
         ca.setEncoder(ple);
@@ -52,7 +51,6 @@ public class ConsoleLogging {
         Logger root = loggerContext.getLogger("ROOT");
         root.addAppender(ca);
         root.setLevel(Level.TRACE);
-
     }
 
     private static class LevelFilter extends AbstractMatcherFilter {
