@@ -56,6 +56,7 @@ public class EBCLIOptions {
     private static final String REPORT_CSV_TO = "--report-csv-to";
     private static final String METRICS_PREFIX = "--metrics-prefix";
     private static final String PROGRESS_INDICATOR = "--progress";
+    private static final String WITH_LOGGING_PATTERN = "--with-logging-pattern";
 
     private static final Set<String> reserved_words = new HashSet<String>() {{
         addAll(
@@ -64,6 +65,7 @@ public class EBCLIOptions {
                 )
         );
     }};
+    private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
     private LinkedList<Cmd> cmdList = new LinkedList<>();
     private int maxLogs = 0;
@@ -89,6 +91,7 @@ public class EBCLIOptions {
     private boolean wantsMarkerTypes=false;
     private String[] rleDumpOptions = new String[0];
     private String[] cyclelogImportOptions = new String[0];
+    private String consoleLoggingPattern = DEFAULT_CONSOLE_LOGGING_PATTERN;
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -246,6 +249,10 @@ public class EBCLIOptions {
                 case WANTS_TRACE_CONSOLE_LOGGING:
                     consoleLevel = Level.TRACE;
                     arglist.removeFirst();
+                    break;
+                case WITH_LOGGING_PATTERN:
+                    arglist.removeFirst();
+                    consoleLoggingPattern = readWordOrThrow(arglist, "logging pattern");
                     break;
                 default:
                     Optional<InputStream> optionalScript =
@@ -438,6 +445,10 @@ public class EBCLIOptions {
     }
     public String[] getCycleLogExporterOptions() {
         return rleDumpOptions;
+    }
+
+    public String getConsoleLoggingPattern() {
+        return consoleLoggingPattern;
     }
 
     public static enum CmdType {

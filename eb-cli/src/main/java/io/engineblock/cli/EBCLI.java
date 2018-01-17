@@ -123,7 +123,7 @@ public class EBCLI {
             ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
         }
 
-        ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel());
+        ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel(), options.getConsoleLoggingPattern());
         // intentionally not shown for warn-only
         logger.info("console logging level is " + options.wantsConsoleLogLevel());
 
