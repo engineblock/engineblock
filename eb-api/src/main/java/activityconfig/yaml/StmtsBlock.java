@@ -26,9 +26,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StmtsBlock implements Tagged, Iterable<StmtDef> {
 
+    private final static String NameToken = "name";
+    private final static String StmtToken = "stmt";
+    private final static Pattern namePattern = Pattern.compile("(?<" + NameToken + ">\\S+)(--|>|:)\\s*(?<" + StmtToken + ">.+)");
     private final RawStmtsBlock rawStmtsBlock;
     private final String blockName;
     private StmtsDoc rawStmtsDoc;
@@ -47,9 +52,17 @@ public class StmtsBlock implements Tagged, Iterable<StmtDef> {
 
         List<String> statements = rawStmtsBlock.getStatements();
         for (int stmt = 0; stmt < statements.size(); stmt++) {
-            String stmtName = getName() + "--" + (stmt + 1);
             String statement = statements.get(stmt);
-            StmtDef stmtDef = new StmtDef(this,stmtName, statement);
+            String stmtName = getName() + "--" + (stmt + 1);
+            Matcher nameMatcher = namePattern.matcher(statement);
+            if (nameMatcher.matches()) {
+                statement = nameMatcher.group(StmtToken);
+                stmtName = nameMatcher.group(NameToken);
+                if (stmtName.startsWith("--")) {
+                    stmtName = getName() + stmtName;
+                }
+            }
+            StmtDef stmtDef = new StmtDef(this, stmtName, statement);
             rawStmtDefs.add(stmtDef);
         }
         return rawStmtDefs;
@@ -72,7 +85,7 @@ public class StmtsBlock implements Tagged, Iterable<StmtDef> {
         return new MultiMapLookup(rawStmtsBlock.getTags(), rawStmtsDoc.getTags());
     }
 
-    public Map<String,String> getParams() {
+    public Map<String, String> getParams() {
         return new MultiMapLookup(rawStmtsBlock.getParams(), rawStmtsDoc.getParams());
     }
 

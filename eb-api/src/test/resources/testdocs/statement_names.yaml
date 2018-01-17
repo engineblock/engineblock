@@ -1,0 +1,9 @@
+statements:
+ - "thefirst: the_first_statement_body"
+ - "the_second_statement_body"
+ - "--thethird:the third statement body"
+ - thefourth> the fourth statement body
+ - >-
+  thefifth--
+  This is the fifth statement body.
+ - This does> not count

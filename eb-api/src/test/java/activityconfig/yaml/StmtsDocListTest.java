@@ -56,6 +56,32 @@ public class StmtsDocListTest {
     }
 
     @Test
+    public void testStatementNameOverride() {
+        StmtsDocList doclist2 = StatementsLoader.load(logger, "testdocs/statement_names.yaml");
+        assertThat(doclist2).isNotNull();
+        assertThat(doclist2.getStmtDocs()).hasSize(1);
+        StmtsDoc doc1 = doclist2.getStmtDocs().get(0);
+        assertThat(doc1.getBlocks()).hasSize(1);
+        StmtsBlock doc1block1 = doc1.getBlocks().get(0);
+        assertThat(doc1block1.getStmts()).hasSize(6);
+        List<StmtDef> stmts = doc1block1.getStmts();
+        assertThat(stmts.get(0).getName()).isEqualTo("thefirst");
+        assertThat(stmts.get(0).getStmt()).isEqualTo("the_first_statement_body");
+        assertThat(stmts.get(1).getName()).isEqualTo("block0--2");
+        assertThat(stmts.get(1).getStmt()).isEqualTo("the_second_statement_body");
+        assertThat(stmts.get(2).getName()).isEqualTo("block0--thethird");
+        assertThat(stmts.get(2).getStmt()).isEqualTo("the third statement body");
+        assertThat(stmts.get(3).getName()).isEqualTo("thefourth");
+        assertThat(stmts.get(3).getStmt()).isEqualTo("the fourth statement body");
+        assertThat(stmts.get(4).getName()).isEqualTo("thefifth");
+        assertThat(stmts.get(4).getStmt()).isEqualTo("This is the fifth statement body.");
+        assertThat(stmts.get(5).getName()).isEqualTo("block0--6");
+        assertThat(stmts.get(5).getStmt()).isEqualTo("This does> not count");
+    }
+
+
+
+    @Test
     public void testBlocksInheritDocData() {
         assertThat(doclist).isNotNull();
         assertThat(doclist.getStmtDocs()).hasSize(2);
