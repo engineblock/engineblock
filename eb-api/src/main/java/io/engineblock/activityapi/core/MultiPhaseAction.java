@@ -33,7 +33,7 @@ public interface MultiPhaseAction extends Action {
     /**
      * Signal to the caller whether or not the current multi-phase is completed.
      *
-     * @return true when completed.
+     * @return true when the action is not yet complete.
      */
     boolean incomplete();
 
