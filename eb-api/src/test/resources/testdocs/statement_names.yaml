@@ -7,3 +7,6 @@ statements:
   thefifth--
   This is the fifth statement body.
  - This does> not count
+ - |
+   blockform> should work
+   even for multiple lines

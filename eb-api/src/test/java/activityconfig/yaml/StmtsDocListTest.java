@@ -63,7 +63,7 @@ public class StmtsDocListTest {
         StmtsDoc doc1 = doclist2.getStmtDocs().get(0);
         assertThat(doc1.getBlocks()).hasSize(1);
         StmtsBlock doc1block1 = doc1.getBlocks().get(0);
-        assertThat(doc1block1.getStmts()).hasSize(6);
+        assertThat(doc1block1.getStmts()).hasSize(7);
         List<StmtDef> stmts = doc1block1.getStmts();
         assertThat(stmts.get(0).getName()).isEqualTo("thefirst");
         assertThat(stmts.get(0).getStmt()).isEqualTo("the_first_statement_body");
@@ -77,6 +77,9 @@ public class StmtsDocListTest {
         assertThat(stmts.get(4).getStmt()).isEqualTo("This is the fifth statement body.");
         assertThat(stmts.get(5).getName()).isEqualTo("block0--6");
         assertThat(stmts.get(5).getStmt()).isEqualTo("This does> not count");
+        assertThat(stmts.get(6).getName()).isEqualTo("blockform");
+        assertThat(stmts.get(6).getStmt()).isEqualTo("should work\neven for multiple lines");
+
     }
 
 

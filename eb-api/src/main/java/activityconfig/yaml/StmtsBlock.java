@@ -33,7 +33,10 @@ public class StmtsBlock implements Tagged, Iterable<StmtDef> {
 
     private final static String NameToken = "name";
     private final static String StmtToken = "stmt";
-    private final static Pattern namePattern = Pattern.compile("(?<" + NameToken + ">\\S+)(--|>|:)\\s*(?<" + StmtToken + ">.+)");
+    private final static Pattern namePattern = Pattern.compile(
+            "(?<" + NameToken + ">\\S+)(--|>|:)\\s*(?<" + StmtToken + ">.+)"
+            , Pattern.DOTALL
+    );
     private final RawStmtsBlock rawStmtsBlock;
     private final String blockName;
     private StmtsDoc rawStmtsDoc;
