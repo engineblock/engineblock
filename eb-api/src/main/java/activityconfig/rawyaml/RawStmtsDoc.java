@@ -32,53 +32,49 @@ import java.util.List;
  * create confusion. The compromise was to allow for either, but
  * specifically disallow them together.
  */
-public class RawStmtsDoc extends BlockParams {
+public class RawStmtsDoc extends StatementsOwner {
 
     private List<RawStmtsBlock> blocks = new ArrayList<>();
-    private List<String> statements = new ArrayList<>();
 
-    public List<String> getStatements() {
-        return statements;
-    }
-
-    public void setStatements(List<String> statements) {
-
-        if (!blocks.isEmpty()) {
-            throw new RuntimeException("presently, you must pick between having " +
-                    "blocks and statement at the document level. This on already has blocks." +
-                    " Add your statements under it.");
-        }
-        this.statements.clear();
-        this.statements.addAll(statements);
-    }
+//    public void setStatements(List<RawStmtDef> statements) {
+//
+//        if (!blocks.isEmpty()) {
+//            throw new RuntimeException("presently, you must pick between having " +
+//                    "blocks and statement at the document level. This on already has blocks." +
+//                    " Add your statements under it.");
+//        }
+//        this.statements.clear();
+//        this.statements.addAll(statements);
+//    }
+//
 
     /**
-     * Return the list of statement blocks in this StmtsDoc.
-     * If raw statements are defined on this StmtsDoc, then a single
+     * Return the list of statement blocks in this RawStmtsDoc.
+     * If raw statements are defined on this RawStmtsDoc, then a single
      * StmtBlock containing those statements is returned. Otherwise,
      * the list of StmtBlocks is returned.
      *
      * @return all logical statement blocks containing statements
      */
     public List<RawStmtsBlock> getBlocks() {
-        if (blocks.isEmpty() && !statements.isEmpty()) {
-            return new ArrayList<RawStmtsBlock>() {{
-                RawStmtsBlock rawStmtsBlock = new RawStmtsBlock(statements);
-                rawStmtsBlock.setName("block0");
-                add(rawStmtsBlock);
-            }};
-        } else {
-            return blocks;
+        List<RawStmtsBlock> stmtBlocks = new ArrayList<>();
+        if (!getRawStmtDefs().isEmpty()) {
+            RawStmtsBlock rawStmtsBlock = new RawStmtsBlock();
+            rawStmtsBlock.setName("block0");
+            rawStmtsBlock.setRawStmtDefs(getRawStmtDefs());
+            stmtBlocks.add(rawStmtsBlock);
         }
+        stmtBlocks.addAll(this.blocks);
+        return stmtBlocks;
     }
 
     public void setBlocks(List<RawStmtsBlock> blocks) {
-        if (!statements.isEmpty()) {
-            throw new RuntimeException("presently, you must pick between having " +
-                    "blocks and statement at the document level." +
-                    " This one already has statements. You can move " +
-                    "them to a new blocks section");
-        }
+//        if (!statements.isEmpty()) {
+//            throw new RuntimeException("presently, you must pick between having " +
+//                    "blocks and statement at the document level." +
+//                    " This one already has statements. You can move " +
+//                    "them to a new blocks section");
+//        }
         this.blocks.clear();
         this.blocks.addAll(blocks);
     }

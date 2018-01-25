@@ -31,8 +31,8 @@ blocks:
    tags:
      root1: value23
    statements:
-    - s13
-    - s14
+    s13: statement thirteen
+    s14: statement fourteen
 params:
  foobar: beez
 bindings:
