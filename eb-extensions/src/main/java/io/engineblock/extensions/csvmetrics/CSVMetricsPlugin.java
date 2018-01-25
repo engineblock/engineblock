@@ -37,14 +37,14 @@ public class CSVMetricsPlugin {
 
     public CSVMetrics log(String filename) {
         CSVMetrics csvMetrics = new CSVMetrics(filename, logger, metricRegistry);
-        writeStdout("started new csvlogger: " + filename);
+        writeStdout("started new csvlogger: " + filename + "\n");
         return csvMetrics;
     }
 
     public CSVMetrics log(String filename, long period, String timeUnit) {
         TimeUnit mappedTimeUnit = TimeUnit.valueOf(timeUnit);
         CSVMetrics csvMetrics = new CSVMetrics(filename, logger, metricRegistry, period, mappedTimeUnit);
-        writeStdout("started new csvlogger: " + filename);
+        writeStdout("started new csvlogger: " + filename + "\n");
         return csvMetrics;
     }
 
