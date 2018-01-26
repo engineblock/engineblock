@@ -34,7 +34,7 @@
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
-            <version>3.2.2</version>
+            <version>4.0.2</version>
         </dependency>
 
         <dependency>
@@ -47,19 +47,19 @@
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-graphite</artifactId>
-            <version>3.2.2</version>
+            <version>4.0.2</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.6</version>
+            <version>3.7</version>
         </dependency>
 
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>20.0</version>
+            <version>23.6-jre</version>
         </dependency>
 
         <!-- only testing scope -->
@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.11</version>
+            <version>6.13.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
-            <version>1.0-rc3</version>
+            <version>1.0-rc4</version>
             <optional>true</optional>
             <scope>compile</scope>
         </dependency>
