@@ -113,7 +113,8 @@ public class RawYamlStatementLoader {
         charmer.addHandler(StatementsOwner.class, "statement", new StatementsReader());
 
         TypeDescription tds = new TypeDescription(RawStmtsDoc.class);
-        tds.addPropertyParameters("blocks", RawStmtsBlock.class);
+        tds.putListPropertyType("blocks",RawStmtsBlock.class);
+        //tds.addPropertyParameters("blocks", RawStmtsBlock.class);
         charmer.addTypeDescription(tds);
 
         return new Yaml(charmer);
