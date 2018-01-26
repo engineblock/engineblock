@@ -31,13 +31,13 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
-public class RawStmtDefsTest {
+public class RawStmtDefDefsTest {
 
-    private final static Logger logger = LoggerFactory.getLogger(RawStmtDefsTest.class);
+    private final static Logger logger = LoggerFactory.getLogger(RawStmtDefDefsTest.class);
     @Test
     public void testLayering() {
 
-        StmtsDocList all = StatementsLoader.load(logger, "testdocs/everything.yaml");
+        StmtsDocList all = StatementsLoader.load(logger, "testdocs/docs_blocks_stmts.yaml");
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(2);
         StmtsDoc doc1 = all.getStmtDocs().get(0);
@@ -64,7 +64,7 @@ public class RawStmtDefsTest {
 
     @Test
     public void testStatementRendering() {
-        StmtsDocList all = StatementsLoader.load(logger, "testdocs/everything.yaml");
+        StmtsDocList all = StatementsLoader.load(logger, "testdocs/docs_blocks_stmts.yaml");
         assertThat(all).isNotNull();
         assertThat(all.getStmtDocs()).hasSize(2);
         StmtsDoc doc1 = all.getStmtDocs().get(0);
@@ -73,7 +73,7 @@ public class RawStmtDefsTest {
         List<StmtDef> assys = block1.getStmts();
         assertThat(assys).hasSize(2);
         StmtDef sdef1 = assys.get(0);
-        assertThat(sdef1.getName()).isEqualTo("doc1--block0--1");
+        assertThat(sdef1.getName()).isEqualTo("doc1--block0--stmt1");
         assertThat(assys.get(0).getStmt()).isEqualTo("s1");
 
     }

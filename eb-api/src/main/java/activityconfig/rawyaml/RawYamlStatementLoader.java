@@ -17,17 +17,19 @@
 
 package activityconfig.rawyaml;
 
+import activityconfig.snakecharmer.SnakeYamlCharmer;
 import io.engineblock.activityimpl.ActivityInitializationError;
 import io.engineblock.util.EngineBlockFiles;
+import jdk.nashorn.internal.runtime.ParserException;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -43,36 +45,42 @@ public class RawYamlStatementLoader {
         this.addTransformer(stringTransformer);
     }
 
+    public RawStmtsDocList load(Logger logger, String fromPath, String... searchPaths) {
+        String data = loadRawFile(logger, fromPath, searchPaths);
+        data = applyTransforms(logger, data);
+        return parseYaml(logger, data);
+    }
+
     public void addTransformer(Function<String, String> transformer) {
         stringTransformers.add(transformer);
     }
 
-    protected String loadAndTransform(Logger logger, String fromPath, String... searchPaths) {
+    protected String loadRawFile(Logger logger, String fromPath, String... searchPaths) {
         InputStream stream = EngineBlockFiles.findRequiredStreamOrFile(fromPath, "yaml", searchPaths);
-        String data;
-
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream))) {
-            data = buffer.lines().collect(Collectors.joining("\n"));
+            return buffer.lines().collect(Collectors.joining("\n"));
         } catch (Exception e) {
-            throw new RuntimeException("Error while reading yaml stream data:" + e);
+            throw new RuntimeException(
+                    "Error while reading YAML from search paths:" + Arrays.toString(searchPaths) + ":" + e.getMessage(), e
+            );
         }
+    }
 
+    protected String applyTransforms(Logger logger, String data) {
         for (Function<String, String> xform : stringTransformers) {
             try {
-                if (logger!=null) logger.debug("Applying string transformer to yaml data:" + xform);
+                if (logger != null) logger.debug("Applying string transformer to yaml data:" + xform);
                 data = xform.apply(data);
             } catch (Exception e) {
-                RuntimeException t = new ActivityInitializationError("Error applying string transform to input", e);
-                if (logger!=null) logger.error(t.getMessage(), t);
+                RuntimeException t = new ActivityInitializationError("Error applying string applyTransforms to input", e);
+                if (logger != null) logger.error(t.getMessage(), t);
                 throw t;
             }
         }
         return data;
     }
 
-    public RawStmtsDocList load(Logger logger, String fromPath, String... searchPaths) {
-        String data = loadAndTransform(logger, fromPath,searchPaths);
-
+    protected RawStmtsDocList parseYaml(Logger logger, String data) {
         Yaml yaml = getCustomYaml();
 
         try {
@@ -83,18 +91,48 @@ public class RawYamlStatementLoader {
                 stmtListList.add(tgsd);
             }
             return new RawStmtsDocList(stmtListList);
+        } catch (ParserException pe) {
+            if (logger != null) logger.error("yaml-parsing-error: Error parsing YAML:"
+                    + pe.getMessage() + "" +
+                    " For more details on this error see " +
+                    "http://docs.engineblock.io/user-guide/standard_yaml_errors/#yaml-parsing-error", pe);
+            throw pe;
         } catch (Exception e) {
-            if (logger!=null) logger.error("Error loading yaml from " + fromPath, e);
+            if (logger != null) logger.error("yaml-construction-error: Error building configuration:"
+                    + e.getMessage() + "" +
+                    " For more details on this error see " +
+                    "http://docs.engineblock.io/user-guide/standard_yaml_errors/#yaml-construction-error", e);
             throw e;
         }
     }
 
     protected Yaml getCustomYaml() {
-        Constructor constructor = new Constructor(RawStmtsDoc.class);
+
+        SnakeYamlCharmer charmer = new SnakeYamlCharmer(RawStmtsDoc.class);
+        charmer.addHandler(StatementsOwner.class, "statements", new StatementsReader());
+        charmer.addHandler(StatementsOwner.class, "statement", new StatementsReader());
+
         TypeDescription tds = new TypeDescription(RawStmtsDoc.class);
-        tds.putListPropertyType("blocks", RawStmtsBlock.class);
-        constructor.addTypeDescription(tds);
-        return new Yaml(constructor);
+        tds.addPropertyParameters("blocks", RawStmtsBlock.class);
+        charmer.addTypeDescription(tds);
+
+        return new Yaml(charmer);
     }
 
+
+    protected RawStmtsDocList loadString(Logger logger, String rawYaml) {
+        String data = applyTransforms(logger, rawYaml);
+        return parseYaml(logger, data);
+    }
+
+    private class StatementsReader implements SnakeYamlCharmer.FieldHandler {
+        @Override
+        public void handleMapping(Object object, Object nodeTuple) {
+            //System.out.println("Handling mapping for" + object +", nodes:" + nodeTuple);
+            if (object instanceof StatementsOwner) {
+                ((StatementsOwner) object).setByObject(nodeTuple);
+            }
+
+        }
+    }
 }

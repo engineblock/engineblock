@@ -21,45 +21,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * StmtProps capture the configuration properties that can be used to control
- * how statements are used. They can be set at multipe levels of configuration.
- * <p>
- * StmtProps include:
- * <ul>
- * <li>An optional name - for identifying statements in metrics and logs</li>
- * <li>An optional set of tags - for specifying which statements to include</li>
- * <li>An optional set of bindings - for associating data with a statement</li>
- * <li>An optional set of config - for configuring the individual statements, in a driver-specific way</li>
- * </ul>
- * <p>
- * Since every layer of a configuration file (statement yaml format) can have the
- * fields above, they will be layered as appropriate for each element.
- * Generally speaking, names are concatenated with hyphens to yield more specific names,
- * while bindings, config and tags are layered, with same-named bindings overriding at
- * lower levels.
- * See {@link RawStmtsBlock} and {@link RawStmtsDoc} for more details.
- * </p>
- * <p>
- * The name represents a symbolic name for the statements in the list. Each statement will
- * be given a specific name by enumeration, so the first statement in the below example will
- * be named "testname-1", the second "testname-2" and so on.
- * <p>
- * The bindings will be used to apply properties and data to each of the statements individually.
- * For bindings that contain data,
- * <p>
- * Example yaml:
- * <pre>
- * name: testname
- * tags:
- *   group: updates
- * config:
- *   timeout: 12345ms
- * bindings:
- *   field1: Static(5)
- *   field2: ToDate()
- * </pre>
- */
 public class BlockParams extends Tags {
 
     private String name = "";
@@ -86,7 +47,7 @@ public class BlockParams extends Tags {
     }
 
     public Map<String, String> getParams() {
-        return Collections.unmodifiableMap(params);
+        return params;
     }
 
     public void setParams(Map<String, String> config) {

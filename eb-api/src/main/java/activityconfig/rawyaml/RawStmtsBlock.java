@@ -17,30 +17,11 @@
 
 package activityconfig.rawyaml;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * A StmtsDef contains a list of statements, as well as all of the optional
+ * A StmtsDef contains a list of rawStmts, as well as all of the optional
  * block parameters that can be assigned to {@link BlockParams}, which includes
  * a name, config values, data bindings, and filtering tags.
  */
-public class RawStmtsBlock extends BlockParams {
+public class RawStmtsBlock extends StatementsOwner {
 
-    private List<String> statements = new ArrayList<>();
-
-    public RawStmtsBlock() {}
-
-    public RawStmtsBlock(List<String> statements) {
-        this.statements = statements;
-    }
-
-    public List<String> getStatements() {
-        return statements;
-    }
-
-    public void setStatements(List<String> statements) {
-        this.statements.clear();
-        this.statements.addAll(statements);
-    }
 }

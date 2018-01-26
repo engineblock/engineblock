@@ -51,7 +51,7 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
         for (RawStmtsBlock rawStmtsBlock : rawStmtsDoc.getBlocks()) {
             String compositeName = rawStmtsDoc.getName() +
                     (rawStmtsBlock.getName().isEmpty() ? "" : "-" + rawStmtsBlock.getName());
-            StmtsBlock compositeBlock = new StmtsBlock(compositeName, rawStmtsBlock, this, ++blockIdx);
+            StmtsBlock compositeBlock = new StmtsBlock(rawStmtsBlock, this, ++blockIdx);
             blocks.add(compositeBlock);
         }
 
