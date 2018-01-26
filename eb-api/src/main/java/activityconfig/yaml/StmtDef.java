@@ -17,46 +17,44 @@
 
 package activityconfig.yaml;
 
+import activityconfig.MultiMapLookup;
+import activityconfig.rawyaml.RawStmtDef;
 import io.engineblock.util.Tagged;
 
 import java.util.Map;
 
 public class StmtDef implements Tagged {
 
-
+    private final RawStmtDef rawStmtDef;
     private StmtsBlock block;
-    private String name;
-    private String stmt;
 
-    public StmtDef(StmtsBlock block, String name, String stmt) {
+    public StmtDef(StmtsBlock block, RawStmtDef rawStmtDef) {
         this.block = block;
-        this.name = name;
-        this.stmt = stmt;
+        this.rawStmtDef = rawStmtDef;
     }
 
     public String getName() {
-        return name;
+        return block.getName() + "--" + rawStmtDef.getName();
     }
 
     public String getStmt() {
-        return stmt;
+        return rawStmtDef.getStmt();
     }
 
     public Map<String,String> getBindings() {
-        return block.getBindings();
+        return new MultiMapLookup(rawStmtDef.getBindings(), block.getBindings());
     }
 
     public Map<String, String> getParams() {
-        return block.getParams();
+        return new MultiMapLookup(rawStmtDef.getParams(), block.getParams());
     }
 
     public Map<String,String> getTags() {
-        return block.getTags();
-
+        return new MultiMapLookup(rawStmtDef.getTags(), block.getTags());
     }
 
     @Override
     public String toString() {
-        return "stmt(name:" + name + ", stmt:" + stmt + ", tags:(" + getTags() + "), params:(" + getParams() +"), bindings:(" + getBindings()+"))";
+        return "stmt(name:" + getName() + ", stmt:" + getStmt() + ", tags:(" + getTags() + "), params:(" + getParams() +"), bindings:(" + getBindings()+"))";
     }
 }
