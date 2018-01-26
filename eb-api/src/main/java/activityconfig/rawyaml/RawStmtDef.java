@@ -47,7 +47,9 @@ public class RawStmtDef extends BlockParams {
         if (this.statement==null) {
             Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
             if (!iterator.hasNext()) {
-                throw new RuntimeException("Statement is not set, and no statements remain to pull 'name: statement' values from.");
+                throw new RuntimeException("undefined-name-statement-tuple:" +
+                        " The statement is not set, and no statements remain to pull 'name: statement' values from." +
+                        " For more details on this error see http://docs.engineblock.io/user-guide/standard_yaml_errors/#undefined-name-statement-tuple");
             }
             Map.Entry<String, Object> firstEntry = iterator.next();
             setStmt((String) firstEntry.getValue());
@@ -55,7 +57,8 @@ public class RawStmtDef extends BlockParams {
             if (getName().isEmpty()) {
                 setName(firstEntry.getKey());
             } else {
-                throw new RuntimeException("Statement name has already been set by name parameter. Remove the name parameter for a statement definition map.");
+                throw new RuntimeException("redefined-name-in-statement-tuple: Statement name has already been set by name parameter. Remove the name parameter for a statement definition map." +
+                        " For more details on this error see http://docs.engineblock.io/user-guide/standard_yaml_errors/#redefined-name-statement-tuple");
             }
         }
         if (getName().isEmpty()) {

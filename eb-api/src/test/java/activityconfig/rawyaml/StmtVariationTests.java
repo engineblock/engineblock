@@ -51,13 +51,6 @@ public class StmtVariationTests {
         assertThat(s1.getStmt()).isEqualTo("second statement");
     }
 
-//    @Test
-//    public void testMixedStmtTypes() {
-//        RawYamlStatementLoader ysl = new RawYamlStatementLoader();
-//
-//    }
-//
-
     @Test
     public void testSingleEntryMapStmtsOnly() {
         RawYamlStatementLoader ysl = new RawYamlStatementLoader();
@@ -103,7 +96,7 @@ public class StmtVariationTests {
     public void testMixedForms() {
         RawYamlStatementLoader ysl = new RawYamlStatementLoader();
         RawStmtsDocList docs = ysl.loadString(logger,
-                "statements:\n" +
+                "statement:\n" +
                         " - name: s1\n" +
                         "   stmt: statement one\n" +
                         " - statement two\n" +

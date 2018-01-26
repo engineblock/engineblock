@@ -78,27 +78,3 @@ public class StatementsOwner extends BlockParams {
         }
     }
 }
-
-
-//    public void setStatements(List<Object> objects) {
-//        System.out.println("Setting statement objects list");
-//        rawStmtDefs.clear();
-//        for (int i = 0; i < objects.size(); i++) {
-//            Object o = objects.get(i);
-//            if (o instanceof String) {
-//                System.out.println("Strings...");
-//                rawStmtDefs.add(new RawStmtDef("stmt" + (i+1), String.valueOf(o)));
-//            } else if (o instanceof List) {
-//                System.out.println("List of ..");
-//
-//            } else if (o instanceof Map) {
-//                System.out.println("Map of ...");
-//
-//            }
-//        }
-//    }
-//
-//    public void setStatements(Map<String, String> map) {
-//        System.out.println("Setting statement objects map");
-//    }
-//}

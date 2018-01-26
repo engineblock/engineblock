@@ -20,6 +20,7 @@ package activityconfig.rawyaml;
 import activityconfig.snakecharmer.SnakeYamlCharmer;
 import io.engineblock.activityimpl.ActivityInitializationError;
 import io.engineblock.util.EngineBlockFiles;
+import jdk.nashorn.internal.runtime.ParserException;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
@@ -47,7 +48,7 @@ public class RawYamlStatementLoader {
     public RawStmtsDocList load(Logger logger, String fromPath, String... searchPaths) {
         String data = loadRawFile(logger, fromPath, searchPaths);
         data = applyTransforms(logger, data);
-        return parseYaml(logger,data);
+        return parseYaml(logger, data);
     }
 
     public void addTransformer(Function<String, String> transformer) {
@@ -68,11 +69,11 @@ public class RawYamlStatementLoader {
     protected String applyTransforms(Logger logger, String data) {
         for (Function<String, String> xform : stringTransformers) {
             try {
-                if (logger!=null) logger.debug("Applying string transformer to yaml data:" + xform);
+                if (logger != null) logger.debug("Applying string transformer to yaml data:" + xform);
                 data = xform.apply(data);
             } catch (Exception e) {
                 RuntimeException t = new ActivityInitializationError("Error applying string applyTransforms to input", e);
-                if (logger!=null) logger.error(t.getMessage(), t);
+                if (logger != null) logger.error(t.getMessage(), t);
                 throw t;
             }
         }
@@ -90,8 +91,17 @@ public class RawYamlStatementLoader {
                 stmtListList.add(tgsd);
             }
             return new RawStmtsDocList(stmtListList);
+        } catch (ParserException pe) {
+            if (logger != null) logger.error("yaml-parsing-error: Error parsing YAML:"
+                    + pe.getMessage() + "" +
+                    " For more details on this error see " +
+                    "http://docs.engineblock.io/user-guide/standard_yaml_errors/#yaml-parsing-error", pe);
+            throw pe;
         } catch (Exception e) {
-            if (logger!=null) logger.error("Error parsing YAML:" + e.getMessage(), e);
+            if (logger != null) logger.error("yaml-construction-error: Error building configuration:"
+                    + e.getMessage() + "" +
+                    " For more details on this error see " +
+                    "http://docs.engineblock.io/user-guide/standard_yaml_errors/#yaml-construction-error", e);
             throw e;
         }
     }
@@ -100,11 +110,10 @@ public class RawYamlStatementLoader {
 
         SnakeYamlCharmer charmer = new SnakeYamlCharmer(RawStmtsDoc.class);
         charmer.addHandler(StatementsOwner.class, "statements", new StatementsReader());
+        charmer.addHandler(StatementsOwner.class, "statement", new StatementsReader());
 
         TypeDescription tds = new TypeDescription(RawStmtsDoc.class);
         tds.addPropertyParameters("blocks", RawStmtsBlock.class);
-//        tds.addPropertyParameters("statements", RawStmtDef.class);
-//        tds.putListPropertyType("blocks", RawStmtsBlock.class);
         charmer.addTypeDescription(tds);
 
         return new Yaml(charmer);
@@ -113,7 +122,7 @@ public class RawYamlStatementLoader {
 
     protected RawStmtsDocList loadString(Logger logger, String rawYaml) {
         String data = applyTransforms(logger, rawYaml);
-        return parseYaml(logger,data);
+        return parseYaml(logger, data);
     }
 
     private class StatementsReader implements SnakeYamlCharmer.FieldHandler {
@@ -121,7 +130,7 @@ public class RawYamlStatementLoader {
         public void handleMapping(Object object, Object nodeTuple) {
             //System.out.println("Handling mapping for" + object +", nodes:" + nodeTuple);
             if (object instanceof StatementsOwner) {
-                ((StatementsOwner)object).setByObject(nodeTuple);
+                ((StatementsOwner) object).setByObject(nodeTuple);
             }
 
         }

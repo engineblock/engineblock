@@ -21,38 +21,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A statements doc can have either a list of statement blocks or a
- * list of statements but not both. It can also have all the block
- * parameters assignable to {@link BlockParams}.
+ * A statements doc can have both a list of statement blocks and/or a
+ * list of statements. It can also have all the block parameters
+ * assignable to {@link BlockParams}.
  * <p>
  * The reason for having support both statements or statement blocks
  * is merely convenience. If you do not need or want to deal with the
- * full blocks format, the extra structure gets in the way. However,
- * having both a list and a blocks section in the same document can
- * create confusion. The compromise was to allow for either, but
- * specifically disallow them together.
+ * full blocks format, the extra structure gets in the way.
  */
 public class RawStmtsDoc extends StatementsOwner {
 
     private List<RawStmtsBlock> blocks = new ArrayList<>();
 
-//    public void setStatements(List<RawStmtDef> statements) {
-//
-//        if (!blocks.isEmpty()) {
-//            throw new RuntimeException("presently, you must pick between having " +
-//                    "blocks and statement at the document level. This on already has blocks." +
-//                    " Add your statements under it.");
-//        }
-//        this.statements.clear();
-//        this.statements.addAll(statements);
-//    }
-//
-
     /**
      * Return the list of statement blocks in this RawStmtsDoc.
      * If raw statements are defined on this RawStmtsDoc, then a single
-     * StmtBlock containing those statements is returned. Otherwise,
-     * the list of StmtBlocks is returned.
+     * StmtBlock containing those statements is prepended to the block list.
+     * Otherwise, the list of StmtBlocks is returned as-is.
      *
      * @return all logical statement blocks containing statements
      */
@@ -69,12 +54,6 @@ public class RawStmtsDoc extends StatementsOwner {
     }
 
     public void setBlocks(List<RawStmtsBlock> blocks) {
-//        if (!statements.isEmpty()) {
-//            throw new RuntimeException("presently, you must pick between having " +
-//                    "blocks and statement at the document level." +
-//                    " This one already has statements. You can move " +
-//                    "them to a new blocks section");
-//        }
         this.blocks.clear();
         this.blocks.addAll(blocks);
     }
