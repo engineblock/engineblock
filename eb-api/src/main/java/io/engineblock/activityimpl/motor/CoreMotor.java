@@ -17,7 +17,6 @@
 package io.engineblock.activityimpl.motor;
 
 import com.codahale.metrics.Timer;
-import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
@@ -28,6 +27,7 @@ import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
+import io.engineblock.planning.EngineBlockRateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private ActivityDef activityDef;
     private SlotStateTracker slotStateTracker;
     private AtomicReference<RunState> slotState;
-    private RateLimiter rateLimiter; // Only for use in phasing
+    private EngineBlockRateLimiter rateLimiter; // Only for use in phasing
     private int stride = 1;
     private Output output;
 

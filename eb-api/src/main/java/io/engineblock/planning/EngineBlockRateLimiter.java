@@ -15,4 +15,15 @@
  * /
  */
 
-package armature;
+package io.engineblock.planning;
+
+public interface EngineBlockRateLimiter {
+
+    void acquire(long nanoGrants);
+
+    void acquire();
+
+    double getRate();
+
+    void setRate(double rate);
+}

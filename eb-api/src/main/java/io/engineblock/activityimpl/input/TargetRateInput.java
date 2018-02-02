@@ -17,13 +17,14 @@
 package io.engineblock.activityimpl.input;
 
 import com.codahale.metrics.Gauge;
-import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.input.RateLimiterProvider;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.ActivityMetrics;
+import io.engineblock.planning.EngineBlockRateLimiter;
+import io.engineblock.planning.RateLimiterCOAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
     private final AtomicLong min = new AtomicLong(0L);
     private final AtomicLong max = new AtomicLong(Long.MAX_VALUE);
     // TODO: Consider a similar approach to this: http://blog.nirav.name/2015/02/a-simple-rate-limiter-using-javas.html
-    private RateLimiter rateLimiter;
+    private EngineBlockRateLimiter rateLimiter;
     private ActivityDef activityDef;
 
     public TargetRateInput(ActivityDef activityDef) {
@@ -127,7 +128,7 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
         activityDef.getParams().getOptionalDoubleUnitCount("targetrate").ifPresent(
         rate -> {
             if (rateLimiter==null) {
-                rateLimiter = RateLimiter.create(rate);
+                rateLimiter = new RateLimiterCOAware(rate);
             } else {
                 double oldRate = rateLimiter.getRate();
                 rateLimiter.setRate(rate);
@@ -144,7 +145,7 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
         });
     }
 
-    public RateLimiter getRateLimiter() {
+    public EngineBlockRateLimiter getRateLimiter() {
         return rateLimiter;
     }
 
