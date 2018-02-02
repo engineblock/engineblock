@@ -95,13 +95,13 @@ public class RawYamlStatementLoader {
             if (logger != null) logger.error("yaml-parsing-error: Error parsing YAML:"
                     + pe.getMessage() + "" +
                     " For more details on this error see " +
-                    "http://docs.engineblock.io/user-guide/standard_yaml_errors/#yaml-parsing-error", pe);
+                    "http://docs.engineblock.io/user-guide/standard_yaml/#yaml-parsing-error", pe);
             throw pe;
         } catch (Exception e) {
             if (logger != null) logger.error("yaml-construction-error: Error building configuration:"
                     + e.getMessage() + "" +
                     " For more details on this error see " +
-                    "http://docs.engineblock.io/user-guide/standard_yaml_errors/#yaml-construction-error", e);
+                    "http://docs.engineblock.io/user-guide/standard_yaml/#yaml-construction-error", e);
             throw e;
         }
     }
