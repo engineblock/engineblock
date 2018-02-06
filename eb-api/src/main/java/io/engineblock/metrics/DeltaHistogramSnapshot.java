@@ -97,4 +97,22 @@ final class DeltaHistogramSnapshot extends Snapshot {
             }
         }
     }
+
+    private String getPctlSummary(double... percentiles) {
+        StringBuilder sb = new StringBuilder();
+        for (double percentile : percentiles) {
+            sb.append(String.format("%.3f",getValue(percentile))).append(",");
+        }
+        sb.setLength(sb.length()-1);
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return
+                String.format(" (count, mean, min, max) = (%d, %.3f, %d, %d)\n",
+                getValues().length, getMean(), getMin(), getMax()) +
+                "         p(25,50,75) = (" + getPctlSummary(0.25d, 0.5d, 0.75d) + ")\n" +
+                " p(90,99,9.99,99.99) = (" + getPctlSummary(0.9d, 0.99d, 0.999, 0.9999d) + ")";
+    }
 }
