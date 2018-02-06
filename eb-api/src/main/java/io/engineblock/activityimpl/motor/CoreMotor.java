@@ -27,7 +27,7 @@ import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.planning.EngineBlockRateLimiter;
+import io.engineblock.planning.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private ActivityDef activityDef;
     private SlotStateTracker slotStateTracker;
     private AtomicReference<RunState> slotState;
-    private EngineBlockRateLimiter rateLimiter; // Only for use in phasing
+    private RateLimiter rateLimiter; // Only for use in phasing
     private int stride = 1;
     private Output output;
 
@@ -182,6 +182,10 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
             long cyclenum;
             action.init();
+
+            if (input instanceof Startable) {
+                ((Startable)input).start();
+            }
 
             while (slotState.get() == Running) {
 

@@ -23,8 +23,8 @@ import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.input.RateLimiterProvider;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.planning.EngineBlockRateLimiter;
-import io.engineblock.planning.RateLimiterCOAware;
+import io.engineblock.planning.RateLimiter;
+import io.engineblock.planning.CoreRateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * If the min or max cycle is changed, then these are re-applied first to the
  * max cycle and then to the min cycle. If the min cycle is changed, then the
  * next cycle value is set to the assigned min value. Otherwise, the cycle
- * will continue as usual till it reaches the max value. The ability to reset
+ * will continue as usual till it reaches the max value. The ability to start
  * the input while running by applying a new set of parameters makes it possible
  * to re-trigger a sequence of inputs during a test.</p>
  * <p>This input, and Inputs in general do not actively prevent usage of values
@@ -54,7 +54,7 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
     private final AtomicLong min = new AtomicLong(0L);
     private final AtomicLong max = new AtomicLong(Long.MAX_VALUE);
     // TODO: Consider a similar approach to this: http://blog.nirav.name/2015/02/a-simple-rate-limiter-using-javas.html
-    private EngineBlockRateLimiter rateLimiter;
+    private RateLimiter rateLimiter;
     private ActivityDef activityDef;
 
     public TargetRateInput(ActivityDef activityDef) {
@@ -128,7 +128,7 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
         activityDef.getParams().getOptionalDoubleUnitCount("targetrate").ifPresent(
         rate -> {
             if (rateLimiter==null) {
-                rateLimiter = new RateLimiterCOAware(rate);
+                rateLimiter = new CoreRateLimiter(rate);
             } else {
                 double oldRate = rateLimiter.getRate();
                 rateLimiter.setRate(rate);
@@ -145,7 +145,7 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
         });
     }
 
-    public EngineBlockRateLimiter getRateLimiter() {
+    public RateLimiter getRateLimiter() {
         return rateLimiter;
     }
 
