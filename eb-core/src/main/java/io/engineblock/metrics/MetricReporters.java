@@ -20,7 +20,7 @@ package io.engineblock.metrics;
 import com.codahale.metrics.*;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
-import io.engineblock.activityapi.IShutdown;
+import io.engineblock.activityapi.core.Shutdownable;
 import io.engineblock.core.ShutdownManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public class MetricReporters implements IShutdown {
+public class MetricReporters implements Shutdownable {
     private final static Logger logger = LoggerFactory.getLogger(MetricReporters.class);
     private static MetricReporters instance = new MetricReporters();
 

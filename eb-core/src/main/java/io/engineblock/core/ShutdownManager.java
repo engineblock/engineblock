@@ -14,7 +14,7 @@
 */
 package io.engineblock.core;
 
-import io.engineblock.activityapi.IShutdown;
+import io.engineblock.activityapi.core.Shutdownable;
 
 import java.util.LinkedList;
 
@@ -25,13 +25,13 @@ public class ShutdownManager {
     private ShutdownManager() {}
     private static ShutdownManager instance = new ShutdownManager();
 
-    private final LinkedList<IShutdown> managedInstances = new LinkedList<>();
+    private final LinkedList<Shutdownable> managedInstances = new LinkedList<>();
 
-    public static void register(IShutdown managedInstance) {
+    public static void register(Shutdownable managedInstance) {
         instance.managedInstances.add(managedInstance);
     }
 
     public static void shutdown() {
-        instance.managedInstances.forEach(IShutdown::shutdown);
+        instance.managedInstances.forEach(Shutdownable::shutdown);
     }
 }

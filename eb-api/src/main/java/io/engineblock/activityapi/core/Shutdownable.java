@@ -14,8 +14,8 @@
  *    limitations under the License.
  * /
  */
-package io.engineblock.activityapi;
+package io.engineblock.activityapi.core;
 
-public interface IShutdown {
+public interface Shutdownable {
     void shutdown();
 }
