@@ -23,12 +23,15 @@ import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.activityimpl.SimpleActivity;
+import io.engineblock.rates.RateLimiter;
+
+import java.util.function.Supplier;
 
 /**
  * Provides the components needed to build and run an activity a runtime.
  * The easiest way to build a useful Activity is to extend {@link SimpleActivity}.
  */
-public interface Activity extends Comparable<Activity> {
+public interface Activity extends Comparable<Activity>, ActivityDefObserver {
 
     /**
      * Register an object which should be closed after this activity is shutdown.
@@ -84,5 +87,75 @@ public interface Activity extends Comparable<Activity> {
     default String getCycleSummary() {
         return getActivityDef().getCycleSummary();
     }
+
+    /**
+     * Get the current cycle rate limiter for this activity.
+     * The cycle rate limiter is used to throttle the rate at which
+     * cycles are dispatched across all threads in the activity
+     * @return the cycle {@link RateLimiter}
+     */
+    RateLimiter getCycleRateLimiter();
+
+    /**
+     * Set the cycle rate limiter for this activity. This method should only
+     * be used in a non-concurrent context. Otherwise, the supplier version
+     * {@link #getCycleRateLimiter(Supplier)} should be used.
+     * @param rateLimiter The cycle {@link RateLimiter} for this activity
+     */
+    void setCycleRateLimiter(RateLimiter rateLimiter);
+
+    /**
+     * Get or create the cycle rate limiter in a safe way. Implementations
+     * should ensure that this method is synchronized or that each requestor
+     * gets the same cycle rate limiter for the activity.
+     * @param supplier A {@link RateLimiter} {@link Supplier}
+     * @return An extant or newly created cycle {@link RateLimiter}
+     */
+    RateLimiter getCycleRateLimiter(Supplier<? extends RateLimiter> supplier);
+
+    /**
+     * Get the current stride rate limiter for this activity.
+     * The stride rate limiter is used to throttle the rate at which
+     * new strides are dispached across all threads in an activity.
+     * @return The stride {@link RateLimiter}
+     */
+    RateLimiter getStrideRateLimiter();
+
+    /**
+     * Set the stride rate limiter for this activity. This method should only
+     * be used in a non-concurrent context. Otherwise, the supplier version
+     * {@link #getStrideRateLimiter(Supplier)}} should be used.
+     * @param rateLimiter The stride {@link RateLimiter} for this activity.
+     */
+    void setStrideRateLimiter(RateLimiter rateLimiter);
+
+    /**
+     * Get or create the stride {@link RateLimiter} in a concurrent-safe
+     * way. Implementations should ensure that this method is synchronized or
+     * that each requestor gets the same stride rate limiter for the activity.
+     * @param supplier A {@link RateLimiter} {@link Supplier}
+     * @return An extant or newly created strid {@link RateLimiter}
+     */
+    RateLimiter getStrideRateLimiter(Supplier<? extends RateLimiter> supplier);
+
+// TODO: Generic activity-scoped objects via map, or explicity API?
+//    /**
+//     * Get the object that is owned by this activity, scoped to the lifetime of
+//     * the activity and the object type.
+//     * @param type The class type under which this object is known to the activity.
+//     * @param <T> A generic superclass type for T
+//     * @return An object of type T
+//     */
+//    <T> T getActivityScoped(Class<? extends T> type);
+//
+//    /**
+//     * Set an object that is owned by this activity, scoped to the lifetime of
+//     * the activity and the object type.
+//     * @param item The object
+//     * @param type A superclass of the object, by which it is known to the activity
+//     * @param <T> The type of object within the activity
+//     * @return An object of type T
+//     */
+//    <T> T setActivityScoped(T item, Class<? extends T> type);
 
 }

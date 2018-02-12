@@ -7,14 +7,21 @@ import io.engineblock.activityapi.core.RunState;
 import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.engineblock.activityapi.output.OutputDispenser;
 import io.engineblock.activityapi.input.InputDispenser;
+import io.engineblock.rates.CoreRateLimiter;
+import io.engineblock.rates.RateLimiter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * A default implementation of an Activity, suitable for building upon.
  */
 public class SimpleActivity implements Activity {
+    private final static Logger logger = LoggerFactory.getLogger(SimpleActivity.class);
+
 
     private List<AutoCloseable> closeables = new ArrayList<>();
 
@@ -25,9 +32,15 @@ public class SimpleActivity implements Activity {
     private IntPredicateDispenser resultFilterDispenser;
     protected ActivityDef activityDef;
     private RunState runState = RunState.Uninitialized;
+    private RateLimiter cycleRateLimiter;
+    private RateLimiter strideRateLimiter;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
+    }
+
+    public SimpleActivity(String activityDefString) {
+        this(ActivityDef.parseActivityDef(activityDefString));
     }
 
     public synchronized RunState getRunState() {
@@ -118,4 +131,73 @@ public class SimpleActivity implements Activity {
         }
         closeables.clear();
     }
+
+    @Override
+    public RateLimiter getCycleRateLimiter() {
+        return this.cycleRateLimiter;
+    }
+
+    @Override
+    public synchronized void setCycleRateLimiter(RateLimiter rateLimiter) {
+        this.cycleRateLimiter = rateLimiter;
+    }
+
+    @Override
+    public synchronized RateLimiter getCycleRateLimiter(Supplier<? extends RateLimiter> s) {
+        if (cycleRateLimiter == null) {
+            cycleRateLimiter = s.get();
+        }
+        return cycleRateLimiter;
+    }
+
+    @Override
+    public synchronized RateLimiter getStrideRateLimiter() {
+        return this.strideRateLimiter;
+    }
+
+    @Override
+    public synchronized void setStrideRateLimiter(RateLimiter rateLimiter) {
+        this.strideRateLimiter = rateLimiter;
+    }
+
+    @Override
+    public synchronized RateLimiter getStrideRateLimiter(Supplier<? extends RateLimiter> s) {
+        if (strideRateLimiter == null) {
+            strideRateLimiter = s.get();
+        }
+        return strideRateLimiter;
+    }
+
+    @Override
+    public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
+
+        activityDef.getParams().getOptionalDouble("targetrate").ifPresent(
+                cycleRateLimit -> {
+                    if (cycleRateLimiter == null) {
+                        logger.debug("setting new cycle target rate to " + cycleRateLimit);
+                        this.cycleRateLimiter = new CoreRateLimiter(cycleRateLimit);
+                    } else {
+                        if (cycleRateLimiter.getRate() != cycleRateLimit) {
+                            logger.debug("adjusting cycle target rate to " + cycleRateLimit);
+                            cycleRateLimiter.setRate(cycleRateLimit);
+                        }
+                    }
+                }
+        );
+
+        activityDef.getParams().getOptionalDouble("striderate").ifPresent(
+                strideRateLimit -> {
+                    if (strideRateLimiter == null) {
+                        logger.debug("setting new stride target rate to " + strideRateLimit);
+                        this.strideRateLimiter = new CoreRateLimiter(strideRateLimit);
+                    } else {
+                        if (strideRateLimiter.getRate() != strideRateLimit) {
+                            logger.debug("adjusting stride target rate to " + strideRateLimit);
+                            strideRateLimiter.setRate(strideRateLimit);
+                        }
+                    }
+                }
+        );
+    }
+
 }

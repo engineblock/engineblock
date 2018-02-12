@@ -27,6 +27,7 @@ import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
+import io.engineblock.rates.CoreRateLimiter;
 import io.engineblock.rates.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,68 +50,70 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private long slotId;
     private Input input;
     private Action action;
-    private ActivityDef activityDef;
+    private Activity activity;
     private SlotStateTracker slotStateTracker;
     private AtomicReference<RunState> slotState;
     private RateLimiter rateLimiter; // Only for use in phasing
     private int stride = 1;
     private Output output;
+    private RateLimiter cycleRateLimiter;
+    private RateLimiter strideRateLimiter;
 
     /**
      * Create an ActivityMotor.
      *
-     * @param activityDef The activity def that this motor will be associated with.
+     * @param activity    The activity that this motor will be associated with.
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      */
     public CoreMotor(
-            ActivityDef activityDef,
+            Activity activity,
             long slotId,
             Input input) {
-        this.activityDef = activityDef;
+        this.activity = activity;
         this.slotId = slotId;
         setInput(input);
         slotStateTracker = new SlotStateTracker(slotId);
         slotState = slotStateTracker.getAtomicSlotState();
-        onActivityDefUpdate(activityDef);
+        onActivityDefUpdate(activity.getActivityDef());
     }
 
 
     /**
      * Create an ActivityMotor.
      *
-     * @param activityDef The activity def that this motor is based on.
+     * @param activity    The activity that this motor is based on.
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      * @param action      An LongConsumer which is applied to the input for each cycle.
      */
     public CoreMotor(
-            ActivityDef activityDef,
+            Activity activity,
             long slotId,
             Input input,
             Action action
     ) {
-        this(activityDef, slotId, input);
+        this(activity, slotId, input);
         setAction(action);
     }
 
     /**
      * Create an ActivityMotor.
      *
-     * @param activityDef The activity def that this motor is based on.
+     * @param activity    The activity that this motor is based on.
      * @param slotId      The enumeration of the motor, as assigned by its executor.
      * @param input       A LongSupplier which provides the cycle number inputs.
      * @param action      An LongConsumer which is applied to the input for each cycle.
      * @param output      An optional tracker.
      */
     public CoreMotor(
-            ActivityDef activityDef,
+            Activity activity,
             long slotId,
             Input input,
             Action action,
             Output output
     ) {
-        this(activityDef, slotId, input);
+        this(activity, slotId, input);
         setAction(action);
         setResultOutput(output);
     }
@@ -164,10 +167,13 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     public void run() {
 
         try {
-            Timer cyclesTimer = ActivityMetrics.timer(activityDef, "cycles");
-            Timer phasesTimer = ActivityMetrics.timer(activityDef, "phases");
-            Timer stridesTimer = ActivityMetrics.timer(activityDef, "strides");
-            Timer inputTimer = ActivityMetrics.timer(activityDef,"read-input");
+            Timer cyclesTimer = ActivityMetrics.timer(activity.getActivityDef(), "cycles");
+            Timer phasesTimer = ActivityMetrics.timer(activity.getActivityDef(), "phases");
+            Timer stridesTimer = ActivityMetrics.timer(activity.getActivityDef(), "strides");
+            Timer inputTimer = ActivityMetrics.timer(activity.getActivityDef(),"read-input");
+
+            RateLimiter cycleRateLimiter = activity.getCycleRateLimiter();
+            RateLimiter strideRateLimiter = activity.getStrideRateLimiter();
 
             if (slotState.get() == Finished) {
                 logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
@@ -186,7 +192,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             if (input instanceof Startable) {
                 ((Startable)input).start();
             }
-p
+
             while (slotState.get() == Running) {
 
                 CycleSegment cycleSegment = null;

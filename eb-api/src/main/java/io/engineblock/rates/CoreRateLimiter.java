@@ -94,8 +94,6 @@ public class CoreRateLimiter implements RateLimiter, Startable {
         this.setLimitCompensation(advanceRatio);
     }
 
-    //
-
     /**
      * See {@link RateLimiter} for interface docs.
      * effective calling overhead of acquire() is ~20ns
@@ -118,7 +116,8 @@ public class CoreRateLimiter implements RateLimiter, Startable {
 
         if (timeSliceDelay > 0L) {
 
-            // If slower than allowed rate, then fast-forward ticks timeline to
+            // If slower than allowed rate,
+            // then fast-forward ticks timeline to
             // close gap by some proportion.
             if (timeSliceDelay > nanos) {
                 long gapAnneal = timeSliceDelay >> limitCompensationShifter;
@@ -130,21 +129,12 @@ public class CoreRateLimiter implements RateLimiter, Startable {
             } catch (InterruptedException ignoringSpuriousInterrupts) {
                 // This is only a safety for spurious interrupts. It should not be hit often.
             }
-//            }
 
-//            if (limitCompensationShifter>0) {
-//                long gapClose = delayForNanos >> limitCompensationShifter;
-//                ticksTimeline.addAndGet(gapClose);
-//            }
             // indicate that no cumulative delay is affecting this caller, only execution delay from above
             return 0;
         }
         return timelinePosition - timeSlicePosition;
     }
-
-//    public long acquire(long size, long time) {
-//
-//    }
 
     @Override
     public long acquire() {

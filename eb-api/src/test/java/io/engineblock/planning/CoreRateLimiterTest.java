@@ -175,7 +175,7 @@ public class CoreRateLimiterTest {
     }
 
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void testBasicRate() {
         CoreRateLimiter rl = new CoreRateLimiter(1000000000.0);
         long startAt = System.nanoTime();
@@ -207,7 +207,7 @@ public class CoreRateLimiterTest {
         LockSupport.parkNanos(23L);
     }
 
-    @Test
+    @Test(enabled=false)
     public void testSleepNanosRate() {
         long startAt = System.nanoTime();
         long count = 100000000;
@@ -224,7 +224,7 @@ public class CoreRateLimiterTest {
         System.out.println(String.format("effective nanos/op: %f", (1000000000.0d / acqops)));
     }
 
-    @Test
+    @Test(enabled=false)
     public void testConcurrentRateWithEmptyTask() {
         int threadCount = 100;
         long count = 500_000_000L;
@@ -273,7 +273,7 @@ public class CoreRateLimiterTest {
         System.out.println(String.format("effective nanos/op: %f", (1000000000.0d / acqops)));
     }
 
-    @Test
+    @Test(enabled=false)
     public void testConcurrentRate() {
         int threadCount = 32;
         long count = 500_000_000L;
@@ -374,7 +374,7 @@ public class CoreRateLimiterTest {
         }
     }
 
-    @Test
+    @Test(enabled=false)
     public void testRatios() {
 
         CoreRateLimiter crl = new CoreRateLimiter(1000);
