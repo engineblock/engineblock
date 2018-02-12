@@ -295,12 +295,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             }
         }
 
-        if (input instanceof RateLimiterProvider) {
-            rateLimiter = ((RateLimiterProvider) input).getRateLimiter();
-        } else {
-            rateLimiter = null;
-        }
-
         this.stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
     }
 
