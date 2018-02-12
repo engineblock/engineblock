@@ -170,6 +170,25 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
+    public RateLimiter getPhaseRateLimiter() {
+        return phaseRateLimiter;
+    }
+
+    @Override
+    public void setPhaseRateLimiter(RateLimiter rateLimiter) {
+        this.phaseRateLimiter = phaseRateLimiter;
+    }
+
+    @Override
+    public synchronized RateLimiter getPhaseRateLimiter(Supplier<? extends RateLimiter> supplier) {
+        if (phaseRateLimiter==null) {
+            phaseRateLimiter = supplier.get();
+        }
+        return phaseRateLimiter;
+    }
+
+
+    @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
 
         activityDef.getParams().getOptionalDouble("targetrate").ifPresent(
