@@ -116,7 +116,7 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver {
     /**
      * Get the current stride rate limiter for this activity.
      * The stride rate limiter is used to throttle the rate at which
-     * new strides are dispached across all threads in an activity.
+     * new strides are dispatched across all threads in an activity.
      * @return The stride {@link RateLimiter}
      */
     RateLimiter getStrideRateLimiter();
@@ -134,28 +134,33 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver {
      * way. Implementations should ensure that this method is synchronized or
      * that each requestor gets the same stride rate limiter for the activity.
      * @param supplier A {@link RateLimiter} {@link Supplier}
-     * @return An extant or newly created strid {@link RateLimiter}
+     * @return An extant or newly created stride {@link RateLimiter}
      */
     RateLimiter getStrideRateLimiter(Supplier<? extends RateLimiter> supplier);
 
-// TODO: Generic activity-scoped objects via map, or explicity API?
-//    /**
-//     * Get the object that is owned by this activity, scoped to the lifetime of
-//     * the activity and the object type.
-//     * @param type The class type under which this object is known to the activity.
-//     * @param <T> A generic superclass type for T
-//     * @return An object of type T
-//     */
-//    <T> T getActivityScoped(Class<? extends T> type);
-//
-//    /**
-//     * Set an object that is owned by this activity, scoped to the lifetime of
-//     * the activity and the object type.
-//     * @param item The object
-//     * @param type A superclass of the object, by which it is known to the activity
-//     * @param <T> The type of object within the activity
-//     * @return An object of type T
-//     */
-//    <T> T setActivityScoped(T item, Class<? extends T> type);
+    /**
+     * Get the current phase rate limiter for this activity.
+     * The phase rate limiter is used to throttle the rate at which
+     * new phases are dispatched across all threads in an activity.
+     * @return The stride {@link RateLimiter}
+     */
+    RateLimiter getPhaseRateLimiter();
+
+    /**
+     * Set the phase rate limiter for this activity. This method should only
+     * be used in a non-concurrent context. Otherwise, the supplier version
+     * {@link #getPhaseRateLimiter(Supplier)}} should be used.
+     * @param rateLimiter The phase {@link RateLimiter} for this activity.
+     */
+    void setPhaseRateLimiter(RateLimiter rateLimiter);
+
+    /**
+     * Get or create the phase {@link RateLimiter} in a concurrent-safe
+     * way. Implementations should ensure that this method is synchronized or
+     * that each requestor gets the same phase rate limiter for the activity.
+     * @param supplier A {@link RateLimiter} {@link Supplier}
+     * @return An extant or newly created phase {@link RateLimiter}
+     */
+    RateLimiter getPhaseRateLimiter(Supplier<? extends RateLimiter> supplier);
 
 }

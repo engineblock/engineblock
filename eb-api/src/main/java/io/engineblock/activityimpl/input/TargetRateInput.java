@@ -16,15 +16,10 @@
  */
 package io.engineblock.activityimpl.input;
 
-import com.codahale.metrics.Gauge;
 import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
 import io.engineblock.activityapi.input.Input;
-import io.engineblock.activityapi.input.RateLimiterProvider;
 import io.engineblock.activityimpl.ActivityDef;
-import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.rates.CoreRateLimiter;
-import io.engineblock.rates.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +29,6 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * <p>TODO: This documentation is out of date as of 2.0.0
  * <p>This input will provide threadsafe access to a sequence of long values.</p>
- * <p>If the targetrate parameter is set on the activity def, then the rate of
- * grants will also be throttled to that rate.</p>
  * <p>Changes to the cycles or the targetrate will affect the provided inputs.
  * If the min or max cycle is changed, then these are re-applied first to the
  * max cycle and then to the min cycle. If the min cycle is changed, then the
@@ -47,14 +40,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * after the max value. They simply expose it to callers. It is up to the
  * caller to check the value to determine when the input is deemed "used up."</p>
  */
-public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterProvider, ProgressCapable {
+public class TargetRateInput implements Input, ActivityDefObserver, ProgressCapable {
     private final static Logger logger = LoggerFactory.getLogger(TargetRateInput.class);
 
     private final AtomicLong cycleValue = new AtomicLong(0L);
     private final AtomicLong min = new AtomicLong(0L);
     private final AtomicLong max = new AtomicLong(Long.MAX_VALUE);
-    // TODO: Consider a similar approach to this: http://blog.nirav.name/2015/02/a-simple-rate-limiter-using-javas.html
-    private RateLimiter rateLimiter;
     private ActivityDef activityDef;
 
     public TargetRateInput(ActivityDef activityDef) {
@@ -64,30 +55,25 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
 
     @Override
     public CycleSegment getInputSegment(int stride) {
-        if (rateLimiter!=null) {
-            rateLimiter.acquire();
-        }
         while (true) {
             long current = this.cycleValue.get();
             long next = current + stride;
-            if (next >max.get()) {
+            if (next > max.get()) {
                 return null;
             }
-            if (cycleValue.compareAndSet(current,next)) {
-                return new InputInterval.Segment(current,next);
+            if (cycleValue.compareAndSet(current, next)) {
+                return new InputInterval.Segment(current, next);
             }
         }
     }
 
     @Override
-    public double getProgress()
-    {
+    public double getProgress() {
         return (double) (cycleValue.get() - min.get());
     }
 
     @Override
-    public double getTotal()
-    {
+    public double getTotal() {
         return (double) (max.get() - min.get());
     }
 
@@ -97,7 +83,6 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
                 "cycleValue=" + cycleValue +
                 ", min=" + min +
                 ", max=" + max +
-                ", rateLimiter=" + rateLimiter +
                 ", activity=" + activityDef.getAlias() +
                 '}';
     }
@@ -120,33 +105,6 @@ public class TargetRateInput implements Input, ActivityDefObserver, RateLimiterP
             cycleValue.set(min.get());
         }
 
-        updateRateLimiter(activityDef);
-
-    }
-
-    private void updateRateLimiter(ActivityDef activityDef) {
-        activityDef.getParams().getOptionalDoubleUnitCount("targetrate").ifPresent(
-        rate -> {
-            if (rateLimiter==null) {
-                rateLimiter = new CoreRateLimiter(rate);
-            } else {
-                double oldRate = rateLimiter.getRate();
-                rateLimiter.setRate(rate);
-                double newRate = rateLimiter.getRate();
-                // RateLimiter turns 30000.0 into 29999.999999999996 so we check if the internal value changed here
-                if(oldRate == newRate)
-                {
-                    return;
-                }
-            }
-            Gauge<Double> rateGauge = () -> rateLimiter.getRate();
-            ActivityMetrics.gauge(activityDef,"targetrate",rateGauge);
-            logger.info("targetrate was set to: " + rate);
-        });
-    }
-
-    public RateLimiter getRateLimiter() {
-        return rateLimiter;
     }
 
     @Override

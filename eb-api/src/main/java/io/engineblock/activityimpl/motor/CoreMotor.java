@@ -53,12 +53,11 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private Activity activity;
     private SlotStateTracker slotStateTracker;
     private AtomicReference<RunState> slotState;
-    private RateLimiter rateLimiter; // Only for use in phasing
     private int stride = 1;
     private Output output;
-    private RateLimiter cycleRateLimiter;
     private RateLimiter strideRateLimiter;
-
+    private RateLimiter cycleRateLimiter;
+    private RateLimiter phaseRateLimiter;
     /**
      * Create an ActivityMotor.
      *
@@ -172,8 +171,9 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             Timer stridesTimer = ActivityMetrics.timer(activity.getActivityDef(), "strides");
             Timer inputTimer = ActivityMetrics.timer(activity.getActivityDef(),"read-input");
 
-            RateLimiter cycleRateLimiter = activity.getCycleRateLimiter();
-            RateLimiter strideRateLimiter = activity.getStrideRateLimiter();
+            strideRateLimiter = activity.getStrideRateLimiter();
+            cycleRateLimiter = activity.getCycleRateLimiter();
+            phaseRateLimiter = activity.getPhaseRateLimiter();
 
             if (slotState.get() == Finished) {
                 logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
@@ -209,6 +209,11 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
                 CycleResultSegmentBuffer segBuffer = new CycleResultSegmentBuffer(stride);
 
+                if (strideRateLimiter!=null) {
+                    // block for strides rate limiter
+                    strideRateLimiter.acquire();
+                }
+
                 try (Timer.Context stridesTime = stridesTimer.time()) {
                     while (!cycleSegment.isExhausted()) {
                         cyclenum = cycleSegment.nextCycle();
@@ -225,6 +230,12 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                             continue;
                         }
                         int result = -1;
+
+                        if (cycleRateLimiter!=null) {
+                            // Block for cycle rate limiter
+                            cycleRateLimiter.acquire();
+                        }
+
                         try (Timer.Context cycleTime = cyclesTimer.time()) {
 
                             logger.trace("cycle " + cyclenum);
@@ -234,8 +245,9 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
                             if (multiPhaseAction != null) {
                                 while (multiPhaseAction.incomplete()) {
-                                    if (rateLimiter != null) {
-                                        rateLimiter.acquire();
+                                    if (phaseRateLimiter != null) {
+                                        // Block for cycle rate limiter
+                                        phaseRateLimiter.acquire();
                                     }
                                     try (Timer.Context phaseTime = phasesTimer.time()) {
                                         result = multiPhaseAction.runPhase(cyclenum);

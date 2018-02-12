@@ -32,8 +32,9 @@ public class SimpleActivity implements Activity {
     private IntPredicateDispenser resultFilterDispenser;
     protected ActivityDef activityDef;
     private RunState runState = RunState.Uninitialized;
-    private RateLimiter cycleRateLimiter;
     private RateLimiter strideRateLimiter;
+    private RateLimiter cycleRateLimiter;
+    private RateLimiter phaseRateLimiter;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -198,6 +199,21 @@ public class SimpleActivity implements Activity {
                     }
                 }
         );
+
+        activityDef.getParams().getOptionalDouble("phaserate").ifPresent(
+                phaseRateLimit -> {
+                    if (phaseRateLimiter == null) {
+                        logger.debug("setting new phase target rate to " + phaseRateLimit);
+                        this.phaseRateLimiter = new CoreRateLimiter(phaseRateLimit);
+                    } else {
+                        if (phaseRateLimiter.getRate() != phaseRateLimit) {
+                            logger.debug("adjusting phase target rate to " + phaseRateLimit);
+                            phaseRateLimiter.setRate(phaseRateLimit);
+                        }
+                    }
+                }
+        );
+
     }
 
 }
