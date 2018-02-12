@@ -88,6 +88,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         try {
             activity.setRunState(RunState.Starting);
             activity.initActivity();
+            activity.onActivityDefUpdate(activityDef);
         } catch (Exception e) {
             this.stoppingException = new RuntimeException("Error initializing activity '" +
                     activity.getAlias() +"': " + e.getMessage(),e);
