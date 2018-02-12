@@ -23,8 +23,8 @@ import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.input.RateLimiterProvider;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.planning.RateLimiter;
-import io.engineblock.planning.CoreRateLimiter;
+import io.engineblock.rates.CoreRateLimiter;
+import io.engineblock.rates.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

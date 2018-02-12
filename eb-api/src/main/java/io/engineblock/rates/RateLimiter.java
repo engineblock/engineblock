@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.planning;
+package io.engineblock.rates;
 
 public interface RateLimiter {
 
@@ -91,6 +91,5 @@ public interface RateLimiter {
      * @return the minimum number of nanoseconds between each operation.
      */
     long getOpTicks();
-
 
 }

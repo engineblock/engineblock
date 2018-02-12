@@ -27,7 +27,7 @@ import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.planning.RateLimiter;
+import io.engineblock.rates.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -186,7 +186,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             if (input instanceof Startable) {
                 ((Startable)input).start();
             }
-
+p
             while (slotState.get() == Running) {
 
                 CycleSegment cycleSegment = null;

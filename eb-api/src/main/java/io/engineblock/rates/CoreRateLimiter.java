@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.planning;
+package io.engineblock.rates;
 
 import io.engineblock.activityapi.core.Startable;
 
@@ -62,29 +62,36 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class CoreRateLimiter implements RateLimiter, Startable {
 
-    // TODO: Add a mode to allow average rate limit or strict rate limit
-    // TODO: Consider calling nanoTime only when needed (in cases which may need time to advance)
-    // TODO: Consider adding a leavening value to adjust from average limit to strict over time
-
     private long opTicks = 0L; // Number of nanos representing one grant at target rate
     private double rate = Double.NaN; // The "ops/s" rate as set by the user
 
     private long startTimeNanos = System.nanoTime(); //
     private AtomicLong ticksTimeline = new AtomicLong(startTimeNanos);
     private AtomicLong accumulatedDelayNanos = new AtomicLong(0L);
+    private AtomicLong lastSeenNanoTime = new AtomicLong(System.nanoTime());
+
     private volatile boolean started;
-//    private volatile long lastDelay;
+
+    // each blocking call will correct to strict schedule by gap * 1/2^n
+    private int limitCompensationShifter = 5;
 
 
+    /**
+     * @param maxOpsPerSecond
+     */
     public CoreRateLimiter(double maxOpsPerSecond) {
-        this.setRate(maxOpsPerSecond);
+        this(maxOpsPerSecond, 0.0D);
     }
 
     /**
-     * The default rate limit is 1E9 ops/s.
+     * Create a rate limiter.
+     *
+     * @param maxOpsPerSecond   Max ops per second
+     * @param advanceRatio ratio of limit compensation to advance per acquire.
      */
-    public CoreRateLimiter() {
-        this(1000000000.0);
+    public CoreRateLimiter(double maxOpsPerSecond, double advanceRatio) {
+        this.setRate(maxOpsPerSecond);
+        this.setLimitCompensation(advanceRatio);
     }
 
     //
@@ -92,29 +99,52 @@ public class CoreRateLimiter implements RateLimiter, Startable {
     /**
      * See {@link RateLimiter} for interface docs.
      * effective calling overhead of acquire() is ~20ns
+     *
      * @param nanos nanoseconds of time allotted to this event
      * @return nanoseconds that have already elapsed since this event's ideal time
      */
     @Override
     public long acquire(long nanos) {
-        long minimumTimelinePosition = ticksTimeline.getAndAdd(nanos);
-        long timelinePosition = System.nanoTime();
+        long timeSlicePosition = ticksTimeline.getAndAdd(nanos);
+        long timelinePosition = lastSeenNanoTime.get();
 
-        while (timelinePosition < minimumTimelinePosition) {
-//            long delayForNanos = (minimumTimelinePosition - timelinePosition)+35; // ballpark calling overhead
-            long delayForNanos = (minimumTimelinePosition - timelinePosition);
-            try {
-                Thread.sleep(delayForNanos / 1000000, (int) (delayForNanos % 1000000L));
-            } catch (InterruptedException ignored) {
-                // This is only a safety for spurious interrupts. It should not be hit often.
-                timelinePosition = System.nanoTime();
-                continue;
+        // This is a throughput optimization
+        if (timelinePosition < timeSlicePosition) {
+            timelinePosition = System.nanoTime();
+            lastSeenNanoTime.set(timelinePosition);
+        }
+
+        long timeSliceDelay = (timeSlicePosition - timelinePosition);
+
+        if (timeSliceDelay > 0L) {
+
+            // If slower than allowed rate, then fast-forward ticks timeline to
+            // close gap by some proportion.
+            if (timeSliceDelay > nanos) {
+                long gapAnneal = timeSliceDelay >> limitCompensationShifter;
+                ticksTimeline.addAndGet(gapAnneal);
             }
+
+            try {
+                Thread.sleep(timeSliceDelay / 1000000, (int) (timeSliceDelay % 1000000L));
+            } catch (InterruptedException ignoringSpuriousInterrupts) {
+                // This is only a safety for spurious interrupts. It should not be hit often.
+            }
+//            }
+
+//            if (limitCompensationShifter>0) {
+//                long gapClose = delayForNanos >> limitCompensationShifter;
+//                ticksTimeline.addAndGet(gapClose);
+//            }
             // indicate that no cumulative delay is affecting this caller, only execution delay from above
             return 0;
         }
-        return timelinePosition - minimumTimelinePosition;
+        return timelinePosition - timeSlicePosition;
     }
+
+//    public long acquire(long size, long time) {
+//
+//    }
 
     @Override
     public long acquire() {
@@ -178,10 +208,66 @@ public class CoreRateLimiter implements RateLimiter, Startable {
         startTimeNanos = newSetTime;
     }
 
+    public String toString() {
+        return getSummary();
+    }
 
     public String getSummary() {
         return "rate=" + this.rate + ", " +
                 "opticks=" + this.getOpTicks() + ", " +
-                "delay=" + this.getCurrentSchedulingDelayNs();
+                "delay=" + this.getCurrentSchedulingDelayNs() + ", " +
+                "compensation_shift=" + limitCompensationShifter;
     }
+
+
+    public int setLimitCompensation(double gapFillRatio) {
+        if (gapFillRatio > 1.0D) {
+            throw new RuntimeException("gap fill ratio must be between 0.0D and 1.0D");
+        }
+        if (gapFillRatio == 1.0D) {
+            this.limitCompensationShifter = 0;
+        } else {
+            long longsize = (long) (gapFillRatio * (double) Long.MAX_VALUE);
+            this.limitCompensationShifter = Long.numberOfLeadingZeros(longsize);
+        }
+
+        return this.limitCompensationShifter;
+    }
+
+    public static class Builder implements RateLimiterBuilder.BuilderFacets {
+
+        private double rate;
+        private double strictness;
+
+        @Override
+        public WithLimit rate(double rate) {
+            this.rate = rate;
+            return this;
+        }
+
+        @Override
+        public WithStrictness withStrictLimit() {
+            this.strictness = 1.0D;
+            return this;
+        }
+
+        @Override
+        public WithStrictness withAverageLimit() {
+            this.strictness = 0.0D;
+            return this;
+        }
+
+        @Override
+        public WithStrictness strictness(double strictness) {
+            this.strictness = strictness;
+            return this;
+        }
+
+        @Override
+        public RateLimiter build() {
+            return new CoreRateLimiter(rate, strictness);
+        }
+
+    }
+
 }

@@ -116,6 +116,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
         List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
+
         if (stmts.size() > 0) {
             for (StmtDef stmt : stmts) {
                 BindingsTemplate bt = new BindingsTemplate(AllDataMapperLibraries.get(), stmt.getBindings());
