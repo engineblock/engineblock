@@ -18,6 +18,8 @@ import io.engineblock.activityapi.core.Action;
 import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityapi.core.MultiPhaseAction;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.rates.CoreRateLimiter;
+import io.engineblock.rates.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +39,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
     private long erroroncycle = Long.MIN_VALUE;
     private boolean logcycle;
     private int staticvalue = Integer.MIN_VALUE;
+    private RateLimiter diagRateLimiter = null;
 
     public DiagAction(int slot, ActivityDef activityDef, DiagActivity diagActivity) {
         this.activityDef = activityDef;
@@ -103,6 +106,7 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
         this.erroroncycle = activityDef.getParams().getOptionalLong("erroroncycle").orElse(Long.MIN_VALUE);
         this.logcycle = activityDef.getParams().getOptionalBoolean("logcycle").orElse(false);
         this.staticvalue = activityDef.getParams().getOptionalInteger("staticvalue").orElse(-1);
+        this.diagRateLimiter = diagActivity.getDiagRateLimiter();
     }
 
     @Override
@@ -117,22 +121,31 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
 
     @Override
     public int runCycle(long value) {
+
         if (logcycle) {
             logger.trace("cycle " + value);
         }
+
+        if (diagRateLimiter!=null) {
+            diagRateLimiter.acquire();
+        }
+
         long now = System.currentTimeMillis();
         if (completedPhase >= phasesPerCycle) {
             completedPhase = 0;
         }
+
         if ((now - lastUpdate) > quantizedInterval) {
             long delay = ((now - lastUpdate) - quantizedInterval);
             logger.info("diag action interval, input=" + value + ", phase=" + completedPhase + ", report delay=" + delay);
             lastUpdate += quantizedInterval;
             diagActivity.delayHistogram.update(delay);
         }
+
         if ((value % reportModulo) == 0) {
             logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
         }
+
         completedPhase++;
 
         int result = 0;
@@ -155,28 +168,5 @@ public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction
 
         return result;
     }
-
-//    @Override
-//    public void accept(long value) {
-//        long now = System.currentTimeMillis();
-//        if (completedPhase>=phasesPerCycle) {
-//            completedPhase=0;
-//        }
-//        if ((now - lastUpdate) > quantizedInterval) {
-//            long delay = ((now - lastUpdate) - quantizedInterval);
-//            logger.info("diag action interval, input=" + value + ", phase=" + completedPhase +", report delay=" + delay);
-//            lastUpdate += quantizedInterval;
-//            diagActivity.delayHistogram.append(delay);
-//        }
-//        if ((value % reportModulo) == 0) {
-//            logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
-//        }
-//        if (erroroncycle==value) {
-//            throw new RuntimeException("Diag was asked to error on cycle " + erroroncycle);
-//        }
-//        completedPhase++;
-//
-//    }
-
 
 }

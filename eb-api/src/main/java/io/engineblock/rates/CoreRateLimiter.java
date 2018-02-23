@@ -18,6 +18,8 @@
 package io.engineblock.rates;
 
 import io.engineblock.activityapi.core.Startable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -61,6 +63,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * time of a new caller, not the caller itself.
  */
 public class CoreRateLimiter implements RateLimiter, Startable {
+    private static final Logger logger = LoggerFactory.getLogger(CoreRateLimiter.class);
 
     private long opTicks = 0L; // Number of nanos representing one grant at target rate
     private double rate = Double.NaN; // The "ops/s" rate as set by the user
@@ -110,21 +113,26 @@ public class CoreRateLimiter implements RateLimiter, Startable {
         if (timelinePosition < timeSlicePosition) {
             timelinePosition = System.nanoTime();
             lastSeenNanoTime.set(timelinePosition);
+
+            // If slower than allowed rate,
+            // then fast-forward ticks timeline to
+            // close gap by some proportion.
+            long gap = (timelinePosition - timeSlicePosition)-nanos;
+            if (gap>0) {
+                gap>>=limitCompensationShifter;
+                logger.debug("closing gap of " + gap);
+                ticksTimeline.addAndGet(gap);
+
+            }
         }
 
         long timeSliceDelay = (timeSlicePosition - timelinePosition);
 
         if (timeSliceDelay > 0L) {
 
-            // If slower than allowed rate,
-            // then fast-forward ticks timeline to
-            // close gap by some proportion.
-            if (timeSliceDelay > nanos) {
-                long gapAnneal = timeSliceDelay >> limitCompensationShifter;
-                ticksTimeline.addAndGet(gapAnneal);
-            }
 
             try {
+//                logger.debug("sleeping " + timeSliceDelay);
                 Thread.sleep(timeSliceDelay / 1000000, (int) (timeSliceDelay % 1000000L));
             } catch (InterruptedException ignoringSpuriousInterrupts) {
                 // This is only a safety for spurious interrupts. It should not be hit often.
