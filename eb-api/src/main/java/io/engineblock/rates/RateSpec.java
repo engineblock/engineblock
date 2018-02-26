@@ -21,7 +21,7 @@ import io.engineblock.util.Unit;
 
 public class RateSpec {
     public double opsPerSec = 1.0D;
-    public double strictness = 1.0D;
+    public double strictness = 0.0D;
 
     public RateSpec(String spec) {
         String[] specs = spec.split("[,;]");

@@ -62,7 +62,7 @@ public class ScriptTests {
         String digits = m.group(1);
         assertThat(digits).isNotEmpty();
         double rate = Double.valueOf(digits);
-        assertThat(rate).isCloseTo(1000.0, Offset.offset(100.0));
+        assertThat(rate).isCloseTo(15000, Offset.offset(1000.0));
     }
 
     @Test

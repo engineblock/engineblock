@@ -2,16 +2,13 @@
 activitydef = {
     "alias" : "ratelimited",
     "type" : "diag",
-    "cycles" : "200",
+    "cycles" : "1K",
     "threads" : "10",
     "targetrate" : "1K",
     "phases" : 15
 };
 
 scenario.run(activitydef);
-
-// while (scenario.isRunningActivity(activitydef)) {
-// }
 
 print("current cycle = " + metrics.ratelimited.cycles.count);
 print("mean cycle rate = " + metrics.ratelimited.cycles.meanRate);
