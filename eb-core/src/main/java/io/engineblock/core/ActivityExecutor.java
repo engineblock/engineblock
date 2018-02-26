@@ -57,6 +57,9 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
     private final ActivityDef activityDef;
     private ExecutorService executorService;
     private RuntimeException stoppingException;
+
+    private final static int waitTime=10000;
+
 //    private RunState intendedState = RunState.Uninitialized;
 
     public ActivityExecutor(Activity activity) {
@@ -88,6 +91,7 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         try {
             activity.setRunState(RunState.Starting);
             activity.initActivity();
+            activity.onActivityDefUpdate(activityDef);
         } catch (Exception e) {
             this.stoppingException = new RuntimeException("Error initializing activity '" +
                     activity.getAlias() +"': " + e.getMessage(),e);
@@ -283,15 +287,15 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         switch (activity.getRunState()) {
             case Starting:
             case Running:
-                motors.forEach(m -> awaitRequiredMotorState(m, 5000, 50, RunState.Running, RunState.Finished));
+                motors.forEach(m -> awaitRequiredMotorState(m, waitTime, 50, RunState.Running, RunState.Finished));
                 break;
             case Stopped:
-                motors.forEach(m -> awaitRequiredMotorState(m, 5000, 50, RunState.Stopped, RunState.Finished));
+                motors.forEach(m -> awaitRequiredMotorState(m, waitTime, 50, RunState.Stopped, RunState.Finished));
                 break;
             case Uninitialized:
                 break;
             case Finished:
-                motors.forEach(m -> awaitRequiredMotorState(m, 5000, 50, RunState.Finished));
+                motors.forEach(m -> awaitRequiredMotorState(m, waitTime, 50, RunState.Finished));
                 break;
             case Stopping:
                 throw new RuntimeException("Invalid requested state in activity executor:" + activity.getRunState());
