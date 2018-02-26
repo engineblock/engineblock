@@ -1,10 +1,12 @@
 package io.engineblock.activitycore;
 
 import io.engineblock.activityapi.core.Action;
+import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.core.Motor;
 import io.engineblock.activityapi.core.RunState;
 import io.engineblock.activitycore.fortesting.BlockingSegmentInput;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.motor.CoreMotor;
 import org.testng.annotations.Test;
 
@@ -34,7 +36,8 @@ public class CoreMotorTest {
     @Test
     public void testBasicActivityMotor() {
         BlockingSegmentInput lockstepper = new BlockingSegmentInput();
-        Motor cm = new CoreMotor(ActivityDef.parseActivityDef("alias=foo"), 5L, lockstepper);
+        Activity activity = new SimpleActivity(ActivityDef.parseActivityDef("alias=foo"));
+        Motor cm = new CoreMotor(activity, 5L, lockstepper);
         AtomicLong observableAction = new AtomicLong(-3L);
         cm.setAction(getTestConsumer(observableAction));
         cm.getSlotStateTracker().enterState(RunState.Starting);
@@ -53,7 +56,7 @@ public class CoreMotorTest {
     @Test
     public void testIteratorStride() {
         BlockingSegmentInput lockstepper = new BlockingSegmentInput();
-        Motor cm1 = new CoreMotor(ActivityDef.parseActivityDef("stride=3"),1L, lockstepper);
+        Motor cm1 = new CoreMotor(new SimpleActivity("stride=3"),1L, lockstepper);
         AtomicLongArray ary = new AtomicLongArray(10);
         Action a1 = getTestArrayConsumer(ary);
         cm1.setAction(a1);

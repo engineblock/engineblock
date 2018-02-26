@@ -22,15 +22,15 @@ import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.input.Input;
-import io.engineblock.activityapi.input.RateLimiterProvider;
 import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.planning.EngineBlockRateLimiter;
+import io.engineblock.rates.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.engineblock.activityapi.core.RunState.*;
@@ -49,68 +49,70 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private long slotId;
     private Input input;
     private Action action;
-    private ActivityDef activityDef;
+    private Activity activity;
     private SlotStateTracker slotStateTracker;
     private AtomicReference<RunState> slotState;
-    private EngineBlockRateLimiter rateLimiter; // Only for use in phasing
     private int stride = 1;
     private Output output;
+    private RateLimiter strideRateLimiter;
+    private RateLimiter cycleRateLimiter;
+    private RateLimiter phaseRateLimiter;
 
     /**
      * Create an ActivityMotor.
      *
-     * @param activityDef The activity def that this motor will be associated with.
-     * @param slotId      The enumeration of the motor, as assigned by its executor.
-     * @param input       A LongSupplier which provides the cycle number inputs.
+     * @param activity The activity that this motor will be associated with.
+     * @param slotId   The enumeration of the motor, as assigned by its executor.
+     * @param input    A LongSupplier which provides the cycle number inputs.
      */
     public CoreMotor(
-            ActivityDef activityDef,
+            Activity activity,
             long slotId,
             Input input) {
-        this.activityDef = activityDef;
+        this.activity = activity;
         this.slotId = slotId;
         setInput(input);
         slotStateTracker = new SlotStateTracker(slotId);
         slotState = slotStateTracker.getAtomicSlotState();
-        onActivityDefUpdate(activityDef);
+        onActivityDefUpdate(activity.getActivityDef());
     }
 
 
     /**
      * Create an ActivityMotor.
      *
-     * @param activityDef The activity def that this motor is based on.
-     * @param slotId      The enumeration of the motor, as assigned by its executor.
-     * @param input       A LongSupplier which provides the cycle number inputs.
-     * @param action      An LongConsumer which is applied to the input for each cycle.
+     * @param activity The activity that this motor is based on.
+     * @param slotId   The enumeration of the motor, as assigned by its executor.
+     * @param input    A LongSupplier which provides the cycle number inputs.
+     * @param action   An LongConsumer which is applied to the input for each cycle.
      */
     public CoreMotor(
-            ActivityDef activityDef,
+            Activity activity,
             long slotId,
             Input input,
             Action action
     ) {
-        this(activityDef, slotId, input);
+        this(activity, slotId, input);
         setAction(action);
     }
 
     /**
      * Create an ActivityMotor.
      *
-     * @param activityDef The activity def that this motor is based on.
-     * @param slotId      The enumeration of the motor, as assigned by its executor.
-     * @param input       A LongSupplier which provides the cycle number inputs.
-     * @param action      An LongConsumer which is applied to the input for each cycle.
-     * @param output      An optional tracker.
+     * @param activity The activity that this motor is based on.
+     * @param slotId   The enumeration of the motor, as assigned by its executor.
+     * @param input    A LongSupplier which provides the cycle number inputs.
+     * @param action   An LongConsumer which is applied to the input for each cycle.
+     * @param output   An optional tracker.
      */
     public CoreMotor(
-            ActivityDef activityDef,
+            Activity activity,
             long slotId,
             Input input,
             Action action,
             Output output
     ) {
-        this(activityDef, slotId, input);
+        this(activity, slotId, input);
         setAction(action);
         setResultOutput(output);
     }
@@ -164,10 +166,14 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     public void run() {
 
         try {
-            Timer cyclesTimer = ActivityMetrics.timer(activityDef, "cycles");
-            Timer phasesTimer = ActivityMetrics.timer(activityDef, "phases");
-            Timer stridesTimer = ActivityMetrics.timer(activityDef, "strides");
-            Timer inputTimer = ActivityMetrics.timer(activityDef,"read-input");
+            Timer cyclesTimer = ActivityMetrics.timer(activity.getActivityDef(), "cycles");
+            Timer phasesTimer = ActivityMetrics.timer(activity.getActivityDef(), "phases");
+            Timer stridesTimer = ActivityMetrics.timer(activity.getActivityDef(), "strides");
+            Timer inputTimer = ActivityMetrics.timer(activity.getActivityDef(), "read-input");
+
+            strideRateLimiter = activity.getStrideLimiter();
+            cycleRateLimiter = activity.getCycleLimiter();
+            phaseRateLimiter = activity.getPhaseLimiter();
 
             if (slotState.get() == Finished) {
                 logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
@@ -183,6 +189,19 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             long cyclenum;
             action.init();
 
+            if (input instanceof Startable) {
+                ((Startable) input).start();
+            }
+
+            if (strideRateLimiter != null) {
+                // block for strides rate limiter
+                strideRateLimiter.start();
+            }
+
+
+            long strideDelay=0L;
+            long cycleDelay=0L;
+            long phaseDelay=0L;
             while (slotState.get() == Running) {
 
                 CycleSegment cycleSegment = null;
@@ -199,7 +218,15 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
                 CycleResultSegmentBuffer segBuffer = new CycleResultSegmentBuffer(stride);
 
-                try (Timer.Context stridesTime = stridesTimer.time()) {
+                if (strideRateLimiter != null) {
+                    // block for strides rate limiter
+                    strideDelay=strideRateLimiter.acquire();
+                }
+
+//                try (Timer.Context stridesTime = stridesTimer.time()) {
+                long strideStart = System.nanoTime();
+                try {
+
                     while (!cycleSegment.isExhausted()) {
                         cyclenum = cycleSegment.nextCycle();
                         if (cyclenum < 0) {
@@ -215,7 +242,21 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                             continue;
                         }
                         int result = -1;
-                        try (Timer.Context cycleTime = cyclesTimer.time()) {
+
+                        if (cycleRateLimiter != null) {
+                            // Block for cycle rate limiter
+                            cycleDelay=cycleRateLimiter.acquire();
+                        }
+
+                        // Phases are rate limited independently from overall cycles, but each cycle has at least one phase.
+                        if (phaseRateLimiter != null) {
+                            // Block for cycle rate limiter
+                            phaseDelay=phaseRateLimiter.acquire();
+                        }
+
+                        //try (Timer.Context cycleTime = cyclesTimer.time()) {
+                        long cycleStart=System.nanoTime();
+                        try {
 
                             logger.trace("cycle " + cyclenum);
                             try (Timer.Context phaseTime = phasesTimer.time()) {
@@ -224,8 +265,9 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
                             if (multiPhaseAction != null) {
                                 while (multiPhaseAction.incomplete()) {
-                                    if (rateLimiter != null) {
-                                        rateLimiter.acquire();
+                                    if (phaseRateLimiter != null) {
+                                        // Block for cycle rate limiter
+                                        phaseDelay=phaseRateLimiter.acquire();
                                     }
                                     try (Timer.Context phaseTime = phasesTimer.time()) {
                                         result = multiPhaseAction.runPhase(cyclenum);
@@ -233,10 +275,16 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                                 }
                             }
 
+                        } finally {
+                            long cycleEnd=System.nanoTime();
+                            cyclesTimer.update((cycleEnd-cycleStart)+cycleDelay,TimeUnit.NANOSECONDS);
                         }
                         segBuffer.append(cyclenum, result);
                     }
 
+                } finally {
+                    long strideEnd=System.nanoTime();
+                    stridesTimer.update((strideEnd-strideStart)+strideDelay, TimeUnit.NANOSECONDS);
                 }
 
                 if (output != null) {
@@ -271,12 +319,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             if (component != null && component instanceof ActivityDefObserver) {
                 ((ActivityDefObserver) component).onActivityDefUpdate(activityDef);
             }
-        }
-
-        if (input instanceof RateLimiterProvider) {
-            rateLimiter = ((RateLimiterProvider) input).getRateLimiter();
-        } else {
-            rateLimiter = null;
         }
 
         this.stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);

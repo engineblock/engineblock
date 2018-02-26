@@ -102,7 +102,7 @@ public class ActivityExecutorTest {
             @Override
             public Motor getMotor(ActivityDef activityDef, int slotId) {
                 Activity activity = new SimpleActivity(activityDef);
-                Motor cm = new CoreMotor(activityDef, slotId, ls);
+                Motor cm = new CoreMotor(activity, slotId, ls);
                 cm.setAction(lc);
                 return cm;
             }

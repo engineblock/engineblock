@@ -56,7 +56,7 @@ public class CoreMotorDispenser implements MotorDispenser {
             output = outputDispenser.getOutput(slotId);
         }
         IntPredicate resultFilter = null;
-        Motor am = new CoreMotor(activity.getActivityDef(), slotId, input, action, output);
+        Motor am = new CoreMotor(activity, slotId, input, action, output);
         return am;
     }
 }
