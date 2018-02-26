@@ -155,12 +155,12 @@ public class ActivityMetrics {
         return registry;
     }
 
-    public static Gauge<?> gauge(ActivityDef activityDef, String name, Gauge<?> gauge) {
-        return (Gauge<?>) register(activityDef, name, () -> gauge);
+    public static <T> Gauge<T> gauge(ActivityDef activityDef, String name, Gauge<T> gauge) {
+        return (Gauge<T>) register(activityDef, name, () -> gauge);
     }
 
-    public static Gauge<?> gauge(ScriptContext scriptContext, String name, Gauge<?> gauge) {
-        return (Gauge<?>) register(scriptContext, name, () -> gauge);
+    public static <T> Gauge<T> gauge(ScriptContext scriptContext, String name, Gauge<T> gauge) {
+        return (Gauge<T>) register(scriptContext, name, () -> gauge);
     }
 
 
