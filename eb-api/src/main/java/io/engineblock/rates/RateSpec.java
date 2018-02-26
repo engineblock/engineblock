@@ -17,6 +17,8 @@
 
 package io.engineblock.rates;
 
+import io.engineblock.util.Unit;
+
 public class RateSpec {
     public double opsPerSec = 1.0D;
     public double strictness = 1.0D;
@@ -27,7 +29,7 @@ public class RateSpec {
             case 2:
                 strictness = Double.valueOf(specs[1]);
             case 1:
-                opsPerSec = Double.valueOf(specs[0]);
+                opsPerSec = Unit.countFor(specs[0]).orElseThrow(() -> new RuntimeException("Unparsable:" + specs[0]));
                 break;
             default:
                 throw new RuntimeException("Rate specs must be either '<rate>' or '<rate>:<strictness>' as in 5000.0 or 5000.0:1.0");
