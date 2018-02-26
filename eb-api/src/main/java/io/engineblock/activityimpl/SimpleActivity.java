@@ -5,29 +5,41 @@ import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.core.MotorDispenser;
 import io.engineblock.activityapi.core.RunState;
 import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
-import io.engineblock.activityapi.output.OutputDispenser;
 import io.engineblock.activityapi.input.InputDispenser;
+import io.engineblock.activityapi.output.OutputDispenser;
+import io.engineblock.rates.RateLimiter;
+import io.engineblock.rates.RateLimiters;
+import io.engineblock.rates.RateSpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * A default implementation of an Activity, suitable for building upon.
  */
 public class SimpleActivity implements Activity {
-
+    private final static Logger logger = LoggerFactory.getLogger(SimpleActivity.class);
+    protected ActivityDef activityDef;
     private List<AutoCloseable> closeables = new ArrayList<>();
-
     private MotorDispenser motorDispenser;
     private InputDispenser inputDispenser;
     private ActionDispenser actionDispenser;
     private OutputDispenser markerDispenser;
     private IntPredicateDispenser resultFilterDispenser;
-    protected ActivityDef activityDef;
     private RunState runState = RunState.Uninitialized;
+    private RateLimiter strideLimiter;
+    private RateLimiter cycleLimiter;
+    private RateLimiter phaseLimiter;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
+    }
+
+    public SimpleActivity(String activityDefString) {
+        this(ActivityDef.parseActivityDef(activityDefString));
     }
 
     public synchronized RunState getRunState() {
@@ -118,4 +130,74 @@ public class SimpleActivity implements Activity {
         }
         closeables.clear();
     }
+
+    @Override
+    public RateLimiter getCycleLimiter() {
+        return this.cycleLimiter;
+    }
+
+    @Override
+    public synchronized void setCycleLimiter(RateLimiter rateLimiter) {
+        this.cycleLimiter = rateLimiter;
+    }
+
+    @Override
+    public synchronized RateLimiter getCycleRateLimiter(Supplier<? extends RateLimiter> s) {
+        if (cycleLimiter == null) {
+            cycleLimiter = s.get();
+        }
+        return cycleLimiter;
+    }
+
+    @Override
+    public synchronized RateLimiter getStrideLimiter() {
+        return this.strideLimiter;
+    }
+
+    @Override
+    public synchronized void setStrideLimiter(RateLimiter rateLimiter) {
+        this.strideLimiter = rateLimiter;
+    }
+
+    @Override
+    public synchronized RateLimiter getStrideRateLimiter(Supplier<? extends RateLimiter> s) {
+        if (strideLimiter == null) {
+            strideLimiter = s.get();
+        }
+        return strideLimiter;
+    }
+
+    @Override
+    public RateLimiter getPhaseLimiter() {
+        return phaseLimiter;
+    }
+
+    @Override
+    public void setPhaseLimiter(RateLimiter rateLimiter) {
+        this.phaseLimiter = phaseLimiter;
+    }
+
+    @Override
+    public synchronized RateLimiter getPhaseRateLimiter(Supplier<? extends RateLimiter> supplier) {
+        if (phaseLimiter == null) {
+            phaseLimiter = supplier.get();
+        }
+        return phaseLimiter;
+    }
+
+
+    @Override
+    public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
+
+        activityDef.getParams().getOptionalString("striderate").map(RateSpec::new)
+                .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), strideLimiter, spec));
+
+        activityDef.getParams().getOptionalString("targetrate").map(RateSpec::new).ifPresent(
+                        spec-> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), cycleLimiter, spec));
+
+        activityDef.getParams().getOptionalString("phaserate").map(RateSpec::new)
+                .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), phaseLimiter, spec));
+
+    }
+
 }
