@@ -99,7 +99,7 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
     @Override
     public synchronized void onCapableAdded(String name, HdrDeltaHistogramAttachment chainedHistogram) {
         if (pattern.matcher(name).matches()) {
-            this.targets.add(new WriterTarget(name,chainedHistogram.attach()));
+            this.targets.add(new WriterTarget(name,chainedHistogram.attachHdrDeltaHistogram()));
         }
     }
 

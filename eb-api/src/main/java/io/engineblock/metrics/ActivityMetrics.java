@@ -230,6 +230,30 @@ public class ActivityMetrics {
     }
 
     /**
+     * Add a classic histogram in addition to the default implementation in this runtime. This is a way to
+     * get a view to both the enhanced histogram implementation as well as the classic implementation in the
+     * same scenario.
+     * @param sessionName The name of the session to be annotated in the classic histogram
+     * @param pattern A regular expression pattern to filter out metric names for inclusion
+     * @param prefix The name prefix to add to the classic histograms so that they fit into the existing metrics namespace
+     * @param interval How frequently to update the histogram
+     */
+    public static void addClassicHistos(String sessionName, String pattern, String prefix, String interval) {
+        Pattern compiledPattern = Pattern.compile(pattern);
+        long intervalMillis = Unit.msFor(interval).orElseThrow(() -> new RuntimeException("Unable to parse interval spec:" + interval + "'"));
+
+        ClassicHistoListener classicHistoListener =
+                new ClassicHistoListener(get(),sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
+        logger.debug("attaching histo listener " + classicHistoListener + " to the metrics registry.");
+        get().addListener(classicHistoListener);
+
+        ClassicTimerListener classicTimerListener =
+                new ClassicTimerListener(get(),sessionName, prefix, compiledPattern, interval, TimeUnit.NANOSECONDS);
+        logger.debug("attaching timer listener " + classicTimerListener + " to the metrics registry.");
+        get().addListener(classicTimerListener);
+    }
+
+    /**
      * This should be called at the end of a process, so that open intervals can be finished, logs closed properly,
      * etc.
      */

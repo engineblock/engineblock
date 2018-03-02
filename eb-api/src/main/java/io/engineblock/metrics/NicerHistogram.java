@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDeltaHistogramAttachment {
+public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDeltaHistogramAttachment, HistogramAttachment {
 
     private final DeltaHdrHistogramReservoir hdrDeltaReservoir;
     private long cacheExpiryMillis = 0L;
     private long cacheTimeMillis = 0L;
     private String metricName;
-    private List<NicerHistogram> mirrors;
+    private List<Histogram> mirrors;
 
     public NicerHistogram(String metricName, DeltaHdrHistogramReservoir hdrHistogramReservoir) {
         super(hdrHistogramReservoir);
@@ -64,7 +64,7 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDe
     }
 
     @Override
-    public synchronized NicerHistogram attach() {
+    public synchronized NicerHistogram attachHdrDeltaHistogram() {
         if (mirrors == null) {
             mirrors = new CopyOnWriteArrayList<>();
         }
@@ -75,10 +75,19 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDe
     }
 
     @Override
+    public Histogram attachHistogram(Histogram histogram) {
+        if (mirrors == null) {
+            mirrors = new CopyOnWriteArrayList<>();
+        }
+        mirrors.add(histogram);
+        return histogram;
+    }
+
+    @Override
     public void update(long value) {
         super.update(value);
         if (mirrors != null) {
-            for (NicerHistogram mirror : mirrors) {
+            for (Histogram mirror : mirrors) {
                 mirror.update(value);
             }
         }
@@ -88,4 +97,5 @@ public class NicerHistogram extends Histogram implements DeltaSnapshotter, HdrDe
     public org.HdrHistogram.Histogram getNextHdrDeltaHistogram() {
         return hdrDeltaReservoir.getNextHdrHistogram();
     }
+
 }

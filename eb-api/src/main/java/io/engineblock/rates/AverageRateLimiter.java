@@ -79,10 +79,6 @@ public class AverageRateLimiter implements Startable, RateLimiter {
 
     // each blocking call will correct to strict schedule by gap * 1/2^n
 
-    /**
-     * @param activity
-     * @param maxOpsPerSecond
-     */
     public AverageRateLimiter(ActivityDef def, double maxOpsPerSecond) {
         this(def, maxOpsPerSecond, 0.0D);
     }
@@ -93,7 +89,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
 
     /**
      * Create a rate limiter.
-     *
+     * @param def The activity definition for this rate limiter
      * @param maxOpsPerSecond Max ops per second
      * @param advanceRatio    ratio of limit compensation to advance per acquire.
      */
@@ -233,6 +229,9 @@ public class AverageRateLimiter implements Startable, RateLimiter {
      * See {@link RateLimiters#createOrUpdate(ActivityDef, RateLimiter, RateSpec)} as a
      * safe way to change from average rate limiting to strict rate limiting
      * at runtime.
+     *
+     * @param strictness - The strictness level for this rate limiter
+     * @return The number of bits used to calculate gap closing via right shift
     */
     public int setStrictness(double strictness) {
         if (strictness!=0.0D) {

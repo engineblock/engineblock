@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-public class NicerTimer extends Timer implements DeltaSnapshotter, HdrDeltaHistogramAttachment {
+public class NicerTimer extends Timer implements DeltaSnapshotter, HdrDeltaHistogramAttachment, TimerAttachment {
     private final String metricName;
     private DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
     private long cacheExpiry = 0L;
     private ConvenientSnapshot lastSnapshot;
-    private List<NicerTimer> mirrors;
+    private List<Timer> mirrors;
 
     public NicerTimer(String metricName, DeltaHdrHistogramReservoir deltaHdrHistogramReservoir) {
         super(deltaHdrHistogramReservoir);
@@ -57,14 +57,22 @@ public class NicerTimer extends Timer implements DeltaSnapshotter, HdrDeltaHisto
     }
 
     @Override
-    public synchronized NicerTimer attach() {
-        DeltaHdrHistogramReservoir sameConfigReservoir = this.deltaHdrHistogramReservoir.copySettings();
-        NicerTimer mirror = new NicerTimer(this.metricName, sameConfigReservoir);
+    public synchronized NicerTimer attachHdrDeltaHistogram() {
         if (mirrors==null) {
             mirrors = new CopyOnWriteArrayList<>();
         }
+        DeltaHdrHistogramReservoir sameConfigReservoir = this.deltaHdrHistogramReservoir.copySettings();
+        NicerTimer mirror = new NicerTimer(this.metricName, sameConfigReservoir);
         mirrors.add(mirror);
         return mirror;
+    }
+    @Override
+    public Timer attachTimer(Timer timer) {
+        if (mirrors==null) {
+            mirrors = new CopyOnWriteArrayList<>();
+        }
+        mirrors.add(timer);
+        return timer;
     }
 
 
@@ -77,9 +85,10 @@ public class NicerTimer extends Timer implements DeltaSnapshotter, HdrDeltaHisto
     public void update(long duration, TimeUnit unit) {
         super.update(duration, unit);
         if (mirrors!=null) {
-            for (NicerTimer mirror : mirrors) {
+            for (Timer mirror : mirrors) {
                 mirror.update(duration,unit);
             }
         }
     }
+
 }
