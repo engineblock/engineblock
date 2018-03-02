@@ -30,8 +30,6 @@ public class EBCLIOptions {
     private static final String WANTS_OUTPUT_TYPES = "--list-output-types";
     private static final String WANTS_VERSION_LONG = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
-    private static final String LOG_HISTO = "--log-histograms";
-    private static final String LOG_STATS = "--log-histostats";
 
     // Execution
     private static final String ACTIVITY = "activity";
@@ -57,6 +55,9 @@ public class EBCLIOptions {
     private static final String METRICS_PREFIX = "--metrics-prefix";
     private static final String PROGRESS_INDICATOR = "--progress";
     private static final String WITH_LOGGING_PATTERN = "--with-logging-pattern";
+    private static final String LOG_HISTO = "--log-histograms";
+    private static final String LOG_STATS = "--log-histostats";
+    private static final String CLASSIC_HISTOS = "--classic-histograms";
 
     private static final Set<String> reserved_words = new HashSet<String>() {{
         addAll(
@@ -85,6 +86,7 @@ public class EBCLIOptions {
     private Level consoleLevel = Level.WARN;
     private List<String> histoLoggerConfigs = new ArrayList<>();
     private List<String> statsLoggerConfigs = new ArrayList<>();
+    private List<String> classicHistoConfigs = new ArrayList<>();
     private String progressSpec = "console:1m";
     private String logDirectory = "logs";
     private boolean wantsInputTypes=false;
@@ -210,6 +212,11 @@ public class EBCLIOptions {
                     String logStatsTo = arglist.removeFirst();
                     statsLoggerConfigs.add(logStatsTo);
                     break;
+                case CLASSIC_HISTOS:
+                    arglist.removeFirst();
+                    String classicHistos = arglist.removeFirst();
+                    classicHistoConfigs.add(classicHistos);
+                    break;
                 case REPORT_INTERVAL:
                     arglist.removeFirst();
                     reportInterval = Integer.valueOf(readWordOrThrow(arglist, "report interval"));
@@ -272,13 +279,19 @@ public class EBCLIOptions {
 
     public List<LoggerConfig> getHistoLoggerConfigs() {
         List<LoggerConfig> configs = histoLoggerConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
-        checkLoggerConfigs(configs, "--log-histograms");
+        checkLoggerConfigs(configs, LOG_HISTO);
         return configs;
     }
 
     public List<LoggerConfig> getStatsLoggerConfigs() {
         List<LoggerConfig> configs = statsLoggerConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
-        checkLoggerConfigs(configs, "--log-histostats");
+        checkLoggerConfigs(configs, LOG_STATS);
+        return configs;
+    }
+
+    public List<LoggerConfig> getClassicHistoConfigs() {
+        List<LoggerConfig> configs = classicHistoConfigs.stream().map(LoggerConfig::new).collect(Collectors.toList());
+        checkLoggerConfigs(configs, CLASSIC_HISTOS);
         return configs;
     }
 

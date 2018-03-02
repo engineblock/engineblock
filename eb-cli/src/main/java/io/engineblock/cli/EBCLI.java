@@ -122,6 +122,9 @@ public class EBCLI {
         for (EBCLIOptions.LoggerConfig statsLogger : options.getStatsLoggerConfigs()) {
             ActivityMetrics.addStatsLogger(sessionName, statsLogger.pattern, statsLogger.file, statsLogger.interval);
         }
+        for (EBCLIOptions.LoggerConfig classicConfigs : options.getClassicHistoConfigs()) {
+            ActivityMetrics.addClassicHistos(sessionName, classicConfigs.pattern, classicConfigs.file, classicConfigs.interval);
+        }
 
         ConsoleLogging.enableConsoleLogging(options.wantsConsoleLogLevel(), options.getConsoleLoggingPattern());
         // intentionally not shown for warn-only
