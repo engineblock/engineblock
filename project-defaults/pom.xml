@@ -10,6 +10,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <metagen-version>1.0.85</metagen-version>
+        <metrics-version>3.2.6</metrics-version>
     </properties>
 
     <name>${project.artifactId}</name>

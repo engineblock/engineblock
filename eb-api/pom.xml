@@ -41,13 +41,13 @@
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
-            <version>4.0.2</version>
+            <version>${metrics-version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-jmx</artifactId>
-            <version>4.0.2</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>io.dropwizard.metrics</groupId>-->
+            <!--<artifactId>metrics-jmx</artifactId>-->
+            <!--<version>${metrics-version}</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.apache.commons</groupId>
