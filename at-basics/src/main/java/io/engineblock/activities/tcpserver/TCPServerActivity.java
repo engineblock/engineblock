@@ -17,7 +17,6 @@
 
 package io.engineblock.activities.tcpserver;
 
-import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activities.stdout.StdoutActivity;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.util.SSLKsFactory;
@@ -48,7 +47,6 @@ public class TCPServerActivity extends StdoutActivity {
     private BlockingQueue<String> queue = new LinkedBlockingQueue<>(10);
     private ServerSocket listenerSocket;
     private List<Shutdown> managedShutdown = new ArrayList<>();
-    private RateLimiter limiter=null;
 
 
     public TCPServerActivity(ActivityDef activityDef) {
@@ -80,7 +78,6 @@ public class TCPServerActivity extends StdoutActivity {
     public synchronized void write(String statement) {
         while (true) {
             try {
-                if (limiter!=null) limiter.acquire();
                 queue.put(statement);
                 return;
             } catch (InterruptedException ignored) {

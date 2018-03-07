@@ -5,7 +5,6 @@ import activityconfig.yaml.StmtDef;
 import activityconfig.yaml.StmtsDocList;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import com.google.common.util.concurrent.RateLimiter;
 import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
@@ -28,7 +27,6 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("Duplicates")
@@ -46,7 +44,6 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     private ExceptionMeterMetrics exceptionMeterMetrics;
     private int retry_delay = 0;
     private int retries;
-    private RateLimiter rateLimiter;
 
     public OpSequence<StringBindings> getOpSequence() {
         return opSequence;
@@ -157,27 +154,16 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
+        super.onActivityDefUpdate(activityDef);
+
         ParameterMap params = activityDef.getParams();
         this.retry_delay = params.getOptionalInteger("retry_delay").orElse(1000);
         this.retries = params.getOptionalInteger("retries").orElse(3);
-
-        Optional<RateLimiter> newLimiter = activityDef.getParams().getOptionalDouble("targetrate")
-                .map(RateLimiter::create);
-        if (newLimiter.isPresent()) {
-            RateLimiter newRateLimiter = newLimiter.get();
-            if (rateLimiter==null || rateLimiter.getRate()!=newRateLimiter.getRate()) {
-                rateLimiter = newRateLimiter;
-                logger.debug("rate limiter adjusted to " + rateLimiter.getRate());
-            }
-        }
     }
 
     public synchronized void write(String statement) {
         int tries = 0;
         Exception e = null;
-        if (rateLimiter!=null) {
-            rateLimiter.acquire();
-        }
         while (tries < retries) {
             tries++;
             if (pw == null) {
