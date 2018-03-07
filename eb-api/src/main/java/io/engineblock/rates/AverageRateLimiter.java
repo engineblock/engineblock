@@ -63,20 +63,14 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class AverageRateLimiter implements Startable, RateLimiter {
     private static final Logger logger = LoggerFactory.getLogger(AverageRateLimiter.class);
-
+    protected Gauge<Long> delayGauge;
     private long opTicks = 0L; // Number of nanos representing one grant at target rate
     private double rate = Double.NaN; // The "ops/s" rate as set by the user
-
-    private volatile boolean started=false;
-    private long startTimeNanos=0L;
-    private final AtomicLong lastSeenNanoTime = new AtomicLong(0L);
-    private final AtomicLong ticksTimeline = new AtomicLong(0L);
-
+    private long startTimeNanos = System.nanoTime();
+    private final AtomicLong lastSeenNanoTime = new AtomicLong(startTimeNanos);
+    private final AtomicLong ticksTimeline = new AtomicLong(startTimeNanos);
     private AtomicLong accumulatedDelayNanos = new AtomicLong(0L);
-    protected Gauge<Long> delayGauge;
-
-
-    // each blocking call will correct to strict schedule by gap * 1/2^n
+    private State state = State.Idle;
 
     /**
      * Create a rate limiter.
@@ -90,6 +84,8 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         this.setRate(maxOpsPerSecond);
         this.setStrictness(strictness);
     }
+
+    // each blocking call will correct to strict schedule by gap * 1/2^n
 
     public AverageRateLimiter(ActivityDef def, double maxOpsPerSecond) {
         this(def, maxOpsPerSecond, 0.0D);
@@ -131,11 +127,13 @@ public class AverageRateLimiter implements Startable, RateLimiter {
 
         timelinePosition = getNanoClockTime();
         lastSeenNanoTime.set(timelinePosition);
-        long scheduleDelay=timelinePosition-opScheduleTime;
+        long scheduleDelay = timelinePosition - opScheduleTime;
 
-        if (scheduleDelay>0) {
+        if (scheduleDelay > 0L) {
             return scheduleDelay;
         } else {
+            scheduleDelay*=-1;
+//            logger.debug("schedule delay: " + scheduleDelay);
             try {
                 Thread.sleep(scheduleDelay / 1000000, (int) (scheduleDelay % 1000000L));
             } catch (InterruptedException ignoringSpuriousInterrupts) {
@@ -170,47 +168,37 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         this.rate = rate;
         opTicks = (long) (1000000000d / rate);
         logger.info("OpTicksNs for one cycle is " + opTicks + "ns");
+
         setOpNanos(opTicks);
     }
 
     @Override
     public synchronized double setOpNanos(long opTicks) {
-        if (opTicks <=0) {
+        if (opTicks <= 0) {
             throw new RuntimeException("The number of nanos per op must be greater than 0.");
         }
         this.opTicks = opTicks;
         this.rate = 1000000000d / opTicks;
 
-        if (started) {
-            accumulateDelay();
-            sync();
+        switch (state) {
+            case Started:
+                accumulateDelay();
+            case Idle:
+                sync();
         }
-
-
-//        sync();
-//        if (started) {
-//            accumulateDelay();
-//        }
-
-//        accumulatedDelayNanos.addAndGet(getRateSchedulingDelay());
-//
-//        long nanos=getNanoClockTime();
-//        startTimeNanos = nanos;
-//        lastSeenNanoTime.set(nanos);
-//        ticksTimeline.set(nanos);
 
         return getRate();
     }
 
     protected long accumulateDelay() {
+        logger.debug("adding " + getTotalSchedulingDelay() + " ns to accumulated delay.");
         accumulatedDelayNanos.set(getTotalSchedulingDelay());
         return accumulatedDelayNanos.get();
     }
 
-
     @Override
     public long getRateSchedulingDelay() {
-        return (Math.max(0L,getNanoClockTime() - this.ticksTimeline.get()));
+        return (Math.max(0L, getNanoClockTime() - this.ticksTimeline.get()));
     }
 
     @Override
@@ -219,14 +207,18 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     }
 
     public synchronized void start() {
-        if (!started) {
-            sync();
-            this.started = true;
+        switch (state) {
+            case Started:
+                break;
+            case Idle:
+                sync();
+                state=State.Started;
+                break;
         }
     }
 
     protected synchronized void sync() {
-        long nanos=getNanoClockTime();
+        long nanos = getNanoClockTime();
         startTimeNanos = nanos;
         lastSeenNanoTime.set(nanos);
         ticksTimeline.set(nanos);
@@ -272,9 +264,9 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         }
     }
 
-
     /**
-     ** visible for testing
+     * * visible for testing
+     *
      * @return startTimeNanos - the logical start time of this rate limiter
      */
     public long getStartTimeNanos() {
@@ -282,7 +274,8 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     }
 
     /**
-     ** visible for testing
+     * * visible for testing
+     *
      * @return ticksTimeline value - the long value of the shared timeslice marker
      */
     public AtomicLong getTicksTimeline() {
@@ -291,9 +284,15 @@ public class AverageRateLimiter implements Startable, RateLimiter {
 
     /**
      * visible for testing
+     *
      * @return lastSeenNanoTime - the long value of the shared view of the clock
      */
     public AtomicLong getLastSeenNanoTimeline() {
         return this.lastSeenNanoTime;
+    }
+
+    private enum State {
+        Idle,
+        Started
     }
 }

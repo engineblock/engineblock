@@ -223,7 +223,7 @@ public abstract class BaseRateLimiterBenches {
     // effective concurrent acquires/s: 77972331.893
     // effective concurrent nanos/op: 12.825062
     @Test
-    public void testContendedMultiThrededPerformance() {
+    public void testContendedMultiThreadedPerformance() {
         int threadCount = 100;
         long iterations = 5_00_000_000L;
         double rate = 500_000_000.0d;

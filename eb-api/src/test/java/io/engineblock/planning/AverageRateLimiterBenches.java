@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
  * These tests run all the rate limiter micro benches with average rate
  * limiting only, due to the strictness level being set to 0.0D.
  */
-@Test(enabled=true)
+@Test(enabled=false)
 public class AverageRateLimiterBenches extends BaseRateLimiterBenches {
 
     protected RateLimiter getRateLimiter(String paramSpec, double rate) {
@@ -37,6 +37,5 @@ public class AverageRateLimiterBenches extends BaseRateLimiterBenches {
                 new RateSpec(rate,0.0D)
         );
     }
-
-
 }
+
