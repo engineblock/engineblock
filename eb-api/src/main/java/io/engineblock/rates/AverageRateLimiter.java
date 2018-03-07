@@ -18,7 +18,6 @@
 package io.engineblock.rates;
 
 import com.codahale.metrics.Gauge;
-import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.core.Startable;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.ActivityMetrics;
@@ -68,16 +67,29 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     private long opTicks = 0L; // Number of nanos representing one grant at target rate
     private double rate = Double.NaN; // The "ops/s" rate as set by the user
 
-    private long startTimeNanos = System.nanoTime();
+    private volatile boolean started=false;
+    private long startTimeNanos=0L;
+    private final AtomicLong lastSeenNanoTime = new AtomicLong(0L);
+    private final AtomicLong ticksTimeline = new AtomicLong(0L);
 
-    private AtomicLong ticksTimeline = new AtomicLong(startTimeNanos);
     private AtomicLong accumulatedDelayNanos = new AtomicLong(0L);
-    private AtomicLong lastSeenNanoTime = new AtomicLong(System.nanoTime());
-    private Gauge<Long> delayGauge;
+    protected Gauge<Long> delayGauge;
 
-    private volatile boolean started;
 
     // each blocking call will correct to strict schedule by gap * 1/2^n
+
+    /**
+     * Create a rate limiter.
+     *
+     * @param def             The activity definition for this rate limiter
+     * @param maxOpsPerSecond Max ops per second
+     * @param strictness      How strict the timing is, between (0.0 and 1.0)
+     */
+    public AverageRateLimiter(ActivityDef def, double maxOpsPerSecond, double strictness) {
+        this.delayGauge = ActivityMetrics.gauge(def, "cco-delay", new RateLimiters.DelayGauge(this));
+        this.setRate(maxOpsPerSecond);
+        this.setStrictness(strictness);
+    }
 
     public AverageRateLimiter(ActivityDef def, double maxOpsPerSecond) {
         this(def, maxOpsPerSecond, 0.0D);
@@ -85,18 +97,6 @@ public class AverageRateLimiter implements Startable, RateLimiter {
 
     public AverageRateLimiter(ActivityDef def, RateSpec rateSpec) {
         this(def, rateSpec.opsPerSec, rateSpec.strictness);
-    }
-
-    /**
-     * Create a rate limiter.
-     * @param def The activity definition for this rate limiter
-     * @param maxOpsPerSecond Max ops per second
-     * @param advanceRatio    ratio of limit compensation to advance per acquire.
-     */
-    public AverageRateLimiter(ActivityDef def, double maxOpsPerSecond, double advanceRatio) {
-        this.delayGauge = ActivityMetrics.gauge(def,"cco-delay",new RateLimiters.DelayGauge(this));
-        this.setRate(maxOpsPerSecond);
-        this.setStrictness(advanceRatio);
     }
 
     public static AverageRateLimiter createOrUpdate(ActivityDef def, AverageRateLimiter maybeExtant, RateSpec ratespec) {
@@ -109,6 +109,10 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         return maybeExtant;
     }
 
+    protected long getNanoClockTime() {
+        return System.nanoTime();
+    }
+
     /**
      * See {@link AverageRateLimiter} for interface docs.
      * effective calling overhead of acquire() is ~20ns
@@ -118,28 +122,26 @@ public class AverageRateLimiter implements Startable, RateLimiter {
      */
     @Override
     public long acquire(long nanos) {
-        long timeSlicePosition = ticksTimeline.getAndAdd(nanos);
+        long opScheduleTime = ticksTimeline.getAndAdd(nanos);
         long timelinePosition = lastSeenNanoTime.get();
 
-        // This is a throughput optimization
-        if (timelinePosition < timeSlicePosition) {
-            timelinePosition = System.nanoTime();
-            lastSeenNanoTime.set(timelinePosition);
+        if (opScheduleTime < timelinePosition) {
+            return 0L;
         }
 
-        long timeSliceDelay = (timeSlicePosition - timelinePosition);
+        timelinePosition = getNanoClockTime();
+        lastSeenNanoTime.set(timelinePosition);
+        long scheduleDelay=timelinePosition-opScheduleTime;
 
-        if (timeSliceDelay > 0L) {
+        if (scheduleDelay>0) {
+            return scheduleDelay;
+        } else {
             try {
-                Thread.sleep(timeSliceDelay / 1000000, (int) (timeSliceDelay % 1000000L));
+                Thread.sleep(scheduleDelay / 1000000, (int) (scheduleDelay % 1000000L));
             } catch (InterruptedException ignoringSpuriousInterrupts) {
-                // This is only a safety for spurious interrupts. It should not be hit often.
             }
-
-            // indicate that no cumulative delay is affecting this caller, only execution delay from above
             return 0;
         }
-        return timelinePosition - timeSlicePosition;
     }
 
     @Override
@@ -147,35 +149,8 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         return acquire(opTicks);
     }
 
-
-    @Override
-    public long getCumulativeSchedulingDelayNs() {
-        return getCurrentSchedulingDelayNs() + accumulatedDelayNanos.get();
-    }
-
-    @Override
-    public long getCurrentSchedulingDelayNs() {
-        return (System.nanoTime() - this.ticksTimeline.get());
-    }
-
-
-    public synchronized void start() {
-        if (!started) {
-            this.started = true;
-            accumulatedDelayNanos.set(0L);
-            resetReferences();
-        }
-    }
-
-    public long getOpTicks() {
+    public long getOpNanos() {
         return opTicks;
-    }
-
-    public synchronized void setOpTicks(long opTicks) {
-        this.opTicks = opTicks;
-        this.rate = 1000000000d / opTicks;
-        accumulateDelay();
-        resetReferences();
     }
 
     @Override
@@ -191,33 +166,76 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         if (rate <= 0.0D) {
             throw new RuntimeException("The rate must be greater than 0.0");
         }
+
         this.rate = rate;
         opTicks = (long) (1000000000d / rate);
         logger.info("OpTicksNs for one cycle is " + opTicks + "ns");
-
-        accumulateDelay();
-        resetReferences();
-    }
-
-    private void accumulateDelay() {
-        accumulatedDelayNanos.addAndGet(getCumulativeSchedulingDelayNs());
-    }
-
-    private void resetReferences() {
-        long newSetTime = System.nanoTime();
-        this.ticksTimeline.set(newSetTime);
-        startTimeNanos = newSetTime;
-    }
-
-    public String toString() {
-        return getSummary();
+        setOpNanos(opTicks);
     }
 
     @Override
-    public String getSummary() {
+    public synchronized double setOpNanos(long opTicks) {
+        if (opTicks <=0) {
+            throw new RuntimeException("The number of nanos per op must be greater than 0.");
+        }
+        this.opTicks = opTicks;
+        this.rate = 1000000000d / opTicks;
+
+        if (started) {
+            accumulateDelay();
+            sync();
+        }
+
+
+//        sync();
+//        if (started) {
+//            accumulateDelay();
+//        }
+
+//        accumulatedDelayNanos.addAndGet(getRateSchedulingDelay());
+//
+//        long nanos=getNanoClockTime();
+//        startTimeNanos = nanos;
+//        lastSeenNanoTime.set(nanos);
+//        ticksTimeline.set(nanos);
+
+        return getRate();
+    }
+
+    protected long accumulateDelay() {
+        accumulatedDelayNanos.set(getTotalSchedulingDelay());
+        return accumulatedDelayNanos.get();
+    }
+
+
+    @Override
+    public long getRateSchedulingDelay() {
+        return (Math.max(0L,getNanoClockTime() - this.ticksTimeline.get()));
+    }
+
+    @Override
+    public long getTotalSchedulingDelay() {
+        return getRateSchedulingDelay() + accumulatedDelayNanos.get();
+    }
+
+    public synchronized void start() {
+        if (!started) {
+            sync();
+            this.started = true;
+        }
+    }
+
+    protected synchronized void sync() {
+        long nanos=getNanoClockTime();
+        startTimeNanos = nanos;
+        lastSeenNanoTime.set(nanos);
+        ticksTimeline.set(nanos);
+    }
+
+    public String toString() {
         return "rate=" + this.rate + ", " +
-                "opticks=" + this.getOpTicks() + ", " +
-                "delay=" + this.getCurrentSchedulingDelayNs() + ", " +
+                "opticks=" + this.getOpNanos() + ", " +
+                "delay=" + this.getRateSchedulingDelay() + ", " +
                 "strictness=" + 0.0D;
     }
 
@@ -232,9 +250,9 @@ public class AverageRateLimiter implements Startable, RateLimiter {
      *
      * @param strictness - The strictness level for this rate limiter
      * @return The number of bits used to calculate gap closing via right shift
-    */
+     */
     public int setStrictness(double strictness) {
-        if (strictness!=0.0D) {
+        if (strictness != 0.0D) {
             throw new RuntimeException("The average rate limiter can only have a strictness of 0.0. See javadoc for details on how to fix this.");
         }
         return 63; // shift any positive long value>>> to 0L;
@@ -255,4 +273,27 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     }
 
 
+    /**
+     ** visible for testing
+     * @return startTimeNanos - the logical start time of this rate limiter
+     */
+    public long getStartTimeNanos() {
+        return startTimeNanos;
+    }
+
+    /**
+     ** visible for testing
+     * @return ticksTimeline value - the long value of the shared timeslice marker
+     */
+    public AtomicLong getTicksTimeline() {
+        return this.ticksTimeline;
+    }
+
+    /**
+     * visible for testing
+     * @return lastSeenNanoTime - the long value of the shared view of the clock
+     */
+    public AtomicLong getLastSeenNanoTimeline() {
+        return this.lastSeenNanoTime;
+    }
 }
