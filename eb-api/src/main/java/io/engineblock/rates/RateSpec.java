@@ -23,6 +23,11 @@ public class RateSpec {
     public double opsPerSec = 1.0D;
     public double strictness = 0.0D;
 
+    public RateSpec(double opsPerSec, double strictness) {
+        this.opsPerSec = opsPerSec;
+        this.strictness = strictness;
+    }
+
     public RateSpec(String spec) {
         String[] specs = spec.split("[,;]");
         switch (specs.length) {
