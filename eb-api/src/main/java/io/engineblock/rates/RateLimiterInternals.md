@@ -1,6 +1,6 @@
 # Core Rate Limiter
 
-This document elaborates on the design of the core rate limiter, to help
+This document elaborates on the design of the core rate limiters, to help
 those who are curious or want to know how some of the design choices were made.
 
 The rate limiter has to be fast enough that it doesn't hinder workloads. Further
