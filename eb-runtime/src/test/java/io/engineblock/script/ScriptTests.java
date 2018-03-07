@@ -52,7 +52,7 @@ public class ScriptTests {
     @Test
     public void testTargetRatePhased() {
 
-        ScenarioResult scenarioResult = runScenario("targetrate");
+        ScenarioResult scenarioResult = runScenario("target_rate");
         String iolog = scenarioResult.getIOLog();
         System.out.println("iolog\n"+iolog);
         Pattern p = Pattern.compile(".*mean phase rate = (\\d[.\\d]+).*",Pattern.DOTALL);
@@ -64,6 +64,37 @@ public class ScriptTests {
         double rate = Double.valueOf(digits);
         assertThat(rate).isCloseTo(15000, Offset.offset(1000.0));
     }
+
+    @Test
+    public void testStrideRateOnly() {
+        ScenarioResult scenarioResult = runScenario("stride_rate");
+        String iolog = scenarioResult.getIOLog();
+        System.out.println("iolog\n"+iolog);
+        Pattern p = Pattern.compile(".*stride_rate.strides.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
+        Matcher m = p.matcher(iolog);
+        assertThat(m.matches()).isTrue();
+
+        String digits = m.group(1);
+        assertThat(digits).isNotEmpty();
+        double rate = Double.valueOf(digits);
+        assertThat(rate).isCloseTo(25000.0D,Offset.offset(5000D));
+    }
+
+    @Test
+    public void testPhaseRateOnly() {
+        ScenarioResult scenarioResult = runScenario("phase_rate");
+        String iolog = scenarioResult.getIOLog();
+        System.out.println("iolog\n"+iolog);
+        Pattern p = Pattern.compile(".*phase_rate.phases.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
+        Matcher m = p.matcher(iolog);
+        assertThat(m.matches()).isTrue();
+
+        String digits = m.group(1);
+        assertThat(digits).isNotEmpty();
+        double rate = Double.valueOf(digits);
+        assertThat(rate).isCloseTo(25000.0D,Offset.offset(5000D));
+    }
+
 
     @Test
     public void testExtensionPoint() {
@@ -158,6 +189,7 @@ public class ScriptTests {
         assertThat(scenarioResult.getException().get().getMessage()).contains("For input string: \"unparsable\"");
         assertThat(scenarioResult.getException()).isNotNull();
     }
+
 
 
 }
