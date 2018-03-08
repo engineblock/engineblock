@@ -17,20 +17,32 @@
 
 package io.engineblock.rates;
 
+import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.util.Unit;
 
 public class RateSpec {
     public double opsPerSec = 1.0D;
     public double strictness = 0.0D;
+    public boolean reportCoDelay = false;
 
     public RateSpec(double opsPerSec, double strictness) {
         this.opsPerSec = opsPerSec;
         this.strictness = strictness;
+        this.reportCoDelay = false;
+    }
+
+    public RateSpec(ParameterMap.NamedParameter tuple) {
+        this(tuple.value);
+        if (tuple.name.startsWith("co_")) {
+            reportCoDelay =true;
+        }
     }
 
     public RateSpec(String spec) {
         String[] specs = spec.split("[,;]");
         switch (specs.length) {
+            case 3:
+                reportCoDelay = (specs[2].toLowerCase().equals("co"));
             case 2:
                 strictness = Double.valueOf(specs[1]);
             case 1:
@@ -42,6 +54,6 @@ public class RateSpec {
     }
 
     public String toString() {
-        return "opsPerSec:" + opsPerSec + ", strictness:" + strictness;
+        return "opsPerSec:" + opsPerSec + ", strictness:" + strictness + ", reportCoDelay:" + reportCoDelay;
     }
 }
