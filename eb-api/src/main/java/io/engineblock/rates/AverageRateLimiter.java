@@ -71,6 +71,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     private final AtomicLong ticksTimeline = new AtomicLong(startTimeNanos);
     private AtomicLong accumulatedDelayNanos = new AtomicLong(0L);
     private State state = State.Idle;
+    private boolean reportCoDelay=false;
 
     /**
      * Create a rate limiter.
@@ -79,7 +80,8 @@ public class AverageRateLimiter implements Startable, RateLimiter {
      * @param maxOpsPerSecond Max ops per second
      * @param strictness      How strict the timing is, between (0.0 and 1.0)
      */
-    public AverageRateLimiter(ActivityDef def, double maxOpsPerSecond, double strictness) {
+    public AverageRateLimiter(ActivityDef def, double maxOpsPerSecond, double strictness, boolean reportCoDelay) {
+        this.reportCoDelay = reportCoDelay;
         this.delayGauge = ActivityMetrics.gauge(def, "cco-delay", new RateLimiters.DelayGauge(this));
         this.setRate(maxOpsPerSecond);
         this.setStrictness(strictness);
@@ -88,11 +90,11 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     // each blocking call will correct to strict schedule by gap * 1/2^n
 
     public AverageRateLimiter(ActivityDef def, double maxOpsPerSecond) {
-        this(def, maxOpsPerSecond, 0.0D);
+        this(def, maxOpsPerSecond, 0.0D, false);
     }
 
     public AverageRateLimiter(ActivityDef def, RateSpec rateSpec) {
-        this(def, rateSpec.opsPerSec, rateSpec.strictness);
+        this(def, rateSpec.opsPerSec, rateSpec.strictness, rateSpec.reportCoDelay);
     }
 
     public static AverageRateLimiter createOrUpdate(ActivityDef def, AverageRateLimiter maybeExtant, RateSpec ratespec) {
@@ -122,7 +124,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         long timelinePosition = lastSeenNanoTime.get();
 
         if (opScheduleTime < timelinePosition) {
-            return 0L;
+            return reportCoDelay ? timelinePosition-opScheduleTime : 0L;
         }
 
         timelinePosition = getNanoClockTime();
@@ -130,7 +132,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         long scheduleDelay = timelinePosition - opScheduleTime;
 
         if (scheduleDelay > 0L) {
-            return scheduleDelay;
+            return reportCoDelay ? scheduleDelay : 0L;
         } else {
             scheduleDelay*=-1;
 //            logger.debug("schedule delay: " + scheduleDelay);
@@ -138,7 +140,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
                 Thread.sleep(scheduleDelay / 1000000, (int) (scheduleDelay % 1000000L));
             } catch (InterruptedException ignoringSpuriousInterrupts) {
             }
-            return 0;
+            return 0L;
         }
     }
 
@@ -183,8 +185,8 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         switch (state) {
             case Started:
                 accumulateDelay();
-            case Idle:
                 sync();
+            case Idle:
         }
 
         return getRate();
@@ -228,7 +230,8 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         return "rate=" + this.rate + ", " +
                 "opticks=" + this.getOpNanos() + ", " +
                 "delay=" + this.getRateSchedulingDelay() + ", " +
-                "strictness=" + 0.0D;
+                "strictness=" + 0.0D + ", " +
+                "reportDelay=" + reportCoDelay;
     }
 
     /**
