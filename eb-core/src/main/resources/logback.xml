@@ -9,6 +9,6 @@
     <!--</encoder>-->
   <!--</appender>-->
 
-  <logger name="io.engineblock" specificity="TRACE"/>
+  <logger name="io.engineblock" specificity="INFO"/>
 
 </configuration>

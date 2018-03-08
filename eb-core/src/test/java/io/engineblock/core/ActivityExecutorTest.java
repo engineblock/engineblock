@@ -40,7 +40,7 @@ public class ActivityExecutorTest {
 
     @Test
     public void testDelayedStartSanity() {
-        ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test;cycles=10000;initdelay=10000;");
+        ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test;cycles=1000;initdelay=5000;");
         Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
         Activity a = new DelayedInitActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);

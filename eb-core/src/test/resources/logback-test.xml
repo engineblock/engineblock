@@ -8,7 +8,9 @@
     </layout>
   </appender>
 
-  <root level="trace">
+  <logger name="io.engineblock" specificity="INFO"/>
+
+  <root level="debug">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>
