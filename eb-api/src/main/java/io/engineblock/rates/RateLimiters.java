@@ -26,6 +26,18 @@ public class RateLimiters {
     private final static Logger logger = LoggerFactory.getLogger(RateLimiters.class);
 
     public static synchronized RateLimiter createOrUpdate(ActivityDef def, RateLimiter extant, RateSpec spec) {
+
+        if (spec.strictness>0.0d) {
+            if (def.getParams().getOptionalString("ratestrictness").orElse("error").equals("average")) {
+                spec.strictness=0.0d;
+            } else {
+                throw new RuntimeException(
+                        "Strict rate limiters are disabled for now. Use strictness value 0.0 instead. (example: targetrate=1K,0.0)" +
+                                "See https://github.com/engineblock/engineblock/issues/148. " +
+                                "Alternately, you can coerce all rate limiter strictness to 0.0 by using ratestrictness=average");
+            }
+        }
+
         if (extant==null) {
             if (spec.strictness == 0.0D) {
                 logger.info("Using average rate limiter for speed: " + spec);
