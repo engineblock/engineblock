@@ -70,9 +70,28 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 //        return s.orElse(defaultStringValue);
 //    }
 
-    public Optional<String> getOptionalString(String paramName) {
-        return Optional.ofNullable(super.get(paramName)).map(String::valueOf);
+    public Optional<String> getOptionalString(String... paramName) {
+        Object[] objects = Arrays.stream(paramName).map(super::get).filter(Objects::nonNull).toArray();
+        if (objects.length>1) {
+         throw new RuntimeException("Multiple parameters are specified for the same value: " + Arrays.toString(paramName)
+                 + ". Just use one of them.");
+        }
+        return Arrays.stream(objects).map(String::valueOf).findAny();
+        //return Optional.ofNullable(super.get(paramName)).map(String::valueOf);
     }
+
+    public Optional<NamedParameter> getOptionalNamedParameter(String... paramName) {
+        List<String> defined = Arrays.stream(paramName).filter(super::containsKey).collect(Collectors.toList());
+        if (defined.size()==1) {
+            return Optional.of(new NamedParameter(defined.get(0),String.valueOf(super.get(defined.get(0)))));
+        }
+        if (defined.size()>1) {
+            throw new RuntimeException("Multiple incompatible parameter names are specified: " + Arrays.toString(paramName)
+                    + ". Just use one of them.");
+        }
+        return Optional.empty();
+    }
+
 
     public Optional<Long> getOptionalLong(String paramName) {
         return Optional.ofNullable(super.get(paramName)).map(String::valueOf).map(Long::valueOf);
@@ -328,6 +347,25 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
                 put(entry.getKey().toString(),entry.getValue().toString());
             }
         }};
+    }
+
+    public static class NamedParameter {
+        public final String name;
+        public final String value;
+
+        public NamedParameter(String name, String value) {
+            this.name = name;
+            this.value = value;
+        }
+        public String toString() {
+            return name+"="+value;
+        }
+        public String getName() {
+            return name;
+        }
+        public String getValue() {
+            return value;
+        }
     }
 
 }
