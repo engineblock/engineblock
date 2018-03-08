@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.rates;
+package io.engineblock.activityapi.rates;
 
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.util.Unit;

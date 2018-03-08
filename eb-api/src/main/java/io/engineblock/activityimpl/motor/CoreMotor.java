@@ -26,7 +26,7 @@ import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.rates.RateLimiter;
+import io.engineblock.activityapi.rates.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -20,9 +20,9 @@ import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.rates.RateLimiter;
-import io.engineblock.rates.RateLimiters;
-import io.engineblock.rates.RateSpec;
+import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityapi.rates.RateLimiters;
+import io.engineblock.activityapi.rates.RateSpec;
 
 public class DiagActivity extends SimpleActivity implements Activity, ActivityDefObserver {
 

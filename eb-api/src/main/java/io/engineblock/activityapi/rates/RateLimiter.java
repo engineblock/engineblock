@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.rates;
+package io.engineblock.activityapi.rates;
 
 import io.engineblock.activityapi.core.Startable;
 

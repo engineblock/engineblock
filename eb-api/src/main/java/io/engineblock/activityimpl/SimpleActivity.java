@@ -7,9 +7,9 @@ import io.engineblock.activityapi.core.RunState;
 import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityapi.output.OutputDispenser;
-import io.engineblock.rates.RateLimiter;
-import io.engineblock.rates.RateLimiters;
-import io.engineblock.rates.RateSpec;
+import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityapi.rates.RateLimiters;
+import io.engineblock.activityapi.rates.RateSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

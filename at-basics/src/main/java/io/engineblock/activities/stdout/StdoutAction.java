@@ -2,7 +2,7 @@ package io.engineblock.activities.stdout;
 
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.Action;
-import io.engineblock.planning.OpSequence;
+import io.engineblock.activityapi.planning.OpSequence;
 import io.virtdata.templates.StringBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

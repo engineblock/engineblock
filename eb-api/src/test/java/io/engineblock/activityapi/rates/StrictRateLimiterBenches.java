@@ -15,27 +15,29 @@
  * /
  */
 
-package io.engineblock.planning;
+package io.engineblock.activityapi.rates;
 
 import io.engineblock.activityimpl.ActivityDef;
-import io.engineblock.rates.RateLimiter;
-import io.engineblock.rates.RateLimiters;
-import io.engineblock.rates.RateSpec;
+import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityapi.rates.RateLimiters;
+import io.engineblock.activityapi.rates.RateSpec;
 import org.testng.annotations.Test;
 
-/**
- * These tests run all the rate limiter micro benches with average rate
- * limiting only, due to the strictness level being set to 0.0D.
- */
-@Test(enabled=false)
-public class AverageRateLimiterBenches extends BaseRateLimiterBenches {
 
+/**
+ * These tests run all the rate limiter micro benches with strict rate
+ * limiting only, due to the strictness level being set to 1.0D.
+ */
+@Test(enabled=true)
+public class StrictRateLimiterBenches extends BaseRateLimiterBenches {
+    
     protected RateLimiter getRateLimiter(String paramSpec, double rate) {
         return RateLimiters.createOrUpdate(
                 ActivityDef.parseActivityDef("alias=testing"),
                 null,
-                new RateSpec(rate,0.0D)
+                new RateSpec(rate,1.0D)
         );
     }
-}
 
+
+}

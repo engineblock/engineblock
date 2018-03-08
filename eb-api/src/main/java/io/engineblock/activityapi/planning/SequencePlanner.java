@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.planning;
+package io.engineblock.activityapi.planning;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

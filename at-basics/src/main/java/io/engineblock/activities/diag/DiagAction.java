@@ -18,7 +18,7 @@ import io.engineblock.activityapi.core.Action;
 import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityapi.core.MultiPhaseAction;
 import io.engineblock.activityimpl.ActivityDef;
-import io.engineblock.rates.RateLimiter;
+import io.engineblock.activityapi.rates.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

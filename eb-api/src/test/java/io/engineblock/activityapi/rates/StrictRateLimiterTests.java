@@ -15,12 +15,12 @@
  * /
  */
 
-package io.engineblock.planning;
+package io.engineblock.activityapi.rates;
 
 //import com.google.common.util.concurrent.RateLimiter;
 
 import io.engineblock.activityimpl.ActivityDef;
-import io.engineblock.rates.StrictRateLimiter;
+import io.engineblock.activityapi.rates.StrictRateLimiter;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

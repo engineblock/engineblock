@@ -17,8 +17,8 @@
 
 package io.engineblock.util;
 
-import io.engineblock.planning.ElementSequencer;
-import io.engineblock.planning.IntervalSequencer;
+import io.engineblock.activityapi.planning.ElementSequencer;
+import io.engineblock.activityapi.planning.IntervalSequencer;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;

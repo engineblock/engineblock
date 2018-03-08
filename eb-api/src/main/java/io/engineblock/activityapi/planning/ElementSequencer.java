@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.planning;
+package io.engineblock.activityapi.planning;
 
 import java.util.Arrays;
 import java.util.List;

@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.rates;
+package io.engineblock.activityapi.rates;
 
 import com.codahale.metrics.Gauge;
 import io.engineblock.activityimpl.ActivityDef;

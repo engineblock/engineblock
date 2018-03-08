@@ -17,7 +17,7 @@
 
 package io.engineblock.activityapi.input;
 
-import io.engineblock.rates.RateLimiter;
+import io.engineblock.activityapi.rates.RateLimiter;
 
 public interface RateLimiterProvider {
     RateLimiter getRateLimiter();

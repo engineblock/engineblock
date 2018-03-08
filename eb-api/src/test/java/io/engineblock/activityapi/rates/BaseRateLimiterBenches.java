@@ -15,14 +15,14 @@
  * /
  */
 
-package io.engineblock.planning;
+package io.engineblock.activityapi.rates;
 
 //import com.google.common.util.concurrent.RateLimiter;
 
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.DeltaHdrHistogramReservoir;
-import io.engineblock.rates.RateLimiter;
-import io.engineblock.rates.RateLimiters;
+import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityapi.rates.RateLimiters;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;

@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.planning;
+package io.engineblock.activityapi.planning;
 
 /**
  * Sequencer types are used to control the type of ordering used with a set of
