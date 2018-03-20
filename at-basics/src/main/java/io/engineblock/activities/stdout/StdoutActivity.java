@@ -6,17 +6,17 @@ import activityconfig.yaml.StmtsDocList;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.ActivityDefObserver;
+import io.engineblock.activityapi.planning.OpSequence;
+import io.engineblock.activityapi.planning.SequencePlanner;
+import io.engineblock.activityapi.planning.SequencerType;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.ExceptionMeterMetrics;
-import io.engineblock.activityapi.planning.OpSequence;
-import io.engineblock.activityapi.planning.SequencePlanner;
-import io.engineblock.activityapi.planning.SequencerType;
 import io.engineblock.util.StrInterpolater;
-import io.virtdata.core.AllDataMapperLibraries;
 import io.virtdata.core.BindingsTemplate;
+import io.virtdata.core.VirtData;
 import io.virtdata.templates.StringBindings;
 import io.virtdata.templates.StringBindingsTemplate;
 import org.slf4j.Logger;
@@ -115,7 +115,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
         if (stmts.size() > 0) {
             for (StmtDef stmt : stmts) {
-                BindingsTemplate bt = new BindingsTemplate(AllDataMapperLibraries.get(), stmt.getBindings());
+                BindingsTemplate bt = new BindingsTemplate(VirtData.get(),stmt.getBindings());
                 String statement = stmt.getStmt();
                 if (!statement.endsWith("\n") && getParams().getOptionalBoolean("newline").orElse(true)) {
                     statement = statement+"\n";
@@ -134,7 +134,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 generatedStmt=generatedStmt+"\n";
             }
 
-            BindingsTemplate bt = new BindingsTemplate(AllDataMapperLibraries.get(), stmtsDocList.getDocBindings());
+            BindingsTemplate bt = new BindingsTemplate(VirtData.get(), stmtsDocList.getDocBindings());
             StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
             StringBindings sb = sbt.resolve();
             sequencer.addOp(sb,1L);

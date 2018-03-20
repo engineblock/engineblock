@@ -50,7 +50,7 @@ public class ConcatSequencer<T> implements ElementSequencer<T> {
         for (int elemIndex = 0; elemIndex < elems.size(); elemIndex++) {
             long runLength = ratios.get(elemIndex);
             for (int i = 0; i< runLength; i++) {
-                sequence.add(i);
+                sequence.add(elemIndex);
             }
         }
         return sequence.stream().mapToInt(i -> (int)i).toArray();

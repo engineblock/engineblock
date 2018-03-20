@@ -21,8 +21,8 @@
 
         <dependency>
             <groupId>io.virtdata</groupId>
-            <artifactId>metagen-userlibs</artifactId>
-            <version>${metagen-version}</version>
+            <artifactId>virtdata-userlibs</artifactId>
+            <version>${virtdata-version}</version>
             <scope>compile</scope>
         </dependency>
 
