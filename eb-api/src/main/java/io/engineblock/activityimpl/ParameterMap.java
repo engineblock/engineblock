@@ -51,25 +51,6 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         super.putAll(valueMap);
     }
 
-//    public long getLongOrDefault(String paramName, long defaultLongValue) {
-//        Optional<String> l = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
-//        return l.map(Long::valueOf).orElse(defaultLongValue);
-//    }
-
-//    public long getMillisOrDefault(String paramName, long defaultMillisValue) {
-//        return getOptionalMillisUnit(paramName).orElse(defaultMillisValue);
-//    }
-
-//    public double getDoubleOrDefault(String paramName, double defaultDoubleValue) {
-//        Optional<String> d = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
-//        return d.map(Double::valueOf).orElse(defaultDoubleValue);
-//    }
-
-//    public String getStringOrDefault(String paramName, String defaultStringValue) {
-//        Optional<String> s = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
-//        return s.orElse(defaultStringValue);
-//    }
-
     public Optional<String> getOptionalString(String... paramName) {
         Object[] objects = Arrays.stream(paramName).map(super::get).filter(Objects::nonNull).toArray();
         if (objects.length>1) {
@@ -174,7 +155,7 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
 
     @Override
     public Object get(Object key) {
-        logger.info("getting parameter " + key);
+        logger.trace("getting parameter " + key);
         return super.get(key);
     }
 

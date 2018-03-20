@@ -61,9 +61,9 @@ public class MultiMapLookup implements Map<String, String> {
     @Override
     public String get(Object key) {
         return maps.stream()
-                .filter(m -> m.containsKey(key))
+                .filter(m -> m.containsKey(String.valueOf(key)))
                 .findFirst()
-                .map(m -> m.get(key))
+                .map(m -> String.valueOf(m.get(key)))
                 .orElse(null);
     }
 
