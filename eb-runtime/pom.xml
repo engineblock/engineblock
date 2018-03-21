@@ -90,6 +90,12 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <annotationProcessors>
+                        <annotationProcessor>
+                            com.google.auto.service.processor.AutoServiceProcessor
+                        </annotationProcessor>
+                    </annotationProcessors>
+
                 </configuration>
             </plugin>
 
@@ -111,7 +117,16 @@
                 </executions>
             </plugin>
         </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
     </build>
+
 
     <profiles>
         <profile>
@@ -128,6 +143,7 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>io.engineblock.cli.EBCLI</mainClass>
                                 </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
                             <finalName>${project.artifactId}</finalName>
                         </configuration>

@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("Duplicates")
@@ -117,6 +118,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
             for (StmtDef stmt : stmts) {
                 BindingsTemplate bt = new BindingsTemplate(VirtData.get(),stmt.getBindings());
                 String statement = stmt.getStmt();
+                Objects.requireNonNull(statement);
                 if (!statement.endsWith("\n") && getParams().getOptionalBoolean("newline").orElse(true)) {
                     statement = statement+"\n";
                 }
