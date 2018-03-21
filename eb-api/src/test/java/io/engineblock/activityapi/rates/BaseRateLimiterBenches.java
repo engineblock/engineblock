@@ -21,8 +21,6 @@ package io.engineblock.activityapi.rates;
 
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.DeltaHdrHistogramReservoir;
-import io.engineblock.activityapi.rates.RateLimiter;
-import io.engineblock.activityapi.rates.RateLimiters;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -64,7 +62,7 @@ public abstract class BaseRateLimiterBenches {
     }
 
 
-    @Test
+    @Test(enabled=false)
     public void testCallerTooSlowNanoLoop() {
 //        DeltaHdrHistogramReservoir hist = new DeltaHdrHistogramReservoir("test", 4);
 
@@ -161,7 +159,7 @@ public abstract class BaseRateLimiterBenches {
     // duration: 6.491
     // acquires/s: 154052155.541
     // effective nanos/op: 6.491308
-    @Test
+    @Test(enabled=false)
     public void testBlockingCostOver() {
         double rate = 500_000_000.0d;
         int count = 1_000_000_000;
@@ -192,7 +190,7 @@ public abstract class BaseRateLimiterBenches {
     // single-threaded
     // acquires/s: 203_337_793.086
     // effective nanos/op: 4.917925
-    @Test
+    @Test(enabled=false)
     public void testUncontendedSingleThreadedPerformance() {
         RateLimiter rl = getRateLimiter("alias=testing",1E9);
         long startAt = System.nanoTime();
@@ -222,7 +220,7 @@ public abstract class BaseRateLimiterBenches {
     // linearized nanos/op: 2565.012424
     // effective concurrent acquires/s: 77972331.893
     // effective concurrent nanos/op: 12.825062
-    @Test
+    @Test(enabled=false)
     public void testContendedMultiThreadedPerformance() {
         int threadCount = 100;
         long iterations = 5_00_000_000L;
