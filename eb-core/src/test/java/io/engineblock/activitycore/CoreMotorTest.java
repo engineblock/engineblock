@@ -69,7 +69,7 @@ public class CoreMotorTest {
             Thread.sleep(500); // allow action time to be waiting in monitor for test fixture
         } catch (InterruptedException ignored) {}
 
-        lockstepper.publishSegment(11L,12L,13L,0L);
+        lockstepper.publishSegment(11L,12L,13L);
 
         boolean result = awaitAryCondition(ala -> (ala.get(2)==13L),ary,5000,100);
         assertThat(ary.get(0)).isEqualTo(11L);
