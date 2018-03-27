@@ -57,6 +57,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     private RateLimiter strideRateLimiter;
     private RateLimiter cycleRateLimiter;
     private RateLimiter phaseRateLimiter;
+    private int substride;
 
     /**
      * Create an ActivityMotor.
@@ -169,6 +170,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             Timer cyclesTimer = ActivityMetrics.timer(activity.getActivityDef(), "cycles");
             Timer phasesTimer = ActivityMetrics.timer(activity.getActivityDef(), "phases");
             Timer stridesTimer = ActivityMetrics.timer(activity.getActivityDef(), "strides");
+            Timer substridesTimer = ActivityMetrics.timer(activity.getActivityDef(), "substrides");
             Timer inputTimer = ActivityMetrics.timer(activity.getActivityDef(), "read-input");
 
             strideRateLimiter = activity.getStrideLimiter();
@@ -199,9 +201,9 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             }
 
 
-            long strideDelay=0L;
-            long cycleDelay=0L;
-            long phaseDelay=0L;
+            long strideDelay = 0L;
+            long cycleDelay = 0L;
+            long phaseDelay = 0L;
             while (slotState.get() == Running) {
 
                 CycleSegment cycleSegment = null;
@@ -220,72 +222,81 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
                 if (strideRateLimiter != null) {
                     // block for strides rate limiter
-                    strideDelay=strideRateLimiter.acquire();
+                    strideDelay = strideRateLimiter.acquire();
                 }
 
 //                try (Timer.Context stridesTime = stridesTimer.time()) {
+
+
                 long strideStart = System.nanoTime();
-                try {
+                while (!cycleSegment.isExhausted()) {
+                    int stridecycle = 0;
 
-                    while (!cycleSegment.isExhausted()) {
-                        cyclenum = cycleSegment.nextCycle();
-                        if (cyclenum < 0) {
-                            if (cycleSegment.isExhausted()) {
-                                logger.trace("input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
-                                slotStateTracker.enterState(Finished);
-                                continue;
-                            }
-                        }
+                    long subStrideStart = System.nanoTime();
+                    try {
 
-                        if (slotState.get() != Running) {
-                            logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
-                            continue;
-                        }
-                        int result = -1;
-
-                        if (cycleRateLimiter != null) {
-                            // Block for cycle rate limiter
-                            cycleDelay=cycleRateLimiter.acquire();
-                        }
-
-                        // Phases are rate limited independently from overall cycles, but each cycle has at least one phase.
-                        if (phaseRateLimiter != null) {
-                            // Block for cycle rate limiter
-                            phaseDelay=phaseRateLimiter.acquire();
-                        }
-
-                        //try (Timer.Context cycleTime = cyclesTimer.time()) {
-                        long cycleStart=System.nanoTime();
-                        try {
-
-                            logger.trace("cycle " + cyclenum);
-                            try (Timer.Context phaseTime = phasesTimer.time()) {
-                                result = action.runCycle(cyclenum);
-                            }
-
-                            if (multiPhaseAction != null) {
-                                while (multiPhaseAction.incomplete()) {
-                                    if (phaseRateLimiter != null) {
-                                        // Block for cycle rate limiter
-                                        phaseDelay=phaseRateLimiter.acquire();
-                                    }
-                                    try (Timer.Context phaseTime = phasesTimer.time()) {
-                                        result = multiPhaseAction.runPhase(cyclenum);
-                                    }
+                        while (!cycleSegment.isExhausted() && stridecycle++ < substride) {
+                            cyclenum = cycleSegment.nextCycle();
+                            if (cyclenum < 0) {
+                                if (cycleSegment.isExhausted()) {
+                                    logger.trace("input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
+                                    slotStateTracker.enterState(Finished);
+                                    continue;
                                 }
                             }
 
-                        } finally {
-                            long cycleEnd=System.nanoTime();
-                            cyclesTimer.update((cycleEnd-cycleStart)+cycleDelay,TimeUnit.NANOSECONDS);
-                        }
-                        segBuffer.append(cyclenum, result);
-                    }
+                            if (slotState.get() != Running) {
+                                logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
+                                continue;
+                            }
+                            int result = -1;
 
-                } finally {
-                    long strideEnd=System.nanoTime();
-                    stridesTimer.update((strideEnd-strideStart)+strideDelay, TimeUnit.NANOSECONDS);
+                            if (cycleRateLimiter != null) {
+                                // Block for cycle rate limiter
+                                cycleDelay = cycleRateLimiter.acquire();
+                            }
+
+                            // Phases are rate limited independently from overall cycles, but each cycle has at least one phase.
+                            if (phaseRateLimiter != null) {
+                                // Block for cycle rate limiter
+                                phaseDelay = phaseRateLimiter.acquire();
+                            }
+
+                            //try (Timer.Context cycleTime = cyclesTimer.time()) {
+                            long cycleStart = System.nanoTime();
+                            try {
+
+                                logger.trace("cycle " + cyclenum);
+                                try (Timer.Context phaseTime = phasesTimer.time()) {
+                                    result = action.runCycle(cyclenum);
+                                }
+
+                                if (multiPhaseAction != null) {
+                                    while (multiPhaseAction.incomplete()) {
+                                        if (phaseRateLimiter != null) {
+                                            // Block for cycle rate limiter
+                                            phaseDelay = phaseRateLimiter.acquire();
+                                        }
+                                        try (Timer.Context phaseTime = phasesTimer.time()) {
+                                            result = multiPhaseAction.runPhase(cyclenum);
+                                        }
+                                    }
+                                }
+
+                            } finally {
+                                long cycleEnd = System.nanoTime();
+                                cyclesTimer.update((cycleEnd - cycleStart) + cycleDelay, TimeUnit.NANOSECONDS);
+                            }
+                            segBuffer.append(cyclenum, result);
+                        }
+
+                    } finally {
+                        long subStrideEnd = System.nanoTime();
+                        substridesTimer.update((subStrideEnd - subStrideStart), TimeUnit.NANOSECONDS);
+                    }
                 }
+                long strideEnd=System.nanoTime();
+                stridesTimer.update((strideEnd - strideStart) + strideDelay, TimeUnit.NANOSECONDS);
 
                 if (output != null) {
                     CycleResultsSegment outputBuffer = segBuffer.toReader();
@@ -322,6 +333,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
         }
 
         this.stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
+        this.substride = activityDef.getParams().getOptionalInteger("substride").orElse(this.stride);
     }
 
     @Override
