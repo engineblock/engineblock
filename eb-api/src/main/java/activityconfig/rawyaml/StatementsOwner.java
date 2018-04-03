@@ -34,6 +34,7 @@ public class StatementsOwner extends BlockParams {
         this.rawStmtDefs = rawStmtDefs;
     }
 
+    @SuppressWarnings("unchecked")
     public void setByObject(Object object) {
         if (object instanceof List) {
             List<Object> stmtList = (List<Object>) object;

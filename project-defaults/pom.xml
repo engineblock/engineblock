@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <virtdata-version>1.2.9</virtdata-version>
+        <virtdata-version>1.2.10</virtdata-version>
         <metrics-version>3.2.6</metrics-version>
     </properties>
 
@@ -140,6 +140,17 @@
             <organizationUrl>http://engineblock.io/</organizationUrl>
         </developer>
     </developers>
+
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-jeta-maven</id>
+            <name>bintray</name>
+            <url>https://bintray.com/brooth/maven</url>
+        </repository>
+    </repositories>
 
     <distributionManagement>
         <snapshotRepository>

@@ -155,10 +155,12 @@ public class ActivityMetrics {
         return registry;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> Gauge<T> gauge(ActivityDef activityDef, String name, Gauge<T> gauge) {
         return (Gauge<T>) register(activityDef, name, () -> gauge);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> Gauge<T> gauge(ScriptContext scriptContext, String name, Gauge<T> gauge) {
         return (Gauge<T>) register(scriptContext, name, () -> gauge);
     }
@@ -283,6 +285,11 @@ public class ActivityMetrics {
 
     public static void mountSubRegistry(String mountPrefix, MetricRegistry subRegistry) {
         new MetricsRegistryMount(getMetricRegistry(),subRegistry,mountPrefix);
+    }
+
+    public static void removeActivityMetrics(ActivityDef activityDef) {
+        get().getMetrics().keySet().stream().filter(s -> s.startsWith(activityDef.getAlias()+"."))
+                .forEach(get()::remove);
     }
 
 }
