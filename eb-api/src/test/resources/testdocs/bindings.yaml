@@ -1,0 +1,11 @@
+bindings:
+ alpha: some alpha
+ beta: some beta
+blocks:
+  - bindings:
+     gamma: "some gamma"
+    statements:
+     - "beta-delta statement {beta} {delta}"
+  - name: block1
+    statements:
+     - "alpha-beta statement {alpha} {beta}"

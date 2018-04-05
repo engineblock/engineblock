@@ -57,4 +57,13 @@ public class StmtDef implements Tagged {
     public String toString() {
         return "stmt(name:" + getName() + ", stmt:" + getStmt() + ", tags:(" + getTags() + "), params:(" + getParams() +"), bindings:(" + getBindings()+"))";
     }
+
+    /**
+     * Parse the statement for anchors and return a richer view of the StmtDef which
+     * is simpler to use for most statement configuration needs.
+     * @return a new {@link ParsedStmt}
+     */
+    public ParsedStmt getParsed() {
+        return new ParsedStmt(this);
+    }
 }
