@@ -22,7 +22,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.ToLongFunction;
+import java.util.stream.Collectors;
 
 public class SequencePlanner<T> {
     private final static Logger logger = LoggerFactory.getLogger(SequencePlanner.class);
@@ -93,6 +95,10 @@ public class SequencePlanner<T> {
 
         public SequencerType getSequencerType() {
             return type;
+        }
+
+        public <U> Sequence<U> transform(Function<T,U> func) {
+            return new Sequence<U>(type, elems.stream().map(func).collect(Collectors.toList()), seq);
         }
 
     }
