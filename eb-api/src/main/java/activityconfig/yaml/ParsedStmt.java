@@ -54,6 +54,13 @@ public class ParsedStmt {
         this.spans = parse();
     }
 
+    public ParsedStmt orError() {
+        if (hasError()) {
+            throw new RuntimeException("Unable to parse statement: " + this.toString());
+        }
+        return this;
+    }
+
     private String[] parse() {
         List<String> spans = new ArrayList<>();
 
@@ -91,10 +98,10 @@ public class ParsedStmt {
     }
 
     public String toString() {
-        String generatorsSummary =
+        String summary =
                 (this.missingBindings.size() > 0) ?
                         "\nundefined bindings:" + this.missingBindings.stream().collect(Collectors.joining(",", "[", "]")) : "";
-        return "STMT:" + stmtDef.getStmt() + "\n" + generatorsSummary;
+        return "STMT:" + stmtDef.getStmt() + "\n" + summary;
     }
 
     /**
