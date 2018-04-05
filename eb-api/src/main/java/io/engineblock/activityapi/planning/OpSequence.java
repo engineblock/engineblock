@@ -18,6 +18,7 @@
 package io.engineblock.activityapi.planning;
 
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * An OpSequence provides fast access to a set of operations in a specific
@@ -48,4 +49,11 @@ public interface OpSequence<T> {
      */
     int[] getSequence();
 
+    /**
+     * Map this OpSequence to another type of OpSequence.
+     * @param func The transformation function from this to another type
+     * @param <U> The target type of the transformation.
+     * @return A new OpSequence of type U
+     */
+    <U> OpSequence<U> transform(Function<T, U> func);
 }

@@ -97,6 +97,7 @@ public class SequencePlanner<T> {
             return type;
         }
 
+        @Override
         public <U> Sequence<U> transform(Function<T,U> func) {
             return new Sequence<U>(type, elems.stream().map(func).collect(Collectors.toList()), seq);
         }
