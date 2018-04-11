@@ -16,10 +16,11 @@ package io.engineblock.script;
 
 import ch.qos.logback.classic.Logger;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Charsets;
 import io.engineblock.activitycore.ProgressIndicator;
-import io.engineblock.core.ScenarioResult;
 import io.engineblock.core.ScenarioController;
 import io.engineblock.core.ScenarioLogger;
+import io.engineblock.core.ScenarioResult;
 import io.engineblock.extensions.ScriptingPluginInfo;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
@@ -135,7 +136,13 @@ public class Scenario implements Callable<ScenarioResult> {
                     result = scriptEngine.eval(script);
                 }
             } catch (ScriptException e) {
-                String errorDesc = "Script error while running scenario:" + e.getMessage();
+                String diagname = "diag_" + System.currentTimeMillis() + ".js";
+                try {
+                    Files.write(Paths.get(diagname),script.getBytes(Charsets.UTF_8));
+
+                } catch (Exception ignored) {
+                }
+                String errorDesc = "Script error while running scenario:" + e.toString() + ", script content is at " + diagname;
                 e.printStackTrace();
                 logger.error(errorDesc, e);
                 scenarioController.forceStopScenario(5000);
