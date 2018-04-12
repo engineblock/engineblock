@@ -40,6 +40,6 @@ public class MetricInstanceFilter implements MetricFilter {
     public boolean matches(String name, Metric metric) {
         return (included.isEmpty() && includedPatterns.isEmpty())
                 || (included.stream().anyMatch(m -> m == metric) ||
-                includedPatterns.stream().anyMatch(p -> p.matcher(metric.toString()).matches()));
+                includedPatterns.stream().anyMatch(p -> p.matcher(name).matches()));
     }
 }
