@@ -73,27 +73,33 @@ public class CSVMetrics {
         reporter.start(period, timeUnit);
     }
 
-    public void start(long period, String timeUnitName) {
+    public CSVMetrics start(long period, String timeUnitName) {
         initReporter();
         TimeUnit timeUnit = TimeUnit.valueOf(timeUnitName);
         reporter.start(period, timeUnit);
+        return this;
     }
 
-    public void add(Metric metric) {
+    public CSVMetrics add(Metric metric) {
         filter.add(metric);
+        return this;
     }
-    public void addPattern(String regex) {
+
+    public CSVMetrics addPattern(String regex) {
         filter.addPattern(regex);
+        return this;
     }
 
     private MetricInstanceFilter filter = new MetricInstanceFilter();
 
-    public void stop() {
+    public CSVMetrics stop() {
         reporter.stop();
+        return this;
     }
 
-    public void report() {
+    public CSVMetrics report() {
         initReporter();
         reporter.report();
+        return this;
     }
 }
