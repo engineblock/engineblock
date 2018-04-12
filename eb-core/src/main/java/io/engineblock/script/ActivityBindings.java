@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
 /**
  * Provide a bindings wrapper around a ScenarioController,
  */
-public class ScenarioBindings implements Bindings {
+public class ActivityBindings implements Bindings {
 
     private final ScenarioController scenario;
     private Map<String,Bindings> elementMap = new HashMap<String,Bindings>();
 
-    public ScenarioBindings(ScenarioController scenarioController) {
+    public ActivityBindings(ScenarioController scenarioController) {
         this.scenario = scenarioController;
     }
 

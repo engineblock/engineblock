@@ -17,8 +17,8 @@
 
 package io.engineblock.script;
 
-import io.engineblock.core.ScenarioResult;
 import io.engineblock.core.ScenarioLogger;
+import io.engineblock.core.ScenarioResult;
 import io.engineblock.core.ScenariosResults;
 import org.assertj.core.data.Offset;
 import org.testng.annotations.Test;
@@ -26,7 +26,9 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -36,10 +38,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Test
 public class ScriptTests {
 
-    public static ScenarioResult runScenario(String scriptname) {
+    public static ScenarioResult runScenario(String scriptname, String... params) {
+        if ((params.length % 2)!=0) {
+            throw new RuntimeException("params must be pairwise key, value, ...");
+        }
+        Map<String,String> paramsMap = new HashMap<>();
+
+        for (int i = 0; i < params.length; i+=2) {
+            paramsMap.put(params[i],params[i+1]);
+        }
         String scenarioName = "testing activity" + scriptname;
         ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName);
+        s.addScenarioScriptParams(paramsMap);
         s.addScriptText("load('classpath:scripts/" + scriptname + ".js');");
         ScenarioLogger scenarioLogger = new ScenarioLogger(s).setMaxLogs(0).setLogDir("logs/test").start();
         e.execute(s,scenarioLogger);
@@ -114,6 +125,17 @@ public class ScriptTests {
     public void testExtensionCsvLogger() {
         ScenarioResult scenarioResult = runScenario("extension_csvmetrics");
         assertThat(scenarioResult.getIOLog()).contains("started new csvlogger: csvmetricstestdir");
+    }
+
+
+    @Test
+    public void testScriptParamsVariable() {
+        ScenarioResult scenarioResult = runScenario("params_variable","one", "two", "three", "four");
+        assertThat(scenarioResult.getIOLog()).contains("params.get(\"one\")='two'");
+        assertThat(scenarioResult.getIOLog()).contains("params.get(\"three\")='four'");
+        assertThat(scenarioResult.getIOLog()).contains("params.size()=2");
+        assertThat(scenarioResult.getIOLog()).contains("params.get(\"three\") [overridden-three-five]='five'");
+        assertThat(scenarioResult.getIOLog()).contains("params.get(\"four\") [defaulted-four-niner]='niner'");
     }
 
     @Test

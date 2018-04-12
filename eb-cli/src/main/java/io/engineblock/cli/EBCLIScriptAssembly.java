@@ -7,19 +7,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EBCLIScriptAssembly {
     private final static Logger logger = LoggerFactory.getLogger(EBCLIScriptAssembly.class);
 
-    public static String assembleScript(EBCLIOptions options) {
+    public static ScriptData assembleScript(EBCLIOptions options) {
         StringBuilder sb = new StringBuilder();
+        Map<String,String> params = new HashMap<>();
         for (EBCLIOptions.Cmd cmd : options.getCommands()) {
             switch (cmd.cmdType) {
                 case script:
-                    String scriptData = loadScript(cmd);
                     sb.append("// from CLI as ").append(cmd).append("\n");
-                    sb.append(scriptData);
+                    ScriptData scriptData = loadScript(cmd);
+                    if (options.getCommands().size()==1) {
+                        sb.append(scriptData.getScriptTextIgnoringParams());
+                        params = scriptData.getScriptParams();
+                    } else {
+                        sb.append(scriptData.getScriptParamsAndText());
+                    }
                     break;
                 case start: // start activity
                 case run: // run activity
@@ -44,11 +52,11 @@ public class EBCLIScriptAssembly {
                     break;
             }
         }
-        return sb.toString();
 
+        return new ScriptData(sb.toString(), params);
     }
 
-    private static String loadScript(EBCLIOptions.Cmd cmd) {
+    private static ScriptData loadScript(EBCLIOptions.Cmd cmd) {
         String scriptData;
 
         try {
@@ -65,6 +73,38 @@ public class EBCLIScriptAssembly {
         }
         StrInterpolater interpolater = new StrInterpolater(cmd.getCmdArgs());
         scriptData = interpolater.apply(scriptData);
-        return scriptData;
+        return new ScriptData(scriptData,cmd.getCmdArgs());
+    }
+
+    public static class ScriptData {
+        private final String scriptText;
+        private final Map<String, String> scriptParams;
+
+        public ScriptData(String scriptText, Map<String,String> scriptParams) {
+
+            this.scriptText = scriptText;
+            this.scriptParams = scriptParams;
+        }
+
+        public String getScriptTextIgnoringParams() {
+            return scriptText;
+        }
+
+        public Map<String, String> getScriptParams() {
+            return scriptParams;
+        }
+
+        public String getScriptParamsAndText() {
+            return "// params:\n" + toJSON(scriptParams) + "\n// script:\n" + scriptText;
+        }
+    }
+
+    private static String toJSON(Map<?,?> map) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("params={\n");
+        map.forEach((k,v) -> { sb.append(" '").append(k.toString()).append("',\n"); });
+        sb.setLength(sb.length()-1);
+        sb.append("};\n");
+        return sb.toString();
     }
 }

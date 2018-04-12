@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -52,16 +53,15 @@ public class Scenario implements Callable<ScenarioResult> {
     private ScenarioContext scriptEnv;
     private String name;
     private ScenarioLogger scenarioLogger;
+    private ScriptParams scenarioScriptParams;
 
     public Scenario(String name, String progressInterval) {
         this.name = name;
         this.progressInterval = progressInterval;
-        init();
     }
 
     public Scenario(String name) {
         this.name = name;
-        init();
     }
 
     public Scenario addScriptText(String scriptText) {
@@ -97,8 +97,9 @@ public class Scenario implements Callable<ScenarioResult> {
         scenarioController = new ScenarioController();
         progressIndicator = new ProgressIndicator(scenarioController,progressInterval);
 
+        scriptEngine.put("params", scenarioScriptParams);
         scriptEngine.put("scenario", scenarioController);
-        scriptEngine.put("activities", new ScenarioBindings(scenarioController));
+        scriptEngine.put("activities", new ActivityBindings(scenarioController));
         scriptEngine.put("metrics", new MetricRegistryBindings(metricRegistry));
 
         for (ScriptingPluginInfo extensionDescriptor : SandboxExtensionFinder.findAll()) {
@@ -122,6 +123,7 @@ public class Scenario implements Callable<ScenarioResult> {
     }
 
     public void run() {
+        init();
 
         logger.info("Running control script for " + getName() + ".");
         for (String script : scripts) {
@@ -173,7 +175,6 @@ public class Scenario implements Callable<ScenarioResult> {
         if (o == null || getClass() != o.getClass()) return false;
         Scenario scenario = (Scenario) o;
         return getName() != null ? getName().equals(scenario.getName()) : scenario.getName() == null;
-
     }
 
     @Override
@@ -203,6 +204,13 @@ public class Scenario implements Callable<ScenarioResult> {
 
     public void setScenarioLogger(ScenarioLogger scenarioLogger) {
         this.scenarioLogger = scenarioLogger;
+    }
+
+    public void addScenarioScriptParams(ScriptParams scenarioScriptParams) {
+        this.scenarioScriptParams = scenarioScriptParams;
+    }
+    public void addScenarioScriptParams(Map<String,String> scriptParams) {
+        addScenarioScriptParams(new ScriptParams() {{ putAll(scriptParams);}});
     }
 }
 

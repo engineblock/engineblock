@@ -138,14 +138,15 @@ public class EBCLI {
         ScenariosExecutor executor = new ScenariosExecutor("executor-" + sessionName, 1);
 
         Scenario scenario = new Scenario(sessionName, options.getProgressSpec());
-        String script = EBCLIScriptAssembly.assembleScript(options);
+        EBCLIScriptAssembly.ScriptData scriptData = EBCLIScriptAssembly.assembleScript(options);
         if (options.wantsShowScript()) {
-            System.out.println("// Script");
-            System.out.println(script);
+            System.out.println("// Rendered Script");
+            System.out.println(scriptData.getScriptParamsAndText());
             System.exit(0);
         }
 
-        scenario.addScriptText(script);
+        scenario.addScenarioScriptParams(scriptData.getScriptParams());
+        scenario.addScriptText(scriptData.getScriptTextIgnoringParams());
         ScenarioLogger sl = new ScenarioLogger(scenario)
                 .setLogDir(options.getLogDirectory())
                 .setMaxLogs(options.getMaxLogs());

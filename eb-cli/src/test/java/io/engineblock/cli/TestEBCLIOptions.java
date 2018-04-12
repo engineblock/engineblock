@@ -101,16 +101,16 @@ public class TestEBCLIOptions {
     @Test
     public void testScriptInterpolation() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"script", "script_to_interpolate", "parameter1=replaced"});
-        String s = EBCLIScriptAssembly.assembleScript(opts);
-        assertThat(s).contains("var foo=replaced;");
-        assertThat(s).contains("var bar=UNSET:parameter2");
+        EBCLIScriptAssembly.ScriptData s = EBCLIScriptAssembly.assembleScript(opts);
+        assertThat(s.getScriptTextIgnoringParams()).contains("var foo=replaced;");
+        assertThat(s.getScriptTextIgnoringParams()).contains("var bar=UNSET:parameter2");
     }
 
     @Test
     public void testAutoScriptCommand() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{ "acommand" });
-        String s = EBCLIScriptAssembly.assembleScript(opts);
-        assertThat(s).contains("acommand script text");
+        EBCLIScriptAssembly.ScriptData s = EBCLIScriptAssembly.assembleScript(opts);
+        assertThat(s.getScriptTextIgnoringParams()).contains("acommand script text");
     }
 
     @Test
