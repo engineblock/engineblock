@@ -18,6 +18,7 @@
 package activityconfig.yaml;
 
 import activityconfig.MultiMapLookup;
+import activityconfig.ParsedStmt;
 import activityconfig.rawyaml.RawStmtDef;
 import io.engineblock.util.Tagged;
 

@@ -18,6 +18,7 @@
 package activityconfig.yaml;
 
 import activityconfig.StatementsLoader;
+import activityconfig.ParsedStmt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -50,6 +51,37 @@ public class ParsedStmtTest {
         assertThat(parsed1.getExtraBindings()).containsExactly();
         assertThat(parsed1.getMissingBindings()).containsExactly();
         assertThat(parsed1.hasError()).isFalse();
+    }
+
+    public void testMultipleBindingUsage() {
+        StmtsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(2);
+
+        StmtDef stmtDef0 = block2.getStmts().get(0);
+        ParsedStmt parsed0 = stmtDef0.getParsed();
+        assertThat(parsed0.getMissingBindings()).isEmpty();
+        assertThat(parsed0.hasError()).isFalse();
+
+        StmtDef stmtDef1 = block2.getStmts().get(1);
+        ParsedStmt parsed1 = stmtDef1.getParsed();
+        assertThat(parsed1.getMissingBindings().isEmpty());
+        assertThat(parsed1.hasError()).isFalse();
+    }
+
+
+    public void testQuestionMarkAnchors() {
+        StmtsBlock block2 = doclist.getStmtDocs().get(0).getBlocks().get(3);
+
+        StmtDef stmtDef0 = block2.getStmts().get(0);
+        ParsedStmt parsed0 = stmtDef0.getParsed();
+        assertThat(parsed0.getMissingBindings()).isEmpty();
+        assertThat(parsed0.hasError()).isFalse();
+
+        StmtDef stmtDef1 = block2.getStmts().get(1);
+        ParsedStmt parsed1 = stmtDef1.getParsed();
+        assertThat(parsed1.getMissingBindings().isEmpty());
+        assertThat(parsed1.hasError()).isFalse();
+        assertThat(parsed1.getSpecificBindings()).containsOnlyKeys("alpha");
+
     }
 
 }

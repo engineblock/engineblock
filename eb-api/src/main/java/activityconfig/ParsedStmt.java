@@ -15,8 +15,9 @@
  * /
  */
 
-package activityconfig.yaml;
+package activityconfig;
 
+import activityconfig.yaml.StmtDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,12 +82,12 @@ public class ParsedStmt {
             spans.add(pre);
 
             if (extraBindings.contains(tokenName)) {
-                extraBindings.remove(tokenName);
                 specificBindings.put(tokenName, stmtDef.getBindings().get(tokenName));
             } else {
                 missingBindings.add(tokenName);
             }
         }
+        specificBindings.forEach((k,v) -> extraBindings.remove(k));
 
         if (lastMatch >= 0) {
             spans.add(statement.substring(lastMatch));
