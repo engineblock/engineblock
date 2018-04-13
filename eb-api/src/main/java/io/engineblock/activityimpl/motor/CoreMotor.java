@@ -248,20 +248,22 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                             cycleDelay=cycleRateLimiter.acquire();
                         }
 
-                        // Phases are rate limited independently from overall cycles, but each cycle has at least one phase.
-                        if (phaseRateLimiter != null) {
-                            // Block for cycle rate limiter
-                            phaseDelay=phaseRateLimiter.acquire();
-                        }
-
                         //try (Timer.Context cycleTime = cyclesTimer.time()) {
-                        long cycleStart=System.nanoTime();
+                        long phaseStart=System.nanoTime();
+                        long cycleStart=phaseStart;
                         try {
 
-                            logger.trace("cycle " + cyclenum);
-                            try (Timer.Context phaseTime = phasesTimer.time()) {
-                                result = action.runCycle(cyclenum);
+                            // Phases are rate limited independently from overall cycles, but each cycle has at least one phase.
+                            if (phaseRateLimiter != null) {
+                                // Block for cycle rate limiter
+                                phaseDelay=phaseRateLimiter.acquire();
                             }
+
+                            logger.trace("cycle " + cyclenum);
+                            result = action.runCycle(cyclenum);
+
+                            long phaseEnd = System.nanoTime();
+                            phasesTimer.update((phaseEnd-phaseStart)+phaseDelay,TimeUnit.NANOSECONDS);
 
                             if (multiPhaseAction != null) {
                                 while (multiPhaseAction.incomplete()) {
@@ -269,9 +271,14 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                                         // Block for cycle rate limiter
                                         phaseDelay=phaseRateLimiter.acquire();
                                     }
+
+                                    phaseStart=System.nanoTime();
                                     try (Timer.Context phaseTime = phasesTimer.time()) {
                                         result = multiPhaseAction.runPhase(cyclenum);
                                     }
+                                    phaseEnd = System.nanoTime();
+                                    phasesTimer.update((phaseEnd-phaseStart)+phaseDelay,TimeUnit.NANOSECONDS);
+
                                 }
                             }
 
