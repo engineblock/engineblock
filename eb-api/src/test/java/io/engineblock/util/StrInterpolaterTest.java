@@ -69,6 +69,14 @@ public class StrInterpolaterTest {
     }
 
     @Test
+    public void shouldMatchAlternateSubst() {
+        String a = interp.apply("TEMPLATE(akey)");
+        assertThat(a).isEqualTo("aval1");
+        String b = interp.apply("TEMPLATE(nokeymatches,value2)");
+        assertThat(b).isEqualTo("value2");
+    }
+
+    @Test
     public void shouldReturnWarningWhenUnmatched() {
         String a = interp.apply("<<nokeymatchesthis>>");
         assertThat(a).isEqualTo("UNSET:nokeymatchesthis");

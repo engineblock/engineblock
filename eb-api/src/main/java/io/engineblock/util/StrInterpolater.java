@@ -31,6 +31,7 @@ public class StrInterpolater implements Function<String, String> {
 
     private MultiMap multimap = new MultiMap();
     private StrSubstitutor substitutor= new StrSubstitutor(multimap,"<<",">>",'\\');
+    private StrSubstitutor substitutor2 = new StrSubstitutor(multimap, "TEMPLATE(", ")", '\\');
 
     public StrInterpolater(ActivityDef... activityDefs) {
         Arrays.stream(activityDefs)
@@ -48,7 +49,7 @@ public class StrInterpolater implements Function<String, String> {
 
     @Override
     public String apply(String s) {
-        return substitutor.replace(s);
+        return substitutor.replace(substitutor2.replace(s));
     }
 
     private static class MultiMap extends StrLookup<String> {
@@ -64,7 +65,7 @@ public class StrInterpolater implements Function<String, String> {
         public String lookup(String key) {
             String defval=null;
 
-            String[] parts = key.split(":", 2);
+            String[] parts = key.split("[:,]", 2);
             if (parts.length == 2) {
                 key = parts[0];
                 defval = parts[1];
