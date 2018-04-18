@@ -7,7 +7,7 @@
     <parent>
         <artifactId>project-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>2.0.83</version>
+        <version>2.0.84-SNAPSHOT</version>
         <relativePath>project-defaults</relativePath>
     </parent>
 
@@ -94,7 +94,7 @@
         <connection>scm:git:https://github.com/engineblock/engineblock.git</connection>
         <developerConnection>scm:git:https://github.com/engineblock/engineblock.git</developerConnection>
         <url>scm:git:git@github.com:engineblock/engineblock.git</url>
-      <tag>engineblock-2.0.83</tag>
+      <tag>engineblock-2.0.59</tag>
     </scm>
 
     <distributionManagement>
