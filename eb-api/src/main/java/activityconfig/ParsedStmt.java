@@ -153,6 +153,7 @@ public class ParsedStmt {
      * Return the statement that can be used as-is by any driver specific version.
      * This uses the anchor token as provided to yield a version of the statement
      * which contains positional anchors, but no named bindings.
+     * @param anchorToken The token which is to be used as a positional place holder
      * @return A driver or usage-specific format of the statement, with anchors
      */
     public String getPositionalStatement(String anchorToken) {

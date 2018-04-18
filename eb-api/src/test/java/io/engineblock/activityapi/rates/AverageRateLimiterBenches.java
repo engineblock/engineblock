@@ -30,6 +30,7 @@ public class AverageRateLimiterBenches extends BaseRateLimiterBenches {
     protected RateLimiter getRateLimiter(String paramSpec, double rate) {
         return RateLimiters.createOrUpdate(
                 ActivityDef.parseActivityDef("alias=testing"),
+                "testing",
                 null,
                 new RateSpec(rate,0.0D)
         );

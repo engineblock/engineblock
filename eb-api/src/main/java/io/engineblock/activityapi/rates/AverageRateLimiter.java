@@ -80,27 +80,27 @@ public class AverageRateLimiter implements Startable, RateLimiter {
      * @param maxOpsPerSecond Max ops per second
      * @param strictness      How strict the timing is, between (0.0 and 1.0)
      */
-    public AverageRateLimiter(ActivityDef def, double maxOpsPerSecond, double strictness, boolean reportCoDelay) {
+    public AverageRateLimiter(ActivityDef def, String label, double maxOpsPerSecond, double strictness, boolean reportCoDelay) {
         this.reportCoDelay = reportCoDelay;
-        this.delayGauge = ActivityMetrics.gauge(def, "cco-delay", new RateLimiters.DelayGauge(this));
+        this.delayGauge = ActivityMetrics.gauge(def, "cco-delay-" + label, new RateLimiters.DelayGauge(this));
         this.setRate(maxOpsPerSecond);
         this.setStrictness(strictness);
     }
 
     // each blocking call will correct to strict schedule by gap * 1/2^n
 
-    public AverageRateLimiter(ActivityDef def, double maxOpsPerSecond) {
-        this(def, maxOpsPerSecond, 0.0D, false);
+    public AverageRateLimiter(ActivityDef def, String label, double maxOpsPerSecond) {
+        this(def, label, maxOpsPerSecond, 0.0D, false);
     }
 
-    public AverageRateLimiter(ActivityDef def, RateSpec rateSpec) {
-        this(def, rateSpec.opsPerSec, rateSpec.strictness, rateSpec.reportCoDelay);
+    public AverageRateLimiter(ActivityDef def, String label, RateSpec rateSpec) {
+        this(def, label, rateSpec.opsPerSec, rateSpec.strictness, rateSpec.reportCoDelay);
     }
 
-    public static AverageRateLimiter createOrUpdate(ActivityDef def, AverageRateLimiter maybeExtant, RateSpec ratespec) {
+    public static AverageRateLimiter createOrUpdate(ActivityDef def, String label, AverageRateLimiter maybeExtant, RateSpec ratespec) {
         if (maybeExtant == null) {
             logger.debug("Creating new rate limiter from spec: " + ratespec);
-            return new AverageRateLimiter(def, ratespec);
+            return new AverageRateLimiter(def, label, ratespec);
         }
 
         maybeExtant.update(ratespec);
@@ -239,7 +239,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
      * if it is not used. For the averaging rate limiter, this is always 0.0.
      * An error will be thrown if an attempt is made to change it directly.
      *
-     * See {@link RateLimiters#createOrUpdate(ActivityDef, RateLimiter, RateSpec)} as a
+     * See {@link RateLimiters#createOrUpdate(ActivityDef, String, RateLimiter, RateSpec)} as a
      * safe way to change from average rate limiting to strict rate limiting
      * at runtime.
      *

@@ -40,15 +40,15 @@ import java.util.concurrent.atomic.AtomicLong;
  * after the max value. They simply expose it to callers. It is up to the
  * caller to check the value to determine when the input is deemed "used up."</p>
  */
-public class TargetRateInput implements Input, ActivityDefObserver, ProgressCapable {
-    private final static Logger logger = LoggerFactory.getLogger(TargetRateInput.class);
+public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable {
+    private final static Logger logger = LoggerFactory.getLogger(AtomicInput.class);
 
     private final AtomicLong cycleValue = new AtomicLong(0L);
     private final AtomicLong min = new AtomicLong(0L);
     private final AtomicLong max = new AtomicLong(Long.MAX_VALUE);
     private ActivityDef activityDef;
 
-    public TargetRateInput(ActivityDef activityDef) {
+    public AtomicInput(ActivityDef activityDef) {
         this.activityDef = activityDef;
         onActivityDefUpdate(activityDef);
     }

@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public class RateLimiters {
     private final static Logger logger = LoggerFactory.getLogger(RateLimiters.class);
 
-    public static synchronized RateLimiter createOrUpdate(ActivityDef def, RateLimiter extant, RateSpec spec) {
+    public static synchronized RateLimiter createOrUpdate(ActivityDef def, String label, RateLimiter extant, RateSpec spec) {
 
         if (spec.strictness>0.0d) {
             if (def.getParams().getOptionalString("ratestrictness").orElse("error").equals("average")) {
@@ -41,7 +41,7 @@ public class RateLimiters {
         if (extant==null) {
             if (spec.strictness == 0.0D) {
                 logger.info("Using average rate limiter for speed: " + spec);
-                return new AverageRateLimiter(def, spec.opsPerSec);
+                return new AverageRateLimiter(def, label, spec.opsPerSec);
             } else {
                 logger.info("Using strict rate limiter: " + spec);
                 return new StrictRateLimiter(def, spec);
@@ -60,8 +60,8 @@ public class RateLimiters {
         }
     }
 
-    public static synchronized  RateLimiter create(ActivityDef def, String specString) {
-        return createOrUpdate(def,null,new RateSpec(specString));
+    public static synchronized  RateLimiter create(ActivityDef def, String label, String specString) {
+        return createOrUpdate(def, label, null,new RateSpec(specString));
     }
 
 

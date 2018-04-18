@@ -18,9 +18,6 @@
 package io.engineblock.activityapi.rates;
 
 import io.engineblock.activityimpl.ActivityDef;
-import io.engineblock.activityapi.rates.RateLimiter;
-import io.engineblock.activityapi.rates.RateLimiters;
-import io.engineblock.activityapi.rates.RateSpec;
 import org.testng.annotations.Test;
 
 
@@ -34,6 +31,7 @@ public class StrictRateLimiterBenches extends BaseRateLimiterBenches {
     protected RateLimiter getRateLimiter(String paramSpec, double rate) {
         return RateLimiters.createOrUpdate(
                 ActivityDef.parseActivityDef("alias=testing"),
+                "testing",
                 null,
                 new RateSpec(rate,1.0D)
         );

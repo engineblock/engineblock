@@ -39,11 +39,11 @@ public class TargetRateInputType implements InputType {
     public static class Dispenser implements InputDispenser {
 
         private final Activity activity;
-        private final TargetRateInput input;
+        private final AtomicInput input;
 
         public Dispenser(Activity activity) {
             this.activity = activity;
-            this.input = new TargetRateInput(activity.getActivityDef());
+            this.input = new AtomicInput(activity.getActivityDef());
         }
 
         @Override

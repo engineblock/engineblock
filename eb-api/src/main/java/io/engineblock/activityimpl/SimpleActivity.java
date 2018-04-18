@@ -191,15 +191,15 @@ public class SimpleActivity implements Activity {
 
         activityDef.getParams().getOptionalNamedParameter("striderate", "co_striderate")
                 .map(RateSpec::new)
-                .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), strideLimiter, spec));
+                .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "stride", strideLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "co_cyclerate", "targetrate", "co_targetrate")
                 .map(RateSpec::new).ifPresent(
-                        spec-> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), cycleLimiter, spec));
+                        spec-> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycle", cycleLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("phaserate", "co_phaserate")
                 .map(RateSpec::new)
-                .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), phaseLimiter, spec));
+                .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "phase", phaseLimiter, spec));
 
     }
 

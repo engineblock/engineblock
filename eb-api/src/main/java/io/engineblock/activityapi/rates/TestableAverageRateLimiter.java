@@ -26,7 +26,7 @@ public class TestableAverageRateLimiter extends AverageRateLimiter {
     private AtomicLong clock;
 
     public TestableAverageRateLimiter(AtomicLong clock, double maxOpsPerSecond, double strictness, boolean reportCoDelay, ActivityDef def) {
-        super(def,maxOpsPerSecond,strictness, reportCoDelay);
+        super(def, "test", maxOpsPerSecond,strictness, reportCoDelay);
         this.clock = clock;
     }
 

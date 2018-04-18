@@ -54,6 +54,6 @@ public class DiagActivity extends SimpleActivity implements Activity, ActivityDe
         activityDef.getParams()
                 .getOptionalString("diagrate")
                 .map(RateSpec::new)
-                .ifPresent(spec -> diagRateLimiter= RateLimiters.createOrUpdate(getActivityDef(),diagRateLimiter,spec));
+                .ifPresent(spec -> diagRateLimiter= RateLimiters.createOrUpdate(getActivityDef(),"diag",diagRateLimiter,spec));
     }
 }

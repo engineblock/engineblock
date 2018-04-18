@@ -9,7 +9,7 @@ import io.engineblock.activityimpl.CoreServices;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.activityimpl.action.CoreActionDispenser;
 import io.engineblock.activityimpl.input.CoreInputDispenser;
-import io.engineblock.activityimpl.input.TargetRateInput;
+import io.engineblock.activityimpl.input.AtomicInput;
 import io.engineblock.activityimpl.motor.CoreMotor;
 import io.engineblock.activityimpl.motor.CoreMotorDispenser;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class ActivityExecutorTest {
     public void testNewActivityExecutor() {
         ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test;cycles=1000;");
         Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
-        Input longSupplier = new TargetRateInput(ad);
+        Input longSupplier = new AtomicInput(ad);
         MotorDispenser cmf = getActivityMotorFactory(
                 ad, motorActionDelay(999), longSupplier
         );

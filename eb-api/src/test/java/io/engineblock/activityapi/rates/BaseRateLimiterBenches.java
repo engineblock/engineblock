@@ -51,7 +51,7 @@ public abstract class BaseRateLimiterBenches {
     public void testCallerFastEnough() {
         long phi = 100_000_000L; // 100ms
 
-        RateLimiter rl = RateLimiters.create(ActivityDef.parseActivityDef("alias=testing"),"1000");
+        RateLimiter rl = RateLimiters.create(ActivityDef.parseActivityDef("alias=testing"),"testing","1000");
 
         for (int i = 0; i < 2000; i++) {
             rl.acquire();
