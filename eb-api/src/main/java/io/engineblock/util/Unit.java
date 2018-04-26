@@ -28,7 +28,7 @@ public class Unit {
 
     private final static Logger logger = LoggerFactory.getLogger(Unit.class);
 
-    private static Pattern numberFmtPattern = Pattern.compile(" *(?<number>[0-9]+(\\.[0-9]+)?) *(?<unit>[^ ]+?)? *");
+    private static Pattern numberFmtPattern = Pattern.compile(" *(?<number>[0-9]+(\\.[0-9]+)?(E[0-9]+)?) *(?<unit>[^ ]+?)? *");
     private static long nanoPerSecond = 1000000000;
     private static long bytesPerGB = 1000000000;
     private static long BytesPerGiB = 1024 * 1024 * 1024;
@@ -90,7 +90,7 @@ public class Unit {
             if (unitpart != null) {
                 Count specifierUnit = Count.valueOfSuffix(unitpart);
                 if (specifierUnit == null) {
-                    throw new RuntimeException("Unable to recognized getChainSize unit:" + unitpart);
+                    throw new RuntimeException("Unable to recognized counts unit:" + unitpart);
                 }
                 double specifierScale = specifierUnit.getMultiplier();
                 double resultScale = resultUnit.getMultiplier();

@@ -149,7 +149,7 @@ public class EBCLIOptions {
                     break;
                 case WAIT_MILLIS:
                     String waitMillisCmdType = readWordOrThrow(arglist, "wait millis");
-                    String millisCount = readWordOrThrow(arglist, "millis getChainSize");
+                    String millisCount = readWordOrThrow(arglist, "millis count");
                     Long.parseLong(millisCount); // sanity check
                     Cmd awaitMillisCmd = new Cmd(CmdType.valueOf(waitMillisCmdType), millisCount);
                     cmdList.add(awaitMillisCmd);

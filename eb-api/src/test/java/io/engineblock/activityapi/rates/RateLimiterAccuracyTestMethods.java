@@ -17,6 +17,8 @@
 
 package io.engineblock.activityapi.rates;
 
+import io.engineblock.activityapi.rates.testtypes.TestableAverageRateLimiter;
+import io.engineblock.activityapi.rates.testtypes.TestableRateLimiterProvider;
 import io.engineblock.activityimpl.ActivityDef;
 import org.testng.annotations.Test;
 
@@ -25,17 +27,17 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
-public class AverageRateLimiterTest {
+public class RateLimiterAccuracyTestMethods {
 
     /**
      * Internal delay calculations should be accurate, whether or not the caller
      * wants to know about CO-aware scheduling latency.
      */
     @Test
-    public void testDelayCalculations() {
+    static void testDelayCalculations(TestableRateLimiterProvider provider) {
         AtomicLong clock = new AtomicLong(50_000);
         TestableAverageRateLimiter rl = new TestableAverageRateLimiter(
-                clock, 1000D, 0.0, true, ActivityDef.parseActivityDef("alias=testing")
+                clock, new RateSpec(1000D, 0.0, true), ActivityDef.parseActivityDef("alias=testing")
         );
         rl.start();
         assertThat(rl.getLastSeenNanoTimeline().get()).isEqualTo(50_000L);
@@ -62,8 +64,8 @@ public class AverageRateLimiterTest {
         assertThat(rl.getLastSeenNanoTimeline().get()).isEqualTo(200_000L);     // unchanged
         rl.acquire(1L);
         assertThat(rl.getTicksTimeline().get()).isEqualTo(200_001L);            // +1 via acquire = 200_001
-        assertThat(rl.getRateSchedulingDelay()).isEqualTo(0L);                  // actually (-1) nano, but delay is 0, not negative
-        assertThat(rl.getTotalSchedulingDelay()).isEqualTo(105000L);            // from before rate change, but nothing to add since
+        assertThat(rl.getRateSchedulingDelay()).isEqualTo(-1L);                  // actually (-1) nano, but delay is 0, not negative
+        assertThat(rl.getTotalSchedulingDelay()).isEqualTo(104999L);            // from before rate change, but nothing to add since
         clock.set(clock.get() + 10L);                                           // clock + 10 to 200_010
         assertThat(rl.getRateSchedulingDelay()).isEqualTo(9L);                  // was -1, but now should be +9
         assertThat(rl.getTotalSchedulingDelay()).isEqualTo(105009L);            // cumulative before rate change + current=
@@ -74,12 +76,9 @@ public class AverageRateLimiterTest {
      * caller how many nanoseconds behind schedule it is according to
      * CO-aware scheduling.
      */
-    @Test
-    public void verifyReportedCoDelayFastPath() {
+    static void testReportedCoDelayFastPath(TestableRateLimiterProvider provider) {
         AtomicLong clock = new AtomicLong(50_000);
-        TestableAverageRateLimiter rl = new TestableAverageRateLimiter(
-                clock, 1000, 0.0, true, ActivityDef.parseActivityDef("alias=testing")
-        );
+        TestableRateLimiter rl = provider.getRateLimiter("alias=testing", "1000,0.0,true",clock);
         rl.start();
         clock.set(clock.get() + 1000);
         long delay0 = rl.acquire(15L);
@@ -96,12 +95,10 @@ public class AverageRateLimiterTest {
      * the caller that there is 0 latency added due to CO, regardless of the
      * internal measurement.
      */
-    @Test
-    public void verifyDisabledCoDelayFastPath() {
+    static void testDisabledCoDelayFastPath(TestableRateLimiterProvider provider) {
         AtomicLong clock = new AtomicLong(50_000);
-        TestableAverageRateLimiter rl = new TestableAverageRateLimiter(
-                clock, 1000, 0.0, false, ActivityDef.parseActivityDef("alias=testing")
-        );
+
+        TestableRateLimiter rl = provider.getRateLimiter("alias=testing", "1000,0.0,false",clock);
         rl.start();
         clock.set(clock.get() + 1000);
         long delay0 = rl.acquire(15L);
@@ -110,6 +107,21 @@ public class AverageRateLimiterTest {
         assertThat(delay0).isEqualTo(0L);
         assertThat(delay1).isEqualTo(0L);
         assertThat(delay2).isEqualTo(0L);
+
+    }
+
+    static void testCOReportingAccuracy(TestableRateLimiterProvider provider) {
+        double rate = 1000D;
+        AtomicLong clock = new AtomicLong(0L);
+        TestableRateLimiter l = provider.getRateLimiter("alias=testing", String.valueOf(rate)+",0.0,true",clock);
+        l.start();
+        assertThat(l.getRateSpec()).isNotNull();
+        assertThat(l.getTotalSchedulingDelay()).isEqualTo(0L);
+        assertThat(l.acquire(5000)).isEqualTo(0L);
+        clock.addAndGet(6000L);
+        assertThat(l.acquire(5000L)).isEqualTo(1000L);
+        clock.addAndGet(7543L);
+        assertThat(l.getTotalSchedulingDelay()).isEqualTo(3543L);
 
     }
 

@@ -130,7 +130,7 @@ public class LongTreeTrackerTest2 {
     /**
      * Last result on a mobile i7 CPU:
      * <pre>
-     *  getChainSize: 1073741824
+     *  count: 1073741824
      *  duration ms: 13730.785213
      *  rate/ms: 78199.593639
      *  rate/s: 78199593.638928
@@ -150,7 +150,7 @@ public class LongTreeTrackerTest2 {
         long t2=System.nanoTime();
         double duration = ((double) t2 - (double) t1)/1000000.0d;
         double rate = ((double) count) / duration;
-        System.out.format("getChainSize: %d\n",count);
+        System.out.format("count: %d\n",count);
         System.out.format("duration ms: %f\n", duration);
         System.out.format("rate/ms: %f\n", rate);
         System.out.format("rate/s: %f\n", rate * 1000.0d);
@@ -169,7 +169,7 @@ public class LongTreeTrackerTest2 {
         long t2=System.nanoTime();
         double duration = ((double) t2 - (double) t1)/1000000.0d;
         double rate = ((double) count) / duration;
-        System.out.format("getChainSize: %d\n",count);
+        System.out.format("count: %d\n",count);
         System.out.format("duration ms: %f\n", duration);
         System.out.format("rate/ms: %f\n", rate);
         System.out.format("rate/s: %f\n", rate * 1000.0d);

@@ -146,7 +146,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
         OpSequence<StringBindings> opSequence = sequencer.resolve();
         if (getActivityDef().getCycleCount() == 0) {
-            logger.debug("Adjusting cycle getChainSize for " + activityDef.getAlias() + " to " +
+            logger.debug("Adjusting cycle count for " + activityDef.getAlias() + " to " +
                     opSequence.getOps().size());
             getActivityDef().setCycles(String.valueOf(opSequence.getOps().size()));
         }

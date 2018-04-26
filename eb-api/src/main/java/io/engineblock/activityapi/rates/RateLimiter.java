@@ -84,4 +84,10 @@ public interface RateLimiter extends Startable {
      */
     void update(RateSpec spec);
 
+    /**
+     * Get the rate spec that this rate limiter was created from.
+     * @return a RateSpec that describes this rate limiter
+     */
+    RateSpec getRateSpec();
+
 }

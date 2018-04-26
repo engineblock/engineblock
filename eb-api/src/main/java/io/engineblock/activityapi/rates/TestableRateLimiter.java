@@ -17,23 +17,11 @@
 
 package io.engineblock.activityapi.rates;
 
-import io.engineblock.activityimpl.ActivityDef;
-import org.testng.annotations.Test;
+public interface TestableRateLimiter extends RateLimiter {
 
-/**
- * These tests run all the rate limiter micro benches with average rate
- * limiting only, due to the strictness level being set to 0.0D.
- */
-@Test(enabled=false)
-public class AverageRateLimiterBenches extends BaseRateLimiterBenches {
+    long setClock(long newValue);
+    long getClock();
 
-    protected RateLimiter getRateLimiter(String paramSpec, double rate) {
-        return RateLimiters.createOrUpdate(
-                ActivityDef.parseActivityDef("alias=testing"),
-                "testing",
-                null,
-                new RateSpec(rate,0.0D)
-        );
-    }
+    long getTicksTime();
+
 }
-

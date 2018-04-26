@@ -56,7 +56,7 @@ final class DeltaHistogramSnapshot extends Snapshot {
 
         if (i != vals.length) {
             throw new IllegalStateException(
-                "Total getChainSize was " + histogram.getTotalCount() + " but iterating values produced " + vals.length);
+                "Total count was " + histogram.getTotalCount() + " but iterating values produced " + vals.length);
         }
 
         return vals;

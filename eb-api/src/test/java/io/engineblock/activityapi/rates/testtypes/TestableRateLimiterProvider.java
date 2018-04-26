@@ -15,10 +15,12 @@
  * /
  */
 
-package io.engineblock.activityapi.input;
+package io.engineblock.activityapi.rates.testtypes;
 
-import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityapi.rates.TestableRateLimiter;
 
-public interface RateLimiterProvider {
-    RateLimiter getRateLimiter();
+import java.util.concurrent.atomic.AtomicLong;
+
+public interface TestableRateLimiterProvider {
+    TestableRateLimiter getRateLimiter(String def, String spec, AtomicLong initialClock);
 }

@@ -172,7 +172,7 @@ public class ActivityDef {
     /**
      * The number of threads (AKA slots) that the associated activity should currently be using.
      *
-     * @return target thread getChainSize
+     * @return target thread count
      */
     public int getThreads() {
         return parameterMap.getOptionalInteger(FIELD_THREADS).orElse(DEFAULT_THREADS);

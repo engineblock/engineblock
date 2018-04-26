@@ -63,38 +63,28 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class AverageRateLimiter implements Startable, RateLimiter {
     private static final Logger logger = LoggerFactory.getLogger(AverageRateLimiter.class);
-    protected Gauge<Long> delayGauge;
+    private Gauge<Long> delayGauge;
     private long opTicks = 0L; // Number of nanos representing one grant at target rate
     private double rate = Double.NaN; // The "ops/s" rate as set by the user
     private long startTimeNanos = System.nanoTime();
     private final AtomicLong lastSeenNanoTime = new AtomicLong(startTimeNanos);
-    private final AtomicLong ticksTimeline = new AtomicLong(startTimeNanos);
+    protected final AtomicLong ticksTimeline = new AtomicLong(startTimeNanos);
     private AtomicLong accumulatedDelayNanos = new AtomicLong(0L);
     private State state = State.Idle;
     private boolean reportCoDelay=false;
+    private RateSpec rateSpec;
 
     /**
      * Create a rate limiter.
      *
      * @param def             The activity definition for this rate limiter
-     * @param maxOpsPerSecond Max ops per second
-     * @param strictness      How strict the timing is, between (0.0 and 1.0)
      */
-    public AverageRateLimiter(ActivityDef def, String label, double maxOpsPerSecond, double strictness, boolean reportCoDelay) {
-        this.reportCoDelay = reportCoDelay;
-        this.delayGauge = ActivityMetrics.gauge(def, "cco-delay-" + label, new RateLimiters.DelayGauge(this));
-        this.setRate(maxOpsPerSecond);
-        this.setStrictness(strictness);
-    }
-
-    // each blocking call will correct to strict schedule by gap * 1/2^n
-
-    public AverageRateLimiter(ActivityDef def, String label, double maxOpsPerSecond) {
-        this(def, label, maxOpsPerSecond, 0.0D, false);
-    }
-
     public AverageRateLimiter(ActivityDef def, String label, RateSpec rateSpec) {
-        this(def, label, rateSpec.opsPerSec, rateSpec.strictness, rateSpec.reportCoDelay);
+        this.rateSpec = rateSpec;
+        this.reportCoDelay = rateSpec.reportCoDelay;
+        this.delayGauge = ActivityMetrics.gauge(def, "cco-delay-" + label, new RateLimiters.DelayGauge(this));
+        this.setRate(rateSpec.opsPerSec);
+        this.setStrictness(rateSpec.strictness);
     }
 
     public static AverageRateLimiter createOrUpdate(ActivityDef def, String label, AverageRateLimiter maybeExtant, RateSpec ratespec) {
@@ -200,12 +190,12 @@ public class AverageRateLimiter implements Startable, RateLimiter {
 
     @Override
     public long getRateSchedulingDelay() {
-        return (Math.max(0L, getNanoClockTime() - this.ticksTimeline.get()));
+        return reportCoDelay ? (getNanoClockTime() - this.ticksTimeline.get()) : 0L;
     }
 
     @Override
     public long getTotalSchedulingDelay() {
-        return getRateSchedulingDelay() + accumulatedDelayNanos.get();
+        return reportCoDelay ? getRateSchedulingDelay() + accumulatedDelayNanos.get() : 0L;
     }
 
     public synchronized void start() {
@@ -227,11 +217,12 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     }
 
     public String toString() {
-        return "rate=" + this.rate + ", " +
-                "opticks=" + this.getOpNanos() + ", " +
-                "delay=" + this.getRateSchedulingDelay() + ", " +
-                "strictness=" + 0.0D + ", " +
-                "reportDelay=" + reportCoDelay;
+        return "spec=" + rateSpec.toString() +
+                ", rateDelay=" + this.getRateSchedulingDelay() +
+                ", totalDelay" + this.getTotalSchedulingDelay() +
+                ", (used/seen)=(" + ticksTimeline.get() + "/" + lastSeenNanoTime.get() +
+                ", clock=" + getNanoClockTime() +
+                ", actual=" + System.nanoTime();
     }
 
     /**
@@ -265,6 +256,11 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         if (getStrictness() != rateSpec.strictness) {
             throw new RuntimeException("Unable to change the strictness on an averaging rate limiter.");
         }
+    }
+
+    @Override
+    public RateSpec getRateSpec() {
+        return this.rateSpec;
     }
 
     /**

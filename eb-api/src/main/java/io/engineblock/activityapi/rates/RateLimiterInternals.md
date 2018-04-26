@@ -30,11 +30,7 @@ of 1_000_000_000 / 500_000, or 2000 nanoseconds. With this time slice, it is tri
 to atomically increment a moving accumulator that represents the time slices
 given out, pacing each operation according to the accumulated value.
 
-## Nanosecond Time Slices
-
-By using nanoseconds as the universal unit of time, we are able to avoid
-unnecessary conversions. Further, the timer state is recorded in terms of views
-of actual time passing.
+Further, the timer state is recorded in terms of views of actual time passing.
 
 The ticks accumulator is one such counter. It simply tracks the monotonically
 and atomically incrementing schedule pointer for the next available time slice.
@@ -55,19 +51,23 @@ upper limit. It is important to optimize the timer not just to support higher
 rates of operation, but also to preserve system thread time for the actual
 workloads that need it.
 
-At very high rate limits, timing accuracy becomes less critical, as other elements
-of system flow will cause a degree of work spreading. Blocking queues, thread
-pools, and SERDES will all make it difficult to preserve any sub-10ns level timing
-downstream. For this reason, it is not critical to achieve sub-10ns level
-isochronous dispatch. This offers room for an accuracy and speed trade-off.
+At very high rate limits, timing accuracy becomes less critical, as other
+elements of system flow will cause a degree of work spreading. Blocking queues,
+thread pools, and SERDES will all make it difficult to preserve any sub-10ns
+level timing downstream. For this reason, it is not critical to achieve sub-10ns
+level isochronous dispatch at these rates. In short, fine-grained timing
+precision is low priority. Rate discipline is high priority. These are not the
+same thing. This offers room for an accuracy and speed trade-off.
 
 The timer implementation thus keeps a view of system nanosecond passage of time
 in another timeline register, called the *last-seen nanotime*. This means that
 threads can share information about the last seen nanotime, avoiding calling it
 except in cases that it may be needed in order to make progress on dispatch for
 the current caller. The basic rule is that the last seen nanotime is only ever
-updated to the current system nanotime IF it has not advanced enough to unblock
-the current caller.
+updated to the current system nanotime IFF it has not advanced enough to unblock
+the current caller. Doing so updates the shared view of the timeline register,
+which again allows a number of subsequent callers to take the fast path for 
+high op rates.
 
 ## Calling Overhead Compensation
 
@@ -88,8 +88,9 @@ rates.
 
 ## Strict vs Average
 
-The two-timeline approach works well in terms of speed, but it is not sufficient
-as explained above to control uniformity of schedule from one call to the next.
+The two-timeline approach described above works well in terms of speed, but it
+is not sufficient to control uniformity of schedule from one call to the next.
+
 The reason for this is that as callers are delayed for their own reasons, the
 "open timespan" gets larger. The longer time progresses without the ticks
 accumulator following it, the larger the gap, and thus the availability of total
@@ -100,24 +101,42 @@ burst over the rate limit in order to approach the average rate limit. Sometimes
 this is desirable, but not as an unlimited bursting which might allow the short-term
 measured op rate to be many times that of the target average rate.
 
-On the other side, you may prefer strict rate limiting from one call to the
-next. In other words, you may require that with a 2000 ops/s rate limit, no two
-operations occur less than 500_000 ns apart. This is effectively the zero-bursting
-mode.
+However, you may prefer strict rate limiting from one call to the next. In other
+words, you may require that with a 2000 ops/s rate limit, no two operations
+occur less than 500_000 ns apart. This is called "Strict Rate Limiting".
 
-To support a mix of these two modes, a feature called *Limit Compensation* is
+## Burst Compensation
+
+To support a mix of these two modes, a feature called *Burst Compensation* is
 added to the scheduling algorithm. This feature takes any gap that exists
 between the next available time slice and the current system nanotime (the 
 open time span) and reduces it by a fraction. The fraction is a power of two, but
 it is set loosely with a *ratio* of gap time, with an approximate register
 shift occurring only in the case of a blocked caller. This has the effect of
-closing the gap in a prescriptive way when it is opened. A limit compensation
-value of 0.25 will cause 1/4 of the gap to be closed, a value of 0.125 will
-cause 1/8 to be closed, and so forth. Values in between are rounded down.
+soaking up lead time that is not being used, but in a proportional way.
 
-A value of 0.0D disables limit compensation, which is will cause the rate limiter
-to only throttle once the average rate is achieved. A value of 1.0D will cause
-strict limiting between each iteration. In practice neither is best, as 
-thread pools have timing jitter, GCs occur, and systems need to warm up to
-their achievable rates. By default, the limit compensation is set to 1/32.
+A burst limit compensation value of 0.25 will cause 1/4 of the gap to be closed, 
+a value of 0.125 will cause 1/8 to be closed, and so forth. Values in between 
+are rounded down. This type of burst compensation is adaptive in that it will
+allow longer periods of idle callers to provide more catch-up time while also
+disallowing extended bursting to occur. Further study is needed to characterize
+how this manifests for different caller timings.
+
+As well, you may want to have the ability to catch up to an average target rate
+with some amount of constant bursting. In other words, you may want to set a
+target rate of R ops/s so long as the callers are keeping up with the allowed
+rate, but allow them to go 110% R rate when behind to catch up. This is
+represented with a strictness value of 1.1. Essentially, any strictness value
+greater than 1.0 is considered a burst allowance. This works out nicely in
+contrast to the burst compensation setting represented by strictness values less
+than 1.0, since they are mutually exclusive.
+
+A value of 0.0D disables limit compensation, which is will cause the rate
+limiter to only throttle once the average rate is achieved. A value of 1.0D will
+cause strict limiting between each iteration. A value of 1.15D will allow for
+15% overspeed relative to the target rate. In practice none of these is best, as
+thread pools have timing jitter, GCs occur, and systems need to warm up to their
+achievable rates.
+
+By default, the limit compensation is set to <s>1/32.</s> <em>TBD</em>
 

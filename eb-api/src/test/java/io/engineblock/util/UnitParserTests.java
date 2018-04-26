@@ -33,6 +33,11 @@ public class UnitParserTests {
     }
 
     @Test
+    public void testExponentialNotation() {
+        assertThat(Unit.countFor("1.0E10")).isPresent().contains(10000000000.0d);
+    }
+
+    @Test
     public void testDurationParser() {
         assertThat(Unit.msFor("1000")).contains(1000L);
         assertThat(Unit.msFor("1S")).contains(1000L);

@@ -65,54 +65,72 @@ import java.util.concurrent.atomic.AtomicLong;
  * In other words, previous allocations of the timeline determine the start
  * time of a new caller, not the caller itself.
  */
-public class StrictRateLimiter implements Startable, RateLimiter {
-    private static final Logger logger = LoggerFactory.getLogger(StrictRateLimiter.class);
+public class OldStrictRateLimiter implements Startable,RateLimiter {
+    private static final Logger logger = LoggerFactory.getLogger(OldStrictRateLimiter.class);
     private final Gauge<Long> delayGauge;
-    private final RateSpec rateSpec;
-    protected AtomicLong ticksTimeline;
+
     private long opTicks = 0L; // Number of nanos representing one grant at target rate
     private double rate = Double.NaN; // The "ops/s" rate as set by the user
-    private long startTimeNanos;
-    private AtomicLong lastSeenNanoTime;
-    private AtomicLong totalAccumualatedDelay = new AtomicLong(0L);
-    private AtomicLong gapClosings = new AtomicLong(0L);
+
+    private long startTimeNanos = System.nanoTime(); //
+    private AtomicLong ticksTimeline = new AtomicLong(startTimeNanos);
+    private AtomicLong accumulatedDelayNanos = new AtomicLong(0L);
+    private AtomicLong lastSeenNanoTime = new AtomicLong(System.nanoTime());
+//    private AtomicLong accumulatedOps = new AtomicLong(0L);
 
     private volatile boolean started;
 
     // each blocking call will correct to strict schedule by gap * 1/2^n
-    private int burstDampeningShift = 5;
+    private int limitCompensationShifter = 5;
     private double strictness;
-    private State state = State.Idle;
-
-
-    private boolean reportCoDelay = false;
-    private long burstTicks;
 
 
     /**
      * Create a rate limiter.
      *
-     * @param def The activity definition for this rate limiter
+     * @param maxOpsPerSecond Max ops per second
+     * @param advanceRatio    ratio of limit compensation to advance per acquire.
      */
-    public StrictRateLimiter(ActivityDef def, String label, RateSpec rateSpec) {
-        this.rateSpec = rateSpec;
-        this.reportCoDelay = rateSpec.reportCoDelay;
-        this.setRate(rateSpec.opsPerSec);
-        this.setStrictness(rateSpec.strictness);
-        this.delayGauge = ActivityMetrics.gauge(def, "cco-delay-" + label, new RateLimiters.DelayGauge(this));
+    public OldStrictRateLimiter(ActivityDef def, double maxOpsPerSecond, double advanceRatio) {
+        this.delayGauge = ActivityMetrics.gauge(def, "cco-delay", new RateLimiters.DelayGauge(this));
+        this.setRate(maxOpsPerSecond);
+        this.setStrictness(advanceRatio);
     }
 
-    public StrictRateLimiter(ActivityDef def, String label, RateSpec spec, AverageRateLimiter prior) {
-        this(def, label, spec);
-        this.totalAccumualatedDelay.set(prior.getTotalSchedulingDelay());
+    public OldStrictRateLimiter(ActivityDef def, RateSpec spec) {
+        this(def, spec.opsPerSec, spec.strictness);
     }
 
-    protected long getNanoClockTime() {
-        return System.nanoTime();
+
+    /**
+     * Initialize this rate limiter instance with previous state, as if continuing on for another
+     * rate limiter.
+     *
+     * @param activity
+     * @param spec
+     * @param cumulativeSchedulingDelayNs
+     */
+    public OldStrictRateLimiter(ActivityDef activity, RateSpec spec, long cumulativeSchedulingDelayNs) {
+        this(activity, spec);
+        this.accumulatedDelayNanos.set(cumulativeSchedulingDelayNs);
+    }
+
+    public OldStrictRateLimiter(ActivityDef def, double rate) {
+        this(def, rate, 1.0D);
+    }
+
+    public static OldStrictRateLimiter createOrUpdate(ActivityDef def, OldStrictRateLimiter maybeExtant, RateSpec ratespec) {
+        if (maybeExtant == null) {
+            logger.debug("Creating new rate limiter from spec: " + ratespec);
+            return new OldStrictRateLimiter(def, ratespec);
+        }
+
+        maybeExtant.update(ratespec);
+        return maybeExtant;
     }
 
     /**
-     * See {@link StrictRateLimiter} for interface docs.
+     * See {@link OldStrictRateLimiter} for interface docs.
      * effective calling overhead of acquire() is ~20ns
      *
      * @param nanos nanoseconds of time allotted to this event
@@ -124,46 +142,25 @@ public class StrictRateLimiter implements Startable, RateLimiter {
         long timelinePosition = lastSeenNanoTime.get();
 
         if (opScheduleTime < timelinePosition) {
-            return reportCoDelay ? (timelinePosition - opScheduleTime) + totalAccumualatedDelay.get() : 0L;
+            return 0L;
         }
 
-        timelinePosition = getNanoClockTime();
+        timelinePosition = System.nanoTime();
         lastSeenNanoTime.set(timelinePosition);
         long scheduleDelay = timelinePosition - opScheduleTime;
 
-        if (scheduleDelay > 0L) {
-            // If slower than allowed rate,
-            // then fast-forward ticks timeline to close gap by some proportion
-            // thus simulating ready callers at some rate
-
-//            long gap = (timelinePosition - opScheduleTime) - nanos;
-
-            //            if (gap > nanos) {
-//                ticksTimeline.addAndGet()
-//            }
-//            if (gap > 0) {
-
-//            if (gap > nanos) {
-//                gap >>>= burstDampeningShift;
-//                if (gap > 0) {
-//                    //logger.debug("closing gap by " + gap);
-//                    ticksTimeline.addAndGet(gap);
-//                    gapClosings.incrementAndGet();
-//                    return(totalAccumualatedDelay.addAndGet(gap));
-//                }
-//            }
-
-            return reportCoDelay ? scheduleDelay + totalAccumualatedDelay.get() : 0L;
+        if (scheduleDelay > 0) {
+            accumulatedDelayNanos.addAndGet(scheduleDelay);
+            return accumulatedDelayNanos.get();
         } else {
-            scheduleDelay *= -1;
-//            logger.debug("schedule delay: " + scheduleDelay);
             try {
                 Thread.sleep(scheduleDelay / 1000000, (int) (scheduleDelay % 1000000L));
             } catch (InterruptedException ignoringSpuriousInterrupts) {
             }
-            return 0L;
+            return 0;
         }
     }
+
 
 //            if ((timeSlicePosition%10)==0) {
 //                // If slower than allowed rate,
@@ -171,7 +168,7 @@ public class StrictRateLimiter implements Startable, RateLimiter {
 //                // close gap by some proportion.
 //                long gap = (timelinePosition - timeSlicePosition) - nanos;
 //                if (gap > 0) {
-//                    gap >>>= burstDampeningShift;
+//                    gap >>>= limitCompensationShifter;
 //                    if (gap > 0) {
 //                        logger.debug("closing gap by " + gap);
 //                        ticksTimeline.addAndGet(gap);
@@ -202,21 +199,19 @@ public class StrictRateLimiter implements Startable, RateLimiter {
 
     @Override
     public long getTotalSchedulingDelay() {
-        return reportCoDelay ? getRateSchedulingDelay() + totalAccumualatedDelay.get() : 0L;
+        return getRateSchedulingDelay() + accumulatedDelayNanos.get();
     }
 
     @Override
     public long getRateSchedulingDelay() {
-        return reportCoDelay ? (getNanoClockTime() - this.ticksTimeline.get()) : 0L;
+        return (System.nanoTime() - this.ticksTimeline.get());
     }
 
 
     public synchronized void start() {
         if (!started) {
-            this.ticksTimeline = new AtomicLong(getNanoClockTime());
-            this.lastSeenNanoTime = new AtomicLong(getNanoClockTime());
-            this.totalAccumualatedDelay = new AtomicLong(0L);
             this.started = true;
+            accumulatedDelayNanos.set(0L);
             resetReferences();
         }
     }
@@ -226,19 +221,10 @@ public class StrictRateLimiter implements Startable, RateLimiter {
     }
 
     public synchronized double setOpNanos(long opTicks) {
-        if (opTicks <= 0) {
-            throw new RuntimeException("The number of nanos per op must be greater than 0.");
-        }
         this.opTicks = opTicks;
         this.rate = 1000000000d / opTicks;
-
-        switch (state) {
-            case Started:
-                accumulateDelay();
-                sync();
-            case Idle:
-        }
-
+        accumulateDelay();
+        resetReferences();
         return getRate();
     }
 
@@ -257,37 +243,27 @@ public class StrictRateLimiter implements Startable, RateLimiter {
         }
         this.rate = rate;
         opTicks = (long) (1000000000d / rate);
-        burstTicks = (strictness > 1.0) ? (long) (1000000000d / (rate * strictness)) : opTicks;
-        logger.info("OpTicksNs for one cycle is " + opTicks + "ns");
+        logger.info("OpTicksNs for one cycle is " + opTicks +"ns");
 
-        setOpNanos(opTicks);
+        accumulateDelay();
+        resetReferences();
     }
 
     private void accumulateDelay() {
-        totalAccumualatedDelay.addAndGet(getTotalSchedulingDelay());
+        accumulatedDelayNanos.addAndGet(getTotalSchedulingDelay());
     }
 
     private void resetReferences() {
-        long newSetTime = getNanoClockTime();
+        long newSetTime = System.nanoTime();
         this.ticksTimeline.set(newSetTime);
         startTimeNanos = newSetTime;
     }
 
-    protected synchronized void sync() {
-        long nanos = getNanoClockTime();
-        startTimeNanos = nanos;
-        lastSeenNanoTime.set(nanos);
-        ticksTimeline.set(nanos);
-    }
-
     public String toString() {
-        return "spec=" + rateSpec.toString() +
-                ", rateDelay=" + this.getRateSchedulingDelay() +
-                ", totalDelay=" + this.getTotalSchedulingDelay() +
-                "\n (used/seen)=(" + ticksTimeline.get() + "/" + lastSeenNanoTime.get() +
-                ", clock=" + getNanoClockTime() +
-                ", actual=" + System.nanoTime() +
-                ", closing=" + gapClosings.get();
+        return "rate=" + this.rate + ", " +
+                "opticks=" + this.getOpNanos() + ", " +
+                "delay=" + this.getRateSchedulingDelay() + ", " +
+                "strictness=" + limitCompensationShifter;
     }
 
     /**
@@ -311,17 +287,16 @@ public class StrictRateLimiter implements Startable, RateLimiter {
     public int setStrictness(double strictness) {
         this.strictness = strictness;
         if (strictness > 1.0D) {
-            this.burstSlice = this.
             throw new RuntimeException("gap fill ratio must be between 0.0D and 1.0D");
         }
         if (strictness == 1.0D) {
-            this.burstDampeningShift = 0;
+            this.limitCompensationShifter = 0;
         } else {
             long longsize = (long) (strictness * (double) Long.MAX_VALUE);
-            this.burstDampeningShift = Math.min(Long.numberOfLeadingZeros(longsize), 63);
+            this.limitCompensationShifter = Math.min(Long.numberOfLeadingZeros(longsize), 63);
         }
 
-        return this.burstDampeningShift;
+        return this.limitCompensationShifter;
     }
 
     public double getStrictness() {
@@ -341,18 +316,9 @@ public class StrictRateLimiter implements Startable, RateLimiter {
 
     @Override
     public RateSpec getRateSpec() {
-        return this.rateSpec;
+
+        return null;
     }
 
-    protected long setTicksTime(long ticks) {
-        long was = ticksTimeline.get();
-        this.ticksTimeline.set(ticks);
-        return was;
-    }
-
-    private enum State {
-        Idle,
-        Started
-    }
 
 }

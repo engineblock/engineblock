@@ -21,14 +21,35 @@ import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.util.Unit;
 
 public class RateSpec {
+    /**
+     * Target rate in Operations Per Second
+     */
     public double opsPerSec = 1.0D;
+
+    /**
+     * Rate Scheduling Strictness
+     *  0.0D - average only
+     *  0.5D - Soak half of unused schedule time away each clock update
+     *  1.0 - Soak all unused schedule time away each clock update
+     *  1.5 - Allow for 150% burst rate until average rate is met
+     */
     public double strictness = 0.0D;
+
+    /**
+     * If true, report total scheduling delay from ideal schedule.
+     */
     public boolean reportCoDelay = false;
 
+    public RateSpec(double opsPerSec) {
+        this(opsPerSec, 0.0d, false);
+    }
     public RateSpec(double opsPerSec, double strictness) {
+        this(opsPerSec, strictness, false);
+    }
+    public RateSpec(double opsPerSec, double strictness, boolean reportCoDelay) {
         this.opsPerSec = opsPerSec;
         this.strictness = strictness;
-        this.reportCoDelay = false;
+        this.reportCoDelay = reportCoDelay;
     }
 
     public RateSpec(ParameterMap.NamedParameter tuple) {
@@ -39,10 +60,10 @@ public class RateSpec {
     }
 
     public RateSpec(String spec) {
-        String[] specs = spec.split("[,;]");
+        String[] specs = spec.split("[,:;]");
         switch (specs.length) {
             case 3:
-                reportCoDelay = (specs[2].toLowerCase().equals("co"));
+                reportCoDelay = (specs[2].toLowerCase().matches("co|true|report"));
             case 2:
                 strictness = Double.valueOf(specs[1]);
             case 1:
@@ -54,6 +75,25 @@ public class RateSpec {
     }
 
     public String toString() {
-        return "opsPerSec:" + opsPerSec + ", strictness:" + strictness + ", reportCoDelay:" + reportCoDelay;
+        return "opsPerSec:" + opsPerSec
+                + ", strictness:" + strictness
+                + ", reportCoDelay:" + reportCoDelay;
     }
+
+    public RateSpec withOpsPerSecond(double rate) {
+        this.opsPerSec = rate;
+        return this;
+    }
+
+    public RateSpec withReportCoDelay(boolean reportCoDelay) {
+        this.reportCoDelay = reportCoDelay;
+        return this;
+    }
+
+    public RateSpec withStrictness(double strictness) {
+        this.strictness = strictness;
+        return this;
+    }
+
+
 }

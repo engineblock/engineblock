@@ -15,18 +15,21 @@
  * /
  */
 
-package io.engineblock.activityapi.rates;
+package io.engineblock.activityapi.rates.testtypes;
 
+import io.engineblock.activityapi.rates.RateSpec;
+import io.engineblock.activityapi.rates.StrictRateLimiter;
+import io.engineblock.activityapi.rates.TestableRateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class TestableAverageRateLimiter extends AverageRateLimiter {
+public class TestableStrictRateLimiter extends StrictRateLimiter implements TestableRateLimiter {
 
     private AtomicLong clock;
 
-    public TestableAverageRateLimiter(AtomicLong clock, double maxOpsPerSecond, double strictness, boolean reportCoDelay, ActivityDef def) {
-        super(def, "test", maxOpsPerSecond,strictness, reportCoDelay);
+    public TestableStrictRateLimiter(AtomicLong clock, ActivityDef def, RateSpec rateSpec) {
+        super(def, "test", rateSpec);
         this.clock = clock;
     }
 
@@ -38,6 +41,16 @@ public class TestableAverageRateLimiter extends AverageRateLimiter {
 
     public long getClock() {
         return clock.get();
+    }
+
+    @Override
+    public long getTicksTime() {
+        return this.ticksTimeline.get();
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", clock=" + clock.get();
     }
 
     @Override

@@ -19,9 +19,8 @@ package io.engineblock.activityapi.rates;
 
 //import com.google.common.util.concurrent.RateLimiter;
 
-import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityapi.rates.testtypes.RateLimiterProvider;
 import io.engineblock.metrics.DeltaHdrHistogramReservoir;
-import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.concurrent.Callable;
@@ -34,42 +33,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * These tests are mostly design sanity checks to be used as needed.
  * Most of them are too expensive to run for every build.
+ * They are defined here and re-used in per-class tests in order to
+ * keep testing dev flow and reporting clear and easy to follow while
+ * allowing for DRY testing across rate limiter implementations.
  */
-@Test(enabled=false)
-public abstract class BaseRateLimiterBenches {
+public class RateLimiterPerformanceTestMethods {
 
-    protected abstract RateLimiter getRateLimiter(String paramSpec, double rate);
-
-    // Simulated Rate=1000.0
-    // Simulated Task Duration=1005000ns (+5000 extra)
-    // Measured delay after 10000 tasks: 58045112
-    // Measured delay per call: 5804.511
-    // Extra delay overhead per call: 804.511
-
-    // Measured delay for rate throttled limiter: 0.006153s
-    @Test
-    public void testCallerFastEnough() {
+    static void testCallerFastEnough(RateLimiterProvider provider) {
         long phi = 100_000_000L; // 100ms
+        int iterations=2000;
 
-        RateLimiter rl = RateLimiters.create(ActivityDef.parseActivityDef("alias=testing"),"testing","1000");
+        RateLimiter rl = provider.getRateLimiter("alias=testing", "1000");
 
-        for (int i = 0; i < 2000; i++) {
+        for (int i = 0; i < iterations; i++) {
             rl.acquire();
         }
         long measuredDelay = rl.getTotalSchedulingDelay();
-        System.out.format("Measured delay for rate throttled limiter: %.6fs\n",((double)measuredDelay/(double)1_000_000_000));
+        System.out.format("Measured delay for rate throttled limiter: %.6fs after %d iterations\n",((double)measuredDelay/(double)1_000_000_000), iterations);
         assertThat(measuredDelay).isLessThan(phi);
     }
 
-
-    @Test(enabled=false)
-    public void testCallerTooSlowNanoLoop() {
-//        DeltaHdrHistogramReservoir hist = new DeltaHdrHistogramReservoir("test", 4);
-
+    static void testCallerTooSlowNanoLoop(RateLimiterProvider provider) {
         double rate = 1000.0;
         long count = 10000;
         long addedTaskDelay = 5000;
-        RateLimiter rl = getRateLimiter("alias=testing", 1000);
+        RateLimiter rl = provider.getRateLimiter("alias=testing", "1000");
 
         int actualDelay = (int) (rl.getOpNanos() + addedTaskDelay);
 
@@ -104,26 +92,15 @@ public abstract class BaseRateLimiterBenches {
      * This test assumes that 100Mops/s is slow enough to make the rate
      * limiter control throttling
      */
-    // stage 0: rate=1.0E7, opticks=100, delay=456093, strictness=0.0
-    // stage 1: rate=1.0E7, opticks=100, delay=794113, strictness=0.0
-    // stage 2: rate=1.0E7, opticks=100, delay=974498, strictness=0.0
-    // stage 3: rate=1.0E7, opticks=100, delay=1008906, strictness=0.0
-    // stage 4: rate=1.0E7, opticks=100, delay=526188, strictness=0.0
-    // stage 5: rate=1.0E7, opticks=100, delay=1097672, strictness=0.0
-    // stage 6: rate=1.0E7, opticks=100, delay=581135, strictness=0.0
-    // stage 7: rate=1.0E7, opticks=100, delay=290292, strictness=0.0
-    // stage 8: rate=1.0E7, opticks=100, delay=63189, strictness=0.0
-    // stage 9: rate=1.0E7, opticks=100, delay=40520, strictness=0.0
-    // acquires/s: 9999908.427
-    // effective nanos/op: 100.000916
-    @Test(enabled=false)
-    public void testBlockingCostUnder() {
+    static void testBlockingCostUnder(RateLimiterProvider provider) {
         double rate = 10_000_000.0d;
         int count = 100_000_000;
         int divisor = 10;
         int stagesize = count / divisor;
 
-        RateLimiter rl = getRateLimiter("alias=testing", rate);
+        RateLimiter rl = provider.getRateLimiter("alias=testing", String.valueOf(rate));
+        rl.start();
+
         long startAt = System.nanoTime();
         for (int stage = 0; stage < divisor; stage++) {
             int start = stage * stagesize;
@@ -146,27 +123,14 @@ public abstract class BaseRateLimiterBenches {
      * which will cause more short-circuit paths through acquire. The delay will increase in
      * the case that the rate doesn't keep up with the target rate.
      */
-    // stage 0: rate=5.0E8, opticks=2, delay=337193834, strictness=0.0
-    // stage 1: rate=5.0E8, opticks=2, delay=805649168, strictness=0.0
-    // stage 2: rate=5.0E8, opticks=2, delay=1266711629, strictness=0.0
-    // stage 3: rate=5.0E8, opticks=2, delay=1726300991, strictness=0.0
-    // stage 4: rate=5.0E8, opticks=2, delay=2185929725, strictness=0.0
-    // stage 5: rate=5.0E8, opticks=2, delay=2649233303, strictness=0.0
-    // stage 6: rate=5.0E8, opticks=2, delay=3113356029, strictness=0.0
-    // stage 7: rate=5.0E8, opticks=2, delay=3573784976, strictness=0.0
-    // stage 8: rate=5.0E8, opticks=2, delay=4033082985, strictness=0.0
-    // stage 9: rate=5.0E8, opticks=2, delay=4491281514, strictness=0.0
-    // duration: 6.491
-    // acquires/s: 154052155.541
-    // effective nanos/op: 6.491308
-    @Test(enabled=false)
-    public void testBlockingCostOver() {
+    static void testBlockingCostOver(RateLimiterProvider provider) {
         double rate = 500_000_000.0d;
         int count = 1_000_000_000;
         int divisor = 10;
         int stagesize = count / divisor;
 
-        RateLimiter rl = getRateLimiter("alias=testing", rate);
+        RateLimiter rl = provider.getRateLimiter("alias=testing", String.valueOf(rate));
+        rl.start();
         long startAt = System.nanoTime();
         for (int stage = 0; stage < divisor; stage++) {
             int start = stage * stagesize;
@@ -186,51 +150,41 @@ public abstract class BaseRateLimiterBenches {
         // Note to tester: duration of duration - (rate / count) should equal summary delay / 1E9.
     }
 
+    static void testUncontendedSingleThreadedPerformance(RateLimiterProvider provider, long iterations) {
+        RateLimiter rl = provider.getRateLimiter("alias=testing",String.valueOf(1E9));
+        testUncontendedSingleThreadedPerformance(rl, iterations);
+    }
 
-    // single-threaded
-    // acquires/s: 203_337_793.086
-    // effective nanos/op: 4.917925
-    @Test(enabled=false)
-    public void testUncontendedSingleThreadedPerformance() {
-        RateLimiter rl = getRateLimiter("alias=testing",1E9);
+    static void testUncontendedSingleThreadedPerformance(RateLimiter rl, long iterations) {
+        rl.start();
         long startAt = System.nanoTime();
-        long count = 1000000000;
-        for (int i = 0; i < count; i++) {
+//        long count = 1000000000;
+        for (int i = 0; i < iterations; i++) {
             rl.acquire();
         }
         long endAt = System.nanoTime();
         double duration = (endAt - startAt) / 1000000000.0d;
-        double acqops = (count / duration);
+        double acqops = (iterations / duration);
         System.out.println(String.format("acquires/s: %.3f", acqops));
         System.out.println(String.format("effective nanos/op: %f", (1000000000.0d / acqops)));
+    }
+
+    static void testContendedMultiThreadedPerformance(RateLimiterProvider provider, long iterations, int threadCount) {
+        RateLimiter rl = provider.getRateLimiter("alias=testing", "500000000");
+        testContendedMultiThreadedPerformance(rl, iterations, threadCount);
     }
 
     /**
      * This a low-overhead test for multi-threaded access to the same rate limiter. It calculates the
      * effective concurrent rate under atomic contention.
      */
-    // Running 500000000 iterations split over 200 threads at rate 500000000.000
-    // limiter stats:rate=5.0E8, opticks=2, delay=60172, strictness=0.0
-    // submit (200 threads)...
-    // submitted (200 threads)...
-    // limiter stats:rate=5.0E8, opticks=2, delay=10369703864, strictness=0.0
-    // totals (seconds, cycles): (1282.506212, 500000000)
-    // total thread duration: 1282.506
-    // linearized acquires/s: 389861.659  (500000000 / 1282.506212)
-    // linearized nanos/op: 2565.012424
-    // effective concurrent acquires/s: 77972331.893
-    // effective concurrent nanos/op: 12.825062
-    @Test(enabled=false)
-    public void testContendedMultiThreadedPerformance() {
-        int threadCount = 100;
-        long iterations = 5_00_000_000L;
-        double rate = 500_000_000.0d;
+    static void testContendedMultiThreadedPerformance(RateLimiter rl, long iterations, int threadCount) {
+        double rate = rl.getRate();
         int iterationsPerThread = (int) (iterations / threadCount);
         if (iterationsPerThread >= Integer.MAX_VALUE) {
             throw new RuntimeException("iterations per thread too high with (count,threads)=(" + iterations + "," + threadCount);
         }
         ExecutorService tp = Executors.newFixedThreadPool(threadCount);
-        RateLimiter rl = getRateLimiter("alias=testing",rate);
         System.out.format("Running %d iterations split over %d threads at rate %.3f\n", iterations, threadCount, rate);
         BasicAcquirer[] threads = new BasicAcquirer[threadCount];
         DeltaHdrHistogramReservoir stats = new DeltaHdrHistogramReservoir("times", 5);
@@ -276,6 +230,7 @@ public abstract class BaseRateLimiterBenches {
         System.out.println(String.format("effective concurrent nanos/op: %f", (1_000_000_000D/ concurrentOpRate)));
     }
 
+
     private static class Acquirer implements Callable<AckResult>, Runnable {
         private final RateLimiter limiter;
         private final int threadIdx;
@@ -303,24 +258,6 @@ public abstract class BaseRateLimiterBenches {
                 limiter.acquire();
             }
         }
-    }
-
-    // 23ns per call on an i7/8(4) core system: i7-4790 CPU @ 3.60GHz
-    @Test
-    public void testSleepNanosRate() {
-        long startAt = System.nanoTime();
-        long count = 100000000;
-        for (int i = 0; i < count; i++) {
-            long v = System.nanoTime();
-            if ((i % 10000000) == 0) {
-                System.out.println("i: " + i + ", v:" + v);
-            }
-        }
-        long endAt = System.nanoTime();
-        double duration = (endAt - startAt) / 1000000000.0d;
-        double acqops = (count / duration);
-        System.out.println(String.format("acquires/s: %.3f", (count / duration)));
-        System.out.println(String.format("effective nanos/op: %f", (1000000000.0d / acqops)));
     }
 
     private static class BasicAcquirer implements Runnable {
