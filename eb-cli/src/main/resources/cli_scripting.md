@@ -103,6 +103,11 @@ To wait for a number of milliseconds before continuing:
 waitmills <milliseconds>
 ~~~
 
+To add a script fragment to the scenario script:
+~~~
+fragment '<ecmascript>...'
+~~~
+
 These can all be used on the command line in any order. The scenario script is assembled
 from them before it is executed. If you want to see the resulting script, use the
  --show-script option to dump the script to the console instead of running it.
