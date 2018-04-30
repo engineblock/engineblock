@@ -58,6 +58,7 @@ public class RateLimiterPerformanceTestMethods {
         long count = 10000;
         long addedTaskDelay = 5000;
         RateLimiter rl = provider.getRateLimiter("alias=testing", "1000");
+        //rl.start();
 
         int actualDelay = (int) (rl.getOpNanos() + addedTaskDelay);
 
@@ -99,7 +100,7 @@ public class RateLimiterPerformanceTestMethods {
         int stagesize = count / divisor;
 
         RateLimiter rl = provider.getRateLimiter("alias=testing", String.valueOf(rate));
-        rl.start();
+        //rl.start();
 
         long startAt = System.nanoTime();
         for (int stage = 0; stage < divisor; stage++) {
@@ -130,7 +131,7 @@ public class RateLimiterPerformanceTestMethods {
         int stagesize = count / divisor;
 
         RateLimiter rl = provider.getRateLimiter("alias=testing", String.valueOf(rate));
-        rl.start();
+        //rl.start;
         long startAt = System.nanoTime();
         for (int stage = 0; stage < divisor; stage++) {
             int start = stage * stagesize;
@@ -156,7 +157,7 @@ public class RateLimiterPerformanceTestMethods {
     }
 
     static void testUncontendedSingleThreadedPerformance(RateLimiter rl, long iterations) {
-        rl.start();
+        //rl.start;
         long startAt = System.nanoTime();
 //        long count = 1000000000;
         for (int i = 0; i < iterations; i++) {
@@ -194,7 +195,7 @@ public class RateLimiterPerformanceTestMethods {
             threads[i] = new BasicAcquirer(rl,iterations/threadCount);
         }
 
-        rl.start();
+        //rl.start;
         System.out.println("limiter stats:" + rl);
 
         System.out.format("submit (%d threads)...\n", threads.length);

@@ -18,7 +18,9 @@ public class EBCLIScriptAssembly {
         StringBuilder sb = new StringBuilder();
         Map<String,String> params = new HashMap<>();
         for (EBCLIOptions.Cmd cmd : options.getCommands()) {
-            switch (cmd.cmdType) {
+            String cmdSpec = cmd.getCmdSpec();
+            EBCLIOptions.CmdType cmdType = cmd.getCmdType();
+            switch (cmd.getCmdType()) {
                 case script:
                     sb.append("// from CLI as ").append(cmd).append("\n");
                     ScriptData scriptData = loadScript(cmd);
@@ -29,26 +31,33 @@ public class EBCLIScriptAssembly {
                         sb.append(scriptData.getScriptParamsAndText());
                     }
                     break;
+                case fragment:
+                    sb.append("// from CLI as ").append(cmd).append("\n");
+                    sb.append(cmd.getCmdSpec());
+                    if (!cmdSpec.endsWith("\n")) {
+                        sb.append("\n");
+                    }
+                    break;
                 case start: // start activity
                 case run: // run activity
                     // Sanity check that this can parse before using it
-                    ActivityDef activityDef = ActivityDef.parseActivityDef(cmd.cmdSpec);
+                    ActivityDef activityDef = ActivityDef.parseActivityDef(cmdSpec);
                     sb.append("// from CLI as ").append(cmd).append("\n")
-                            .append("scenario.").append(cmd.cmdType.toString()).append("(\"")
-                            .append(cmd.cmdSpec)
+                            .append("scenario.").append(cmdType.toString()).append("(\"")
+                            .append(cmdSpec)
                             .append("\");\n");
                     break;
                 case await: // await activity
                     sb.append("// from CLI as ").append(cmd).append("\n");
-                    sb.append("scenario.awaitActivity(\"").append(cmd.cmdSpec).append("\");\n");
+                    sb.append("scenario.awaitActivity(\"").append(cmdSpec).append("\");\n");
                     break;
                 case stop: // stop activity
                     sb.append("// from CLI as ").append(cmd).append("\n");
-                    sb.append("scenario.stop(\"").append(cmd.cmdSpec).append("\");\n");
+                    sb.append("scenario.stop(\"").append(cmdSpec).append("\");\n");
                     break;
                 case waitmillis:
                     sb.append("// from CLI as ").append(cmd).append("\n");
-                    sb.append("scenario.waitMillis(").append(cmd.cmdSpec).append(");\n");
+                    sb.append("scenario.waitMillis(").append(cmdSpec).append(");\n");
                     break;
             }
         }
@@ -60,16 +69,16 @@ public class EBCLIScriptAssembly {
         String scriptData;
 
         try {
-            logger.debug("Looking for " + new File(".").getCanonicalPath() + File.separator + cmd.cmdSpec);
+            logger.debug("Looking for " + new File(".").getCanonicalPath() + File.separator + cmd.getCmdSpec());
         } catch (IOException ignored) {
         }
 
-        InputStream resourceAsStream = EngineBlockFiles.findRequiredStreamOrFile(cmd.cmdSpec, "js", "scripts");
+        InputStream resourceAsStream = EngineBlockFiles.findRequiredStreamOrFile(cmd.getCmdSpec(), "js", "scripts");
 
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(resourceAsStream))) {
             scriptData = buffer.lines().collect(Collectors.joining("\n"));
         } catch (Throwable t) {
-            throw new RuntimeException("Unable to buffer " + cmd.cmdSpec + ": " + t);
+            throw new RuntimeException("Unable to buffer " + cmd.getCmdSpec() + ": " + t);
         }
         StrInterpolater interpolater = new StrInterpolater(cmd.getCmdArgs());
         scriptData = interpolater.apply(scriptData);

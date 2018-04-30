@@ -31,8 +31,7 @@ public interface RateLimiter extends Startable {
 
     /**
      * Block until it is time for the next operation, according to the
-     * nanoseconds per op as set by either {@link #setRate(double)} or
-     * {@link #setOpNanos(long)}
+     * nanoseconds per op as set by {@link #setRate(double)}
      * @return the number of nanos behind schedule when this op returns
      */
     long acquire();
@@ -47,24 +46,11 @@ public interface RateLimiter extends Startable {
     long getTotalSchedulingDelay();
 
     /**
-     * Get the scheduling delay since the rate was last set or changed.
-     * @return nanoseconds behind schedule of the current rate limiter.
-     */
-    long getRateSchedulingDelay();
-
-    /**
      * Set the rate in ops/s. This is a friendly way to calculate the
      * nanoseconds per op.
      * @param rate The desired ops/s rate.
      */
     void setRate(double rate);
-
-    /**
-     * Set the nanoseconds to be given to each operation by default.
-     * @param nanos The number of nanoseconds per op
-     * @return The equivalent rate in terms of ops/s
-     */
-    double setOpNanos(long nanos);
 
     /**
      * Return the rate in ops/s.
@@ -80,9 +66,9 @@ public interface RateLimiter extends Startable {
 
     /**
      * Modify the rate of a running rate limiter.
-     * @param spec The rate and strictness specification
+     * @param spec The rate and burstRatio specification
      */
-    void update(RateSpec spec);
+    void setRateSpec(RateSpec spec);
 
     /**
      * Get the rate spec that this rate limiter was created from.

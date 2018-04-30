@@ -26,14 +26,7 @@ public class RateSpec {
      */
     public double opsPerSec = 1.0D;
 
-    /**
-     * Rate Scheduling Strictness
-     *  0.0D - average only
-     *  0.5D - Soak half of unused schedule time away each clock update
-     *  1.0 - Soak all unused schedule time away each clock update
-     *  1.5 - Allow for 150% burst rate until average rate is met
-     */
-    public double strictness = 0.0D;
+    public double burstRatio = 1.1D;
 
     /**
      * If true, report total scheduling delay from ideal schedule.
@@ -43,12 +36,12 @@ public class RateSpec {
     public RateSpec(double opsPerSec) {
         this(opsPerSec, 0.0d, false);
     }
-    public RateSpec(double opsPerSec, double strictness) {
-        this(opsPerSec, strictness, false);
+    public RateSpec(double opsPerSec, double burstRatio) {
+        this(opsPerSec, burstRatio, false);
     }
-    public RateSpec(double opsPerSec, double strictness, boolean reportCoDelay) {
+    public RateSpec(double opsPerSec, double burstRatio, boolean reportCoDelay) {
         this.opsPerSec = opsPerSec;
-        this.strictness = strictness;
+        this.burstRatio = burstRatio;
         this.reportCoDelay = reportCoDelay;
     }
 
@@ -65,35 +58,81 @@ public class RateSpec {
             case 3:
                 reportCoDelay = (specs[2].toLowerCase().matches("co|true|report"));
             case 2:
-                strictness = Double.valueOf(specs[1]);
+                burstRatio = Double.valueOf(specs[1]);
             case 1:
                 opsPerSec = Unit.countFor(specs[0]).orElseThrow(() -> new RuntimeException("Unparsable:" + specs[0]));
                 break;
             default:
-                throw new RuntimeException("Rate specs must be either '<rate>' or '<rate>:<strictness>' as in 5000.0 or 5000.0:1.0");
+                throw new RuntimeException("Rate specs must be either '<rate>' or '<rate>:<burstRatio>' as in 5000.0 or 5000.0:1.0");
         }
     }
 
     public String toString() {
-        return "opsPerSec:" + opsPerSec
-                + ", strictness:" + strictness
-                + ", reportCoDelay:" + reportCoDelay;
+        return "rate:" + opsPerSec
+                + ", burst:" + burstRatio
+                + ", report:" + reportCoDelay;
     }
 
     public RateSpec withOpsPerSecond(double rate) {
-        this.opsPerSec = rate;
-        return this;
+        return new RateSpec(rate,this.burstRatio,this.reportCoDelay);
     }
 
     public RateSpec withReportCoDelay(boolean reportCoDelay) {
-        this.reportCoDelay = reportCoDelay;
-        return this;
+        return new RateSpec(this.opsPerSec,this.burstRatio,reportCoDelay);
     }
 
-    public RateSpec withStrictness(double strictness) {
-        this.strictness = strictness;
-        return this;
+    public RateSpec withBurstRatio(double burstRatio) {
+        return new RateSpec(this.opsPerSec, burstRatio, this.reportCoDelay);
     }
 
 
+    public long getCalculatedBurstNanos() {
+        if (burstRatio==0.0) {
+            return 0L;
+        }
+        if (burstRatio<1.0) {
+            throw new RuntimeException("burst ratio must be either 0.0 (disabled), or be greater or equal to 1.0");
+        }
+        return (long) ((double)1_000_000_000L / (burstRatio*opsPerSec));
+    }
+
+    public long getCalculatedNanos() {
+        return (long) ((double)1_000_000_000L / opsPerSec);
+    }
+
+    public double getRate() {
+        return this.opsPerSec;
+    }
+
+    public double getBurstRatio() {
+        return this.burstRatio;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RateSpec rateSpec = (RateSpec) o;
+
+        if (Double.compare(rateSpec.opsPerSec, opsPerSec) != 0) return false;
+        if (Double.compare(rateSpec.burstRatio, burstRatio) != 0) return false;
+        return reportCoDelay == rateSpec.reportCoDelay;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        temp = Double.doubleToLongBits(opsPerSec);
+        result = (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(burstRatio);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (reportCoDelay ? 1 : 0);
+        return result;
+    }
+
+    public boolean getReportCoDelay() {
+        return reportCoDelay;
+    }
 }

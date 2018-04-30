@@ -27,43 +27,18 @@ public class RateLimiters {
 
     public static synchronized RateLimiter createOrUpdate(ActivityDef def, String label, RateLimiter extant, RateSpec spec) {
 
-//        if (spec.strictness>0.0d) {
-//            if (def.getParams().getOptionalString("ratestrictness").orElse("error").equals("average")) {
-//                spec.strictness=0.0d;
-//            } else {
-//                throw new RuntimeException(
-//                        "Strict rate limiters are disabled for now. Use strictness value 0.0 instead. (example: targetrate=1K,0.0)" +
-//                                "See https://github.com/engineblock/engineblock/issues/148. " +
-//                                "Alternately, you can coerce all rate limiter strictness to 0.0 by using ratestrictness=average");
-//            }
-//        }
-
-        if (extant==null) {
-            if (spec.strictness == 0.0D) {
-                logger.info("Using average rate limiter for speed: " + spec);
-                return new AverageRateLimiter(def, label, spec);
-            } else {
-                logger.info("Using strict rate limiter: " + spec);
-                return new StrictRateLimiter(def, label, spec);
-            }
+        if (extant == null) {
+            logger.info("Using average rate limiter for speed: " + spec);
+            return new AverageRateLimiter(def, label, spec);
         } else {
-            if (extant instanceof AverageRateLimiter && spec.strictness > 0.0D) {
-                AverageRateLimiter prior = (AverageRateLimiter) extant;
-                logger.warn("Replacing average rate limiter with strict rate limiter:" + spec + ", beware of a performance gap." +
-                        " This is due to the required logic in strict rate limiting having more overhead.");
-                return new StrictRateLimiter(def, label, spec, prior);
-            } else {
-                // Neither Strict nor Average limiting needs to be changed in an incompatible way
-                extant.update(spec);
-                return extant;
-            }
+            extant.setRateSpec(spec);
+            return extant;
         }
     }
 
-    public static synchronized  RateLimiter create(ActivityDef def, String label, String specString) {
-        return createOrUpdate(def, label, null,new RateSpec(specString));
+    public static synchronized RateLimiter create(ActivityDef def, String label, String specString) {
+        return createOrUpdate(def, label, null, new RateSpec(specString));
     }
-
 
     public static class DelayGauge implements Gauge<Long> {
 
@@ -72,9 +47,37 @@ public class RateLimiters {
         public DelayGauge(RateLimiter rateLimiter) {
             this.rateLimiter = rateLimiter;
         }
+
         @Override
         public Long getValue() {
             return rateLimiter.getTotalSchedulingDelay();
         }
     }
+
+    public static class RateGauge implements Gauge<Double> {
+        private final RateLimiter rateLimiter;
+
+        public RateGauge(RateLimiter rateLimiter) {
+            this.rateLimiter = rateLimiter;
+        }
+
+        @Override
+        public Double getValue() {
+            return rateLimiter.getRateSpec().opsPerSec;
+        }
+    }
+
+    public static class BurstRateGauge implements Gauge<Double> {
+        private final RateLimiter rateLimiter;
+
+        public BurstRateGauge(RateLimiter rateLimiter) {
+            this.rateLimiter = rateLimiter;
+        }
+
+        @Override
+        public Double getValue() {
+            return rateLimiter.getRateSpec().getBurstRatio() * rateLimiter.getRateSpec().getRate();
+        }
+    }
+
 }

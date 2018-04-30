@@ -118,7 +118,7 @@ public class TestEBCLIOptions {
         EBCLIOptions opts = new EBCLIOptions(new String[]{ "start", "type=woot" });
         List<EBCLIOptions.Cmd> cmds = opts.getCommands();
         assertThat(cmds).hasSize(1);
-        assertThat(cmds.get(0).cmdType).isEqualTo(EBCLIOptions.CmdType.start);
+        assertThat(cmds.get(0).getCmdType()).isEqualTo(EBCLIOptions.CmdType.start);
 
     }
 
@@ -127,7 +127,7 @@ public class TestEBCLIOptions {
         EBCLIOptions opts = new EBCLIOptions(new String[]{ "run", "type=runwoot" });
         List<EBCLIOptions.Cmd> cmds = opts.getCommands();
         assertThat(cmds).hasSize(1);
-        assertThat(cmds.get(0).cmdType).isEqualTo(EBCLIOptions.CmdType.run);
+        assertThat(cmds.get(0).getCmdType()).isEqualTo(EBCLIOptions.CmdType.run);
 
     }
 
@@ -136,8 +136,8 @@ public class TestEBCLIOptions {
         EBCLIOptions opts = new EBCLIOptions(new String[]{ "stop", "woah" });
         List<EBCLIOptions.Cmd> cmds = opts.getCommands();
         assertThat(cmds).hasSize(1);
-        assertThat(cmds.get(0).cmdType).isEqualTo(EBCLIOptions.CmdType.stop);
-        assertThat(cmds.get(0).cmdSpec).isEqualTo("woah");
+        assertThat(cmds.get(0).getCmdType()).isEqualTo(EBCLIOptions.CmdType.stop);
+        assertThat(cmds.get(0).getCmdSpec()).isEqualTo("woah");
 
     }
 
@@ -151,8 +151,8 @@ public class TestEBCLIOptions {
     public void shouldRecognizeAwaitActivityCmd() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{ "await", "awaitme" });
         List<EBCLIOptions.Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).cmdType).isEqualTo(EBCLIOptions.CmdType.await);
-        assertThat(cmds.get(0).cmdSpec).isEqualTo("awaitme");
+        assertThat(cmds.get(0).getCmdType()).isEqualTo(EBCLIOptions.CmdType.await);
+        assertThat(cmds.get(0).getCmdSpec()).isEqualTo("awaitme");
 
     }
 
@@ -167,8 +167,8 @@ public class TestEBCLIOptions {
     public void shouldRecognizewaitMillisCmd() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{ "waitmillis", "23234" });
         List<EBCLIOptions.Cmd> cmds = opts.getCommands();
-        assertThat(cmds.get(0).cmdType).isEqualTo(EBCLIOptions.CmdType.waitmillis);
-        assertThat(cmds.get(0).cmdSpec).isEqualTo("23234");
+        assertThat(cmds.get(0).getCmdType()).isEqualTo(EBCLIOptions.CmdType.waitmillis);
+        assertThat(cmds.get(0).getCmdSpec()).isEqualTo("23234");
 
     }
 

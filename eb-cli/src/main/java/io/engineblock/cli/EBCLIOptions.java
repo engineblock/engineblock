@@ -35,6 +35,7 @@ public class EBCLIOptions {
     private static final String ACTIVITY = "activity";
     private static final String RUN_ACTIVITY = "run";
     private static final String START_ACTIVITY = "start";
+    private static final String SCRIPT_FRAGMENT = "fragment";
     private static final String STOP_ACTIVITY = "stop";
     private static final String AWAIT_ACTIVITY = "await";
     private static final String WAIT_MILLIS = "waitmillis";
@@ -116,6 +117,10 @@ public class EBCLIOptions {
                 case SHOW_SCRIPT:
                     arglist.removeFirst();
                     showScript = true;
+                    break;
+                case SCRIPT_FRAGMENT:
+                    Cmd fragment = parseFragmentCmd(arglist);
+                    cmdList.add(fragment);
                     break;
                 case ACTIVITY:
                     arglist.removeFirst();
@@ -394,6 +399,12 @@ public class EBCLIOptions {
         return new Cmd(CmdType.script, scriptName, scriptParams);
     }
 
+    private Cmd parseFragmentCmd(LinkedList<String> arglist) {
+        String cmdType = arglist.removeFirst();
+        String scriptFragment = arglist.removeFirst();
+        return new Cmd(CmdType.valueOf(cmdType),scriptFragment);
+    }
+
     private Cmd parseActivityCmd(LinkedList<String> arglist) {
         String cmdType = arglist.removeFirst();
         List<String> activitydef = new ArrayList<String>();
@@ -470,13 +481,14 @@ public class EBCLIOptions {
         stop,
         await,
         script,
+        fragment,
         waitmillis,
     }
 
     public static class Cmd {
-        public CmdType cmdType;
-        public String cmdSpec;
-        public Map<String, String> cmdArgs;
+        private CmdType cmdType;
+        private String cmdSpec;
+        private Map<String, String> cmdArgs;
 
         public Cmd(CmdType cmdType, String cmdSpec) {
             this.cmdSpec = cmdSpec;
@@ -489,6 +501,13 @@ public class EBCLIOptions {
         }
 
         public String getCmdSpec() {
+
+            if (cmdSpec.startsWith("'") && cmdSpec.endsWith("'")) {
+                return cmdSpec.substring(1,cmdSpec.length()-1);
+            }
+            if (cmdSpec.startsWith("\"") && cmdSpec.endsWith("\"")) {
+                return cmdSpec.substring(1,cmdSpec.length()-1);
+            }
             return cmdSpec;
         }
 

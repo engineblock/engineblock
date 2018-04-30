@@ -213,5 +213,12 @@ public class ScriptTests {
     }
 
 
+    @Test
+    public void testReportedCoDelay() {
+        ScenarioResult scenarioResult = runScenario("cocycledelay");
+        assertThat(scenarioResult.getException()).isPresent();
+    }
+
+
 
 }

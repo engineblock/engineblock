@@ -238,7 +238,7 @@ public class ActivityMetrics {
      * @param sessionName The name of the session to be annotated in the classic histogram
      * @param pattern A regular expression pattern to filter out metric names for inclusion
      * @param prefix The name prefix to add to the classic histograms so that they fit into the existing metrics namespace
-     * @param interval How frequently to update the histogram
+     * @param interval How frequently to setRateSpec the histogram
      */
     public static void addClassicHistos(String sessionName, String pattern, String prefix, String interval) {
         Pattern compiledPattern = Pattern.compile(pattern);

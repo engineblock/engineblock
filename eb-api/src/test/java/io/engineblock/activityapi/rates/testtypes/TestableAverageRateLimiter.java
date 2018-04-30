@@ -29,8 +29,11 @@ public class TestableAverageRateLimiter extends AverageRateLimiter implements Te
     private AtomicLong clock;
 
     public TestableAverageRateLimiter(AtomicLong clock, RateSpec rateSpec, ActivityDef def) {
-        super(def, "test", rateSpec);
+        setActivityDef(def);
+        setRateSpec(rateSpec);
+        setLabel("test");
         this.clock = clock;
+        init();
     }
 
     public long setClock(long newValue) {
