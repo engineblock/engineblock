@@ -17,7 +17,6 @@
 
 package io.engineblock.activityapi.rates;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import io.engineblock.activityapi.core.Startable;
 import io.engineblock.activityimpl.ActivityDef;
@@ -76,11 +75,11 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     private State state = State.Idle;
     private boolean reportCoDelay = false;
 
-    private Counter fastpathCounter;
-    private Counter sleepCounter;
+    //private Counter fastpathCounter;
+    //private Counter sleepCounter;
     private Gauge<Long> delayGauge;
     private Gauge<Double> avgRateGauge;
-    private Gauge<Double> burstRateGauge;
+    //private Gauge<Double> burstRateGauge;
 
     protected AverageRateLimiter() {
     }
@@ -106,11 +105,11 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     }
 
     protected void init() {
-        this.delayGauge = ActivityMetrics.gauge(activityDef, "cco-delay-" + label, new RateLimiters.DelayGauge(this));
-        this.sleepCounter = ActivityMetrics.counter(activityDef, label + "-ratelogic.sleep-counter");
-        this.fastpathCounter = ActivityMetrics.counter(activityDef, label + "-ratelogic.fast-counter");
-        this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + "-ratelogic.avg-targetrate-gauge", new RateLimiters.RateGauge(this));
-        this.burstRateGauge = ActivityMetrics.gauge(activityDef, label + "-ratelogic.burst-targetrate-gauge", new RateLimiters.BurstRateGauge(this));
+        this.delayGauge = ActivityMetrics.gauge(activityDef, label+".cco_delay_gauge", new RateLimiters.DelayGauge(this));
+        //this.sleepCounter = ActivityMetrics.counter(activityDef, label + "_ratelogic.sleep_counter");
+        //this.fastpathCounter = ActivityMetrics.counter(activityDef, label + "_ratelogic.fast_counter");
+        this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + ".avg_targetrate_gauge", new RateLimiters.RateGauge(this));
+        //this.burstRateGauge = ActivityMetrics.gauge(activityDef, label + "_ratelogic.burst_targetrate_gauge", new RateLimiters.BurstRateGauge(this));
         start();
     }
 
@@ -148,7 +147,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
                 isBursting = false;
                 delay *= -1;
                 try {
-                    sleepCounter.inc();
+                    //sleepCounter.inc();
                     Thread.sleep(delay / 1000000, (int) (delay % 1000000L));
                 } catch (InterruptedException ignored) {
                 }

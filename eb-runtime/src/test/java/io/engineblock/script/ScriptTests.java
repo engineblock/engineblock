@@ -216,7 +216,17 @@ public class ScriptTests {
     @Test
     public void testReportedCoDelay() {
         ScenarioResult scenarioResult = runScenario("cocycledelay");
-        assertThat(scenarioResult.getException()).isPresent();
+        assertThat(scenarioResult.getIOLog()).contains("step1 metrics.co_cycle_delay=");
+        assertThat(scenarioResult.getIOLog()).contains("step2 metrics.co_cycle_delay=");
+        System.out.println(scenarioResult.getIOLog());
+        Pattern delayPattern = Pattern.compile(".*step1 metrics.co_cycle_delay=(\\d+).*",Pattern.MULTILINE|Pattern.DOTALL);
+        Matcher matcher = delayPattern.matcher(scenarioResult.getIOLog());
+        assertThat(matcher.matches()).isTrue();
+        String digits = matcher.group(1);
+        assertThat(digits).isNotEmpty();
+        Long delayValue = Long.valueOf(digits);
+        assertThat(delayValue).isBetween(750000000L,950000000L);
+
     }
 
 

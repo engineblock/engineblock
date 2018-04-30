@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * These tests run all the rate limiter micro benches with average rate
  * limiting only, due to the burstRatio level being set to 0.0D.
  */
-@Test(groups={"perftest"},enabled=true)
+@Test(groups={"perftest"},enabled=false)
 public class TestAverageRateLimiterPerformance implements RateLimiterProvider, TestableRateLimiterProvider {
 
     @Override
@@ -49,12 +49,12 @@ public class TestAverageRateLimiterPerformance implements RateLimiterProvider, T
     // Extra delay overhead per call: 804.511
 
     // Measured delay for rate throttled limiter: 0.006153s
-    @Test
+    @Test(enabled=false)
     public void testAverageRateLimiterFastEnough() {
         RateLimiterPerformanceTestMethods.testCallerFastEnough(this);
     }
 
-    @Test
+    @Test(enabled=false)
     public void testAverageRateLimiterCallerToSlowNanoLoop() {
         RateLimiterPerformanceTestMethods.testCallerTooSlowNanoLoop(this);
     }
@@ -71,7 +71,7 @@ public class TestAverageRateLimiterPerformance implements RateLimiterProvider, T
     // stage 9: rate=1.0E7, opticks=100, delay=40520, burstRatio=0.0
     // acquires/s: 9999908.427
     // effective nanos/op: 100.000916
-    @Test
+    @Test(enabled=false)
     public void testAverageRateLimiterBlockingCostUnder() {
         RateLimiterPerformanceTestMethods.testBlockingCostUnder(this);
     }
@@ -89,13 +89,13 @@ public class TestAverageRateLimiterPerformance implements RateLimiterProvider, T
     // duration: 6.491
     // acquires/s: 154052155.541
     // effective nanos/op: 6.491308
-    @Test
+    @Test(enabled=false)
     public void testAverageRateLimiterBlockingCostOver() {
         RateLimiterPerformanceTestMethods.testBlockingCostOver(this);
     }
 
     // 23ns per call on an i7/8(4) core system: i7-4790 CPU @ 3.60GHz
-    @Test(groups="perftest")
+    @Test(groups="perftest",enabled=false)
     public void testSleepNanosRate() {
         long startAt = System.nanoTime();
         long count = 100000000;
@@ -123,12 +123,12 @@ public class TestAverageRateLimiterPerformance implements RateLimiterProvider, T
     // single-threaded
     // acquires/s: 203_337_793.086
     // effective nanos/op: 4.917925
-    @Test(groups="perftest")
+    @Test(groups="perftest",enabled=false)
     public void testAverageRateLimiterUncontendedSingleThreadedPerformance() {
         RateLimiterPerformanceTestMethods.testUncontendedSingleThreadedPerformance(this,1000000000L);
     }
 
-    @Test(groups="perftest")
+    @Test(groups="perftest",enabled=false)
     public void testBurstFeatureCost() {
         RateLimiter rl = new AverageRateLimiter(ActivityDef.parseActivityDef("bursting=120"),"bursting",new RateSpec(100_000_000,1.2,true));
         RateLimiterPerformanceTestMethods.testUncontendedSingleThreadedPerformance(rl,1_000_000_000);
@@ -145,12 +145,12 @@ public class TestAverageRateLimiterPerformance implements RateLimiterProvider, T
     // linearized nanos/op: 2565.012424
     // effective concurrent acquires/s: 77972331.893
     // effective concurrent nanos/op: 12.825062
-    @Test(groups="perftest")
+    @Test(groups="perftest",enabled=false)
     public void testAverageRateLimiterContendedMultiThreadedPerformance() {
         RateLimiterPerformanceTestMethods.testContendedMultiThreadedPerformance(this,500_000_000, 100);
     }
 
-    @Test(groups="perftest")
+    @Test(groups="perftest",enabled=false)
     public void testAverageRateLimiterBurstingContendedMultiThreadedPerformance() {
         RateLimiter rl = new AverageRateLimiter(ActivityDef.parseActivityDef("bursting=120"),"bursting",new RateSpec(100_000_000,1.2,true));
         RateLimiterPerformanceTestMethods.testContendedMultiThreadedPerformance(rl,500_000_000, 100);

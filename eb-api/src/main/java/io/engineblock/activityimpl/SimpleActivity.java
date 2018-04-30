@@ -42,6 +42,12 @@ public class SimpleActivity implements Activity {
         this(ActivityDef.parseActivityDef(activityDefString));
     }
 
+    @Override
+    public void initActivity() {
+        onActivityDefUpdate(this.activityDef);
+    }
+
+
     public synchronized RunState getRunState() {
         return runState;
     }
@@ -184,7 +190,6 @@ public class SimpleActivity implements Activity {
         }
         return phaseLimiter;
     }
-
 
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {

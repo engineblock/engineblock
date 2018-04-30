@@ -169,7 +169,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             Timer cyclesTimer = ActivityMetrics.timer(activity.getActivityDef(), "cycles");
             Timer phasesTimer = ActivityMetrics.timer(activity.getActivityDef(), "phases");
             Timer stridesTimer = ActivityMetrics.timer(activity.getActivityDef(), "strides");
-            Timer inputTimer = ActivityMetrics.timer(activity.getActivityDef(), "read-input");
+            Timer inputTimer = ActivityMetrics.timer(activity.getActivityDef(), "read_input");
 
             strideRateLimiter = activity.getStrideLimiter();
             cycleRateLimiter = activity.getCycleLimiter();
