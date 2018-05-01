@@ -31,7 +31,7 @@ public class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("badparam", 15,
-                "java", "-jar", "target/eb-cli.jar", "--log-dir", "logs/test", "badparam"
+                "java", "-jar", "target/eb-cli.jar", "--logs-dir", "logs/test", "badparam"
         );
         String stderr = result.getStderrData().stream().collect(Collectors.joining("\n"));
         assertThat(stderr).contains("unrecognized option:badparam");
@@ -43,7 +43,7 @@ public class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("badparam", 15,
-                "java", "-jar", "target/eb-cli.jar", "--log-dir", "logs/test", "run", "type=diag", "initdelay=notanumber"
+                "java", "-jar", "target/eb-cli.jar", "--logs-dir", "logs/test", "run", "type=diag", "initdelay=notanumber"
         );
         String stderr = result.getStderrData().stream().collect(Collectors.joining("\n"));
         assertThat(stderr).contains("Error initializing activity 'ALIAS_UNSET': For input string: \"notanumber\"");
@@ -55,7 +55,7 @@ public class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("badparam", 30,
-                "java", "-jar", "target/eb-cli.jar", "--log-dir", "logs/test", "run", "type=diag", "erroroncycle=10", "cycles=20", "-vv"
+                "java", "-jar", "target/eb-cli.jar", "--logs-dir", "logs/test", "run", "type=diag", "erroroncycle=10", "cycles=20", "-vv"
         );
         String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
         assertThat(stdout).contains("Diag was asked to error on cycle 10");
