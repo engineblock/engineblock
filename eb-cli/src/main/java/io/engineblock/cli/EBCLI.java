@@ -150,6 +150,7 @@ public class EBCLI {
         ScenarioLogger sl = new ScenarioLogger(scenario)
                 .setLogDir(options.getLogsDirectory())
                 .setMaxLogs(options.getLogsMax())
+                .setLevel(options.getLogsLevel())
                 .start();
 
         executor.execute(scenario, sl);
