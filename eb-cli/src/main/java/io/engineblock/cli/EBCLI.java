@@ -148,8 +148,10 @@ public class EBCLI {
         scenario.addScenarioScriptParams(scriptData.getScriptParams());
         scenario.addScriptText(scriptData.getScriptTextIgnoringParams());
         ScenarioLogger sl = new ScenarioLogger(scenario)
-                .setLogDir(options.getLogDirectory())
-                .setMaxLogs(options.getMaxLogs());
+                .setLogDir(options.getLogsDirectory())
+                .setMaxLogs(options.getLogsMax())
+                .start();
+
         executor.execute(scenario, sl);
         ScenariosResults scenariosResults = executor.awaitAllResults();
         ActivityMetrics.closeMetrics();

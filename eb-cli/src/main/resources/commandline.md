@@ -64,11 +64,17 @@ These options modify how the scenario is run.
 
 Specify a directory for scenario log files:
 
-    --log-dir <dirname>
+    --logs-dir <dirname>
 
-Specify a limit on logfiles (old files will be purged)
+Specify a limit on logfiles (old files will be purged):
 
-    --log-max <count>
+    --logs-max <count>
+
+Specify the priority level of file logs:
+
+    --logs-level <level>
+
+where `<level>` can be one of OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL
 
 Specify the logging pattern:
 

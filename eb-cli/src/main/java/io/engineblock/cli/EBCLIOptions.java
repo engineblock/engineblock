@@ -45,8 +45,9 @@ public class EBCLIOptions {
     // Execution Options
     private static final String SCRIPT = "script";
     private static final String SESSION_NAME = "--session-name";
-    private static final String LOG_DIR = "--log-dir";
-    private static final String MAX_LOGS = "--log-max";
+    private static final String LOGS_DIR = "--logs-dir";
+    private static final String LOGS_MAX = "--logs-max";
+    private static final String LOGS_LEVEL = "--logs-level";
     private static final String WANTS_INFO_CONSOLE_LOGGING = "-v";
     private static final String WANTS_DEBUG_CONSOLE_LOGGING = "-vv";
     private static final String WANTS_TRACE_CONSOLE_LOGGING = "-vvv";
@@ -70,7 +71,7 @@ public class EBCLIOptions {
     private static final String DEFAULT_CONSOLE_LOGGING_PATTERN = "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
 
     private LinkedList<Cmd> cmdList = new LinkedList<>();
-    private int maxLogs = 0;
+    private int logsMax = 0;
     private boolean wantsVersion = false;
     private boolean wantsActivityHelp = false;
     private String wantsActivityHelpFor;
@@ -89,12 +90,13 @@ public class EBCLIOptions {
     private List<String> statsLoggerConfigs = new ArrayList<>();
     private List<String> classicHistoConfigs = new ArrayList<>();
     private String progressSpec = "console:1m";
-    private String logDirectory = "logs";
+    private String logsDirectory = "logs";
     private boolean wantsInputTypes=false;
     private boolean wantsMarkerTypes=false;
     private String[] rleDumpOptions = new String[0];
     private String[] cyclelogImportOptions = new String[0];
     private String consoleLoggingPattern = DEFAULT_CONSOLE_LOGGING_PATTERN;
+    private String logsLevel = "INFO";
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -167,13 +169,17 @@ public class EBCLIOptions {
                     arglist.removeFirst();
                     sessionName = readWordOrThrow(arglist, "a session name");
                     break;
-                case LOG_DIR:
+                case LOGS_DIR:
                     arglist.removeFirst();
-                    logDirectory = readWordOrThrow(arglist, "a log directory");
+                    logsDirectory = readWordOrThrow(arglist, "a log directory");
                     break;
-                case MAX_LOGS:
+                case LOGS_MAX:
                     arglist.removeFirst();
-                    maxLogs = Integer.valueOf(readWordOrThrow(arglist,"max logfiles to keep"));
+                    logsMax = Integer.valueOf(readWordOrThrow(arglist,"max logfiles to keep"));
+                    break;
+                case LOGS_LEVEL:
+                    arglist.removeFirst();
+                    logsLevel = readWordOrThrow(arglist, "a log level");
                     break;
                 case PROGRESS_INDICATOR:
                     arglist.removeFirst();
@@ -441,12 +447,16 @@ public class EBCLIOptions {
         return reportCsvTo;
     }
 
-    public String getLogDirectory() {
-        return logDirectory;
+    public String getLogsDirectory() {
+        return logsDirectory;
     }
 
-    public int getMaxLogs() {
-        return maxLogs;
+    public int getLogsMax() {
+        return logsMax;
+    }
+
+    public String getLogsLevel() {
+        return logsLevel;
     }
 
     public boolean wantsInputTypes() {

@@ -31,8 +31,9 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ScenarioLogger {
@@ -40,6 +41,7 @@ public class ScenarioLogger {
     private final Scenario scenario;
     private File loggerDir = new File("logs");
     private int maxLogfiles = 10;
+    private Level logLevel = Level.INFO;
 
     public ScenarioLogger(Scenario scenario) {
         this.scenario = scenario;
@@ -52,6 +54,11 @@ public class ScenarioLogger {
 
     public ScenarioLogger setMaxLogs(int maxLogfiles) {
         this.maxLogfiles = maxLogfiles;
+        return this;
+    }
+
+    public ScenarioLogger setLevel(String levelname) {
+        this.logLevel = Level.toLevel(levelname);
         return this;
     }
 
@@ -88,7 +95,7 @@ public class ScenarioLogger {
         Logger logger = (Logger) LoggerFactory.getLogger("ROOT");
         logger.addAppender(fileAppender);
 
-        logger.setLevel(Level.INFO);
+        logger.setLevel(logLevel);
         logger.setAdditive(true); /* set to true if root should log too */
 
         purgeOldFiles(logger);
