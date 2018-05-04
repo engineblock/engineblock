@@ -19,14 +19,16 @@ package io.engineblock.activityimpl.motor;
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
+import io.engineblock.activityapi.cyclelog.outputs.MutableCycleResult;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.output.Output;
+import io.engineblock.activityapi.rates.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.activityapi.rates.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -202,108 +204,230 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             long strideDelay = 0L;
             long cycleDelay = 0L;
             long phaseDelay = 0L;
-            while (slotState.get() == Running) {
 
-                CycleSegment cycleSegment = null;
+            if (action instanceof AsyncAction) {
+                AsyncAction async = (AsyncAction) action;
 
-                try (Timer.Context inputTime = inputTimer.time()) {
-                    cycleSegment = input.getInputSegment(stride);
-                }
+                while (slotState.get() == Running) {
 
-                if (cycleSegment == null) {
-                    logger.debug("input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
-                    slotStateTracker.enterState(Finished);
-                    if (action instanceof BufferedAction) {
-                        ((BufferedAction)action).flush();
+                    CycleSegment cycleSegment = null;
+
+                    try (Timer.Context inputTime = inputTimer.time()) {
+                        cycleSegment = input.getInputSegment(stride);
                     }
-                    continue;
-                }
 
-                CycleResultSegmentBuffer segBuffer = new CycleResultSegmentBuffer(stride);
+                    if (cycleSegment == null) {
+                        logger.debug("input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
+                        slotStateTracker.enterState(Finished);
+                        continue;
+                    }
 
-                if (strideRateLimiter != null) {
-                    // block for strides rate limiter
-                    strideDelay = strideRateLimiter.acquire();
-                }
+                    if (strideRateLimiter != null) {
+                        // block for strides rate limiter
+                        strideDelay = strideRateLimiter.acquire();
+                    }
 
 //                try (Timer.Context stridesTime = stridesTimer.time()) {
-                long strideStart = System.nanoTime();
-                try {
+                    long strideStart = System.nanoTime();
+                    try {
 
-                    while (!cycleSegment.isExhausted()) {
-                        cyclenum = cycleSegment.nextCycle();
-                        if (cyclenum < 0) {
-                            if (cycleSegment.isExhausted()) {
-                                logger.trace("input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
-                                slotStateTracker.enterState(Finished);
-                                continue;
-                            }
-                        }
-
-                        if (slotState.get() != Running) {
-                            logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
-                            continue;
-                        }
-                        int result = -1;
-
-                        if (cycleRateLimiter != null) {
-                            // Block for cycle rate limiter
-                            cycleDelay = cycleRateLimiter.acquire();
-                        }
-
-                        //try (Timer.Context cycleTime = cyclesTimer.time()) {
-                        long cycleStart = System.nanoTime();
-                        try {
-                            logger.trace("cycle " + cyclenum);
-
-                            // runCycle
-                            long phaseStart = System.nanoTime();
-                            if (phaseRateLimiter != null) {
-                                phaseDelay = phaseRateLimiter.acquire();
-                            }
-                            result = action.runCycle(cyclenum);
-                            long phaseEnd = System.nanoTime();
-                            phasesTimer.update((phaseEnd - phaseStart) + phaseDelay, TimeUnit.NANOSECONDS);
-
-                            // ... runPhase ...
-                            if (multiPhaseAction != null) {
-                                while (multiPhaseAction.incomplete()) {
-                                    phaseStart = System.nanoTime();
-                                    if (phaseRateLimiter != null) {
-                                        phaseDelay = phaseRateLimiter.acquire();
-                                    }
-                                    result = multiPhaseAction.runPhase(cyclenum);
-                                    phaseEnd = System.nanoTime();
-                                    phasesTimer.update((phaseEnd - phaseStart) + phaseDelay, TimeUnit.NANOSECONDS);
+                        while (!cycleSegment.isExhausted()) {
+                            cyclenum = cycleSegment.nextCycle();
+                            if (cyclenum < 0) {
+                                if (cycleSegment.isExhausted()) {
+                                    logger.trace("input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
+                                    slotStateTracker.enterState(Finished);
+                                    continue;
                                 }
                             }
 
-                        } finally {
-                            long cycleEnd = System.nanoTime();
-                            cyclesTimer.update((cycleEnd - cycleStart) + cycleDelay, TimeUnit.NANOSECONDS);
+                            if (slotState.get() != Running) {
+                                logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
+                                continue;
+                            }
+
+                            if (cycleRateLimiter != null) {
+                                // Block for cycle rate limiter
+                                cycleDelay = cycleRateLimiter.acquire();
+                            }
+
+                            //try (Timer.Context cycleTime = cyclesTimer.time()) {
+                            long cycleStart = System.nanoTime();
+                            try {
+                                if (!async.enqueue(new MutableCycleResult(cyclenum,-1))) {
+                                    logger.debug("enqueued last cycle " + cyclenum);
+                                    CycleResult cresult = async.dequeue();
+                                    if (output != null) {
+                                        try {
+                                            output.onCycleResult(cresult);
+                                        } catch (Exception t) {
+                                            logger.error("Error while feeding cycle result  " + cresult + " to output '" + output + "', error:" + t);
+                                            throw t;
+                                        }
+                                    }
+                                }
+
+//                                // runCycle
+//                                long phaseStart = System.nanoTime();
+//                                if (phaseRateLimiter != null) {
+//                                    phaseDelay = phaseRateLimiter.acquire();
+//                                }
+//                                long phaseEnd = System.nanoTime();
+//                                phasesTimer.update((phaseEnd - phaseStart) + phaseDelay, TimeUnit.NANOSECONDS);
+
+//                                // ... runPhase ...
+//                                if (multiPhaseAction != null) {
+//                                    while (multiPhaseAction.incomplete()) {
+//                                        phaseStart = System.nanoTime();
+//                                        if (phaseRateLimiter != null) {
+//                                            phaseDelay = phaseRateLimiter.acquire();
+//                                        }
+//                                        result = multiPhaseAction.runPhase(cyclenum);
+//                                        phaseEnd = System.nanoTime();
+//                                        phasesTimer.update((phaseEnd - phaseStart) + phaseDelay, TimeUnit.NANOSECONDS);
+//                                    }
+//                                }
+
+
+                            } finally {
+                                long cycleEnd = System.nanoTime();
+                                cyclesTimer.update((cycleEnd - cycleStart) + cycleDelay, TimeUnit.NANOSECONDS);
+                            }
                         }
-                        segBuffer.append(cyclenum, result);
+
+                    } finally {
+                        long strideEnd = System.nanoTime();
+                        stridesTimer.update((strideEnd - strideStart) + strideDelay, TimeUnit.NANOSECONDS);
                     }
 
-                } finally {
-                    long strideEnd = System.nanoTime();
-                    stridesTimer.update((strideEnd - strideStart) + strideDelay, TimeUnit.NANOSECONDS);
                 }
 
-                if (output != null) {
-                    CycleResultsSegment outputBuffer = segBuffer.toReader();
+                CycleResult result=async.dequeue();
+                while (result!=null) {
+                    if (output != null) {
+                        try {
+                            output.onCycleResult(result);
+                        } catch (Exception t) {
+                            logger.error("Error while feeding cycle result  " + result + " to output '" + output + "', error:" + t);
+                            throw t;
+                        }
+                    }
+                    result=async.dequeue();
+                }
+
+                if (slotState.get() == Stopping) {
+                    slotStateTracker.enterState(Stopped);
+                }
+
+
+
+            } else {
+                while (slotState.get() == Running) {
+
+                    CycleSegment cycleSegment = null;
+
+                    try (Timer.Context inputTime = inputTimer.time()) {
+                        cycleSegment = input.getInputSegment(stride);
+                    }
+
+                    if (cycleSegment == null) {
+                        logger.debug("input exhausted (input " + input + ") via null segment, stopping motor thread " + slotId);
+                        slotStateTracker.enterState(Finished);
+                        if (action instanceof BufferedAction) {
+                            ((BufferedAction) action).flush();
+                        }
+                        continue;
+                    }
+
+                    CycleResultSegmentBuffer segBuffer = new CycleResultSegmentBuffer(stride);
+
+                    if (strideRateLimiter != null) {
+                        // block for strides rate limiter
+                        strideDelay = strideRateLimiter.acquire();
+                    }
+
+//                try (Timer.Context stridesTime = stridesTimer.time()) {
+                    long strideStart = System.nanoTime();
                     try {
-                        output.onCycleResultSegment(outputBuffer);
-                    } catch (Exception t) {
-                        logger.error("Error while feeding result segment " + outputBuffer + " to output '" + output + "', error:" + t);
-                        throw t;
+
+                        while (!cycleSegment.isExhausted()) {
+                            cyclenum = cycleSegment.nextCycle();
+                            if (cyclenum < 0) {
+                                if (cycleSegment.isExhausted()) {
+                                    logger.trace("input exhausted (input " + input + ") via negative read, stopping motor thread " + slotId);
+                                    slotStateTracker.enterState(Finished);
+                                    continue;
+                                }
+                            }
+
+                            if (slotState.get() != Running) {
+                                logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
+                                continue;
+                            }
+                            int result = -1;
+
+                            if (cycleRateLimiter != null) {
+                                // Block for cycle rate limiter
+                                cycleDelay = cycleRateLimiter.acquire();
+                            }
+
+                            //try (Timer.Context cycleTime = cyclesTimer.time()) {
+                            long cycleStart = System.nanoTime();
+                            try {
+                                logger.trace("cycle " + cyclenum);
+
+                                // runCycle
+                                long phaseStart = System.nanoTime();
+                                if (phaseRateLimiter != null) {
+                                    phaseDelay = phaseRateLimiter.acquire();
+                                }
+                                result = action.runCycle(cyclenum);
+                                long phaseEnd = System.nanoTime();
+                                phasesTimer.update((phaseEnd - phaseStart) + phaseDelay, TimeUnit.NANOSECONDS);
+
+                                // ... runPhase ...
+                                if (multiPhaseAction != null) {
+                                    while (multiPhaseAction.incomplete()) {
+                                        phaseStart = System.nanoTime();
+                                        if (phaseRateLimiter != null) {
+                                            phaseDelay = phaseRateLimiter.acquire();
+                                        }
+                                        result = multiPhaseAction.runPhase(cyclenum);
+                                        phaseEnd = System.nanoTime();
+                                        phasesTimer.update((phaseEnd - phaseStart) + phaseDelay, TimeUnit.NANOSECONDS);
+                                    }
+                                }
+
+                            } finally {
+                                long cycleEnd = System.nanoTime();
+                                cyclesTimer.update((cycleEnd - cycleStart) + cycleDelay, TimeUnit.NANOSECONDS);
+                            }
+                            segBuffer.append(cyclenum, result);
+                        }
+
+                    } finally {
+                        long strideEnd = System.nanoTime();
+                        stridesTimer.update((strideEnd - strideStart) + strideDelay, TimeUnit.NANOSECONDS);
+                    }
+
+                    if (output != null) {
+                        CycleResultsSegment outputBuffer = segBuffer.toReader();
+                        try {
+                            output.onCycleResultSegment(outputBuffer);
+                        } catch (Exception t) {
+                            logger.error("Error while feeding result segment " + outputBuffer + " to output '" + output + "', error:" + t);
+                            throw t;
+                        }
                     }
                 }
+
+                if (slotState.get() == Stopping) {
+                    slotStateTracker.enterState(Stopped);
+                }
+
             }
 
-            if (slotState.get() == Stopping) {
-                slotStateTracker.enterState(Stopped);
-            }
+
         } catch (Throwable t) {
             logger.error("Error in core motor loop:" + t, t);
             throw t;

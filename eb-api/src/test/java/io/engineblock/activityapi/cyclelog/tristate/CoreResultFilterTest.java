@@ -21,7 +21,7 @@ import io.engineblock.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.engineblock.activityapi.cyclelog.filters.CoreResultValueFilter;
 import io.engineblock.activityapi.cyclelog.filters.ResultFilterDispenser;
 import io.engineblock.activityapi.cyclelog.filters.ResultValueFilterType;
-import io.engineblock.activityapi.cyclelog.outputs.SimpleCycleResult;
+import io.engineblock.activityapi.cyclelog.outputs.MutableCycleResult;
 import org.testng.annotations.Test;
 
 import java.util.function.Predicate;
@@ -39,11 +39,11 @@ public class CoreResultFilterTest {
                 ));
         ResultFilterDispenser fd = filterType.getDispenser("in:5,ex:6,in:7");
         Predicate<ResultReadable> cycleResultFilter = fd.getResultFilter();
-        assertThat(cycleResultFilter.test(new SimpleCycleResult(3,3))).isFalse();
-        assertThat(cycleResultFilter.test(new SimpleCycleResult(3,5))).isTrue();
-        assertThat(cycleResultFilter.test(new SimpleCycleResult(3,6))).isFalse();
-        assertThat(cycleResultFilter.test(new SimpleCycleResult(3,7))).isTrue();
-        assertThat(cycleResultFilter.test(new SimpleCycleResult(3,8))).isFalse();
+        assertThat(cycleResultFilter.test(new MutableCycleResult(3,3))).isFalse();
+        assertThat(cycleResultFilter.test(new MutableCycleResult(3,5))).isTrue();
+        assertThat(cycleResultFilter.test(new MutableCycleResult(3,6))).isFalse();
+        assertThat(cycleResultFilter.test(new MutableCycleResult(3,7))).isTrue();
+        assertThat(cycleResultFilter.test(new MutableCycleResult(3,8))).isFalse();
 
     }
 

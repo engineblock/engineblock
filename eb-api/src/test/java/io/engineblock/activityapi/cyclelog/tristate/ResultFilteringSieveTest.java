@@ -21,7 +21,7 @@ import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 import io.engineblock.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.engineblock.activityapi.cyclelog.filters.tristate.ResultFilteringSieve;
 import io.engineblock.activityapi.cyclelog.filters.tristate.TristateFilter;
-import io.engineblock.activityapi.cyclelog.outputs.SimpleCycleResult;
+import io.engineblock.activityapi.cyclelog.outputs.MutableCycleResult;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -37,35 +37,35 @@ public class ResultFilteringSieveTest {
     @Test
     public void testDefaultPolicy() {
         ResultFilteringSieve sieve = new ResultFilteringSieve.Builder().discardByDefault().build();
-        assertThat(sieve.apply(new SimpleCycleResult(4,5))).isEqualTo(TristateFilter.Policy.Discard);
+        assertThat(sieve.apply(new MutableCycleResult(4,5))).isEqualTo(TristateFilter.Policy.Discard);
     }
 
     @Test
     public void testBasicFilter() {
         ResultFilteringSieve sieve = new ResultFilteringSieve.Builder().discardByDefault().include(3).build();
-        assertThat(sieve.apply(new SimpleCycleResult(3L,2))).isEqualTo(TristateFilter.Policy.Discard);
-        assertThat(sieve.apply(new SimpleCycleResult(3L,3))).isEqualTo(TristateFilter.Policy.Keep);
+        assertThat(sieve.apply(new MutableCycleResult(3L,2))).isEqualTo(TristateFilter.Policy.Discard);
+        assertThat(sieve.apply(new MutableCycleResult(3L,3))).isEqualTo(TristateFilter.Policy.Keep);
     }
 
     @Test
     public void testRangeFilter() {
         ResultFilteringSieve sieve = new ResultFilteringSieve.Builder().keepByDefault().exclude(3,7).exclude(9).build();
-        assertThat(sieve.apply(new SimpleCycleResult(3L,2))).isEqualTo(TristateFilter.Policy.Keep);
-        assertThat(sieve.apply(new SimpleCycleResult(3L,3))).isEqualTo(TristateFilter.Policy.Discard);
-        assertThat(sieve.apply(new SimpleCycleResult(3L,7))).isEqualTo(TristateFilter.Policy.Discard);
-        assertThat(sieve.apply(new SimpleCycleResult(3L,8))).isEqualTo(TristateFilter.Policy.Keep);
-        assertThat(sieve.apply(new SimpleCycleResult(3L,9))).isEqualTo(TristateFilter.Policy.Discard);
-        assertThat(sieve.apply(new SimpleCycleResult(3L,10))).isEqualTo(TristateFilter.Policy.Keep);
+        assertThat(sieve.apply(new MutableCycleResult(3L,2))).isEqualTo(TristateFilter.Policy.Keep);
+        assertThat(sieve.apply(new MutableCycleResult(3L,3))).isEqualTo(TristateFilter.Policy.Discard);
+        assertThat(sieve.apply(new MutableCycleResult(3L,7))).isEqualTo(TristateFilter.Policy.Discard);
+        assertThat(sieve.apply(new MutableCycleResult(3L,8))).isEqualTo(TristateFilter.Policy.Keep);
+        assertThat(sieve.apply(new MutableCycleResult(3L,9))).isEqualTo(TristateFilter.Policy.Discard);
+        assertThat(sieve.apply(new MutableCycleResult(3L,10))).isEqualTo(TristateFilter.Policy.Keep);
     }
 
     public void testPredicateConversions() {
-        SimpleCycleResult c1 = new SimpleCycleResult(1,1);
-        SimpleCycleResult c2 = new SimpleCycleResult(2,2);
-        SimpleCycleResult c3 = new SimpleCycleResult(3,3);
-        SimpleCycleResult c4 = new SimpleCycleResult(4,4);
-        SimpleCycleResult c5 = new SimpleCycleResult(5,5);
-        SimpleCycleResult c6 = new SimpleCycleResult(6,6);
-        SimpleCycleResult c7 = new SimpleCycleResult(7,7);
+        MutableCycleResult c1 = new MutableCycleResult(1,1);
+        MutableCycleResult c2 = new MutableCycleResult(2,2);
+        MutableCycleResult c3 = new MutableCycleResult(3,3);
+        MutableCycleResult c4 = new MutableCycleResult(4,4);
+        MutableCycleResult c5 = new MutableCycleResult(5,5);
+        MutableCycleResult c6 = new MutableCycleResult(6,6);
+        MutableCycleResult c7 = new MutableCycleResult(7,7);
 
         List<CycleResult> results = new ArrayList<CycleResult>() {
             {

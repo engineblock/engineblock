@@ -20,7 +20,6 @@ package io.engineblock.activityapi.core;
  * An action is the core logic that occurs within an activity.
  * Within a thread slot, a motor will continuously ask an action to process its input.
  */
-@FunctionalInterface
 public interface Action {
 
     /**
@@ -31,7 +30,9 @@ public interface Action {
      * @param value a long input
      * @return an int status
      */
-    int runCycle(long value);
+    default int runCycle(long value) {
+        return (int) value % 100;
+    }
 
     default void init() {
     }

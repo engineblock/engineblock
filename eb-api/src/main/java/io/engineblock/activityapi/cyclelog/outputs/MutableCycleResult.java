@@ -19,12 +19,12 @@ package io.engineblock.activityapi.cyclelog.outputs;
 
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 
-public class SimpleCycleResult implements CycleResult {
+public class MutableCycleResult implements CycleResult {
 
     private final long cycle;
-    private final int result;
+    private int result;
 
-    public SimpleCycleResult(long cycle, int result) {
+    public MutableCycleResult(long cycle, int result) {
         this.cycle = cycle;
         this.result = result;
     }
@@ -43,4 +43,7 @@ public class SimpleCycleResult implements CycleResult {
         return this.cycle +"->" + this.result;
     }
 
+    public void setResult(int result) {
+        this.result = result;
+    }
 }

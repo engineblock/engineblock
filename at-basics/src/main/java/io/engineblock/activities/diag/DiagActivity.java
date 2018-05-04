@@ -14,20 +14,24 @@
  */
 package io.engineblock.activities.diag;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.core.ActivityDefObserver;
-import io.engineblock.activityimpl.ActivityDef;
-import io.engineblock.activityimpl.SimpleActivity;
-import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.activityapi.rates.RateLimiter;
 import io.engineblock.activityapi.rates.RateLimiters;
 import io.engineblock.activityapi.rates.RateSpec;
+import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityimpl.SimpleActivity;
+import io.engineblock.metrics.ActivityMetrics;
 
 public class DiagActivity extends SimpleActivity implements Activity, ActivityDefObserver {
 
     protected Histogram delayHistogram;
     private RateLimiter diagRateLimiter;
+    private boolean async=false;
+    private long maxAsync;
+    public  Counter pendingOpsCounter;
 
     public DiagActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -41,6 +45,10 @@ public class DiagActivity extends SimpleActivity implements Activity, ActivityDe
         try {
             Thread.sleep(initdelay);
         } catch (InterruptedException ignored) {
+        }
+        onActivityDefUpdate(activityDef);
+        if (isAsync()) {
+            pendingOpsCounter = ActivityMetrics.counter(this.activityDef,"pending_ops");
         }
     }
 
@@ -56,5 +64,20 @@ public class DiagActivity extends SimpleActivity implements Activity, ActivityDe
                 .getOptionalString("diagrate")
                 .map(RateSpec::new)
                 .ifPresent(spec -> diagRateLimiter= RateLimiters.createOrUpdate(getActivityDef(),"diag",diagRateLimiter,spec));
+
+        this.async = activityDef.getParams()
+                .getOptionalBoolean("async").orElse(false);
+
+        this.maxAsync = activityDef.getParams()
+                .getOptionalLong("maxasync").orElse(1L);
+    }
+
+
+    public boolean isAsync() {
+        return this.async;
+    }
+
+    public long getMaxAsync() {
+        return this.maxAsync;
     }
 }
