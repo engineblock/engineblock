@@ -17,17 +17,18 @@
 
 package io.engineblock.activityapi.core;
 
-/**
- * If an action may have some cleanup or IO flushing to do after
- * the normal cycles are dispatched to it, then it can ask to be notified
- * one time by the motor after the end of input is seen.
- */
-public interface BufferedAction extends Action {
+public interface SyncAction extends Action {
 
     /**
-     * This method is called on FlushableAction after all input for the
-     * given thread is exhausted. This does not occur if the stopping
-     * is caused by anything besides exhaustion of cycle input.
+     * <p>Apply a work function to an input value, producing an int status code.</p>
+     * The meaning of status codes is activity specific, however the values Integer.MIN_VALUE,
+     * and Integer.MAX_VALUE are reserved.
+     *
+     * @param value a long input
+     * @return an int status
      */
-    void flush();
+    default int runCycle(long value) {
+        return (int) value % 100;
+    }
+
 }

@@ -1,9 +1,6 @@
 package io.engineblock.activitycore;
 
-import io.engineblock.activityapi.core.Action;
-import io.engineblock.activityapi.core.Activity;
-import io.engineblock.activityapi.core.Motor;
-import io.engineblock.activityapi.core.RunState;
+import io.engineblock.activityapi.core.*;
 import io.engineblock.activitycore.fortesting.BlockingSegmentInput;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SimpleActivity;
@@ -79,8 +76,8 @@ public class CoreMotorTest {
 
     }
 
-    private Action getTestArrayConsumer(final AtomicLongArray ary) {
-        return new Action() {
+    private SyncAction getTestArrayConsumer(final AtomicLongArray ary) {
+        return new SyncAction() {
             private int offset=0;
             @Override
             public int runCycle(long value) {
@@ -89,8 +86,8 @@ public class CoreMotorTest {
             }
         };
     }
-    private Action getTestConsumer(final AtomicLong atomicLong) {
-        return new Action() {
+    private SyncAction getTestConsumer(final AtomicLong atomicLong) {
+        return new SyncAction() {
             @Override
             public int runCycle(long value) {
                 atomicLong.set(value);

@@ -28,17 +28,34 @@ public class CycleResultSegmentBuffer {
 
     private ByteBuffer buf;
     private final static int BYTES = Long.BYTES + Byte.BYTES;
+    private final Sink sink;
 
+    public CycleResultSegmentBuffer(Sink sink, int resultCount) {
+        this.sink = sink;
+        this.buf = ByteBuffer.allocate(resultCount*BYTES);
+    }
     public CycleResultSegmentBuffer(int resultCount) {
+        this.sink = null;
         this.buf = ByteBuffer.allocate(resultCount*BYTES);
     }
 
+
     public void append(long cycle, int result) {
         buf.putLong(cycle).put((byte) result);
+        if (sink!=null) {
+            if (!buf.hasRemaining()) {
+                sink.handle(toReader());
+            }
+        }
     }
 
     public void append(CycleResult result) {
         buf.putLong(result.getCycle()).put((byte) result.getResult());
+        if (sink!=null) {
+            if (!buf.hasRemaining()) {
+                sink.handle(toReader());
+            }
+        }
     }
 
     public CycleResultsSegment toReader() {
@@ -46,6 +63,14 @@ public class CycleResultSegmentBuffer {
         CycleResultsSegmentReadable readable = new CycleResultsSegmentReadable(buf);
         buf=null;
         return readable;
+    }
+
+    public boolean hasRemaining() {
+        return buf.hasRemaining();
+    }
+
+    public static interface Sink {
+        void handle(CycleResultsSegment buffer);
     }
 
 }

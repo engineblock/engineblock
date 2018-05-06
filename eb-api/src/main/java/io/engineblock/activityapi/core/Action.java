@@ -19,21 +19,11 @@ package io.engineblock.activityapi.core;
 /**
  * An action is the core logic that occurs within an activity.
  * Within a thread slot, a motor will continuously ask an action to process its input.
+ *
+ * To do anything useful in your action, you should implement {@link AsyncAction} or
+ * {@link SyncAction} directly.
  */
 public interface Action {
-
-    /**
-     * <p>Apply a work function to an input value, producing an int status code.</p>
-     * The meaning of status codes is activity specific, however the values Integer.MIN_VALUE,
-     * and Integer.MAX_VALUE are reserved.
-     *
-     * @param value a long input
-     * @return an int status
-     */
-    default int runCycle(long value) {
-        return (int) value % 100;
-    }
-
     default void init() {
     }
 }

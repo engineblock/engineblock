@@ -21,7 +21,7 @@ import io.engineblock.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.engineblock.activityapi.cyclelog.filters.CoreResultValueFilter;
 import io.engineblock.activityapi.cyclelog.filters.ResultFilterDispenser;
 import io.engineblock.activityapi.cyclelog.filters.ResultValueFilterType;
-import io.engineblock.activityapi.cyclelog.outputs.MutableCycleResult;
+import io.engineblock.activityapi.cyclelog.buffers.results.MutableCycleResult;
 import org.testng.annotations.Test;
 
 import java.util.function.Predicate;

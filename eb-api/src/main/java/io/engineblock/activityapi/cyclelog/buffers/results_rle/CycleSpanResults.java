@@ -20,7 +20,7 @@ package io.engineblock.activityapi.cyclelog.buffers.results_rle;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.cyclelog.buffers.results.ResultReadable;
-import io.engineblock.activityapi.cyclelog.outputs.MutableCycleResult;
+import io.engineblock.activityapi.cyclelog.buffers.results.MutableCycleResult;
 import org.jetbrains.annotations.NotNull;
 
 /**

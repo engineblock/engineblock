@@ -14,15 +14,15 @@
  */
 package io.engineblock.activities.diag;
 
-import io.engineblock.activityapi.core.Action;
 import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityapi.core.MultiPhaseAction;
-import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityapi.core.SyncAction;
 import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DiagAction implements Action, ActivityDefObserver, MultiPhaseAction {
+public class DiagAction implements SyncAction, ActivityDefObserver, MultiPhaseAction {
 
     private final static Logger logger = LoggerFactory.getLogger(DiagAction.class);
     private final ActivityDef activityDef;

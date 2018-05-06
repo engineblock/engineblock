@@ -73,11 +73,20 @@ public class InputInterval implements Input {
             return -100;
         }
 
+        @Override
+        public long peekNextCycle() {
+            if (next < afterEnd) {
+                return next;
+            }
+            return -100;
+        }
+
 
         @Override
         public boolean isExhausted() {
             return next >= afterEnd;
         }
+
 
         public String toString() {
             return "InputInterval.Segment(" + start + "," + afterEnd + "]: next=" + next;

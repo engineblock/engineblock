@@ -16,11 +16,9 @@
  */
 package io.engineblock.activities.diag;
 
-import io.engineblock.activityapi.core.Action;
 import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityapi.core.AsyncAction;
-import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
-import io.engineblock.activityapi.cyclelog.outputs.MutableCycleResult;
+import io.engineblock.activityapi.core.OpContext;
 import io.engineblock.activityapi.rates.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
@@ -28,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 
-public class AsyncDiagAction implements Action, ActivityDefObserver, AsyncAction {
+public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
 
     private final static Logger logger = LoggerFactory.getLogger(AsyncDiagAction.class);
     private final ActivityDef activityDef;
@@ -48,7 +46,7 @@ public class AsyncDiagAction implements Action, ActivityDefObserver, AsyncAction
     private long maxAsync =10L;
     private long pendingOps=0L;
 
-    private LinkedList<MutableCycleResult> results = new LinkedList<>();
+    private LinkedList<OpContext> results = new LinkedList<>();
 
     public AsyncDiagAction(int slot, ActivityDef activityDef, DiagActivity diagActivity) {
         this.activityDef = activityDef;
@@ -119,8 +117,7 @@ public class AsyncDiagAction implements Action, ActivityDefObserver, AsyncAction
         this.maxAsync = diagActivity.getMaxAsync();
     }
 
-    @Override
-    public int runCycle(long value) {
+    private int runCycle(long value) {
 
         if (logcycle) {
             logger.trace("cycle " + value);
@@ -170,17 +167,17 @@ public class AsyncDiagAction implements Action, ActivityDefObserver, AsyncAction
     }
 
     @Override
-    public boolean enqueue(MutableCycleResult unprocessed) {
+    public boolean enqueue(OpContext unprocessed) {
         results.addLast(unprocessed);
         diagActivity.pendingOpsCounter.inc();
         return (++pendingOps<maxAsync);
     }
 
     @Override
-    public CycleResult dequeue() {
-        MutableCycleResult resultCarrier = results.pollFirst();
+    public OpContext dequeue() {
+        OpContext resultCarrier = results.pollFirst();
         if (resultCarrier==null) {
-            return resultCarrier;
+            return null;
         }
         int resultCode = runCycle(resultCarrier.getCycle());
         resultCarrier.setResult(resultCode);

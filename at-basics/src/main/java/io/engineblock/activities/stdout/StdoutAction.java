@@ -1,14 +1,14 @@
 package io.engineblock.activities.stdout;
 
 import com.codahale.metrics.Timer;
-import io.engineblock.activityapi.core.Action;
+import io.engineblock.activityapi.core.SyncAction;
 import io.engineblock.activityapi.planning.OpSequence;
 import io.virtdata.templates.StringBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("Duplicates")
-public class StdoutAction implements Action {
+public class StdoutAction implements SyncAction {
 
     private static final Logger logger = LoggerFactory.getLogger(StdoutAction.class);
     private int slot;

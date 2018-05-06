@@ -67,9 +67,18 @@ public class CycleArray implements Input {
         }
 
         @Override
+        public long peekNextCycle() {
+            if (offset<values.length) {
+                return values[offset];
+            }
+            return -100;
+        }
+
+        @Override
         public boolean isExhausted() {
             return (offset>=values.length);
         }
+
 
     }
 }

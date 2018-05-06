@@ -48,6 +48,5 @@ public interface CycleSegment {
         return values;
     }
 
-
-
+    long peekNextCycle();
 }

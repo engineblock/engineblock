@@ -17,12 +17,12 @@
 
 package io.engineblock.activityimpl.action;
 
-import io.engineblock.activityapi.core.Action;
+import io.engineblock.activityapi.core.SyncAction;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CoreAction implements Action {
+public class CoreAction implements SyncAction {
     private final static Logger logger = LoggerFactory.getLogger(CoreAction.class);
 
     private final int interval;

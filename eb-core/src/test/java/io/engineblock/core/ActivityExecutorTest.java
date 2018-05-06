@@ -110,8 +110,8 @@ public class ActivityExecutorTest {
         return cmf;
     }
 
-    private Action motorActionDelay(final long delay) {
-        Action consumer = new Action() {
+    private SyncAction motorActionDelay(final long delay) {
+        SyncAction consumer = new SyncAction() {
             @Override
             public int runCycle(long value) {
                 System.out.println("consuming " + value + ", delaying:" + delay);
