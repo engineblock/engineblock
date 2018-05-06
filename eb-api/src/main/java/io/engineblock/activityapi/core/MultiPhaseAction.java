@@ -41,7 +41,7 @@ public interface MultiPhaseAction extends Action {
      * <p>Apply a work function to an input value, producing an int status code.</p>
      * <p>This iterative interface represents work that occurs within the scope
      * of an existing action cycle. The last value returned by this phase loop will
-     * take the place of the value returned by {@link Action#runCycle(long)}</p>
+     * take the place of the value returned by {@link SyncAction#runCycle(long)}</p>
      *
      * <p>This will be called iteratively so long as {@link #incomplete()} returns true.</p>
      *
