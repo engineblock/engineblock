@@ -72,6 +72,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
                 new IndexedThreadFactory(activity.getAlias(), new ActivityExceptionHandler(this))
         );
         activity.getActivityDef().getParams().addListener(this);
+        activity.setActivityController(this);
     }
 
 
