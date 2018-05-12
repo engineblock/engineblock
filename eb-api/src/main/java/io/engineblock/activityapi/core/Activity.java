@@ -33,12 +33,33 @@ import java.util.function.Supplier;
  */
 public interface Activity extends Comparable<Activity>, ActivityDefObserver {
 
+
+    /**
+     * Provide the activity with the controls needed to stop itself.
+     * @param activityController The dedicated control interface for this activity
+     */
+    void setActivityController(ActivityController activityController);
+
+    ActivityController getActivityController();
     /**
      * Register an object which should be closed after this activity is shutdown.
      *
      * @param closeable An Autocloseable object
      */
     void registerAutoCloseable(AutoCloseable closeable);
+
+    ActivityDef getActivityDef();
+
+    default String getAlias() {
+        return getActivityDef().getAlias();
+    }
+
+    default ParameterMap getParams() {
+        return getActivityDef().getParams();
+    }
+
+    default void initActivity() {
+    }
 
     /**
      * Close all autocloseables that have been registered with this Activity.
@@ -64,19 +85,6 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver {
     OutputDispenser getMarkerDispenserDelegate();
 
     void setOutputDispenserDelegate(OutputDispenser outputDispenser);
-
-    ActivityDef getActivityDef();
-
-    default String getAlias() {
-        return getActivityDef().getAlias();
-    }
-
-    default ParameterMap getParams() {
-        return getActivityDef().getParams();
-    }
-
-    default void initActivity() {
-    }
 
     RunState getRunState();
     void setRunState(RunState runState);

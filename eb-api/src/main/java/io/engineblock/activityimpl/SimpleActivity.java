@@ -1,9 +1,6 @@
 package io.engineblock.activityimpl;
 
-import io.engineblock.activityapi.core.ActionDispenser;
-import io.engineblock.activityapi.core.Activity;
-import io.engineblock.activityapi.core.MotorDispenser;
-import io.engineblock.activityapi.core.RunState;
+import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityapi.output.OutputDispenser;
@@ -33,6 +30,7 @@ public class SimpleActivity implements Activity {
     private RateLimiter strideLimiter;
     private RateLimiter cycleLimiter;
     private RateLimiter phaseLimiter;
+    private ActivityController activityController;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -118,6 +116,17 @@ public class SimpleActivity implements Activity {
     @Override
     public int compareTo(Activity o) {
         return getAlias().compareTo(o.getAlias());
+    }
+
+    @Override
+    public void setActivityController(ActivityController activityController) {
+        this.activityController = activityController;
+
+    }
+
+    @Override
+    public ActivityController getActivityController() {
+        return activityController;
     }
 
     @Override

@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
  * </ul>
  */
 
-public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
+public class ActivityExecutor implements ActivityController, ParameterMap.Listener, ProgressMeter {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);
     private final List<Motor> motors = new ArrayList<>();
     private final Activity activity;
@@ -456,5 +456,27 @@ public class ActivityExecutor implements ParameterMap.Listener, ProgressMeter {
         //logger.error("Uncaught exception in activity thread forwarded to activity executor:", e);
         this.stoppingException=new RuntimeException("Error in activity thread " +t.getName(), e);
         forceStopExecutor(10000);
+    }
+
+    @Override
+    public synchronized void stopActivityWithReason(String reason) {
+        logger.info("Stopping activity " + this.activityDef.getAlias() + ": " + reason);
+        stopActivity();
+    }
+
+    @Override
+    public synchronized void stopActivityWithError(Throwable throwable) {
+        if (stoppingException==null) {
+            this.stoppingException = new RuntimeException(throwable);
+            logger.error("stopping on error: " + throwable.toString(), throwable);
+        } else {
+            if (activityDef.getParams().getOptionalBoolean("fullerrors").orElse(false)) {
+                logger.error("additional error: " + throwable.toString(), throwable);
+            } else {
+                logger.warn("summarized error (fullerrors=false): " + throwable.toString());
+            }
+        }
+
+
     }
 }
