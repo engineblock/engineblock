@@ -477,7 +477,6 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
                 logger.warn("summarized error (fullerrors=false): " + throwable.toString());
             }
         }
-
-
+        stopActivity();
     }
 }
