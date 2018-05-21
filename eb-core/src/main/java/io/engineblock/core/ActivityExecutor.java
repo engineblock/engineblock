@@ -463,6 +463,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     public synchronized void stopActivityWithReason(String reason) {
         logger.info("Stopping activity " + this.activityDef.getAlias() + ": " + reason);
         stopActivity();
+
     }
 
     @Override
