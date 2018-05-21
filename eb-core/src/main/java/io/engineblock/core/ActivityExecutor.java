@@ -460,14 +460,15 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     }
 
     @Override
-    public synchronized void stopActivityWithReason(String reason) {
+    public synchronized void stopActivityWithReasonAsync(String reason) {
         logger.info("Stopping activity " + this.activityDef.getAlias() + ": " + reason);
-        stopActivity();
-
+        this.stoppingException=new RuntimeException("Stopping activity " + this.activityDef.getAlias() + ": " + reason);
+        logger.error("stopping with reason: " + stoppingException);
+        this.getActivity().setRunState(RunState.Stopping);
     }
 
     @Override
-    public synchronized void stopActivityWithError(Throwable throwable) {
+    public synchronized void stopActivityWithErrorAsync(Throwable throwable) {
         if (stoppingException==null) {
             this.stoppingException = new RuntimeException(throwable);
             logger.error("stopping on error: " + throwable.toString(), throwable);
@@ -478,6 +479,6 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
                 logger.warn("summarized error (fullerrors=false): " + throwable.toString());
             }
         }
-        stopActivity();
+        this.getActivity().setRunState(RunState.Stopping);
     }
 }

@@ -18,6 +18,6 @@
 package io.engineblock.activityapi.core;
 
 public interface ActivityController {
-    void stopActivityWithReason(String reason);
-    void stopActivityWithError(Throwable throwable);
+    void stopActivityWithReasonAsync(String reason);
+    void stopActivityWithErrorAsync(Throwable throwable);
 }

@@ -30,7 +30,7 @@ public class ExitStatusIntegrationTests {
     public void testExitStatusOnBadParam() {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
-        ProcessResult result = invoker.run("badparam", 15,
+        ProcessResult result = invoker.run("exitstatus_badparam", 15,
                 "java", "-jar", "target/eb-cli.jar", "--logs-dir", "logs/test", "badparam"
         );
         String stderr = result.getStderrData().stream().collect(Collectors.joining("\n"));
@@ -42,7 +42,7 @@ public class ExitStatusIntegrationTests {
     public void testExitStatusOnActivityInitException() {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
-        ProcessResult result = invoker.run("badparam", 15,
+        ProcessResult result = invoker.run("exitstatus_initexception", 15,
                 "java", "-jar", "target/eb-cli.jar", "--logs-dir", "logs/test", "run", "type=diag", "initdelay=notanumber"
         );
         String stderr = result.getStderrData().stream().collect(Collectors.joining("\n"));
@@ -54,11 +54,23 @@ public class ExitStatusIntegrationTests {
     public void testExitStatusOnActivityThreadException() {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
-        ProcessResult result = invoker.run("badparam", 30,
-                "java", "-jar", "target/eb-cli.jar", "--logs-dir", "logs/test", "run", "type=diag", "erroroncycle=10", "cycles=20", "-vv"
+        ProcessResult result = invoker.run("exitstatus_threadexception", 30,
+                "java", "-jar", "target/eb-cli.jar", "--logs-dir", "logs/test", "run", "type=diag", "throwoncycle=10", "cycles=20", "-vv"
         );
         String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
-        assertThat(stdout).contains("Diag was asked to error on cycle 10");
+        assertThat(stdout).contains("Diag was asked to throw an error on cycle 10");
+        assertThat(result.exitStatus).isEqualTo(2);
+    }
+
+    @Test
+    public void testExitStatusOnActivityAsyncStopException() {
+        ProcessInvoker invoker = new ProcessInvoker();
+        invoker.setLogDir("logs/test");
+        ProcessResult result = invoker.run("exitstatus_asyncstopreqeust", 30,
+                "java", "-jar", "target/eb-cli.jar", "--logs-dir", "logs/test", "run", "type=diag", "async=true", "cyclerate=5", "erroroncycle=10", "cycles=2000", "-vv"
+        );
+        String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
+        assertThat(stdout).contains("Diag was requested to stop on cycle 10");
         assertThat(result.exitStatus).isEqualTo(2);
     }
 

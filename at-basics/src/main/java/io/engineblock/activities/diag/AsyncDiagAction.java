@@ -40,6 +40,7 @@ public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
     private int completedPhase;
     private int resultmodulo = Integer.MIN_VALUE;
     private long erroroncycle = Long.MIN_VALUE;
+    private long throwoncycle = Long.MIN_VALUE;
     private boolean logcycle;
     private int staticvalue = Integer.MIN_VALUE;
     private RateLimiter diagRateLimiter = null;
@@ -111,6 +112,7 @@ public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
         updatePhases();
         this.resultmodulo = activityDef.getParams().getOptionalInteger("resultmodulo").orElse(Integer.MIN_VALUE);
         this.erroroncycle = activityDef.getParams().getOptionalLong("erroroncycle").orElse(Long.MIN_VALUE);
+        this.throwoncycle = activityDef.getParams().getOptionalLong("throwoncycle").orElse(Long.MIN_VALUE);
         this.logcycle = activityDef.getParams().getOptionalBoolean("logcycle").orElse(false);
         this.staticvalue = activityDef.getParams().getOptionalInteger("staticvalue").orElse(-1);
         this.diagRateLimiter = diagActivity.getDiagRateLimiter();
@@ -123,7 +125,7 @@ public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
             logger.trace("cycle " + value);
         }
 
-        if (diagRateLimiter!=null) {
+        if (diagRateLimiter != null) {
             diagRateLimiter.acquire();
         }
 
@@ -160,7 +162,11 @@ public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
         }
 
         if (erroroncycle == value) {
-            throw new RuntimeException("Diag was asked to error on cycle " + erroroncycle);
+            this.diagActivity.getActivityController().stopActivityWithReasonAsync("Diag was requested to stop on cycle " + erroroncycle);
+        }
+
+        if (throwoncycle == value) {
+            throw new RuntimeException("Diag was asked to throw an error on cycle " + throwoncycle);
         }
 
         return result;
