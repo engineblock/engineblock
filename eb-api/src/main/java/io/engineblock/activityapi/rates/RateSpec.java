@@ -60,7 +60,7 @@ public class RateSpec {
             case 2:
                 burstRatio = Double.valueOf(specs[1]);
             case 1:
-                opsPerSec = Unit.countFor(specs[0]).orElseThrow(() -> new RuntimeException("Unparsable:" + specs[0]));
+                opsPerSec = Unit.doubleCountFor(specs[0]).orElseThrow(() -> new RuntimeException("Unparsable:" + specs[0]));
                 break;
             default:
                 throw new RuntimeException("Rate specs must be either '<rate>' or '<rate>:<burstRatio>' as in 5000.0 or 5000.0:1.0");

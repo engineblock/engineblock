@@ -38,4 +38,5 @@ public class ActivityDefTest {
         assertThat(d.getEndCycle()).isEqualTo(5000000);
         assertThat(d.getCycleCount()).isEqualTo(4000000);
     }
+
 }
