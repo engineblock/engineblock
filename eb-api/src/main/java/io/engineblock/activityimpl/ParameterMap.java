@@ -83,11 +83,11 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     }
 
     public Optional<Long> getOptionalLongUnitCount(String paramName) {
-        return getOptionalDoubleUnitCount(paramName).map(Double::longValue);
+        return getOptionalString(paramName).flatMap(Unit::longCountFor);
     }
 
     public Optional<Double> getOptionalDoubleUnitCount(String paramName) {
-        return getOptionalString(paramName).flatMap(Unit::countFor);
+        return getOptionalString(paramName).flatMap(Unit::doubleCountFor);
     }
 
     public Optional<Long> getOptionalLongBytes(String paramName) {
@@ -105,17 +105,6 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
     public Optional<Boolean> getOptionalBoolean(String paramName) {
         return Optional.ofNullable(super.get(paramName)).map(String::valueOf).map(Boolean::valueOf);
     }
-
-//    public int getIntOrDefault(String paramName, int defaultIntValue) {
-//        Optional<String> i = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
-//        return i.map(Integer::valueOf).orElse(defaultIntValue);
-//    }
-
-//    public boolean getBoolOrDefault(String paramName, boolean defaultBoolValue) {
-//        Optional<String> b = Optional.ofNullable(super.get(paramName)).map(String::valueOf);
-//        return b.map(Boolean::valueOf).orElse(defaultBoolValue);
-//    }
-
 
     public Long takeLongOrDefault(String paramName, Long defaultLongValue) {
         Optional<String> l = Optional.ofNullable(super.remove(paramName)).map(String::valueOf);

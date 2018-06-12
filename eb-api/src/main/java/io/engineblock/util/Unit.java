@@ -20,6 +20,7 @@ package io.engineblock.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.InvalidParameterException;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +30,8 @@ public class Unit {
     private final static Logger logger = LoggerFactory.getLogger(Unit.class);
 
     private static Pattern numberFmtPattern = Pattern.compile(" *(?<number>[0-9]+(\\.[0-9]+)?(E[0-9]+)?) *(?<unit>[^ ]+?)? *");
+    private static Pattern numberExponentPattern = Pattern.compile(" *(?<pre>.*?)?(?<number>[0-9]+)\\^(?<exponent>[0-9]+)(?<post>.*?)?");
+
     private static long nanoPerSecond = 1000000000;
     private static long bytesPerGB = 1000000000;
     private static long BytesPerGiB = 1024 * 1024 * 1024;
@@ -77,11 +80,11 @@ public class Unit {
         }
     }
 
-    public static Optional<Double> countFor(String spec) {
-        return convertCounts(Count.UNIT, spec);
+    public static Optional<Double> doubleCountFor(String spec) {
+        return convertDoubleCount(Count.UNIT, spec);
     }
 
-    public static Optional<Double> convertCounts(Count resultUnit, String spec) {
+    public static Optional<Double> convertDoubleCount(Count resultUnit, String spec) {
         Matcher m = numberFmtPattern.matcher(spec);
         if (m.matches()) {
             String numberpart = m.group("number");
@@ -105,9 +108,70 @@ public class Unit {
 
     }
 
+    public static Optional<Long> longCountFor(String spec) {
+        spec = longConversions(spec);
+        spec = spec.replace("MAX",String.valueOf(Long.MAX_VALUE));
+        try {
+            long value = Long.parseLong(spec);
+            return Optional.of(value);
+        } catch (NumberFormatException ignored) {
+        }
+        return convertLongCount(Count.UNIT, spec);
+    }
+
+    public static Optional<Long> convertLongCount(Count resultUnit, String spec) {
+        spec = longConversions(spec);
+        Matcher m = numberFmtPattern.matcher(spec);
+        if (m.matches()) {
+            String numberpart = m.group("number");
+            long base = Long.valueOf(numberpart);
+            String unitpart = m.group("unit");
+            if (unitpart != null) {
+                Count specifierUnit = Count.valueOfSuffix(unitpart);
+                if (specifierUnit == null) {
+                    throw new RuntimeException("Unable to recognized counts unit:" + unitpart);
+                }
+                double specifierScale = specifierUnit.getMultiplier();
+                double resultScale = resultUnit.getMultiplier();
+                double multiplier = (specifierScale / resultScale);
+                base *= multiplier;
+            }
+            return Optional.of(base);
+        } else {
+            logger.error("Parsing error for specifier:'" + spec + "'");
+            return Optional.empty();
+        }
+
+    }
+
+
     public static Optional<Double> bytesFor(String spec) {
         return convertBytes(Bytes.BYTE, spec);
     }
+
+    private static String longConversions(String spec) {
+        spec = spec.replace("MAX", String.valueOf(Long.MAX_VALUE));
+        Matcher matcher = numberExponentPattern.matcher(spec);
+
+        if (matcher.matches()) {
+            long number=Long.valueOf(matcher.group("number"));
+            long exponent = Long.valueOf(matcher.group("exponent"));
+
+            if (number==2L) {
+                if (exponent>63) {
+                    throw new InvalidParameterException("Exponent for powers of two must be 63 or less. It is " + exponent);
+                }
+                long value = 1L<<exponent;
+                spec= matcher.group("pre") + String.valueOf(value) + matcher.group("post");
+            } else {
+                spec= matcher.group("pre") + (long) Math.pow(number,exponent) + matcher.group("post");
+            }
+        }
+
+        return spec;
+
+    }
+
 
     public static Optional<Double> convertBytes(Bytes resultUnit, String spec) {
         Matcher m = numberFmtPattern.matcher(spec);

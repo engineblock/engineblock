@@ -26,15 +26,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UnitParserTests {
 
     @Test
-    public void testCountParser() {
-        assertThat(Unit.countFor("1M")).isPresent().contains(1000000.0d);
-        assertThat(Unit.convertCounts(Unit.Count.KILO,"1M")).isPresent().contains(1000.0d);
-        assertThat(Unit.convertCounts(Unit.Count.MEGA, "1K")).isPresent().contains(0.001d);
+    public void testDoubleCountParser() {
+        assertThat(Unit.doubleCountFor("1M")).isPresent().contains(1000000.0d);
+        assertThat(Unit.convertDoubleCount(Unit.Count.KILO,"1M")).isPresent().contains(1000.0d);
+        assertThat(Unit.convertDoubleCount(Unit.Count.MEGA, "1K")).isPresent().contains(0.001d);
+    }
+
+    @Test
+    public void testLongCountParser() {
+        assertThat(Unit.convertLongCount(Unit.Count.KILO, "1M")).isPresent().contains(1000L);
+        assertThat(Unit.convertLongCount(Unit.Count.UNIT, "3074457344000000000")).isPresent().contains(3074457344000000000L);
+        assertThat(Unit.convertLongCount(Unit.Count.UNIT, "3074457344000000020")).isPresent().contains(3074457344000000020L);
     }
 
     @Test
     public void testExponentialNotation() {
-        assertThat(Unit.countFor("1.0E10")).isPresent().contains(10000000000.0d);
+        assertThat(Unit.doubleCountFor("1.0E10")).isPresent().contains(10000000000.0d);
     }
 
     @Test

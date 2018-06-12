@@ -22,6 +22,7 @@ import io.engineblock.util.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.InvalidParameterException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -56,20 +57,10 @@ public class ActivityDef {
     };
     // parameter map has its own internal atomic map
     private ParameterMap parameterMap;
-//    private final AtomicInteger atomicThreadTarget = new AtomicInteger(0);
-
-//    public ActivityDef(String parameterString) {
-//        this.parameterMap = ParameterMap.parsePositional(parameterString, field_list);
-//    }
 
     public ActivityDef(ParameterMap parameterMap) {
         this.parameterMap = parameterMap;
-//        updateAtomicThreadLevel();
     }
-
-    //    private void updateAtomicThreadLevel() {
-//        this.atomicThreadTarget.set(getThreads());
-//    }
 
     public static Optional<ActivityDef> parseActivityDefOptionally(String namedActivitySpec) {
         try {
@@ -125,25 +116,25 @@ public class ActivityDef {
             startCycle = "0";
         }
 
-        return Unit.countFor(startCycle).orElseThrow(
+        return Unit.longCountFor(startCycle).orElseThrow(
                 () -> new RuntimeException("Unable to parse start cycles from " + startCycle)
-        ).longValue();
-    }
-
-    public void setStartCycle(String startCycle) {
-        setStartCycle(Unit.countFor(startCycle).orElseThrow(
-                () -> new RuntimeException("Unable to convert start cycle '" + startCycle + "' to a value.")
-        ).longValue());
+        );
     }
 
     public void setStartCycle(long startCycle) {
         parameterMap.set(FIELD_CYCLES, "" + startCycle + ".." + getEndCycle());
     }
 
+    public void setStartCycle(String startCycle) {
+        setStartCycle(Unit.longCountFor(startCycle).orElseThrow(
+                () -> new RuntimeException("Unable to convert start cycle '" + startCycle + "' to a value.")
+        );
+    }
+
     public void setEndCycle(String endCycle) {
-        setEndCycle(Unit.countFor(endCycle).orElseThrow(
+        setEndCycle(Unit.longCountFor(endCycle).orElseThrow(
                 () -> new RuntimeException("Unable to convert end cycle '" + endCycle + "' to a value.")
-        ).longValue());
+        );
     }
 
     /**
@@ -160,9 +151,9 @@ public class ActivityDef {
         } else {
             endCycle = cycles;
         }
-        return Unit.countFor(endCycle).orElseThrow(
+        return Unit.longCountFor(endCycle).orElseThrow(
                 () -> new RuntimeException("Unable to convert end cycle from " + endCycle)
-        ).longValue();
+        );
     }
 
     public void setEndCycle(long endCycle) {
@@ -180,7 +171,6 @@ public class ActivityDef {
 
     public void setThreads(int threads) {
         parameterMap.set(FIELD_THREADS, threads);
-//        updateAtomicThreadLevel();
     }
 
     /**
@@ -198,6 +188,7 @@ public class ActivityDef {
 
     public void setCycles(String cycles) {
         parameterMap.set(FIELD_CYCLES, cycles);
+        checkInvariants();
     }
 
     public String getCycleSummary() {
@@ -211,5 +202,11 @@ public class ActivityDef {
 
     public long getCycleCount() {
         return (getEndCycle() - getStartCycle());
+    }
+
+    private void checkInvariants() {
+        if (getStartCycle() >= getEndCycle()) {
+            throw new InvalidParameterException("Start cycle must be strictly less than end cycle, but they are [" + getStartCycle() + "," + getEndCycle() + ")");
+        }
     }
 }

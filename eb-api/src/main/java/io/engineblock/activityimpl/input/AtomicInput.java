@@ -20,6 +20,7 @@ import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.util.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,10 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
     private final AtomicLong cycleValue = new AtomicLong(0L);
     private final AtomicLong min = new AtomicLong(0L);
     private final AtomicLong max = new AtomicLong(Long.MAX_VALUE);
+
+    private final AtomicLong recycleValue = new AtomicLong(0L);
+    private final AtomicLong recycleMax = new AtomicLong(0L);
+
     private ActivityDef activityDef;
 
     public AtomicInput(ActivityDef activityDef) {
@@ -59,7 +64,16 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
             long current = this.cycleValue.get();
             long next = current + stride;
             if (next > max.get()) {
-                return null;
+                if (recycleValue.get()>=recycleMax.get()) {
+                    logger.debug("Exhausted input for " + activityDef.getAlias() + " at " + current + ", recycle count " + recycleValue.get());
+                    return null;
+                } else {
+                    if (cycleValue.compareAndSet(current,min.get()+stride)) {
+                        recycleValue.getAndIncrement();
+                        logger.trace("recycling input  for " + activityDef.getAlias() + " recycle:" + recycleValue.get());
+                        return new InputInterval.Segment(min.get(), min.get()+stride);
+                    }
+                }
             }
             if (cycleValue.compareAndSet(current, next)) {
                 return new InputInterval.Segment(current, next);
@@ -105,10 +119,22 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
             cycleValue.set(min.get());
         }
 
+        long recycles = activityDef.getParams().getOptionalString("recycles").flatMap(Unit::longCountFor).orElse(0L);
+        this.recycleMax.set(recycles);
+
+        checkInvariants();
+
     }
 
     @Override
     public boolean isContiguous() {
         return true;
     }
+
+    private void checkInvariants() {
+        if (min.get() >= max.get()) {
+            throw new InvalidParameterException("Start cycle must be strictly less than end cycle, but they are [" + min.get() + "," + max.get() + ")");
+        }
+    }
+
 }
