@@ -122,19 +122,11 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
         long recycles = activityDef.getParams().getOptionalString("recycles").flatMap(Unit::longCountFor).orElse(0L);
         this.recycleMax.set(recycles);
 
-        checkInvariants();
-
     }
 
     @Override
     public boolean isContiguous() {
         return true;
-    }
-
-    private void checkInvariants() {
-        if (min.get() >= max.get()) {
-            throw new InvalidParameterException("Start cycle must be strictly less than end cycle, but they are [" + min.get() + "," + max.get() + ")");
-        }
     }
 
 }

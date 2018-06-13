@@ -128,13 +128,13 @@ public class ActivityDef {
     public void setStartCycle(String startCycle) {
         setStartCycle(Unit.longCountFor(startCycle).orElseThrow(
                 () -> new RuntimeException("Unable to convert start cycle '" + startCycle + "' to a value.")
-        );
+        ));
     }
 
     public void setEndCycle(String endCycle) {
         setEndCycle(Unit.longCountFor(endCycle).orElseThrow(
                 () -> new RuntimeException("Unable to convert end cycle '" + endCycle + "' to a value.")
-        );
+        ));
     }
 
     /**

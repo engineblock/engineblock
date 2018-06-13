@@ -464,7 +464,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         logger.info("Stopping activity " + this.activityDef.getAlias() + ": " + reason);
         this.stoppingException=new RuntimeException("Stopping activity " + this.activityDef.getAlias() + ": " + reason);
         logger.error("stopping with reason: " + stoppingException);
-        this.getActivity().setRunState(RunState.Stopping);
+        requestStopMotors();
     }
 
     @Override
@@ -479,6 +479,6 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
                 logger.warn("summarized error (fullerrors=false): " + throwable.toString());
             }
         }
-        this.getActivity().setRunState(RunState.Stopping);
+        requestStopMotors();
     }
 }

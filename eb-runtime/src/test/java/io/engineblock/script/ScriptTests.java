@@ -39,13 +39,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ScriptTests {
 
     public static ScenarioResult runScenario(String scriptname, String... params) {
-        if ((params.length % 2)!=0) {
+        if ((params.length % 2) != 0) {
             throw new RuntimeException("params must be pairwise key, value, ...");
         }
-        Map<String,String> paramsMap = new HashMap<>();
+        Map<String, String> paramsMap = new HashMap<>();
 
-        for (int i = 0; i < params.length; i+=2) {
-            paramsMap.put(params[i],params[i+1]);
+        for (int i = 0; i < params.length; i += 2) {
+            paramsMap.put(params[i], params[i + 1]);
         }
         String scenarioName = "testing activity" + scriptname;
         ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":" + scriptname, 1);
@@ -53,7 +53,7 @@ public class ScriptTests {
         s.addScenarioScriptParams(paramsMap);
         s.addScriptText("load('classpath:scripts/" + scriptname + ".js');");
         ScenarioLogger scenarioLogger = new ScenarioLogger(s).setMaxLogs(0).setLogDir("logs/test").start();
-        e.execute(s,scenarioLogger);
+        e.execute(s, scenarioLogger);
         ScenariosResults scenariosResults = e.awaitAllResults();
         ScenarioResult scenarioResult = scenariosResults.getOne();
         scenarioResult.reportToLog();
@@ -65,8 +65,8 @@ public class ScriptTests {
 
         ScenarioResult scenarioResult = runScenario("target_rate");
         String iolog = scenarioResult.getIOLog();
-        System.out.println("iolog\n"+iolog);
-        Pattern p = Pattern.compile(".*mean phase rate = (\\d[.\\d]+).*",Pattern.DOTALL);
+        System.out.println("iolog\n" + iolog);
+        Pattern p = Pattern.compile(".*mean phase rate = (\\d[.\\d]+).*", Pattern.DOTALL);
         Matcher m = p.matcher(iolog);
         assertThat(m.matches()).isTrue();
 
@@ -80,7 +80,7 @@ public class ScriptTests {
     public void testStrideRateOnly() {
         ScenarioResult scenarioResult = runScenario("stride_rate");
         String iolog = scenarioResult.getIOLog();
-        System.out.println("iolog\n"+iolog);
+        System.out.println("iolog\n" + iolog);
         Pattern p = Pattern.compile(".*stride_rate.strides.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
         Matcher m = p.matcher(iolog);
         assertThat(m.matches()).isTrue();
@@ -88,14 +88,14 @@ public class ScriptTests {
         String digits = m.group(1);
         assertThat(digits).isNotEmpty();
         double rate = Double.valueOf(digits);
-        assertThat(rate).isCloseTo(25000.0D,Offset.offset(5000D));
+        assertThat(rate).isCloseTo(25000.0D, Offset.offset(5000D));
     }
 
     @Test
     public void testPhaseRateOnly() {
         ScenarioResult scenarioResult = runScenario("phase_rate");
         String iolog = scenarioResult.getIOLog();
-        System.out.println("iolog\n"+iolog);
+        System.out.println("iolog\n" + iolog);
         Pattern p = Pattern.compile(".*phase_rate.phases.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
         Matcher m = p.matcher(iolog);
         assertThat(m.matches()).isTrue();
@@ -103,7 +103,7 @@ public class ScriptTests {
         String digits = m.group(1);
         assertThat(digits).isNotEmpty();
         double rate = Double.valueOf(digits);
-        assertThat(rate).isCloseTo(25000.0D,Offset.offset(5000D));
+        assertThat(rate).isCloseTo(25000.0D, Offset.offset(5000D));
     }
 
 
@@ -130,7 +130,7 @@ public class ScriptTests {
 
     @Test
     public void testScriptParamsVariable() {
-        ScenarioResult scenarioResult = runScenario("params_variable","one", "two", "three", "four");
+        ScenarioResult scenarioResult = runScenario("params_variable", "one", "two", "three", "four");
         assertThat(scenarioResult.getIOLog()).contains("params.get(\"one\")='two'");
         assertThat(scenarioResult.getIOLog()).contains("params.get(\"three\")='four'");
         assertThat(scenarioResult.getIOLog()).contains("params.size()=2");
@@ -219,16 +219,22 @@ public class ScriptTests {
         assertThat(scenarioResult.getIOLog()).contains("step1 metrics.co_cycle_delay=");
         assertThat(scenarioResult.getIOLog()).contains("step2 metrics.co_cycle_delay=");
         System.out.println(scenarioResult.getIOLog());
-        Pattern delayPattern = Pattern.compile(".*step1 metrics.co_cycle_delay=(\\d+).*",Pattern.MULTILINE|Pattern.DOTALL);
+        Pattern delayPattern = Pattern.compile(".*step1 metrics.co_cycle_delay=(\\d+).*", Pattern.MULTILINE | Pattern.DOTALL);
         Matcher matcher = delayPattern.matcher(scenarioResult.getIOLog());
         assertThat(matcher.matches()).isTrue();
         String digits = matcher.group(1);
         assertThat(digits).isNotEmpty();
         Long delayValue = Long.valueOf(digits);
-        assertThat(delayValue).isBetween(750000000L,950000000L);
+        assertThat(delayValue).isBetween(750000000L, 950000000L);
 
     }
 
-
+    @Test
+    public void testExitAsyncLogic() {
+        ScenarioResult scenarioResult = runScenario(
+                "basicdiag",
+                "type", "diag", "async", "true", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
+        );
+    }
 
 }

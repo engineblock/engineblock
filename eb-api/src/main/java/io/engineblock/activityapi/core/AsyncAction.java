@@ -42,7 +42,7 @@ public interface AsyncAction extends Action {
      * more work. Once the async action signals that the internal buffer is
      * full, it should not be called again until {@link #dequeue()} is called at least
      * once. The enqueued cycle should be processed by the {@link AsyncAction} as
-     * an unblocking call before returning.
+     * a nonblocking call before returning.
      * </p>
      *
      * <p>If the method implementation is not able to accept another request for any
