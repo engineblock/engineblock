@@ -70,7 +70,7 @@ public class CycleSpanResults implements CycleResultsSegment, ResultReadable {
         }
     }
 
-    @NotNull
+
     @Override
     public Iterator<CycleResult> iterator() {
         return new Iter(min,nextMin);

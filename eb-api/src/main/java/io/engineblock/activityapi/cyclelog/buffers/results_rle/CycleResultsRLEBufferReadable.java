@@ -75,7 +75,7 @@ public class CycleResultsRLEBufferReadable implements CycleResultSegmentsReadabl
 //        return count;
 //    }
 //
-    @NotNull
+
     @Override
     public Iterator<CycleResultsSegment> iterator() {
         return new ResultSpanIterator(buf,null);

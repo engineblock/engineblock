@@ -50,7 +50,7 @@ public class CycleResultArray implements CycleResultsSegment, CanSortCycles {
         return cycleResults[0].getCycle();
     }
 
-    @NotNull
+
     @Override
     public Iterator<CycleResult> iterator() {
         return Iterators.forArray(cycleResults);

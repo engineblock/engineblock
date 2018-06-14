@@ -52,7 +52,7 @@ public class CycleResultsIntervalSegment implements CycleResultsSegment {
         return s;
     }
 
-    @NotNull
+
     @Override
     public Iterator<CycleResult> iterator() {
         return new CycleSegmentIterator();

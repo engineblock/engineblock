@@ -143,7 +143,7 @@ public class CycleLogInput implements Input, AutoCloseable, Iterable<CycleResult
         }
     }
 
-    @NotNull
+
     @Override
     public Iterator<CycleResultsSegment> iterator() {
         CycleResultsRLEBufferReadable cycleResultsSegments = new CycleResultsRLEBufferReadable(mbb.duplicate());

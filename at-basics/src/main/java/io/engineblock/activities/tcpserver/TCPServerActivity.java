@@ -20,7 +20,6 @@ package io.engineblock.activities.tcpserver;
 import io.engineblock.activities.stdout.StdoutActivity;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.util.SSLKsFactory;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,7 +176,7 @@ public class TCPServerActivity extends StdoutActivity {
         }
 
         @Override
-        public synchronized void write(@NotNull char[] cbuf, int off, int len) {
+        public synchronized void write( char[] cbuf, int off, int len) {
             while (true) {
                 try {
                     queue.put(new String(cbuf, off, len));

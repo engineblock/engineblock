@@ -234,7 +234,7 @@ public class ByteTrackerExtent implements CycleResultSegmentsReadable {
         return "[" + min + "," + (min + size) + ")";
     }
 
-    @NotNull
+
     @Override
     public Iterator<CycleResultsSegment> iterator() {
         return new SegmentIterator(min, this.markerData);

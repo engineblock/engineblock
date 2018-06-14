@@ -44,7 +44,7 @@ public class CycleResultsSegmentReadable implements CycleResultsSegment {
         return new CycleResultsSegmentReadable(single);
     }
 
-    @NotNull
+
     @Override
     public Iterator<CycleResult> iterator() {
         return new Iter();

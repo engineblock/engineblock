@@ -21,7 +21,6 @@ import activityconfig.MultiMapLookup;
 import activityconfig.rawyaml.RawStmtDef;
 import activityconfig.rawyaml.RawStmtsBlock;
 import io.engineblock.util.Tagged;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -81,7 +80,6 @@ public class StmtsBlock implements Tagged, Iterable<StmtDef> {
         return new MultiMapLookup(rawStmtsBlock.getBindings(), rawStmtsDoc.getBindings());
     }
 
-    @NotNull
     @Override
     public Iterator<StmtDef> iterator() {
         return getStmts().iterator();

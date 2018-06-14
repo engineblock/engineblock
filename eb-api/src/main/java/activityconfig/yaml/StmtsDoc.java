@@ -20,7 +20,6 @@ package activityconfig.yaml;
 import activityconfig.rawyaml.RawStmtsBlock;
 import activityconfig.rawyaml.RawStmtsDoc;
 import io.engineblock.util.Tagged;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -99,7 +98,6 @@ public class StmtsDoc implements Tagged, Iterable<StmtsBlock> {
      * Allow StmtsDoc to be used in iterable loops.
      * @return An iterator of {@link StmtsBlock}
      */
-    @NotNull
     @Override
     public Iterator<StmtsBlock> iterator() {
         return getBlocks().iterator();

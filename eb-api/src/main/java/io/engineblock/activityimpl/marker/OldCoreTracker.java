@@ -64,7 +64,7 @@ public class OldCoreTracker implements CycleResultSegmentsReadable {
         extents.addLast(extent);
     }
 
-    @NotNull
+
     @Override
     public Iterator<CycleResultsSegment> iterator() {
         return new SegmentIterable();

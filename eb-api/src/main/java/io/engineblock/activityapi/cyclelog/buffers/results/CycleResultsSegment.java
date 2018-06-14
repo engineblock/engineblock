@@ -34,7 +34,7 @@ public interface CycleResultsSegment extends Comparable<CycleResultsSegment>, It
         return new CycleResultArray(filteredResults);
     }
 
-    default int compareTo(@NotNull CycleResultsSegment other) {
+    default int compareTo( CycleResultsSegment other) {
         return Long.compare(getMinCycle(),other.getMinCycle());
     }
 
@@ -51,7 +51,7 @@ public interface CycleResultsSegment extends Comparable<CycleResultsSegment>, It
             return Long.MAX_VALUE;
         }
 
-        @NotNull
+
         @Override
         public Iterator<CycleResult> iterator() {
             return Collections.emptyIterator();

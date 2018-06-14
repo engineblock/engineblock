@@ -27,7 +27,7 @@ public interface CycleResultSegmentsReadable extends Iterable<CycleResultsSegmen
 
     default Iterable<CycleResult> getCycleResultIterable() {
         return new Iterable<CycleResult>() {
-            @NotNull
+
             @Override
             public Iterator<CycleResult> iterator() {
                 return new Iterator<CycleResult>() {

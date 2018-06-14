@@ -64,7 +64,7 @@ public class StmtsDocList implements Iterable<StmtsDoc> {
         return stmts;
     }
 
-    @NotNull
+
     @Override
     public Iterator<StmtsDoc> iterator() {
         return getStmtDocs().iterator();

@@ -78,7 +78,7 @@ public class ConfigTuples implements Iterable<ConfigTuples.Section> {
         return new ConfigTuples(matching);
     }
 
-    @NotNull
+
     @Override
     public Iterator<Section> iterator() {
         return sections.iterator();

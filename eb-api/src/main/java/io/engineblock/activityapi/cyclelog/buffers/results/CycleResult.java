@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface CycleResult extends Comparable<CycleResult>, CycleReadable, ResultReadable {
 
-    default int compareTo(@NotNull CycleResult o) {
+    default int compareTo( CycleResult o) {
         return Long.compare(getCycle(),o.getCycle());
     }
 
