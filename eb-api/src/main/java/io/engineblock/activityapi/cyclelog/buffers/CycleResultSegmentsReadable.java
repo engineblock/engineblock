@@ -19,7 +19,7 @@ package io.engineblock.activityapi.cyclelog.buffers;
 
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
-import org.jetbrains.annotations.NotNull;
+
 
 import java.util.Iterator;
 

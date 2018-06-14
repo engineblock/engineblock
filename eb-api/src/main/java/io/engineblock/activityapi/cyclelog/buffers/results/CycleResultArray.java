@@ -19,7 +19,7 @@ package io.engineblock.activityapi.cyclelog.buffers.results;
 
 import com.google.common.collect.Iterators;
 import io.engineblock.activityapi.cyclelog.outputs.CanSortCycles;
-import org.jetbrains.annotations.NotNull;
+
 
 import java.util.Arrays;
 import java.util.Iterator;

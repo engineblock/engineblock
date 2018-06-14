@@ -18,7 +18,7 @@
 package io.engineblock.util;
 
 import io.engineblock.activityapi.core.Activity;
-import org.jetbrains.annotations.NotNull;
+
 
 import java.util.*;
 import java.util.regex.Pattern;

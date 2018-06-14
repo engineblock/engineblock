@@ -17,7 +17,7 @@
 
 package io.engineblock.activityapi.cyclelog.buffers.results;
 
-import org.jetbrains.annotations.NotNull;
+
 
 import java.util.Collections;
 import java.util.Iterator;

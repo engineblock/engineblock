@@ -17,7 +17,7 @@
 
 package io.engineblock.activityapi.cyclelog.buffers.results;
 
-import org.jetbrains.annotations.NotNull;
+
 
 /**
  * A readable interface for (cycle, result) tuple types.
