@@ -128,7 +128,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 sequencer.addOp(sb,Long.valueOf(stmt.getParams().getOrDefault("ratio","1")));
             }
         } else if (stmtsDocList.getDocBindings().size() > 0) {
-            logger.debug("Creating stdout statement template from bindings, since none is otherwise defined.");
+            logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");
             String generatedStmt = stmtsDocList.getDocBindings().keySet()
                     .stream().map(s -> "{" + s + "}")
                     .collect(Collectors.joining(","));
@@ -146,8 +146,10 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
         OpSequence<StringBindings> opSequence = sequencer.resolve();
         if (getActivityDef().getCycleCount() == 0) {
-            logger.debug("Adjusting cycle count for " + activityDef.getAlias() + " to " +
-                    opSequence.getOps().size());
+            if (getParams().containsKey("cycles")) {
+                throw new RuntimeException("You specified cycles, but the range specified means zero cycles: " + getParams().get("cycles"));
+            }
+            logger.debug("Adjusting cycle count for " + activityDef.getAlias() + " to " + opSequence.getOps().size() +", which the size of the planned statement sequence.");
             getActivityDef().setCycles(String.valueOf(opSequence.getOps().size()));
         }
 

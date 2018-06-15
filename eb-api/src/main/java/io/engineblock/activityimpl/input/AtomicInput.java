@@ -104,6 +104,12 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
 
+        if (activityDef.getCycleCount() == 0) {
+            if (activityDef.getParams().containsKey("cycles")) {
+                throw new RuntimeException("You specified cycles, but the range specified means zero cycles: " + activityDef.getParams().get("cycles"));
+            }
+        }
+
         long startCycle = activityDef.getStartCycle();
         long endCycle = activityDef.getEndCycle();
         if (startCycle > endCycle) {
