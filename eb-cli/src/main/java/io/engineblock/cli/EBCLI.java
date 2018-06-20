@@ -14,12 +14,14 @@ import io.engineblock.metrics.MetricReporters;
 import io.engineblock.script.MetricsMapper;
 import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
+import io.virtdata.apps.MainRouting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,6 +41,11 @@ public class EBCLI {
     }
 
     public void run(String[] args) {
+        if (args.length>0 && args[0].toLowerCase().equals("virtdata")) {
+            MainRouting.main(Arrays.copyOfRange(args,1,args.length));
+            System.exit(0);
+        }
+
         EBCLIOptions options = new EBCLIOptions(args);
 
         if (options.wantsBasicHelp()) {
