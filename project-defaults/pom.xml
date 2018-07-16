@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <virtdata-version>1.2.22</virtdata-version>
+        <virtdata-version>1.2.23</virtdata-version>
         <metrics-version>3.2.6</metrics-version>
     </properties>
 
@@ -140,7 +140,7 @@
             <organizationUrl>http://engineblock.io/</organizationUrl>
         </developer>
     </developers>
-    
+
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh-snapshot</id>

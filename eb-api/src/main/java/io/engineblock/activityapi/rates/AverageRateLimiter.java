@@ -88,6 +88,8 @@ public class AverageRateLimiter implements Startable, RateLimiter {
      * Create a rate limiter.
      *
      * @param def The activity definition for this rate limiter
+     * @param label The label for the rate limiting facet within the activity
+     * @param rateSpec the rate limiter configuration
      */
     public AverageRateLimiter(ActivityDef def, String label, RateSpec rateSpec) {
         setActivityDef(def);

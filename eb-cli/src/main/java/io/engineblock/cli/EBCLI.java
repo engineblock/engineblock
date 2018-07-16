@@ -40,7 +40,7 @@ public class EBCLI {
         cli.run(args);
     }
 
-    public void run(String[] args) {
+    public void run(String[] args) { 
         if (args.length>0 && args[0].toLowerCase().equals("virtdata")) {
             MainRouting.main(Arrays.copyOfRange(args,1,args.length));
             System.exit(0);
