@@ -17,12 +17,8 @@ package io.engineblock.runtime;
 import java.util.Objects;
 
 /**
- * <p>This class and documentation satisfies the artifact rule checks
+ * This class and documentation satisfies the artifact rule checks
  * that don't know about dependency-aggregating modules.
- * </p>
- * <p>
- * If you really want to know more about engine block, consult the docs folder in the src repo.
- * </p>
  */
 public class RuntimeCheck {
     public static void sanityCheck() {
