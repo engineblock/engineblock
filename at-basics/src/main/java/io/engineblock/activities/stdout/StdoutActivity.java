@@ -16,7 +16,6 @@ import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.ExceptionMeterMetrics;
 import io.engineblock.util.StrInterpolater;
 import io.virtdata.core.BindingsTemplate;
-import io.virtdata.core.VirtData;
 import io.virtdata.templates.StringBindings;
 import io.virtdata.templates.StringBindingsTemplate;
 import org.slf4j.Logger;
@@ -116,7 +115,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
         if (stmts.size() > 0) {
             for (StmtDef stmt : stmts) {
-                BindingsTemplate bt = new BindingsTemplate(VirtData.get(),stmt.getBindings());
+                BindingsTemplate bt = new BindingsTemplate(stmt.getBindings());
                 String statement = stmt.getStmt();
                 Objects.requireNonNull(statement);
                 if (!statement.endsWith("\n") && getParams().getOptionalBoolean("newline").orElse(true)) {
@@ -136,7 +135,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 generatedStmt=generatedStmt+"\n";
             }
 
-            BindingsTemplate bt = new BindingsTemplate(VirtData.get(), stmtsDocList.getDocBindings());
+            BindingsTemplate bt = new BindingsTemplate(stmtsDocList.getDocBindings());
             StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
             StringBindings sb = sbt.resolve();
             sequencer.addOp(sb,1L);

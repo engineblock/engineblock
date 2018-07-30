@@ -26,6 +26,11 @@
         </dependency>
         <dependency>
             <groupId>io.engineblock</groupId>
+            <artifactId>eb-vis</artifactId>
+            <version>2.0.107-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>io.engineblock</groupId>
             <artifactId>eb-core</artifactId>
             <version>2.0.107-SNAPSHOT</version>
         </dependency>
