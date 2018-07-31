@@ -71,6 +71,8 @@ public class VisHttpd implements Runnable {
     }
 
     private ResourceHandler getResourceHandler() {
+        // http://www.eclipse.org/jetty/javadoc/9.4.11.v20180605/org/eclipse/jetty/server/Handler.html
+
         try {
             ResourceHandler resourceHandler = new ResourceHandler();
             Resource viscp = ResourceCollection.newClassPathResource("viscontent", true, true);
