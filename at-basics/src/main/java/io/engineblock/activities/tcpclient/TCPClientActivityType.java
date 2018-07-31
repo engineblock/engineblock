@@ -17,15 +17,15 @@
 
 package io.engineblock.activities.tcpclient;
 
-import com.google.auto.service.AutoService;
 import io.engineblock.activities.stdout.StdoutAction;
 import io.engineblock.activities.stdout.StdoutActivity;
 import io.engineblock.activityapi.core.Action;
 import io.engineblock.activityapi.core.ActionDispenser;
 import io.engineblock.activityapi.core.ActivityType;
 import io.engineblock.activityimpl.ActivityDef;
+import io.virtdata.annotations.Service;
 
-@AutoService(ActivityType.class)
+@Service(ActivityType.class)
 public class TCPClientActivityType implements ActivityType<TCPClientActivity> {
 
     @Override

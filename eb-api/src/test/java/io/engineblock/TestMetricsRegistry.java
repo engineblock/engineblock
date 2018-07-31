@@ -19,11 +19,12 @@ package io.engineblock;
 
 import com.codahale.metrics.MetricRegistry;
 import io.engineblock.activityapi.core.MetricRegistryService;
+import io.virtdata.annotations.Service;
 
 /**
  * Provide a local MetricRegistryService for tests
  */
-@com.google.auto.service.AutoService(MetricRegistryService.class)
+@Service(MetricRegistryService.class)
 public class TestMetricsRegistry implements MetricRegistryService {
 
     private MetricRegistry metricRegistry = new MetricRegistry();

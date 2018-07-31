@@ -18,10 +18,10 @@
 package io.engineblock.metrics;
 
 import com.codahale.metrics.MetricRegistry;
-import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.core.MetricRegistryService;
+import io.virtdata.annotations.Service;
 
-@AutoService(MetricRegistryService.class)
+@Service(MetricRegistryService.class)
 public class MetricsContext implements MetricRegistryService {
 
     private static MetricsContext instance;

@@ -17,11 +17,11 @@
 
 package io.engineblock.activityapi.cyclelog.filters;
 
-import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.cyclelog.buffers.results.ResultReadable;
 import io.engineblock.activityapi.cyclelog.filters.tristate.ResultFilteringSieve;
 import io.engineblock.activityapi.cyclelog.filters.tristate.TristateFilter;
 import io.engineblock.util.ConfigTuples;
+import io.virtdata.annotations.Service;
 
 import java.util.function.Predicate;
 
@@ -37,7 +37,7 @@ import java.util.function.Predicate;
  * clause. In the example above, the default policy would be "exclude",
  * given that the fist clause is "include".
  */
-@AutoService(ResultValueFilterType.class)
+@Service(ResultValueFilterType.class)
 public class CoreResultValueFilter implements ResultValueFilterType {
 
     @Override

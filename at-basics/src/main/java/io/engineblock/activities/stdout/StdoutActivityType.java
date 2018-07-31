@@ -1,14 +1,14 @@
 package io.engineblock.activities.stdout;
 
-import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.core.Action;
 import io.engineblock.activityapi.core.ActionDispenser;
 import io.engineblock.activityapi.core.ActivityType;
 import io.engineblock.activityimpl.ActivityDef;
+import io.virtdata.annotations.Service;
 
 import java.util.Optional;
 
-@AutoService(ActivityType.class)
+@Service(ActivityType.class)
 public class StdoutActivityType implements ActivityType<StdoutActivity> {
 
     @Override

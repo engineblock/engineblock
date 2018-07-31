@@ -17,13 +17,13 @@
 
 package io.engineblock.activityimpl.input;
 
-import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityapi.input.InputType;
+import io.virtdata.annotations.Service;
 
-@AutoService(InputType.class)
+@Service(InputType.class)
 public class TargetRateInputType implements InputType {
 
     @Override

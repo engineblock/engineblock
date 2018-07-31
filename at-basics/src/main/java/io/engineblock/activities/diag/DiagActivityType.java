@@ -15,10 +15,10 @@
 */
 package io.engineblock.activities.diag;
 
-import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.core.ActionDispenser;
 import io.engineblock.activityapi.core.ActivityType;
 import io.engineblock.activityimpl.ActivityDef;
+import io.virtdata.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * Diag serves as a basic template for implementing your own activity type.
  */
-@AutoService(ActivityType.class)
+@Service(ActivityType.class)
 public class DiagActivityType implements ActivityType<DiagActivity> {
 
     private static final Logger logger = LoggerFactory.getLogger(DiagActivityType.class);

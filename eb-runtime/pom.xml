@@ -90,12 +90,6 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <annotationProcessors>
-                        <annotationProcessor>
-                            com.google.auto.service.processor.AutoServiceProcessor
-                        </annotationProcessor>
-                    </annotationProcessors>
-
                 </configuration>
             </plugin>
 

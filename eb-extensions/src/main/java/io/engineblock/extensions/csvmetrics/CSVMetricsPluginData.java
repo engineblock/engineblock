@@ -18,13 +18,13 @@
 package io.engineblock.extensions.csvmetrics;
 
 import com.codahale.metrics.MetricRegistry;
-import com.google.auto.service.AutoService;
 import io.engineblock.extensions.ScriptingPluginInfo;
+import io.virtdata.annotations.Service;
 import org.slf4j.Logger;
 
 import javax.script.ScriptContext;
 
-@AutoService(ScriptingPluginInfo.class)
+@Service(ScriptingPluginInfo.class)
 public class CSVMetricsPluginData implements ScriptingPluginInfo<CSVMetricsPlugin> {
     @Override
     public String getDescription() {

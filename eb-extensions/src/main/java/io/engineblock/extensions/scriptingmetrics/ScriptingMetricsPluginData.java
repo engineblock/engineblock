@@ -19,11 +19,12 @@ package io.engineblock.extensions.scriptingmetrics;
 
 import com.codahale.metrics.MetricRegistry;
 import io.engineblock.extensions.ScriptingPluginInfo;
+import io.virtdata.annotations.Service;
 import org.slf4j.Logger;
 
 import javax.script.ScriptContext;
 
-@com.google.auto.service.AutoService(ScriptingPluginInfo.class)
+@Service(ScriptingPluginInfo.class)
 public class ScriptingMetricsPluginData implements ScriptingPluginInfo<ScriptingMetrics> {
     @Override
     public String getDescription() {

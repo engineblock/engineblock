@@ -17,14 +17,14 @@
 
 package io.engineblock.activityapi.cyclelog.outputs.logger;
 
-import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityapi.output.OutputDispenser;
+import io.virtdata.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@AutoService(OutputDispenser.class)
+@Service(OutputDispenser.class)
 public class LoggingMarkerDispenser implements OutputDispenser {
 
     private final static Logger logger = LoggerFactory.getLogger(LoggingMarkerDispenser.class);

@@ -17,17 +17,17 @@
 
 package io.engineblock.activityapi.cyclelog.outputs.cyclelog;
 
-import com.google.auto.service.AutoService;
 import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.cyclelog.outputs.ReorderingConcurrentResultBuffer;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityapi.output.OutputDispenser;
 import io.engineblock.activityapi.output.OutputType;
+import io.virtdata.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@AutoService(OutputType.class)
+@Service(OutputType.class)
 public class CycleLogOutputType implements OutputType {
 
     @Override

@@ -17,8 +17,8 @@
 
 package io.engineblock.activityapi.cyclelog.filters;
 
-import com.google.auto.service.AutoService;
 import io.engineblock.util.SimpleConfig;
+import io.virtdata.annotations.Service;
 
 import java.util.Arrays;
 import java.util.function.IntPredicate;
@@ -29,7 +29,7 @@ import java.util.function.IntPredicate;
  * array is used. When the type widens, this will need to use a native
  * int trie or something else that is time and space efficient.
  */
-@AutoService(ExperimentalResultFilterType.class)
+@Service(ExperimentalResultFilterType.class)
 public class IncludeCodesTypeExperimental implements ExperimentalResultFilterType {
 
     @Override
