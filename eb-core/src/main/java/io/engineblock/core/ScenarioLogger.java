@@ -31,9 +31,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ScenarioLogger {
@@ -42,6 +40,7 @@ public class ScenarioLogger {
     private File loggerDir = new File("logs");
     private int maxLogfiles = 10;
     private Level logLevel = Level.INFO;
+    private Map<String, Level> logLevelOverrides = new HashMap<>();
 
     public ScenarioLogger(Scenario scenario) {
         this.scenario = scenario;
@@ -94,6 +93,13 @@ public class ScenarioLogger {
 
         Logger logger = (Logger) LoggerFactory.getLogger("ROOT");
         logger.addAppender(fileAppender);
+
+        logLevelOverrides.forEach((loggerName,loggingLevel) -> {
+            logger.debug("Overriding log level for " + loggerName + " to " + loggingLevel);
+            Logger toOverride = (Logger) LoggerFactory.getLogger(loggerName);
+            toOverride.setLevel(loggingLevel);
+            toOverride.debug("Log level was set to " + loggingLevel + " by engineblock CLI option.");
+        });
 
         logger.setLevel(logLevel);
         logger.setAdditive(true); /* set to true if root should log too */
@@ -151,4 +157,8 @@ public class ScenarioLogger {
     };
 
 
+    public ScenarioLogger setLogLevelOverrides(Map<String, Level> logLevelOverrides) {
+        this.logLevelOverrides = logLevelOverrides;
+        return this;
+    }
 }

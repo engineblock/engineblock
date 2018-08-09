@@ -158,6 +158,7 @@ public class EBCLI {
                 .setLogDir(options.getLogsDirectory())
                 .setMaxLogs(options.getLogsMax())
                 .setLevel(options.getLogsLevel())
+                .setLogLevelOverrides(options.getLogLevelOverrides())
                 .start();
 
         executor.execute(scenario, sl);

@@ -60,6 +60,7 @@ public class EBCLIOptions {
     private static final String LOG_HISTO = "--log-histograms";
     private static final String LOG_STATS = "--log-histostats";
     private static final String CLASSIC_HISTOS = "--classic-histograms";
+    private final static String LOG_LEVEL_OVERRIDE = "--log-level-override";
 
     private static final Set<String> reserved_words = new HashSet<String>() {{
         addAll(
@@ -97,6 +98,7 @@ public class EBCLIOptions {
     private String[] cyclelogImportOptions = new String[0];
     private String consoleLoggingPattern = DEFAULT_CONSOLE_LOGGING_PATTERN;
     private String logsLevel = "INFO";
+    private Map<String,Level> logLevelsOverrides = new HashMap<>();
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -180,6 +182,10 @@ public class EBCLIOptions {
                 case LOGS_LEVEL:
                     arglist.removeFirst();
                     logsLevel = readWordOrThrow(arglist, "a log level");
+                    break;
+                case LOG_LEVEL_OVERRIDE:
+                    arglist.removeFirst();
+                    logLevelsOverrides = parseLogLevelOverrides(readWordOrThrow(arglist, "log levels in name:LEVEL,... format"));
                     break;
                 case PROGRESS_INDICATOR:
                     arglist.removeFirst();
@@ -286,6 +292,18 @@ public class EBCLIOptions {
                     }
             }
         }
+    }
+
+    private Map<String, Level> parseLogLevelOverrides(String levelsSpec) {
+        Map<String,Level> levels = new HashMap<>();
+        Arrays.stream(levelsSpec.split("[,;]")).forEach(kp -> {
+            String[] ll = kp.split(":");
+            if (ll.length!=2) {
+                throw new RuntimeException("Log level must have name:level format");
+            }
+            levels.put(ll[0],Level.toLevel(ll[1]));
+        });
+        return levels;
     }
 
     public List<LoggerConfig> getHistoLoggerConfigs() {
@@ -483,6 +501,10 @@ public class EBCLIOptions {
 
     public String getConsoleLoggingPattern() {
         return consoleLoggingPattern;
+    }
+
+    public Map<String, Level> getLogLevelOverrides() {
+        return logLevelsOverrides;
     }
 
     public static enum CmdType {

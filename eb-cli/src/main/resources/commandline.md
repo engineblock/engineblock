@@ -76,6 +76,10 @@ Specify the priority level of file logs:
 
 where `<level>` can be one of OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL
 
+Specify an override for one or more classes:
+
+    --log-level-override com.foobarbaz:DEBUG,com.barfoobaz:TRACE
+    
 Specify the logging pattern:
 
     --with-logging-pattern '%date %level [%thread] %logger{10} [%file:%line] %msg%n'
@@ -141,8 +145,11 @@ Increase console logging levels: (Default console logging level is *warning*)
     -v         (info)         
     -vv        (debug)
     -vvv       (trace)
-    
+
     --progress console:1m (disables itself if -v options are used)
+
+These levels affect *only* the console output level. Other logging level
+parameters affect logging to the scenario log, stored by default in logs/...    
     
 Show version, long form, with artifact coordinates.
 
