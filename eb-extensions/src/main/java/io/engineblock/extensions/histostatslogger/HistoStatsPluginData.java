@@ -29,7 +29,7 @@ public class HistoStatsPluginData implements ScriptingPluginInfo<HistoStatsPlugi
 
     @Override
     public String getDescription() {
-        return "allows script control of histogram stats logging in CSV files.";
+        return "allows script control of histogram stats logging in CSV files";
     }
 
     @Override

@@ -28,7 +28,7 @@ import javax.script.ScriptContext;
 public class FileAccessPluginData implements ScriptingPluginInfo<FileAccessPluginData> {
     @Override
     public String getDescription() {
-        return "Allows for convenient access to local files.";
+        return "Allows for convenient read access to local files";
     }
 
     @Override

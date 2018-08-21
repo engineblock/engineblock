@@ -28,7 +28,7 @@ import javax.script.ScriptContext;
 public class HdrHistoLogPluginData implements ScriptingPluginInfo<HdrHistoLogPlugin> {
     @Override
     public String getDescription() {
-        return "allows script control of HDR histogram interval logging.";
+        return "allows script control of HDR histogram interval logging";
 
     }
 
