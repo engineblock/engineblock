@@ -39,7 +39,6 @@ public class RateLimiterAccuracyTestMethods {
                 clock, new RateSpec(1000D, 0.0, true), ActivityDef.parseActivityDef("alias=testing")
         );
         //rl.start;
-        assertThat(rl.getLastSeenNanoTimeline()).isEqualTo(50_000L);
         assertThat(rl.getTicksTimeline().get()).isEqualTo(50_000L);
         assertThat(rl.getRateSchedulingDelay()).isEqualTo(0L);
         assertThat(rl.getTotalSchedulingDelay()).isEqualTo(0L);
@@ -53,14 +52,12 @@ public class RateLimiterAccuracyTestMethods {
         assertThat(rl.getTotalSchedulingDelay()).isEqualTo(25_000);             // 75K - 50K (+0 carryover)
 
         rl.acquire(20_000L);                                              // +20K to 95K
-        assertThat(rl.getLastSeenNanoTimeline()).isEqualTo(100_000L);
         assertThat(rl.getTicksTimeline().get()).isEqualTo(95_000L);
         assertThat(rl.getRateSchedulingDelay()).isEqualTo(5000L);               // 100K-95K
         assertThat(rl.getTotalSchedulingDelay()).isEqualTo(5000L);              // 100K -95K
 
         clock.set(clock.get() + 100_000L);                                      // clock +100K to 200K
         rl.setRate(2000);                                                       // triggers seen time sync
-        assertThat(rl.getLastSeenNanoTimeline()).isEqualTo(200_000L);           // unchanged
         rl.acquire(1L);
         assertThat(rl.getTicksTimeline().get()).isEqualTo(95_001L);             // +1 via acquire = 200_001
         assertThat(rl.getRateSchedulingDelay()).isEqualTo(104999L);             // actually (-1) nano, but delay is 0, not negative

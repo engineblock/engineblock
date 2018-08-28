@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * <p>This rate limiter uses nanoseconds as the unit of timing. This
@@ -69,9 +70,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     private long opTicks = 0L; // Number of nanos representing one grant at target rate
     protected final AtomicLong ticksTimeline = new AtomicLong(0L);
     private final AtomicLong accumulatedDelayNanos = new AtomicLong(0L);
-    private volatile long lastSeenNanoTime;
-    private volatile boolean isBursting = false;
-
+    
     private State state = State.Idle;
     private boolean reportCoDelay = false;
 
@@ -129,36 +128,20 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     @Override
     public long acquire(long nanos) {
 
-        long opScheduleTime = ticksTimeline.getAndAdd(nanos);
-        long timelinePosition = lastSeenNanoTime;
-
-        if (opScheduleTime < timelinePosition) {
-            isBursting = true;
-            return reportCoDelay ? timelinePosition - opScheduleTime : 0L;
+        long opScheduleTimeNs = ticksTimeline.getAndAdd(nanos);
+        long delayNs = opScheduleTimeNs - getNanoClockTime();
+        // event is in the past, return immediately
+        if (delayNs <= 0) {
+            return reportCoDelay ? -delayNs : 0L;
         }
 
-        long delay = timelinePosition - opScheduleTime;
-        if (delay <= 0) {
-
-            timelinePosition = getNanoClockTime();
-            lastSeenNanoTime = timelinePosition;
-            delay = timelinePosition - opScheduleTime;
-
-            // This only happens if the callers are ahead of schedule
-            if (delay < 0) {
-                isBursting = false;
-                delay *= -1;
-                try {
-                    //sleepCounter.inc();
-                    Thread.sleep(delay / 1000000, (int) (delay % 1000000L));
-                } catch (InterruptedException ignored) {
-                }
-                return 0L;
-            }
-        }
-
-        return reportCoDelay ? delay : 0L;
-
+        do {
+            LockSupport.parkNanos(delayNs);
+            // threads can spuriously unpark, must retest on wakeup.
+            delayNs = opScheduleTimeNs - getNanoClockTime();
+        } while (delayNs > 0);
+        
+        return reportCoDelay ? -delayNs : 0L;
     }
 
     @Override
@@ -202,12 +185,9 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     }
 
     private synchronized void sync() {
-        long nanos = getNanoClockTime();
-        this.lastSeenNanoTime = nanos;
-
         switch (this.state) {
             case Idle:
-                this.ticksTimeline.set(nanos);
+                this.ticksTimeline.set(getNanoClockTime());
                 this.accumulatedDelayNanos.set(0L);
                 break;
             case Started:
@@ -220,7 +200,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         return "spec=[" + label + "]:" + rateSpec.toString() +
                 ", delay=" + this.getRateSchedulingDelay() +
                 ", total=" + this.getTotalSchedulingDelay() +
-                ", (used/seen)=(" + ticksTimeline.get() + "/" + lastSeenNanoTime + ")" +
+                ", ticksTimeline=" + ticksTimeline.get() +
                 ", (clock,actual)=(" + getNanoClockTime() + "," + System.nanoTime() + ")";
     }
 
@@ -255,15 +235,6 @@ public class AverageRateLimiter implements Startable, RateLimiter {
      */
     public AtomicLong getTicksTimeline() {
         return this.ticksTimeline;
-    }
-
-    /**
-     * visible for testing
-     *
-     * @return lastSeenNanoTime - the long value of the shared view of the clock
-     */
-    public long getLastSeenNanoTimeline() {
-        return this.lastSeenNanoTime;
     }
 
     private enum State {
