@@ -24,6 +24,11 @@ package io.engineblock.activityapi.cyclelog.buffers.results;
  */
 public interface CycleResult extends Comparable<CycleResult>, CycleReadable, ResultReadable {
 
+    /**
+     * By default, allow cycle results to be ordered according to the cycle number.
+     * @param o CycleResult to compare to
+     * @return -1, 0, or 1, depending on ordering
+     */
     default int compareTo( CycleResult o) {
         return Long.compare(getCycle(),o.getCycle());
     }

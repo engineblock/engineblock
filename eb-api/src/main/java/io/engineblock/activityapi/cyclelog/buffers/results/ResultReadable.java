@@ -18,5 +18,9 @@
 package io.engineblock.activityapi.cyclelog.buffers.results;
 
 public interface ResultReadable {
+    /**
+     * Get a result associated with some operation, according to the activity-specific result map
+     * @return an activity-specific result code
+     */
     int getResult();
 }

@@ -65,7 +65,7 @@ public class Unit {
             if (unitpart != null) {
                 Duration durationDuration = Duration.valueOfSuffix(unitpart);
                 if (durationDuration == null) {
-                    throw new RuntimeException("Unable to recognized duration unit:" + unitpart);
+                    throw new RuntimeException("Unable to recognize duration unit:" + unitpart);
                 }
                 long specnanos = durationDuration.getNanos();
                 long resultnanos = resultUnit.getNanos();
@@ -129,7 +129,7 @@ public class Unit {
             if (unitpart != null) {
                 Count specifierUnit = Count.valueOfSuffix(unitpart);
                 if (specifierUnit == null) {
-                    throw new RuntimeException("Unable to recognized counts unit:" + unitpart);
+                    throw new RuntimeException("Unable to recognize counts unit:" + unitpart);
                 }
                 double specifierScale = specifierUnit.getMultiplier();
                 double resultScale = resultUnit.getMultiplier();
@@ -201,6 +201,7 @@ public class Unit {
         UNIT("U", "unit", 1.0),
         KILO("K", "kilo", 1000.0),
         MEGA("M", "mega", 1000000.0),
+        BILLION("B", "billion", 1000000000.0),
         GIGA("G", "giga", 1000000000.0),
         TERA("T", "tera", 1000000000000.0),
         PETA("P", "peta", 1000000000000000.0),

@@ -18,5 +18,9 @@
 package io.engineblock.activityapi.cyclelog.buffers.results;
 
 public interface CycleReadable {
+    /**
+     * get the cycle number associated with this element.
+     * @return a cycle number
+     */
     long getCycle();
 }

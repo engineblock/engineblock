@@ -33,7 +33,6 @@ import java.util.function.Supplier;
  */
 public interface Activity extends Comparable<Activity>, ActivityDefObserver {
 
-
     /**
      * Provide the activity with the controls needed to stop itself.
      * @param activityController The dedicated control interface for this activity
@@ -114,7 +113,7 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver {
 
     /**
      * Get or create the cycle rate limiter in a safe way. Implementations
-     * should ensure that this method is synchronized or that each requestor
+     * should ensure that this method is synchronized or that each requester
      * gets the same cycle rate limiter for the activity.
      * @param supplier A {@link RateLimiter} {@link Supplier}
      * @return An extant or newly created cycle {@link RateLimiter}
@@ -140,7 +139,7 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver {
     /**
      * Get or create the stride {@link RateLimiter} in a concurrent-safe
      * way. Implementations should ensure that this method is synchronized or
-     * that each requestor gets the same stride rate limiter for the activity.
+     * that each requester gets the same stride rate limiter for the activity.
      * @param supplier A {@link RateLimiter} {@link Supplier}
      * @return An extant or newly created stride {@link RateLimiter}
      */
@@ -165,7 +164,7 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver {
     /**
      * Get or create the phase {@link RateLimiter} in a concurrent-safe
      * way. Implementations should ensure that this method is synchronized or
-     * that each requestor gets the same phase rate limiter for the activity.
+     * that each requester gets the same phase rate limiter for the activity.
      * @param supplier A {@link RateLimiter} {@link Supplier}
      * @return An extant or newly created phase {@link RateLimiter}
      */
