@@ -49,8 +49,8 @@ public class OpResultBuffer<T> extends Buffer<OpContext> implements OpContext.Si
     }
 
     @Override
-    public void handle(OpContext opContext) {
-        put(opContext);
+    public void handle(OpContext opc) {
+        put(opc);
     }
 
     public T getContext() {
@@ -65,7 +65,7 @@ public class OpResultBuffer<T> extends Buffer<OpContext> implements OpContext.Si
     }
 
     public static interface Sink<T> {
-        void handle(OpResultBuffer<T> opContext);
+        void handle(OpResultBuffer<T> opcbuf);
     }
 
 

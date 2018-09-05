@@ -65,19 +65,15 @@ public class DiagActivity extends SimpleActivity implements Activity, ActivityDe
                 .map(RateSpec::new)
                 .ifPresent(spec -> diagRateLimiter= RateLimiters.createOrUpdate(getActivityDef(),"diag",diagRateLimiter,spec));
 
-        this.async = activityDef.getParams()
-                .getOptionalBoolean("async").orElse(false);
-
-        this.maxAsync = activityDef.getParams()
-                .getOptionalLong("maxasync").orElse(1L);
     }
 
 
     public boolean isAsync() {
-        return this.async;
+        return activityDef.getParams().getOptionalInteger("async").isPresent();
     }
 
     public long getMaxAsync() {
-        return this.maxAsync;
+        return activityDef.getParams().getOptionalInteger("async").orElse(1);
     }
+
 }

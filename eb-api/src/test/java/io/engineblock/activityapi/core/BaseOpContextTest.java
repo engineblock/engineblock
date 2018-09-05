@@ -17,14 +17,22 @@
 
 package io.engineblock.activityapi.core;
 
-public class AsyncExecutionException extends Exception {
-    private long cycle;
-    public AsyncExecutionException(long cycle) {
-        this.cycle = cycle;
+import org.testng.annotations.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@Test
+public class BaseOpContextTest {
+
+    @Test
+    public void testRunningStatus() {
+        BaseOpContext c = new BaseOpContext();
+        assertThat(c.isRunning()).isFalse();
+        c.init(null,3L,0L);
+        assertThat(c.isRunning()).isTrue();
+        c.stop(23);
+        assertThat(c.isRunning()).isFalse();
+
     }
 
-    @Override
-    public String getMessage() {
-        return "There was an error while handling an async call for cycle " + cycle + ":" + super.getMessage();
-    }
 }

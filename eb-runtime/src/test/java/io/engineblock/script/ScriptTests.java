@@ -233,7 +233,7 @@ public class ScriptTests {
     public void testExitAsyncLogic() {
         ScenarioResult scenarioResult = runScenario(
                 "basicdiag",
-                "type", "diag", "async", "true", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
+                "type", "diag", "async", "15", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
         );
     }
 

@@ -32,10 +32,10 @@ public class DiagActionDispenser implements ActionDispenser {
     @Override
     public Action getAction(int slot) {
         if (activity.isAsync()) {
-            logger.trace("creating new DiagAction instance for slot=" + slot + ", activity=" + activity);
-            return new AsyncDiagAction(slot, activity.getActivityDef(), activity);
+            logger.debug("creating new Async DiagAction instance for slot=" + slot + ", activity=" + activity);
+            return new AsyncDiagAction(activity, slot);
         } else {
-            logger.trace("creating new DiagAction instance for slot=" + slot + ", activity=" + activity);
+            logger.debug("creating new DiagAction instance for slot=" + slot + ", activity=" + activity);
             return new DiagAction(slot, activity.getActivityDef(), activity);
         }
     }

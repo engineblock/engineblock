@@ -16,23 +16,21 @@
  */
 package io.engineblock.activities.diag;
 
-import io.engineblock.activityapi.core.ActivityDefObserver;
-import io.engineblock.activityapi.core.AsyncAction;
+import io.engineblock.activityapi.core.BaseAsyncAction;
+import io.engineblock.activityapi.core.BaseOpContext;
 import io.engineblock.activityapi.core.OpContext;
 import io.engineblock.activityapi.rates.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.activityimpl.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 
-public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
+public class AsyncDiagAction extends BaseAsyncAction<OpContext, DiagActivity> {
 
     private final static Logger logger = LoggerFactory.getLogger(AsyncDiagAction.class);
-    private final ActivityDef activityDef;
-    private final DiagActivity diagActivity;
 
-    private int slot;
     private long lastUpdate;
     private long quantizedInterval;
     private long reportModulo;
@@ -44,33 +42,26 @@ public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
     private boolean logcycle;
     private int staticvalue = Integer.MIN_VALUE;
     private RateLimiter diagRateLimiter = null;
-    private long maxAsync =10L;
-    private long pendingOps=0L;
 
-    private LinkedList<OpContext> results = new LinkedList<>();
+    private ArrayDeque<OpContext> asyncOps;
 
-    public AsyncDiagAction(int slot, ActivityDef activityDef, DiagActivity diagActivity) {
-        this.activityDef = activityDef;
-        this.slot = slot;
-        this.diagActivity = diagActivity;
 
-        onActivityDefUpdate(activityDef);
+    public AsyncDiagAction(DiagActivity activity, int slot) {
+        super(activity, slot);
+        onActivityDefUpdate(activity.getActivityDef());
     }
 
     /**
-     * idempotently assign the last append reference time and the interval which, when added to it, represent when this
+     * assign the last append reference time and the interval which, when added to it, represent when this
      * diagnostic thread should take its turn to log cycle info. Also, append the modulo parameter.
      */
     private void updateReportTime() {
-        reportModulo = activityDef.getParams().getOptionalLong("modulo").orElse(10000000L);
-        lastUpdate = System.currentTimeMillis() - calculateOffset(slot, activityDef);
-        quantizedInterval = calculateInterval(activityDef);
-        logger.trace("updating report time for slot:" + slot + ", def:" + activityDef + " to " + quantizedInterval
+        ParameterMap params = this.activity.getActivityDef().getParams();
+        reportModulo = params.getOptionalLong("modulo").orElse(10000000L);
+        lastUpdate = System.currentTimeMillis() - calculateOffset(slot, params);
+        quantizedInterval = calculateInterval(params, activity.getActivityDef().getThreads());
+        logger.trace("updating report time for slot:" + slot + ", def:" + params + " to " + quantizedInterval
                 + ", and modulo " + reportModulo);
-    }
-
-    private void updatePhases() {
-        phasesPerCycle = activityDef.getParams().getOptionalInteger("phases").orElse(1);
     }
 
     /**
@@ -78,13 +69,13 @@ public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
      * for use as a discrete reference point upon which the quantizedIntervals can be stacked to find the
      * ideal schedule.
      *
-     * @param timeslot    - This thread's offset within the scheduled rotation, determined simply by thread enumeration
-     * @param activityDef - the def for this activity instance
+     * @param timeslot - This thread's offset within the scheduled rotation, determined simply by thread enumeration
+     * @param params   - the def for this activity instance
      * @return last time this thread would have updated
      */
-    private long calculateOffset(long timeslot, ActivityDef activityDef) {
-        long updateInterval = activityDef.getParams().getOptionalLong("interval").orElse(1000L);
-        long offset = calculateInterval(activityDef) - (updateInterval * timeslot);
+    private long calculateOffset(long timeslot, ParameterMap params) {
+        long updateInterval = params.getOptionalLong("interval").orElse(1000L);
+        long offset = calculateInterval(params, activity.getActivityDef().getThreads()) - (updateInterval * timeslot);
         return offset;
     }
 
@@ -92,37 +83,61 @@ public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
      * Calculate how frequently a thread needs to append in order to achieve an aggregate append interval for
      * a given number of cooperating threads.
      *
-     * @param activityDef - the def for this activity instance
+     * @param params - the def for this activity instance
      * @return long ms interval for this thread (the same for all threads, but calculated independently for each)
      */
-    private long calculateInterval(ActivityDef activityDef) {
-        long updateInterval = activityDef.getParams().getOptionalLong("interval").orElse(1000L);
+    private long calculateInterval(ParameterMap params, int threads) {
+        long updateInterval = params.getOptionalLong("interval").orElse(1000L);
         if (updateInterval == 0) { // Effectively disable this if it is set to 0 as an override.
             return Long.MAX_VALUE;
         }
 
-        int threads = activityDef.getThreads();
         return updateInterval * threads;
     }
 
 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
+        super.onActivityDefUpdate(activityDef);
+
+        ParameterMap params = activityDef.getParams();
         updateReportTime();
-        updatePhases();
-        this.resultmodulo = activityDef.getParams().getOptionalInteger("resultmodulo").orElse(Integer.MIN_VALUE);
-        this.erroroncycle = activityDef.getParams().getOptionalLong("erroroncycle").orElse(Long.MIN_VALUE);
-        this.throwoncycle = activityDef.getParams().getOptionalLong("throwoncycle").orElse(Long.MIN_VALUE);
-        this.logcycle = activityDef.getParams().getOptionalBoolean("logcycle").orElse(false);
-        this.staticvalue = activityDef.getParams().getOptionalInteger("staticvalue").orElse(-1);
-        this.diagRateLimiter = diagActivity.getDiagRateLimiter();
-        this.maxAsync = diagActivity.getMaxAsync();
+
+        this.resultmodulo = params.getOptionalInteger("resultmodulo").orElse(Integer.MIN_VALUE);
+        this.erroroncycle = params.getOptionalLong("erroroncycle").orElse(Long.MIN_VALUE);
+        this.throwoncycle = params.getOptionalLong("throwoncycle").orElse(Long.MIN_VALUE);
+        this.logcycle = params.getOptionalBoolean("logcycle").orElse(false);
+        this.staticvalue = params.getOptionalInteger("staticvalue").orElse(-1);
+        this.diagRateLimiter = activity.getDiagRateLimiter();
+        this.asyncOps = new ArrayDeque<>(this.getMaxPendingOps(activityDef));
     }
 
-    private int runCycle(long value) {
+    @Override
+    public boolean enqueue(OpContext opc) {
+        if (available()==0) {
+            finishOpCycle();
+        }
+        return super.enqueue(opc);
+    }
+
+    @Override
+    protected OpContext startOpCycle(OpContext opc) {
+        opc.start();
+        this.asyncOps.addLast(opc);
+        return opc;
+    }
+
+    private void finishOpCycle() {
+        OpContext opc = asyncOps.removeFirst();
+        opc.stop(runCycle(opc.getCycle()));
+        decrementOps();
+    }
+
+
+    private int runCycle(long cycle) {
 
         if (logcycle) {
-            logger.trace("cycle " + value);
+            logger.trace("cycle " + cycle);
         }
 
         if (diagRateLimiter != null) {
@@ -136,13 +151,13 @@ public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
 
         if ((now - lastUpdate) > quantizedInterval) {
             long delay = ((now - lastUpdate) - quantizedInterval);
-            logger.info("diag action interval, input=" + value + ", phase=" + completedPhase + ", report delay=" + delay + "ms");
+            logger.info("diag action interval, input=" + cycle + ", phase=" + completedPhase + ", report delay=" + delay + "ms");
             lastUpdate += quantizedInterval;
-            diagActivity.delayHistogram.update(delay);
+            activity.delayHistogram.update(delay);
         }
 
-        if ((value % reportModulo) == 0) {
-            logger.info("diag action   modulo, input=" + value + ", phase=" + completedPhase);
+        if ((cycle % reportModulo) == 0) {
+            logger.info("diag action   modulo, input=" + cycle + ", phase=" + completedPhase);
         }
 
         completedPhase++;
@@ -150,22 +165,20 @@ public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
         int result = 0;
 
         if (resultmodulo >= 0) {
-            if ((value % resultmodulo) == 0) {
+            if ((cycle % resultmodulo) == 0) {
                 result = 1;
-            } else {
-                result = 0;
             }
         } else if (staticvalue >= 0) {
             return staticvalue;
         } else {
-            result = (byte) (value % 128);
+            result = (byte) (cycle % 128);
         }
 
-        if (erroroncycle == value) {
-            this.diagActivity.getActivityController().stopActivityWithReasonAsync("Diag was requested to stop on cycle " + erroroncycle);
+        if (erroroncycle == cycle) {
+            activity.getActivityController().stopActivityWithReasonAsync("Diag was requested to stop on cycle " + erroroncycle);
         }
 
-        if (throwoncycle == value) {
+        if (throwoncycle == cycle) {
             throw new RuntimeException("Diag was asked to throw an error on cycle " + throwoncycle);
         }
 
@@ -173,23 +186,28 @@ public class AsyncDiagAction implements AsyncAction, ActivityDefObserver {
     }
 
     @Override
-    public boolean enqueue(OpContext unprocessed) {
-        results.addLast(unprocessed);
-        diagActivity.pendingOpsCounter.inc();
-        return (++pendingOps<maxAsync);
+    public boolean awaitCompletion(long timeout) {
+        while (pending()>0) {
+            finishOpCycle();
+        }
+        return true; // Diag action doesn't have any asynchronous logic to demonstrate
     }
 
     @Override
-    public OpContext dequeue() {
-        OpContext resultCarrier = results.pollFirst();
-        if (resultCarrier==null) {
-            return null;
-        }
-        int resultCode = runCycle(resultCarrier.getCycle());
-        resultCarrier.setResult(resultCode);
+    public DiagOpContext newOpContext() {
+        return new DiagOpContext("This is a diag op context.");
+    }
 
-        pendingOps--;
-        diagActivity.pendingOpsCounter.dec();
-        return resultCarrier;
+    public static class DiagOpContext extends BaseOpContext {
+        private String description;
+
+        DiagOpContext(String description) {
+            this.description = description;
+        }
+
+        @Override
+        public String toString() {
+            return super.toString() + ", description:'" + description;
+        }
     }
 }

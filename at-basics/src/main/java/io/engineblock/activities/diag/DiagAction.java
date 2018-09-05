@@ -168,7 +168,7 @@ public class DiagAction implements SyncAction, ActivityDefObserver, MultiPhaseAc
         }
 
         if (throwoncycle == value) {
-            throw new RuntimeException("Diag was asked to throw an error on cycle " + throwoncycle);
+            throw new DiagDummyError("Diag was asked to throw an error on cycle " + throwoncycle);
         }
 
         return result;

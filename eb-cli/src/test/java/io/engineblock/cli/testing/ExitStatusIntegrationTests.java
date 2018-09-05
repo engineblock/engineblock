@@ -67,7 +67,7 @@ public class ExitStatusIntegrationTests {
         ProcessInvoker invoker = new ProcessInvoker();
         invoker.setLogDir("logs/test");
         ProcessResult result = invoker.run("exitstatus_asyncstoprequest", 30,
-                "java", "-jar", "target/eb-cli.jar", "--logs-dir", "logs/test", "run", "type=diag", "async=true", "cyclerate=5", "erroroncycle=10", "cycles=2000", "-vvv"
+                "java", "-jar", "target/eb-cli.jar", "--logs-dir", "logs/test", "run", "type=diag", "async=1", "cyclerate=5", "erroroncycle=10", "cycles=2000", "-vvv"
         );
         String stdout = result.getStdoutData().stream().collect(Collectors.joining("\n"));
         assertThat(stdout).contains("Diag was requested to stop on cycle 10");

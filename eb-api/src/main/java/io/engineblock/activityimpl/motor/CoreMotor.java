@@ -19,7 +19,6 @@ package io.engineblock.activityimpl.motor;
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
-import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.input.Input;
@@ -31,6 +30,7 @@ import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -44,7 +44,7 @@ import static io.engineblock.activityapi.core.RunState.*;
  * input and action, respectively.
  * </p>
  */
-public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResultBuffer.Sink<OpContext> {
+public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResultBuffer.Sink<OpContext>, OpContext.Sink {
 
     private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
     Timer cyclesTimer;
@@ -62,6 +62,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
     private RateLimiter strideRateLimiter;
     private RateLimiter cycleRateLimiter;
     private RateLimiter phaseRateLimiter;
+    private ArrayDeque<OpContext> contextPool = new ArrayDeque<>();
 
 
     /**
@@ -213,7 +214,9 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
             // previously logic for the SyncAction type. It may be consolidated later once
             // the async action is proven durable
             if (action instanceof AsyncAction) {
-                AsyncAction async = (AsyncAction) action;
+
+                @SuppressWarnings("unchecked")
+                AsyncAction<OpContext> async = AsyncAction.class.cast(action);
 
                 while (slotState.get() == Running) {
 
@@ -236,11 +239,9 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
 
                     StrideResultBuffer strideResultBuffer = new StrideResultBuffer(cyclesTimer, strideDelay, cycleSegment.peekNextCycle(), this, stride);
 
-
-//                try (Timer.Context stridesTime = stridesTimer.time()) {
                     long strideStart = System.nanoTime();
 
-                    while (!cycleSegment.isExhausted()) {
+                    while (!cycleSegment.isExhausted() && slotState.get() == Running) {
                         cyclenum = cycleSegment.nextCycle();
                         if (cyclenum < 0) {
                             if (cycleSegment.isExhausted()) {
@@ -251,7 +252,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
                         }
 
                         if (slotState.get() != Running) {
-                            logger.trace("motor stopped after input (input " + cyclenum + "), stopping motor thread " + slotId);
+                            logger.trace("motor stopped in cycle " + cyclenum + ", stopping motor thread " + slotId);
                             continue;
                         }
 
@@ -260,35 +261,15 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
                             cycleDelay = cycleRateLimiter.acquire();
                         }
 
-                        //try (Timer.Context cycleTime = cyclesTimer.time()) {
                         try {
-                            if (!async.enqueue(new OpContext(strideResultBuffer, cyclenum, cycleDelay))) {
+                            OpContext opc = async.newOpContext();
+                            opc.init(strideResultBuffer, cyclenum, cycleDelay);
+
+                            boolean canAcceptMore = async.enqueue(opc);
+
+                            if (!canAcceptMore) {
                                 logger.trace("Action queue full at cycle=" + cyclenum);
-
-                                OpContext opContext = async.dequeue();
-                                cyclesTimer.update(opContext.getTotalLatency(), TimeUnit.NANOSECONDS);
-                            }
-
-//                                // runCycle
-//                                long phaseStart = System.nanoTime();
-//                                if (phaseRateLimiter != null) {
-//                                    phaseDelay = phaseRateLimiter.acquire();
-//                                }
-//                                long phaseEnd = System.nanoTime();
-//                                phasesTimer.update((phaseEnd - phaseStart) + phaseDelay, TimeUnit.NANOSECONDS);
-
-//                                // ... runPhase ...
-//                                if (multiPhaseAction != null) {
-//                                    while (multiPhaseAction.incomplete()) {
-//                                        phaseStart = System.nanoTime();
-//                                        if (phaseRateLimiter != null) {
-//                                            phaseDelay = phaseRateLimiter.acquire();
-//                                        }
-//                                        result = multiPhaseAction.runPhase(cyclenum);
-//                                        phaseEnd = System.nanoTime();
-//                                        phasesTimer.update((phaseEnd - phaseStart) + phaseDelay, TimeUnit.NANOSECONDS);
-//                                    }
-//                                }
+                                }
 
                         } catch (Exception t) {
                             logger.error("Error while processing async cycle " + cyclenum + ", error:" + t);
@@ -299,17 +280,13 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
 
                 }
 
-                CycleResult result = async.dequeue();
-                while (result != null) {
-                    if (output != null) {
-                        try {
-                            output.onCycleResult(result);
-                        } catch (Exception t) {
-                            logger.error("Error while feeding cycle result  " + result + " to output '" + output + "', error:" + t);
-                            throw t;
-                        }
+                if (slotState.get() == Finished) {
+                    boolean finished = async.awaitCompletion(60000);
+                    if (finished) {
+                        logger.debug("slot " + this.slotId + " completed successfully");
+                    } else {
+                        logger.warn("slot " + this.slotId + " was stopped before completing successfully");
                     }
-                    result = async.dequeue();
                 }
 
                 if (slotState.get() == Stopping) {
@@ -318,6 +295,11 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
 
 
             } else if (action instanceof SyncAction) {
+
+                if (activity.getActivityDef().getParams().containsKey("async")) {
+                    throw new RuntimeException("The async parameter was given for this activity, but it does not seem to know how to do async.");
+                }
+
                 SyncAction sync = (SyncAction) action;
 
                 while (slotState.get() == Running) {
@@ -341,7 +323,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
                         strideDelay = strideRateLimiter.acquire();
                     }
 
-//                try (Timer.Context stridesTime = stridesTimer.time()) {
                     long strideStart = System.nanoTime();
                     try {
 
@@ -366,7 +347,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
                                 cycleDelay = cycleRateLimiter.acquire();
                             }
 
-                            //try (Timer.Context cycleTime = cyclesTimer.time()) {
                             long cycleStart = System.nanoTime();
                             try {
                                 logger.trace("cycle " + cyclenum);
@@ -440,7 +420,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
         for (Object component : (new Object[]{input, action, output})) {
-            if (component != null && component instanceof ActivityDefObserver) {
+            if (component instanceof ActivityDefObserver) {
                 ((ActivityDefObserver) component).onActivityDefUpdate(activityDef);
             }
         }
@@ -470,18 +450,31 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
     }
 
     @Override
-    public void handle(OpResultBuffer<OpContext> strideResults) {
-        OpContext strideOps = strideResults.get();
-        strideOps.stop();
-        stridesTimer.update(strideOps.getTotalLatency(), TimeUnit.NANOSECONDS);
+    public void handle(OpResultBuffer<OpContext> opcbuf) {
+        OpContext strideOps = opcbuf.get();
+        stridesTimer.update(strideOps.getFinalResponseTime(), TimeUnit.NANOSECONDS);
         logger.trace("completed stride with first result cycle (" + strideOps.getCycle() + ")");
         if (output != null) {
-            int remaining = strideResults.remaining();
+            int remaining = opcbuf.remaining();
             for (int i = 0; i < remaining; i++) {
-                OpContext opContext = strideResults.get();
-                output.onCycleResult(opContext.getCycle(), opContext.getResult());
+                OpContext opc = opcbuf.get();
+                output.onCycleResult(opc.getCycle(), opc.getResult());
             }
         }
+    }
+
+    @Override
+    public void handle(OpContext opc) {
+        cyclesTimer.update(opc.getFinalResponseTime(), TimeUnit.NANOSECONDS);
+        if (output != null) {
+            try {
+                output.onCycleResult(opc);
+            } catch (Exception t) {
+                logger.error("Error while feeding cycle result  " + opc + " to output '" + output + "', error:" + t);
+                throw t;
+            }
+        }
+
     }
 
     public static class StrideResultBuffer extends OpResultBuffer<OpContext> {
@@ -489,14 +482,14 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
         private final Timer cycleTimer;
 
         public StrideResultBuffer(Timer cycleTimer, long strideDelay, long initialCycle, OpResultBuffer.Sink<OpContext> sink, int size) {
-            super(new OpContext(null, initialCycle, strideDelay), sink, OpContext[].class, size);
+            super(new BaseOpContext().init(null,initialCycle,strideDelay), sink, OpContext[].class, size);
             this.cycleTimer = cycleTimer;
         }
 
         @Override
-        public void handle(OpContext opContext) {
-            cycleTimer.update(opContext.getTotalLatency(), TimeUnit.NANOSECONDS);
-            super.handle(opContext);
+        public void handle(OpContext opc) {
+            cycleTimer.update(opc.getFinalResponseTime(), TimeUnit.NANOSECONDS);
+            super.handle(opc);
         }
     }
 }
