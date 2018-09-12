@@ -1,10 +1,10 @@
 package io.engineblock.cli;
 
 import io.engineblock.activityapi.core.ActivityType;
-import io.engineblock.activityapi.output.OutputType;
 import io.engineblock.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.engineblock.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.engineblock.activityapi.input.InputType;
+import io.engineblock.activityapi.output.OutputType;
 import io.engineblock.core.MarkdownDocInfo;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
@@ -117,11 +117,7 @@ public class EBCLI {
             reporters.start(10, options.getReportInterval());
         }
 
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        String sessionName = "scenario-" + timestamp;
-        if (!options.getSessionName().isEmpty()) {
-            sessionName = options.getSessionName();
-        }
+        String sessionName = new SessionNamer().format(options.getSessionName());
 
         for (EBCLIOptions.LoggerConfig histoLogger : options.getHistoLoggerConfigs()) {
             ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);
