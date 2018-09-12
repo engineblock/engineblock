@@ -15,24 +15,11 @@
  * /
  */
 
-package io.engineblock.activityapi.input;
+package io.engineblock.activityapi.cyclelog.buffers.results;
 
-import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
-
-public interface Input {
-
+public interface CycleMutable extends CycleReadable {
     /**
-     * Return the next InputSegment available, or null if
-     * none were available. This method is required to be thread safe.
-     * <p>All implementations of this method are required to be thread-safe.
-     * @param segmentLength The number of cycles (not necessarily contiguous) in the segment.
-     * @return a segment, or null if none available.
+     * set the cycle number associated with this element.
      */
-    CycleSegment getInputSegment(int segmentLength);
-
-    default boolean isContiguous() {
-        return false;
-    }
+    void setCycle(long cycle);
 }
-
-

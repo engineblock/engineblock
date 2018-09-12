@@ -18,11 +18,16 @@
 package io.engineblock.activityapi.core;
 
 import com.codahale.metrics.Counter;
+import io.engineblock.activityapi.core.ops.OpContext;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class BaseAsyncAction<T extends OpContext, A extends Activity> implements AsyncAction<T>, Stoppable, ActivityDefObserver {
     private final static Logger logger = LoggerFactory.getLogger("BaseAsyncAction");
@@ -34,7 +39,9 @@ public abstract class BaseAsyncAction<T extends OpContext, A extends Activity> i
 
     private int pendingOpsQueuedForThread = 0;
     private int maxOpsQueuedForThread = 1;
-
+    final Lock lock = new ReentrantLock(false);
+    final Condition canAccept = lock.newCondition();
+    final Condition isComplete = lock.newCondition();
 
     public BaseAsyncAction(A activity, int slot) {
         this.activity = activity;

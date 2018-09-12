@@ -17,6 +17,7 @@
 
 package io.engineblock.activityapi.core;
 
+import io.engineblock.activityapi.core.ops.BaseOpContext;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +29,7 @@ public class BaseOpContextTest {
     public void testRunningStatus() {
         BaseOpContext c = new BaseOpContext();
         assertThat(c.isRunning()).isFalse();
-        c.init(null,3L,0L);
+        c.init(3L, 0L, null);
         assertThat(c.isRunning()).isTrue();
         c.stop(23);
         assertThat(c.isRunning()).isFalse();

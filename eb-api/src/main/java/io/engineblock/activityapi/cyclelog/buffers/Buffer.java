@@ -21,6 +21,11 @@ import java.lang.reflect.Array;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+/**
+ * This is a lightweight buffer implementation that allows for buffer
+ * flipping and callbacks when the buffer is full.
+ * @param <T> The type held in this buffer
+ */
 public abstract class Buffer<T> implements Comparable<Buffer<T>> {
 
     private int position;

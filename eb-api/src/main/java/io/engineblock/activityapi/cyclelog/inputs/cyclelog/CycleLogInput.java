@@ -18,8 +18,8 @@
 package io.engineblock.activityapi.cyclelog.inputs.cyclelog;
 
 import io.engineblock.activityapi.core.Activity;
-import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
-import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegmentBuffer;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegmentBuffer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.cyclelog.buffers.results.ResultReadable;

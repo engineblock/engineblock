@@ -18,7 +18,9 @@ package io.engineblock.activityimpl.motor;
 
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.*;
-import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.core.ops.OpContext;
+import io.engineblock.activityapi.core.ops.OpResultBuffer;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.input.Input;
@@ -37,14 +39,25 @@ import java.util.concurrent.atomic.AtomicReference;
 import static io.engineblock.activityapi.core.RunState.*;
 
 /**
- * <p>ActivityMotor is a Runnable which runs in one of an activity's many threads.
+ * ActivityMotor is a Runnable which runs in one of an activity's many threads.
  * It is the iteration harness for individual cycles of an activity. Each ActivityMotor
  * instance is responsible for taking input from a LongSupplier and applying
  * the provided LongConsumer to it on each cycle. These two parameters are called
  * input and action, respectively.
- * </p>
+ *
+ * This motor implementation splits the handling of sync and async actions with a hard
+ * fork in the middle to limit potential breakage of the prior sync implementation
+ * with new async logic.
+ *
+ * <H2>Async Flow</H2>
+ * The stride is used as a unit of buffering. The core motor uses the stride as a
+ * buffer with event callbacks. Once an operation is started by calling the action's
+ * {@link AsyncAction#enqueue(OpContext)}} method, it is the responsibility of that
+ * action to call {@link OpContext#stop(int)} exactly once. Callbacks are registered
+ * on the OpContext which trigger operational tracking logic and then housekeeping or
+ * object re-use.
  */
-public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResultBuffer.Sink<OpContext>, OpContext.Sink {
+public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResultBuffer.OpBufferEvents, OpContext.OpEvents {
 
     private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
     Timer cyclesTimer;
@@ -237,7 +250,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
                         strideDelay = strideRateLimiter.acquire();
                     }
 
-                    StrideResultBuffer strideResultBuffer = new StrideResultBuffer(cyclesTimer, strideDelay, cycleSegment.peekNextCycle(), this, stride);
+                    StrideTracker strideTracker = new StrideTracker(cyclesTimer, strideDelay, cycleSegment.peekNextCycle(), this, stride);
 
                     long strideStart = System.nanoTime();
 
@@ -262,14 +275,14 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
                         }
 
                         try {
-                            OpContext opc = async.newOpContext();
-                            opc.init(strideResultBuffer, cyclenum, cycleDelay);
+                            OpContext opc = async.newOpContext().addSink(strideTracker);
+                            opc.setWaitTime(cycleDelay).setCycle(cyclenum);
 
                             boolean canAcceptMore = async.enqueue(opc);
 
                             if (!canAcceptMore) {
                                 logger.trace("Action queue full at cycle=" + cyclenum);
-                                }
+                            }
 
                         } catch (Exception t) {
                             logger.error("Error while processing async cycle " + cyclenum + ", error:" + t);
@@ -450,46 +463,49 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
     }
 
     @Override
-    public void handle(OpResultBuffer<OpContext> opcbuf) {
-        OpContext strideOps = opcbuf.get();
+    public void onResultBufferFull(OpResultBuffer resultBuffer) {
+        OpContext strideOps = resultBuffer.getContext();
         stridesTimer.update(strideOps.getFinalResponseTime(), TimeUnit.NANOSECONDS);
         logger.trace("completed stride with first result cycle (" + strideOps.getCycle() + ")");
         if (output != null) {
-            int remaining = opcbuf.remaining();
-            for (int i = 0; i < remaining; i++) {
-                OpContext opc = opcbuf.get();
-                output.onCycleResult(opc.getCycle(), opc.getResult());
-            }
-        }
-    }
-
-    @Override
-    public void handle(OpContext opc) {
-        cyclesTimer.update(opc.getFinalResponseTime(), TimeUnit.NANOSECONDS);
-        if (output != null) {
             try {
-                output.onCycleResult(opc);
+                int remaining = resultBuffer.remaining();
+                for (int i = 0; i < remaining; i++) {
+                    OpContext opc = resultBuffer.get();
+                    output.onCycleResult(opc);
+                }
             } catch (Exception t) {
-                logger.error("Error while feeding cycle result  " + opc + " to output '" + output + "', error:" + t);
+                logger.error("Error while feeding cycle result to output '" + output + "', error:" + t);
                 throw t;
             }
         }
-
     }
 
-    public static class StrideResultBuffer extends OpResultBuffer<OpContext> {
+//    @Override
+//    public void onAfterOpStop(OpContext opc) {
+//        cyclesTimer.update(opc.getFinalResponseTime(), TimeUnit.NANOSECONDS);
+//        if (output != null) {
+//            try {
+//                output.onCycleResult(opc);
+//            } catch (Exception t) {
+//            }
+//        }
+//
+//    }
+
+    public static class StrideTracker extends OpResultBuffer {
 
         private final Timer cycleTimer;
 
-        public StrideResultBuffer(Timer cycleTimer, long strideDelay, long initialCycle, OpResultBuffer.Sink<OpContext> sink, int size) {
-            super(new BaseOpContext().init(null,initialCycle,strideDelay), sink, OpContext[].class, size);
+        public StrideTracker(Timer cycleTimer, long strideDelay, long initialCycle, OpResultBuffer.OpBufferEvents sink, int size) {
+            super(initialCycle, strideDelay, sink, OpContext[].class, size);
             this.cycleTimer = cycleTimer;
         }
 
         @Override
-        public void handle(OpContext opc) {
+        public void onAfterOpStop(OpContext opc) {
             cycleTimer.update(opc.getFinalResponseTime(), TimeUnit.NANOSECONDS);
-            super.handle(opc);
+            super.onAfterOpStop(opc);
         }
     }
 }

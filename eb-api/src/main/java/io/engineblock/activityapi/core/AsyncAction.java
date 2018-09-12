@@ -17,6 +17,9 @@
 
 package io.engineblock.activityapi.core;
 
+import io.engineblock.activityapi.core.ops.BaseOpContext;
+import io.engineblock.activityapi.core.ops.OpContext;
+
 /**
  * <p>An AsyncAction allows an activity type to implement asynchronous
  * operations within each thread.

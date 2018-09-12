@@ -17,7 +17,7 @@
 
 package io.engineblock.activityimpl.input;
 
-import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleArray;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleArray;
 
 public class CycleArrayBuffer {
 

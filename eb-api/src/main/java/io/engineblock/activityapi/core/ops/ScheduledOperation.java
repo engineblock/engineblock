@@ -15,24 +15,17 @@
  * /
  */
 
-package io.engineblock.activityapi.input;
+package io.engineblock.activityapi.core.ops;
 
-import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
-
-public interface Input {
+public interface ScheduledOperation {
 
     /**
-     * Return the next InputSegment available, or null if
-     * none were available. This method is required to be thread safe.
-     * <p>All implementations of this method are required to be thread-safe.
-     * @param segmentLength The number of cycles (not necessarily contiguous) in the segment.
-     * @return a segment, or null if none available.
+     * Get the number of nanoseconds between the time that this operation was scheduled to run,
+     * and when it was initiated.
+     *
+     * @return nanoseconds of wait time
      */
-    CycleSegment getInputSegment(int segmentLength);
+    long getWaitTime();
 
-    default boolean isContiguous() {
-        return false;
-    }
 }
-
 

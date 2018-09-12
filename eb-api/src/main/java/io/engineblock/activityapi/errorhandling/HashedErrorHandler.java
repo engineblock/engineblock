@@ -194,7 +194,7 @@ public class HashedErrorHandler<T extends Throwable, R> implements CycleErrorHan
      * handled directly are more limited than this, you can cause the default handler
      * to trigger when the upper bound type is found if the traversal gets that far.
      *
-     * @param upperBound The Throwable subtype which is the lowest subtype to handle
+     * @param upperBound The Throwable subtype which is the lowest subtype to onAfterOpStop
      * @return this, for method chaining.
      */
     public HashedErrorHandler<T, R> setUpperBound(Class<? extends T> upperBound) {
@@ -239,7 +239,7 @@ public class HashedErrorHandler<T extends Throwable, R> implements CycleErrorHan
      * {@link Throwable} subtype. Handlers of supertypes are used when a specific
      * handler is not found for the reported error class. This means that you
      * can install a default handler for a throwable that is a common parent to
-     * your exceptions and have it handle all reported errors by default.
+     * your exceptions and have it onAfterOpStop all reported errors by default.
      *
      * <p>
      * The return type is contextual to how this handler class is used. If it is

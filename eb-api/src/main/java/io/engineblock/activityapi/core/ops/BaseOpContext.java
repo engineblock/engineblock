@@ -15,18 +15,20 @@
  * /
  */
 
-package io.engineblock.activityapi.core;
+package io.engineblock.activityapi.core.ops;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class BaseOpContext implements OpContext {
 
-    private final static Sink NULLSINK = new NullSink();
+    private final static OpEvents NULLSINK = new NullOpEvents();
     private static AtomicLong idgen = new AtomicLong(0L);
     public final long ctxid = idgen.getAndIncrement();
     private long usages = 0L;
 
-    private Sink sink = NULLSINK;
+    private OpEvents nullHandler = NULLSINK;
 
     private long delayNanos;
     private long startedAtNanos = 0L;
@@ -36,19 +38,36 @@ public class BaseOpContext implements OpContext {
     private int result;
 
     private int tries=0;
+    private List<OpEvents> opEvents = new ArrayList<OpEvents>();
 
     public BaseOpContext() {
     }
 
     @Override
     public OpContext reset() {
+        for (OpEvents opEvents : this.opEvents) {
+            opEvents.onOpReset(this);
+        }
         startedAtNanos=0L;
+        delayNanos=0L;
+        endedAtNanos=0L;
+        cycle=0L;
+        result=0;
+        opEvents =null;
+        opEvents.clear();
         return this;
     }
 
     @Override
-    public OpContext init(Sink sink, long cycle, long delayNanos) {
-        this.sink = sink==null? NULLSINK : sink;
+    public OpContext addSink(OpEvents opEvents) {
+        this.opEvents.add(opEvents);
+        return this;
+    }
+
+
+
+    @Override
+    public OpContext setWaitTime(long delayNanos) {
         this.endedAtNanos = Long.MIN_VALUE;
         this.cycle = cycle;
         this.delayNanos = delayNanos;
@@ -57,22 +76,26 @@ public class BaseOpContext implements OpContext {
         return this;
     }
 
-
-
     @Override
     public OpContext start() {
         this.endedAtNanos = Long.MIN_VALUE;
         this.startedAtNanos = System.nanoTime();
         tries=1;
         usages++;
+        for (OpEvents opEvents : this.opEvents) {
+            opEvents.onOpStart(this);
+        }
         return this;
     }
 
-    public OpContext restart() {
+    public OpContext retry() {
         this.startedAtNanos = System.nanoTime();
         this.endedAtNanos = Long.MIN_VALUE;
         usages++;
         tries++;
+        for (OpEvents opEvents : this.opEvents) {
+            opEvents.onOpRestart(this);
+        }
         return this;
     }
 
@@ -80,7 +103,9 @@ public class BaseOpContext implements OpContext {
     public OpContext stop(int result) {
         this.endedAtNanos = System.nanoTime();
         this.result = result;
-        this.sink.handle(this);
+        for (OpEvents opEvents : this.opEvents) {
+            opEvents.onAfterOpStop(this);
+        }
         synchronized(this) {
             notifyAll();
         }
@@ -88,7 +113,7 @@ public class BaseOpContext implements OpContext {
     }
 
     @Override
-    public long getServiceTime() {
+    public long getFinalServiceTime() {
         return (endedAtNanos - startedAtNanos);
     }
 
@@ -105,7 +130,6 @@ public class BaseOpContext implements OpContext {
     @Override
     public long getCumulativeResponseTime() {
         return delayNanos + (System.nanoTime() - startedAtNanos);
-
     }
 
     @Override
@@ -153,12 +177,16 @@ public class BaseOpContext implements OpContext {
                 ", startedAtNanos=" + startedAtNanos +
                 ", endedAtNanos=" + endedAtNanos +
                 ", usages=" + usages +
+                ", opEvents=" + opEvents.size() +
                 '}';
     }
 
-    private final static class NullSink implements Sink {
-        @Override
-        public void handle(OpContext opc) {
-        }
+    @Override
+    public void setCycle(long cycle) {
+        this.cycle = cycle;
     }
+
+    private final static class NullOpEvents implements OpEvents {
+    }
+
 }

@@ -48,7 +48,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * by marking and tracking calls respectively. Conversely, they are expected
  * to be signaled by tracking and marking calls.
  * <p>
- * This implementation needs to be adapted to handle early exit of either
+ * This implementation needs to be adapted to onAfterOpStop early exit of either
  * marker or tracker threads with no deadlock.
  */
 public class ContiguousOutputChunker implements Output {

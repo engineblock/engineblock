@@ -17,7 +17,7 @@
 
 package io.engineblock.activityimpl.input;
 
-import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.engineblock.activityimpl.ActivityDef;
 import org.testng.annotations.Test;
 
