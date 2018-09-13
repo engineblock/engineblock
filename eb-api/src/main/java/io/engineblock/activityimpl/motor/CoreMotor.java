@@ -57,7 +57,7 @@ import static io.engineblock.activityapi.core.RunState.*;
  * on the OpContext which trigger operational tracking logic and then housekeeping or
  * object re-use.
  */
-public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResultBuffer.OpBufferEvents, OpContext.OpEvents {
+public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
     private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
     Timer cyclesTimer;
@@ -250,7 +250,9 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
                         strideDelay = strideRateLimiter.acquire();
                     }
 
-                    StrideTracker strideTracker = new StrideTracker(cyclesTimer, strideDelay, cycleSegment.peekNextCycle(), this, stride);
+                    StrideTracker strideTracker =
+                            new StrideTracker(stridesTimer, cyclesTimer, strideDelay, cycleSegment.peekNextCycle(), stride, output)
+                            .start();
 
                     long strideStart = System.nanoTime();
 
@@ -277,12 +279,11 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
                         try {
                             OpContext opc = async.newOpContext().addSink(strideTracker);
                             opc.setWaitTime(cycleDelay).setCycle(cyclenum);
-
-                            boolean canAcceptMore = async.enqueue(opc);
-
-                            if (!canAcceptMore) {
-                                logger.trace("Action queue full at cycle=" + cyclenum);
-                            }
+                            async.enqueue(opc);
+//                            boolean canAcceptMore = async.enqueue(opc);
+//                            if (!canAcceptMore) {
+//                                logger.trace("Action queue full at cycle=" + cyclenum);
+//                            }
 
                         } catch (Exception t) {
                             logger.error("Error while processing async cycle " + cyclenum + ", error:" + t);
@@ -462,24 +463,6 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
         this.output = resultOutput;
     }
 
-    @Override
-    public void onResultBufferFull(OpResultBuffer resultBuffer) {
-        OpContext strideOps = resultBuffer.getContext();
-        stridesTimer.update(strideOps.getFinalResponseTime(), TimeUnit.NANOSECONDS);
-        logger.trace("completed stride with first result cycle (" + strideOps.getCycle() + ")");
-        if (output != null) {
-            try {
-                int remaining = resultBuffer.remaining();
-                for (int i = 0; i < remaining; i++) {
-                    OpContext opc = resultBuffer.get();
-                    output.onCycleResult(opc);
-                }
-            } catch (Exception t) {
-                logger.error("Error while feeding cycle result to output '" + output + "', error:" + t);
-                throw t;
-            }
-        }
-    }
 
 //    @Override
 //    public void onAfterOpStop(OpContext opc) {
@@ -495,17 +478,60 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable, OpResul
 
     public static class StrideTracker extends OpResultBuffer {
 
+        private final Timer strideTimer;
         private final Timer cycleTimer;
+        private final Output output;
 
-        public StrideTracker(Timer cycleTimer, long strideDelay, long initialCycle, OpResultBuffer.OpBufferEvents sink, int size) {
-            super(initialCycle, strideDelay, sink, OpContext[].class, size);
+        public StrideTracker(Timer strideTimer, Timer cycleTimer, long strideDelay, long initialCycle, int size, Output output) {
+            super(initialCycle, strideDelay, OpContext[].class, size);
+            this.strideTimer = strideTimer;
             this.cycleTimer = cycleTimer;
+            this.output = output;
         }
 
+        /**
+         * Each stride tracker must be started before any ops that it tracks
+         * @return the stride tracker, for method chaining
+         */
+        public StrideTracker start() {
+            this.getContext().start();
+            return this;
+        }
+
+        /**
+         * When an op that is tracked by this stride tracker completes, this method must be called
+         * @param opc The op context to be updated in the stride tracker
+         */
         @Override
         public void onAfterOpStop(OpContext opc) {
             cycleTimer.update(opc.getFinalResponseTime(), TimeUnit.NANOSECONDS);
             super.onAfterOpStop(opc);
         }
+
+        /**
+         * When a stride is complete, do house keeping. This effectively means when N==stride ops have been
+         * submitted to this buffer, which is tracked by {@link OpResultBuffer#put(Object)}.
+         */
+        public void onFull() {
+            getContext().stop(0);
+            strideTimer.update(this.getContext().getFinalResponseTime(),TimeUnit.NANOSECONDS);
+            logger.trace("completed stride with first result cycle (" + getContext().getCycle() + ")");
+
+            if (output != null) {
+                try {
+                    flip();
+                    int remaining = remaining();
+                    for (int i = 0; i < remaining; i++) {
+                        OpContext opc = get();
+                        output.onCycleResult(opc);
+                    }
+                } catch (Exception t) {
+                    logger.error("Error while feeding cycle result to output '" + output + "', error:" + t);
+                    throw t;
+                }
+            }
+        }
+
+
     }
 }

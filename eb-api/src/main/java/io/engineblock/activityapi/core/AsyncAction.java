@@ -55,7 +55,7 @@ public interface AsyncAction<T extends OpContext> extends Action {
      * If the action is known to have additional headroom according to the configured
      * concurrency limits, it can signal such by returning true from this method.
      *
-     * @param opc
+     * @param opc The op context that holds state for this operation
      * @return true, if the action is ready immediately for another operation
      */
     boolean enqueue(T opc);

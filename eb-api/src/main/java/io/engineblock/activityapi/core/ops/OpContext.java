@@ -55,7 +55,9 @@ public interface OpContext extends
     long getCtxId();
 
     /**
-     * {@see ScheduledOperation}
+     * @param waitTimeNanos How long the op was delayed from its ideal scheduled time
+     *                      according to the configured op rate
+     * @return the op context, for method chaining
      */
     OpContext setWaitTime(long waitTimeNanos);
 

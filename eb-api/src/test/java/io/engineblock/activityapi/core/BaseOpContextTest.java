@@ -29,7 +29,8 @@ public class BaseOpContextTest {
     public void testRunningStatus() {
         BaseOpContext c = new BaseOpContext();
         assertThat(c.isRunning()).isFalse();
-        c.init(3L, 0L, null);
+        c.setCycle(3L);
+        c.setWaitTime(0L);
         assertThat(c.isRunning()).isTrue();
         c.stop(23);
         assertThat(c.isRunning()).isFalse();

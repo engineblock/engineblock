@@ -25,34 +25,17 @@ import io.engineblock.activityapi.cyclelog.buffers.Buffer;
 public class OpResultBuffer extends Buffer<OpContext> implements OpContext.OpEvents {
 
     private OpContext context;
-    private final OpBufferEvents evhandler;
 
-    public OpResultBuffer(long initialCycle, long waitTime, OpBufferEvents evhandler, Class<OpContext[]> clazz, int size) {
+    public OpResultBuffer(long initialCycle, long waitTime, Class<OpContext[]> clazz, int size) {
         super(clazz, size);
         this.context = new BaseOpContext();
         context.setCycle(initialCycle);
         context.setWaitTime(waitTime);
-        this.evhandler = evhandler;
     }
 
     @Override
     protected int compare(OpContext one, OpContext other) {
         return one.compareTo(other);
-    }
-
-
-    protected void onEmpty() {
-        if (evhandler !=null) {
-            evhandler.onResultBufferEmpty(this);
-        }
-    }
-
-    protected void onFull() {
-        if (evhandler !=null) {
-            this.flip();
-            context.stop(0);
-            evhandler.onResultBufferFull(this);
-        }
     }
 
     @Override
@@ -67,14 +50,7 @@ public class OpResultBuffer extends Buffer<OpContext> implements OpContext.OpEve
     @Override
     public String toString() {
         return ((context!=null) ? "context:" + String.valueOf(context) : "") +
-                ((evhandler !=null) ? " event handler:" + String.valueOf(evhandler) :"") +
                 "buffer: " + super.toString();
     }
-
-    public static interface OpBufferEvents {
-        default void onResultBufferEmpty(OpResultBuffer buf) {};
-        default void onResultBufferFull(OpResultBuffer buf) {};
-    }
-
 
 }

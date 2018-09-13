@@ -20,6 +20,7 @@ package io.engineblock.activityapi.cyclelog.buffers.results;
 public interface CycleMutable extends CycleReadable {
     /**
      * set the cycle number associated with this element.
+     * @param cycle The cycle for this operation
      */
     void setCycle(long cycle);
 }
