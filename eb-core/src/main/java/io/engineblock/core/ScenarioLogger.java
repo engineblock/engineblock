@@ -161,4 +161,8 @@ public class ScenarioLogger {
         this.logLevelOverrides = logLevelOverrides;
         return this;
     }
+
+    public String getLogDir() {
+        return this.loggerDir.toString();
+    }
 }
