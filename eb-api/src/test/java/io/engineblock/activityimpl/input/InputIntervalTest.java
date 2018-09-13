@@ -17,7 +17,7 @@
 
 package io.engineblock.activityimpl.input;
 
-import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

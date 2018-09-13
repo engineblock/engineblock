@@ -1,10 +1,10 @@
 package io.engineblock.cli;
 
 import io.engineblock.activityapi.core.ActivityType;
-import io.engineblock.activityapi.output.OutputType;
 import io.engineblock.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.engineblock.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
 import io.engineblock.activityapi.input.InputType;
+import io.engineblock.activityapi.output.OutputType;
 import io.engineblock.core.MarkdownDocInfo;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
@@ -14,7 +14,7 @@ import io.engineblock.metrics.MetricReporters;
 import io.engineblock.script.MetricsMapper;
 import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
-import io.virtdata.apps.MainRouting;
+import io.virtdata.apps.MainApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class EBCLI {
 
     public void run(String[] args) { 
         if (args.length>0 && args[0].toLowerCase().equals("virtdata")) {
-            MainRouting.main(Arrays.copyOfRange(args,1,args.length));
+            MainApp.main(Arrays.copyOfRange(args,1,args.length));
             System.exit(0);
         }
 
@@ -117,11 +117,7 @@ public class EBCLI {
             reporters.start(10, options.getReportInterval());
         }
 
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        String sessionName = "scenario-" + timestamp;
-        if (!options.getSessionName().isEmpty()) {
-            sessionName = options.getSessionName();
-        }
+        String sessionName = new SessionNamer().format(options.getSessionName());
 
         for (EBCLIOptions.LoggerConfig histoLogger : options.getHistoLoggerConfigs()) {
             ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);

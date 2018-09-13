@@ -14,8 +14,8 @@
 */
 package io.engineblock.activitycore.fortesting;
 
-import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleArray;
-import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleArray;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityimpl.input.InputInterval;
 

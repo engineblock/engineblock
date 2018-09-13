@@ -140,8 +140,8 @@ public class Scenario implements Callable<ScenarioResult> {
             } catch (ScriptException e) {
                 String diagname = "diag_" + System.currentTimeMillis() + ".js";
                 try {
-                    Files.write(Paths.get(diagname),script.getBytes(Charsets.UTF_8));
-
+                    Path diagFilePath = Paths.get(scenarioLogger.getLogDir(), diagname);
+                    Files.write(diagFilePath,script.getBytes(Charsets.UTF_8));
                 } catch (Exception ignored) {
                 }
                 String errorDesc = "Script error while running scenario:" + e.toString() + ", script content is at " + diagname;

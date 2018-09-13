@@ -15,24 +15,23 @@
  * /
  */
 
-package io.engineblock.activityapi.input;
+package io.engineblock.activityapi.core.ops;
 
-import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
-
-public interface Input {
+public interface RetryableOperation {
 
     /**
-     * Return the next InputSegment available, or null if
-     * none were available. This method is required to be thread safe.
-     * <p>All implementations of this method are required to be thread-safe.
-     * @param segmentLength The number of cycles (not necessarily contiguous) in the segment.
-     * @return a segment, or null if none available.
+     * Retry this operation. Set the start timer to when the method is called, and increment
+     * the tries counter.
+     * @return The op context after modifications
      */
-    CycleSegment getInputSegment(int segmentLength);
+    RetryableOperation retry();
 
-    default boolean isContiguous() {
-        return false;
-    }
+    /**
+     * Get the number of times start or restart were called, cumulatively, since this operation
+     * was initialized.
+     * @return total attempts to complete this op
+     */
+    int getTries();
+
 }
-
 

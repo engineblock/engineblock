@@ -18,6 +18,7 @@
 package io.engineblock.activityapi.core;
 
 import com.codahale.metrics.Counter;
+import io.engineblock.activityapi.core.ops.OpContext;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.metrics.ActivityMetrics;
@@ -34,7 +35,6 @@ public abstract class BaseAsyncAction<T extends OpContext, A extends Activity> i
 
     private int pendingOpsQueuedForThread = 0;
     private int maxOpsQueuedForThread = 1;
-
 
     public BaseAsyncAction(A activity, int slot) {
         this.activity = activity;

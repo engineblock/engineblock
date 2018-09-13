@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activityapi.cyclelog.buffers.cycles;
+package io.engineblock.activityapi.cyclelog.buffers.results;
 
 import java.util.Arrays;
 

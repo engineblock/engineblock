@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activityapi.cyclelog.buffers.cycles;
+package io.engineblock.activityapi.cyclelog.buffers.results;
 
 /**
  * A segment of cycle numbers to iterate over. Usage of an InputSegment
@@ -48,5 +48,11 @@ public interface CycleSegment {
         return values;
     }
 
+    /**
+     * Return the value of the next cycle which would be returned by {@link #nextCycle()}}
+     * without modifying the segment, or a negative number if the cycle range would be
+     * outside the valid range for this segment.
+     * @return the next cycle that will be returned
+     */
     long peekNextCycle();
 }

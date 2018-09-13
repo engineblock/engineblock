@@ -15,24 +15,22 @@
  * /
  */
 
-package io.engineblock.activityapi.core;
+package io.engineblock.activityapi.core.ops;
 
 import io.engineblock.activityapi.cyclelog.buffers.Buffer;
 
-public class OpResultBuffer<T> extends Buffer<OpContext> implements OpContext.Sink {
+/**
+ * An OpResultBuffer
+ */
+public class OpResultBuffer extends Buffer<OpContext> implements OpContext.OpEvents {
 
-    private T context;
-    private final Sink<T> sink;
+    private OpContext context;
 
-    public OpResultBuffer(T context, Sink<T> sink, Class<OpContext[]> clazz, int size) {
+    public OpResultBuffer(long initialCycle, long waitTime, Class<OpContext[]> clazz, int size) {
         super(clazz, size);
-        this.context = context;
-        this.sink = sink;
-    }
-
-    public OpResultBuffer(Sink<T> sink, Class<OpContext[]> clazz, int size) {
-        super(clazz, size);
-        this.sink = sink;
+        this.context = new BaseOpContext();
+        context.setCycle(initialCycle);
+        context.setWaitTime(waitTime);
     }
 
     @Override
@@ -41,32 +39,18 @@ public class OpResultBuffer<T> extends Buffer<OpContext> implements OpContext.Si
     }
 
     @Override
-    protected void onFull() {
-        if (sink!=null) {
-            this.flip();
-            sink.handle(this);
-        }
-    }
-
-    @Override
-    public void handle(OpContext opc) {
+    public void onAfterOpStop(OpContext opc) {
         put(opc);
     }
 
-    public T getContext() {
+    public OpContext getContext() {
         return context;
     }
 
     @Override
     public String toString() {
         return ((context!=null) ? "context:" + String.valueOf(context) : "") +
-                ((sink!=null) ? " sink:" + String.valueOf(sink) :"") +
                 "buffer: " + super.toString();
     }
-
-    public static interface Sink<T> {
-        void handle(OpResultBuffer<T> opcbuf);
-    }
-
 
 }

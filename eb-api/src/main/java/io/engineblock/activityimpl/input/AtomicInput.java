@@ -17,7 +17,7 @@
 package io.engineblock.activityimpl.input;
 
 import io.engineblock.activityapi.core.ActivityDefObserver;
-import io.engineblock.activityapi.cyclelog.buffers.cycles.CycleSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.util.Unit;

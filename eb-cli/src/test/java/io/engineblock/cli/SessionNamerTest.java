@@ -15,26 +15,31 @@
  * /
  */
 
-package io.engineblock.activityapi.core;
+package io.engineblock.cli;
 
-import io.engineblock.activityapi.core.ops.BaseOpContext;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
-public class BaseOpContextTest {
+public class SessionNamerTest {
 
     @Test
-    public void testRunningStatus() {
-        BaseOpContext c = new BaseOpContext();
-        assertThat(c.isRunning()).isFalse();
-        c.setCycle(3L);
-        c.setWaitTime(0L);
-        assertThat(c.isRunning()).isTrue();
-        c.stop(23);
-        assertThat(c.isRunning()).isFalse();
-
+    public void testDefaultFormat() {
+        SessionNamer namer = new SessionNamer();
+        String name1 = namer.format(null);
+        assertThat(name1).matches("scenario_\\d{8}_\\d{6}_\\d{3}");
+        String name2 = namer.format("");
+        assertThat(name2).matches("scenario_\\d{8}_\\d{6}_\\d{3}");
     }
+
+    public void testCustomFormat() {
+        SessionNamer namer = new SessionNamer();
+        String name1 = namer.format("Custom_session_name");
+        assertThat(name1).matches("Custom_session_name");
+        String name2 = namer.format("TEST--%tQ");
+        assertThat(name2).matches("TEST--\\d{13}");
+    }
+
 
 }

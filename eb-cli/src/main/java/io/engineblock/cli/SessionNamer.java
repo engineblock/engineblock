@@ -15,26 +15,23 @@
  * /
  */
 
-package io.engineblock.activityapi.core;
+package io.engineblock.cli;
 
-import io.engineblock.activityapi.core.ops.BaseOpContext;
-import org.testng.annotations.Test;
+public class SessionNamer {
 
-import static org.assertj.core.api.Assertions.assertThat;
+    public String format(String sessionName) {
+        String nameTemplate = sessionName;
+        if (nameTemplate==null || nameTemplate.isEmpty()) {
+            nameTemplate = "scenario_%tY%tm%td_%tH%tM%tS_%tL";
+        }
 
-@Test
-public class BaseOpContextTest {
+        int splits = nameTemplate.split("%").length -1;
+        Long[] times = new Long[splits];
+        long now = System.currentTimeMillis();
+        for (int i = 0; i < times.length; i++) times[i] = now;
 
-    @Test
-    public void testRunningStatus() {
-        BaseOpContext c = new BaseOpContext();
-        assertThat(c.isRunning()).isFalse();
-        c.setCycle(3L);
-        c.setWaitTime(0L);
-        assertThat(c.isRunning()).isTrue();
-        c.stop(23);
-        assertThat(c.isRunning()).isFalse();
+        sessionName = String.format(nameTemplate, (Object[]) times);
 
+        return sessionName;
     }
-
 }
