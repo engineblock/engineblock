@@ -38,7 +38,7 @@ public class SessionNamerTest {
         String name1 = namer.format("Custom_session_name");
         assertThat(name1).matches("Custom_session_name");
         String name2 = namer.format("TEST--%tQ");
-        assertThat(name2).matches("TEST--\\d{113}");
+        assertThat(name2).matches("TEST--\\d{13}");
     }
 
 
