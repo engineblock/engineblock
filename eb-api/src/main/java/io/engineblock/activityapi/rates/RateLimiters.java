@@ -28,9 +28,10 @@ public class RateLimiters {
     public static synchronized RateLimiter createOrUpdate(ActivityDef def, String label, RateLimiter extant, RateSpec spec) {
 
         if (extant == null) {
-            logger.info("Using average rate limiter for speed: " + spec);
+            logger.debug("Using average rate limiter for speed: " + spec);
             return new AverageRateLimiter(def, label, spec);
         } else {
+            logger.debug("updating rate limiter for speed: " + spec);
             extant.setRateSpec(spec);
             return extant;
         }
