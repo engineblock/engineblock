@@ -19,27 +19,30 @@ package io.engineblock.activityapi.core;
 
 import com.codahale.metrics.Counter;
 import io.engineblock.activityapi.core.ops.OpContext;
+import io.engineblock.activityapi.core.ops.fluent.TrackedOp;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
+import io.engineblock.activityimpl.motor.AsyncTracker;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class BaseAsyncAction<T extends OpContext, A extends Activity> implements AsyncAction<T>, Stoppable, ActivityDefObserver {
+public abstract class BaseAsyncAction<D, A extends Activity> implements AsyncAction<D>, Stoppable, ActivityDefObserver {
     private final static Logger logger = LoggerFactory.getLogger("BaseAsyncAction");
 
+    protected final AsyncTracker tracker;
     protected final A activity;
+
     public Counter pendingOpsCounter;
     protected int slot;
     protected boolean running = true;
-
-    private int pendingOpsQueuedForThread = 0;
-    private int maxOpsQueuedForThread = 1;
 
     public BaseAsyncAction(A activity, int slot) {
         this.activity = activity;
         this.slot = slot;
         onActivityDefUpdate(activity.getActivityDef());
+        pendingOpsCounter = ActivityMetrics.counter(activity.getActivityDef(), "pending_ops");
+        tracker = new AsyncTracker(pendingOpsCounter);
     }
 
     @Override
@@ -47,8 +50,7 @@ public abstract class BaseAsyncAction<T extends OpContext, A extends Activity> i
         ParameterMap params = activityDef.getParams();
         params.getOptionalInteger("async").orElseThrow(
                 () -> new RuntimeException("the async parameter is required to activate async actions"));
-        this.maxOpsQueuedForThread = getMaxPendingOps(activityDef);
-        pendingOpsCounter = ActivityMetrics.counter(activityDef, "pending_ops");
+        this.tracker.setMaxOps(getMaxPendingOps(activityDef));
     }
 
     protected int getMaxPendingOps(ActivityDef def) {
@@ -57,56 +59,31 @@ public abstract class BaseAsyncAction<T extends OpContext, A extends Activity> i
         return (maxTotalOpsInFlight / threads) + (slot < (maxTotalOpsInFlight % threads) ? 1 : 0);
     }
 
-    @Override
-    public boolean enqueue(T opc) {
+    public boolean enqueue(TrackedOp opc) {
         synchronized (this) {
-            while (available() == 0) {
+            while (tracker.isFull()) {
                 try {
-                    logger.trace("Blocking for enqueue with (" + pendingOpsQueuedForThread + "/" + maxOpsQueuedForThread + ") queued ops");
-                    wait(60000);
+                    logger.trace("Blocking for enqueue with (" + tracker.getPendingOps() + "/" + tracker.getMaxOps() + ") queued ops");
+                    tracker.wait(60000);
                 } catch (InterruptedException ignored) {
                 }
             }
         }
-        incrementOps();
         startOpCycle(opc);
-        return (running && available() > 0);
+        return (running && !tracker.isFull());
     }
 
     @Override
     public synchronized boolean awaitCompletion(long timeout) {
         long endAt = System.currentTimeMillis() + timeout;
-        while (running && pending() > 0 && System.currentTimeMillis() < endAt) {
+        while (running && tracker.getPendingOps() > 0 && System.currentTimeMillis() < endAt) {
             try {
                 long waitfor = Math.max(0, endAt - System.currentTimeMillis());
                 wait(waitfor);
             } catch (InterruptedException ignored) {
             }
         }
-        return pending() == 0;
-    }
-
-    protected int available() {
-        return maxOpsQueuedForThread - pendingOpsQueuedForThread;
-    }
-    protected int pending() {
-        return pendingOpsQueuedForThread;
-    }
-
-    protected void incrementOps() {
-        this.pendingOpsCounter.inc();
-        pendingOpsQueuedForThread++;
-    }
-
-    protected void decrementOps() {
-        this.pendingOpsCounter.dec();
-        pendingOpsQueuedForThread--;
-        if (pendingOpsQueuedForThread == 0 || pendingOpsQueuedForThread == (maxOpsQueuedForThread - 1)) {
-            // Either waiting for not full (enqueue), or waiting for empty (awaitCompletion)
-            synchronized (this) {
-                notifyAll();
-            }
-        }
+        return tracker.getPendingOps() == 0;
     }
 
     /**
@@ -114,9 +91,8 @@ public abstract class BaseAsyncAction<T extends OpContext, A extends Activity> i
      * an operation in flight.
      *
      * @param opc The type-specific {@link OpContext}
-     * @return the type-specific {@link OpContext}
      */
-    protected abstract T startOpCycle(T opc);
+    abstract void startOpCycle(TrackedOp opc);
 
     @Override
     public void requestStop() {
@@ -124,6 +100,4 @@ public abstract class BaseAsyncAction<T extends OpContext, A extends Activity> i
         this.running = false;
     }
 
-    @Override
-    public abstract T newOpContext();
 }

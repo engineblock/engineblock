@@ -48,6 +48,9 @@ public class StdoutActivityType implements ActivityType<StdoutActivity> {
 
         @Override
         public Action getAction(int slot) {
+            if (activity.getActivityDef().getParams().getOptionalString("async").isPresent()) {
+                return new AsyncStdoutAction(slot, activity);
+            }
             return new StdoutAction(slot, activity);
         }
     }

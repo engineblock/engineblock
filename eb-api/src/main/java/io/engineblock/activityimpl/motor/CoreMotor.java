@@ -20,9 +20,11 @@ import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.core.ops.OpContext;
 import io.engineblock.activityapi.core.ops.OpResultBuffer;
-import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
+import io.engineblock.activityapi.core.ops.fluent.OpTracker;
+import io.engineblock.activityapi.core.ops.fluent.TrackedOp;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityapi.rates.RateLimiter;
@@ -49,21 +51,24 @@ import static io.engineblock.activityapi.core.RunState.*;
  * fork in the middle to limit potential breakage of the prior sync implementation
  * with new async logic.
  *
- * <H2>Async Flow</H2>
- * The stride is used as a unit of buffering. The core motor uses the stride as a
- * buffer with event callbacks. Once an operation is started by calling the action's
- * {@link AsyncAction#enqueue(OpContext)}} method, it is the responsibility of that
- * action to call {@link OpContext#stop(int)} exactly once. Callbacks are registered
- * on the OpContext which trigger operational tracking logic and then housekeeping or
- * object re-use.
  */
-public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
+public class CoreMotor<T extends OpContext> implements ActivityDefObserver, Motor, Stoppable {
 
     private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
+
+    private boolean strictmetricnames = true;
+
     Timer cyclesTimer;
-    Timer phasesTimer;
     Timer stridesTimer;
+    Timer phasesTimer;
+
     Timer inputTimer;
+
+    Timer strideWaitTimer;
+    Timer strideResponseTimer;
+    Timer cycleWaitTimer;
+    Timer cycleResponseTimer;
+
     private long slotId;
     private Input input;
     private Action action;
@@ -186,9 +191,10 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
     public void run() {
 
         try {
-            cyclesTimer = ActivityMetrics.timer(activity.getActivityDef(), "cycles");
-            phasesTimer = ActivityMetrics.timer(activity.getActivityDef(), "phases");
-            stridesTimer = ActivityMetrics.timer(activity.getActivityDef(), "strides");
+            String metricSuffix = this.strictmetricnames ? "-servicetime" : "";
+            stridesTimer = ActivityMetrics.timer(activity.getActivityDef(), "strides"+ metricSuffix);
+            cyclesTimer = ActivityMetrics.timer(activity.getActivityDef(), "cycles" + metricSuffix);
+            phasesTimer = ActivityMetrics.timer(activity.getActivityDef(), "phases"+ metricSuffix);
             inputTimer = ActivityMetrics.timer(activity.getActivityDef(), "read_input");
 
             strideRateLimiter = activity.getStrideLimiter();
@@ -229,7 +235,8 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
             if (action instanceof AsyncAction) {
 
                 @SuppressWarnings("unchecked")
-                AsyncAction<OpContext> async = AsyncAction.class.cast(action);
+                AsyncAction<T> async = AsyncAction.class.cast(action);
+                OpTracker tracker = async.getTracker();
 
                 while (slotState.get() == Running) {
 
@@ -277,9 +284,12 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                         }
 
                         try {
-                            OpContext opc = async.newOpContext().addSink(strideTracker);
-                            opc.setWaitTime(cycleDelay).setCycle(cyclenum);
-                            async.enqueue(opc);
+                            TrackedOp tracked = tracker.allocate(cyclenum);
+                            tracked.setWaitTime(cycleDelay);
+                            async.enqueue(tracked);
+//                            T opc = async.newOpContext();
+//                            opc.addSink(strideTracker);
+//                            async.enqueue(opc);
 //                            boolean canAcceptMore = async.enqueue(opc);
 //                            if (!canAcceptMore) {
 //                                logger.trace("Action queue full at cycle=" + cyclenum);
@@ -433,6 +443,8 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
     @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
+
+        this.strictmetricnames = activityDef.getParams().getOptionalBoolean("strictmetricnames").orElse(true);
         for (Object component : (new Object[]{input, action, output})) {
             if (component instanceof ActivityDefObserver) {
                 ((ActivityDefObserver) component).onActivityDefUpdate(activityDef);
