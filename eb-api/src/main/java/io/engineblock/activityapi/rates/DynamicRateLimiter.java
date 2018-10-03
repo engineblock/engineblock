@@ -47,11 +47,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * and the nanosecond scheduling gap is returned to the caller.
  *
  * <p>
- * This implementation of the rate limiter is simplified to only support
- * averaging rate limits. The {@link RateLimiters} class provides a
- * convenient way for using either the averaging rate limiter or the
- * strict rate limiter at runtime, while allowing the averaging rate
- * limiter to be used when desired for higher client-side throughput.
+ * This implementation of the rate limiter is meant to provide a sliding
+ * scale between strict rate limiting and average rate limiting.
+ * In general it is expected to behave like a strict rate limiter when
+ * the rate is near the target rate. When the achieved rate is much
+ * lower, then some allowance is made to allow it to catch up according
+ * to the strictness setting.
  *
  * <p>
  * Note that the ticks accumulator can not rate limit a single event.
@@ -61,27 +62,28 @@ import java.util.concurrent.atomic.AtomicLong;
  * In other words, previous allocations of the timeline determine the start
  * time of a subsequent caller, not the caller itself.
  */
-public class AverageRateLimiter implements Startable, RateLimiter {
-    private static final Logger logger = LoggerFactory.getLogger(AverageRateLimiter.class);
+@SuppressWarnings("ALL")
+public class DynamicRateLimiter implements Startable, RateLimiter {
+    private static final Logger logger = LoggerFactory.getLogger(DynamicRateLimiter.class);
     private String label;
     private ActivityDef activityDef;
     private RateSpec rateSpec;
+    private long maxFreeOps =10;
+
     private long opTicks = 0L; // Number of nanos representing one grant at target rate
-    protected final AtomicLong ticksTimeline = new AtomicLong(0L);
-    private final AtomicLong accumulatedDelayNanos = new AtomicLong(0L);
-    private volatile long lastSeenNanoTime;
-    private volatile boolean isBursting = false;
+    private long burstTicks;
+    protected final AtomicLong allocatedNanos = new AtomicLong(0L);
+    private final AtomicLong waitTimeNanos = new AtomicLong(0L);
+
+    private volatile long freeOps = 0L;
+    private volatile long lastSeenNanoTime = 0L;
 
     private State state = State.Idle;
-    private boolean reportCoDelay = false;
 
-    //private Counter fastpathCounter;
-    //private Counter sleepCounter;
     private Gauge<Long> delayGauge;
     private Gauge<Double> avgRateGauge;
-    //private Gauge<Double> burstRateGauge;
 
-    protected AverageRateLimiter() {
+    protected DynamicRateLimiter() {
     }
 
     /**
@@ -91,10 +93,11 @@ public class AverageRateLimiter implements Startable, RateLimiter {
      * @param label The label for the rate limiting facet within the activity
      * @param rateSpec the rate limiter configuration
      */
-    public AverageRateLimiter(ActivityDef def, String label, RateSpec rateSpec) {
+    public DynamicRateLimiter(ActivityDef def, String label, RateSpec rateSpec) {
         setActivityDef(def);
         setLabel(label);
         this.setRateSpec(rateSpec);
+        this.maxFreeOps = (long) rateSpec.opsPerSec/10;
         init();
     }
 
@@ -108,19 +111,16 @@ public class AverageRateLimiter implements Startable, RateLimiter {
 
     protected void init() {
         this.delayGauge = ActivityMetrics.gauge(activityDef, label+".cco_delay_gauge", new RateLimiters.DelayGauge(this));
-        //this.sleepCounter = ActivityMetrics.counter(activityDef, label + "_ratelogic.sleep_counter");
-        //this.fastpathCounter = ActivityMetrics.counter(activityDef, label + "_ratelogic.fast_counter");
         this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + ".avg_targetrate_gauge", new RateLimiters.RateGauge(this));
-        //this.burstRateGauge = ActivityMetrics.gauge(activityDef, label + "_ratelogic.burst_targetrate_gauge", new RateLimiters.BurstRateGauge(this));
         start();
     }
 
     protected long getNanoClockTime() {
-        return System.nanoTime();
+        return System.nanoTime() + 25; // Typical calling overhead time, plus half phase-ish
     }
 
     /**
-     * See {@link AverageRateLimiter} for interface docs.
+     * See {@link DynamicRateLimiter} for interface docs.
      * effective calling overhead of acquire() is ~20ns
      *
      * @param nanos nanoseconds of time allotted to this event
@@ -129,35 +129,35 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     @Override
     public long acquire(long nanos) {
 
-        long opScheduleTime = ticksTimeline.getAndAdd(nanos);
-        long timelinePosition = lastSeenNanoTime;
+        long operationScheduledAt = allocatedNanos.getAndAdd(nanos);
+        long elapsedTimeCheckpoint = lastSeenNanoTime;
 
-        if (opScheduleTime < timelinePosition) {
-            isBursting = true;
-            return reportCoDelay ? timelinePosition - opScheduleTime : 0L;
+        if (operationScheduledAt < elapsedTimeCheckpoint) {
+            return elapsedTimeCheckpoint - operationScheduledAt;
         }
 
-        long delay = timelinePosition - opScheduleTime;
-        if (delay <= 0) {
+        long opdelay = elapsedTimeCheckpoint - operationScheduledAt;
+        if (opdelay <= 0) {
+            if ((freeOps+=1)<maxFreeOps) return 0;
+            freeOps=0L;
 
-            timelinePosition = getNanoClockTime();
-            lastSeenNanoTime = timelinePosition;
-            delay = timelinePosition - opScheduleTime;
+            elapsedTimeCheckpoint = getNanoClockTime();
+            lastSeenNanoTime = elapsedTimeCheckpoint;
+            opdelay = elapsedTimeCheckpoint - operationScheduledAt;
 
             // This only happens if the callers are ahead of schedule
-            if (delay < 0) {
-                isBursting = false;
-                delay *= -1;
+//            if (behindschedule < 0) {
+                if (opdelay < -700) {
+                opdelay *= -1;
                 try {
-                    //sleepCounter.inc();
-                    Thread.sleep(delay / 1000000, (int) (delay % 1000000L));
+                    Thread.sleep(opdelay / 1000000, (int) (opdelay % 1000000L));
                 } catch (InterruptedException ignored) {
                 }
-                return 0L;
+                opdelay=0L;
             }
         }
 
-        return reportCoDelay ? delay : 0L;
+        return opdelay;
 
     }
 
@@ -182,11 +182,11 @@ public class AverageRateLimiter implements Startable, RateLimiter {
 
     @Override
     public long getTotalSchedulingDelay() {
-        return getRateSchedulingDelay() + accumulatedDelayNanos.get();
+        return getRateSchedulingDelay() + waitTimeNanos.get();
     }
 
     protected long getRateSchedulingDelay() {
-        return getNanoClockTime() - ticksTimeline.get();
+        return getNanoClockTime() - allocatedNanos.get();
     }
 
 
@@ -207,11 +207,11 @@ public class AverageRateLimiter implements Startable, RateLimiter {
 
         switch (this.state) {
             case Idle:
-                this.ticksTimeline.set(nanos);
-                this.accumulatedDelayNanos.set(0L);
+                this.allocatedNanos.set(nanos);
+                this.waitTimeNanos.set(0L);
                 break;
             case Started:
-                accumulatedDelayNanos.addAndGet(getRateSchedulingDelay());
+                waitTimeNanos.addAndGet(getRateSchedulingDelay());
                 break;
         }
     }
@@ -220,7 +220,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
         return "spec=[" + label + "]:" + rateSpec.toString() +
                 ", delay=" + this.getRateSchedulingDelay() +
                 ", total=" + this.getTotalSchedulingDelay() +
-                ", (used/seen)=(" + ticksTimeline.get() + "/" + lastSeenNanoTime + ")" +
+                ", (used/seen)=(" + allocatedNanos.get() + "/" + lastSeenNanoTime + ")" +
                 ", (clock,actual)=(" + getNanoClockTime() + "," + System.nanoTime() + ")";
     }
 
@@ -238,9 +238,8 @@ public class AverageRateLimiter implements Startable, RateLimiter {
             return;
         }
 
-        this.reportCoDelay = updatingRateSpec.getReportCoDelay();
         this.opTicks = updatingRateSpec.getCalculatedNanos();
-
+        this.burstTicks = (long) (updatingRateSpec.getBurstRatio() * (1.0D/opTicks));
         switch (this.state) {
             case Started:
                 sync();
@@ -253,8 +252,8 @@ public class AverageRateLimiter implements Startable, RateLimiter {
      *
      * @return allocatedNanos value - the long value of the shared timeslice marker
      */
-    public AtomicLong getTicksTimeline() {
-        return this.ticksTimeline;
+    public AtomicLong getAllocatedNanos() {
+        return this.allocatedNanos;
     }
 
     /**

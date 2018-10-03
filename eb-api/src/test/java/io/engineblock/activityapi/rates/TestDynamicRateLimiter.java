@@ -18,7 +18,7 @@
 package io.engineblock.activityapi.rates;
 
 import io.engineblock.activityapi.rates.testtypes.RateLimiterProvider;
-import io.engineblock.activityapi.rates.testtypes.TestableAverageRateLimiter;
+import io.engineblock.activityapi.rates.testtypes.TestableDynamicRateLimiter;
 import io.engineblock.activityapi.rates.testtypes.TestableRateLimiterProvider;
 import io.engineblock.activityimpl.ActivityDef;
 import org.testng.annotations.Test;
@@ -30,16 +30,16 @@ import java.util.concurrent.atomic.AtomicLong;
  * limiting only, due to the burstRatio level being set to 0.0D.
  */
 @Test
-public class TestAverageRateLimiter implements RateLimiterProvider, TestableRateLimiterProvider {
+public class TestDynamicRateLimiter implements RateLimiterProvider, TestableRateLimiterProvider {
 
     @Override
     public RateLimiter getRateLimiter(String paramSpec, String rateSpec) {
-        return new AverageRateLimiter(ActivityDef.parseActivityDef(paramSpec),"averagetest",new RateSpec(rateSpec));
+        return new DynamicRateLimiter(ActivityDef.parseActivityDef(paramSpec),"averagetest",new RateSpec(rateSpec));
     }
 
     @Override
     public TestableRateLimiter getRateLimiter(String def, String spec, AtomicLong initialClock) {
-        return new TestableAverageRateLimiter(initialClock, new RateSpec(spec), ActivityDef.parseActivityDef(def));
+        return new TestableDynamicRateLimiter(initialClock, new RateSpec(spec), ActivityDef.parseActivityDef(def));
     }
 
     @Test
@@ -61,8 +61,6 @@ public class TestAverageRateLimiter implements RateLimiterProvider, TestableRate
     public void testBurstCOReportingAccuracy() {
         RateLimiterAccuracyTestMethods.testBurstReportingAccuracy(this);
     }
-
-
 
 }
 

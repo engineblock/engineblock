@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * These tests run all the rate limiter micro benches with average rate
  * limiting only, due to the burstRatio level being set to 0.0D.
  */
-@Test(groups={"perftest"},enabled=false)
+@Test(groups={"perftest"},enabled=true)
 public class TestAverageRateLimiterPerformance implements RateLimiterProvider, TestableRateLimiterProvider {
 
     @Override
@@ -95,11 +95,34 @@ public class TestAverageRateLimiterPerformance implements RateLimiterProvider, T
     }
 
     // 23ns per call on an i7/8(4) core system: i7-4790 CPU @ 3.60GHz
-    @Test(groups="perftest",enabled=false)
-    public void testSleepNanosRate() {
+    @Test(groups="perftest",enabled=true)
+    public void testSystemNanoTimeRate() {
         long startAt = System.nanoTime();
         long count = 100000000;
         for (int i = 0; i < count; i++) {
+            long v = System.nanoTime();
+            if ((i % 10000000) == 0) {
+                System.out.println("i: " + i + ", v:" + v);
+            }
+        }
+        long endAt = System.nanoTime();
+        double duration = (endAt - startAt) / 1000000000.0d;
+        double acqops = (count / duration);
+        System.out.println(String.format("acquires/s: %.3f", (count / duration)));
+        System.out.println(String.format("effective nanos/op: %f", (1000000000.0d / acqops)));
+    }
+
+    // 23ns per call on an i7/8(4) core system: i7-4790 CPU @ 3.60GHz
+    @Test(groups="perftest",enabled=true)
+    public void testSleepNanosRate() {
+        long startAt = System.nanoTime();
+//        long count = 000;
+        long count = 10000000;
+        for (int i = 0; i < count; i++) {
+            try {
+                Thread.sleep(0L,0);
+            } catch (InterruptedException ignored) {
+            }
             long v = System.nanoTime();
             if ((i % 10000000) == 0) {
                 System.out.println("i: " + i + ", v:" + v);

@@ -75,7 +75,7 @@ public class RateLimiterAccuracyTestMethods {
      * caller how many nanoseconds behind schedule it is according to
      * CO-aware scheduling.
      */
-    static void testReportedCoDelayFastPath(TestableRateLimiterProvider provider) {
+    static void testReportedDelayFastPath(TestableRateLimiterProvider provider) {
         AtomicLong clock = new AtomicLong(50_000);
         TestableRateLimiter rl = provider.getRateLimiter("alias=testing", "1000,0.0,true",clock);
         //rl.start;
@@ -89,27 +89,7 @@ public class RateLimiterAccuracyTestMethods {
 
     }
 
-    /**
-     * When reportCoDelay is disabled, this rate limiter should always report back to
-     * the caller that there is 0 latency added due to CO, regardless of the
-     * internal measurement.
-     */
-    static void testDisabledCoDelayFastPath(TestableRateLimiterProvider provider) {
-        AtomicLong clock = new AtomicLong(50_000);
-
-        TestableRateLimiter rl = provider.getRateLimiter("alias=testing", "1000,0.0,false",clock);
-        //rl.start;
-        clock.set(clock.get() + 1000);
-        long delay0 = rl.acquire(15L);
-        long delay1 = rl.acquire(51L);
-        long delay2 = rl.acquire(73L);
-        assertThat(delay0).isEqualTo(0L);
-        assertThat(delay1).isEqualTo(0L);
-        assertThat(delay2).isEqualTo(0L);
-
-    }
-
-    static void testCOReportingAccuracy(TestableRateLimiterProvider provider) {
+    static void testReportingAccuracy(TestableRateLimiterProvider provider) {
         double rate = 1000D;
         AtomicLong clock = new AtomicLong(0L);
         TestableRateLimiter l = provider.getRateLimiter("alias=testing", String.valueOf(rate)+",0.0,true",clock);
@@ -124,7 +104,7 @@ public class RateLimiterAccuracyTestMethods {
 
     }
 
-    static void testCOBurstReportingAccuracy(TestableRateLimiterProvider provider) {
+    static void testBurstReportingAccuracy(TestableRateLimiterProvider provider) {
         double rate = 1000D;
         AtomicLong clock = new AtomicLong(0L);
         TestableRateLimiter l = provider.getRateLimiter("alias=testing", String.valueOf(rate)+",1.5,true",clock);

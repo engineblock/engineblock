@@ -181,7 +181,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         }
 
         // An activity must be initialized before the motors and other components are
-        // considered ready to onAfterOpStop parameter map changes. This is signaled in an activity
+        // considered ready to handle parameter map changes. This is signaled in an activity
         // by the RunState.
         if (activity.getRunState()!=RunState.Uninitialized) {
             if (activity.getRunState()==RunState.Running) {
@@ -199,6 +199,11 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
         return activityDef;
     }
 
+    /**
+     * Wait for
+     * @param waitTime
+     * @return
+     */
     public boolean awaitCompletion(int waitTime) {
         return requestStopExecutor(waitTime);
     }

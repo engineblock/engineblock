@@ -103,16 +103,18 @@ public class RateLimiterPerformanceTestMethods {
         //rl.start();
 
         long startAt = System.nanoTime();
+        long endAt = System.nanoTime();
         for (int stage = 0; stage < divisor; stage++) {
             int start = stage * stagesize;
             int end = (stage + 1) * stagesize;
             for (int i = start; i < end; i++) {
                 rl.acquire();
             }
+            endAt = System.nanoTime();
             System.out.println("stage " + stage + ": " + rl);
         }
 
-        long endAt = System.nanoTime();
+ //       long endAt = System.nanoTime();
         double duration = (endAt - startAt) / 1000000000.0d;
         double acqops = (count / duration);
         System.out.println(String.format("acquires/s: %.3f", acqops));
@@ -136,10 +138,10 @@ public class RateLimiterPerformanceTestMethods {
         for (int stage = 0; stage < divisor; stage++) {
             int start = stage * stagesize;
             int end = (stage + 1) * stagesize;
+            System.out.println("stage " + stage + ": " + rl);
             for (int i = start; i < end; i++) {
                 rl.acquire();
             }
-            System.out.println("stage " + stage + ": " + rl);
         }
 
         long endAt = System.nanoTime();
