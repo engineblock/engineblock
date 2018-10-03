@@ -68,7 +68,7 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
     private String label;
     private ActivityDef activityDef;
     private RateSpec rateSpec;
-    private long maxFreeOps =10;
+    private long maxFreeOps = 10;
 
     private long opTicks = 0L; // Number of nanos representing one grant at target rate
     private long burstTicks;
@@ -89,15 +89,15 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
     /**
      * Create a rate limiter.
      *
-     * @param def The activity definition for this rate limiter
-     * @param label The label for the rate limiting facet within the activity
+     * @param def      The activity definition for this rate limiter
+     * @param label    The label for the rate limiting facet within the activity
      * @param rateSpec the rate limiter configuration
      */
     public DynamicRateLimiter(ActivityDef def, String label, RateSpec rateSpec) {
         setActivityDef(def);
         setLabel(label);
         this.setRateSpec(rateSpec);
-        this.maxFreeOps = (long) rateSpec.opsPerSec/10;
+        this.maxFreeOps = (long) rateSpec.opsPerSec / 10;
         init();
     }
 
@@ -110,7 +110,7 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
     }
 
     protected void init() {
-        this.delayGauge = ActivityMetrics.gauge(activityDef, label+".cco_delay_gauge", new RateLimiters.DelayGauge(this));
+        this.delayGauge = ActivityMetrics.gauge(activityDef, label + ".cco_delay_gauge", new RateLimiters.DelayGauge(this));
         this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + ".avg_targetrate_gauge", new RateLimiters.RateGauge(this));
         start();
     }
@@ -132,29 +132,30 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
         long operationScheduledAt = allocatedNanos.getAndAdd(nanos);
         long elapsedTimeCheckpoint = lastSeenNanoTime;
 
-        if (operationScheduledAt < elapsedTimeCheckpoint) {
-            return elapsedTimeCheckpoint - operationScheduledAt;
+        long opdelay = elapsedTimeCheckpoint - operationScheduledAt;
+
+        if (opdelay > 0) {
+            return opdelay;
         }
 
-        long opdelay = elapsedTimeCheckpoint - operationScheduledAt;
-        if (opdelay <= 0) {
-            if ((freeOps+=1)<maxFreeOps) return 0;
-            freeOps=0L;
+        if ((freeOps += 1) < maxFreeOps) {
+            return 0;
+        }
+        freeOps = 0L;
 
-            elapsedTimeCheckpoint = getNanoClockTime();
-            lastSeenNanoTime = elapsedTimeCheckpoint;
-            opdelay = elapsedTimeCheckpoint - operationScheduledAt;
+        elapsedTimeCheckpoint = getNanoClockTime();
+        lastSeenNanoTime = elapsedTimeCheckpoint;
+        opdelay = elapsedTimeCheckpoint - operationScheduledAt;
 
-            // This only happens if the callers are ahead of schedule
+        // This only happens if the callers are ahead of schedule
 //            if (behindschedule < 0) {
-                if (opdelay < -700) {
-                opdelay *= -1;
-                try {
-                    Thread.sleep(opdelay / 1000000, (int) (opdelay % 1000000L));
-                } catch (InterruptedException ignored) {
-                }
-                opdelay=0L;
+        if (opdelay < -700) {
+            opdelay *= -1;
+            try {
+                Thread.sleep(opdelay / 1000000, (int) (opdelay % 1000000L));
+            } catch (InterruptedException ignored) {
             }
+            opdelay = 0L;
         }
 
         return opdelay;
@@ -232,14 +233,14 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
     @Override
     public void setRateSpec(RateSpec updatingRateSpec) {
         RateSpec oldRateSpec = this.rateSpec;
-        this.rateSpec=updatingRateSpec;
+        this.rateSpec = updatingRateSpec;
 
-        if (oldRateSpec!=null && oldRateSpec.equals(this.rateSpec)) {
+        if (oldRateSpec != null && oldRateSpec.equals(this.rateSpec)) {
             return;
         }
 
         this.opTicks = updatingRateSpec.getCalculatedNanos();
-        this.burstTicks = (long) (updatingRateSpec.getBurstRatio() * (1.0D/opTicks));
+        this.burstTicks = (long) (updatingRateSpec.getBurstRatio() * (1.0D / opTicks));
         switch (this.state) {
             case Started:
                 sync();
