@@ -76,6 +76,15 @@ public class TestDynamicRateLimiterPerformance implements RateLimiterProvider, T
         RateLimiterPerformanceTestMethods.testBlockingCostUnder(this);
     }
 
+    @Test(enabled=true)
+    public void testRateChanges() {
+        RateLimiterPerformanceTestMethods.testRateChanges(this,
+                100000000,100000000,
+                200000000,200000000,
+                100000000,100000000
+        );
+    }
+
     // stage 0: rate=5.0E8, opticks=2, delay=337193834, burstRatio=0.0
     // stage 1: rate=5.0E8, opticks=2, delay=805649168, burstRatio=0.0
     // stage 2: rate=5.0E8, opticks=2, delay=1266711629, burstRatio=0.0
@@ -189,8 +198,8 @@ public class TestDynamicRateLimiterPerformance implements RateLimiterProvider, T
     // effective concurrent nanos/op: 10.405151
 
     @Test(groups="perftest",enabled=true)
-    public void testDynamicRateL1imiterContendedMultiThreadedPerformance() {
-        RateLimiterPerformanceTestMethods.testContendedMultiThreadedPerformance(this,500_000_000, 100);
+    public void testDynamicRateLimiterContendedMultiThreadedPerformance() {
+        RateLimiterPerformanceTestMethods.testContendedMultiThreadedPerformance(this,500_000_000, 200);
     }
 
 }

@@ -26,6 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+// TODO: rate should be volatile
+// TODO: waittime should be volatile
+
 /**
  * <p>This rate limiter uses nanoseconds as the unit of timing. This
  * works well because it is the native precision of the system timer
@@ -71,9 +74,11 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
     private long maxFreeOps = 10;
 
     private long opTicks = 0L; // Number of nanos representing one grant at target rate
-    private long burstTicks;
+    private long burstTicks = 0L; // Number of nanos representing one grant at burst rate
+    private long burstDiff;
     protected final AtomicLong allocatedNanos = new AtomicLong(0L);
-    private final AtomicLong waitTimeNanos = new AtomicLong(0L);
+    private final AtomicLong scheduledNanos = new AtomicLong(0L);
+    private final AtomicLong cumulativeWaitTimeNanos = new AtomicLong(0L);
 
     private volatile long freeOps = 0L;
     private volatile long lastSeenNanoTime = 0L;
@@ -82,6 +87,7 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
 
     private Gauge<Long> delayGauge;
     private Gauge<Double> avgRateGauge;
+    private long burstWindow;
 
     protected DynamicRateLimiter() {
     }
@@ -129,36 +135,46 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
     @Override
     public long acquire(long nanos) {
 
-        long operationScheduledAt = allocatedNanos.getAndAdd(nanos);
-        long elapsedTimeCheckpoint = lastSeenNanoTime;
+        long scheduledAt_IDEAL = allocatedNanos.getAndAdd(nanos);
 
-        long opdelay = elapsedTimeCheckpoint - operationScheduledAt;
 
-        if (opdelay > 0) {
-            return opdelay;
+        long scheduledAt_ACTUAL = scheduledNanos.getAndAdd(nanos);
+        long scheduledDelay = lastSeenNanoTime - scheduledAt_ACTUAL;
+
+        if (scheduledDelay > 0) { // DEFINITELY LATE
+            // we already know here that an op should not block, even if
+            // lastSeenNanoTime is stale. Basically, the op is behind schedule,
+            // and we want to let it start
+            // The delay calculation is potentially off, since we don't always
+            // read the clock nanos. A margin of error is unavoidable.
+
+            if (scheduledDelay > burstWindow) {
+                long attenuation = scheduledDelay - burstWindow;
+            }
+
+            return lastSeenNanoTime - scheduledAt_IDEAL;
+//            return scheduledDelay;
         }
 
-        if ((freeOps += 1) < maxFreeOps) {
-            return 0;
-        }
-        freeOps = 0L;
+//        // Although we are now letting ops run without blocking for a bit,
+//        // it is limited to just a few. After that, we adjust schedule.
+//        if ((freeOps += 1) < maxFreeOps) {
+//            return 0;
+//        }
+//        freeOps = 0L;
 
-        elapsedTimeCheckpoint = getNanoClockTime();
-        lastSeenNanoTime = elapsedTimeCheckpoint;
-        opdelay = elapsedTimeCheckpoint - operationScheduledAt;
+        lastSeenNanoTime = getNanoClockTime();
+        scheduledDelay = lastSeenNanoTime - scheduledAt_IDEAL;
 
-        // This only happens if the callers are ahead of schedule
-//            if (behindschedule < 0) {
-        if (opdelay < -700) {
-            opdelay *= -1;
+        if (scheduledDelay < -500) { // DEFINITELY EARLY
+            scheduledDelay = (-scheduledDelay)-500;
             try {
-                Thread.sleep(opdelay / 1000000, (int) (opdelay % 1000000L));
+                Thread.sleep(scheduledDelay / 1000000, (int) (scheduledDelay % 1000000L));
             } catch (InterruptedException ignored) {
             }
-            opdelay = 0L;
         }
 
-        return opdelay;
+        return lastSeenNanoTime - scheduledAt_IDEAL;
 
     }
 
@@ -183,11 +199,11 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
 
     @Override
     public long getTotalSchedulingDelay() {
-        return getRateSchedulingDelay() + waitTimeNanos.get();
+        return getRateSchedulingDelay() + cumulativeWaitTimeNanos.get();
     }
 
     protected long getRateSchedulingDelay() {
-        return getNanoClockTime() - allocatedNanos.get();
+        return getNanoClockTime()-this.allocatedNanos.get();
     }
 
 
@@ -209,10 +225,11 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
         switch (this.state) {
             case Idle:
                 this.allocatedNanos.set(nanos);
-                this.waitTimeNanos.set(0L);
+                this.scheduledNanos.set(nanos);
+                this.cumulativeWaitTimeNanos.set(0L);
                 break;
             case Started:
-                waitTimeNanos.addAndGet(getRateSchedulingDelay());
+                cumulativeWaitTimeNanos.addAndGet(getRateSchedulingDelay());
                 break;
         }
     }
@@ -241,6 +258,8 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
 
         this.opTicks = updatingRateSpec.getCalculatedNanos();
         this.burstTicks = (long) (updatingRateSpec.getBurstRatio() * (1.0D / opTicks));
+        this.burstDiff = opTicks - burstTicks;
+        this.burstWindow = opTicks * 10;
         switch (this.state) {
             case Started:
                 sync();
@@ -251,7 +270,7 @@ public class DynamicRateLimiter implements Startable, RateLimiter {
     /**
      * * visible for testing
      *
-     * @return allocatedNanos value - the long value of the shared timeslice marker
+     * @return allocatedOpNanos value - the long value of the shared timeslice marker
      */
     public AtomicLong getAllocatedNanos() {
         return this.allocatedNanos;

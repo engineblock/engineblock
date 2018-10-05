@@ -89,6 +89,35 @@ public class RateLimiterPerformanceTestMethods {
     }
 
 
+    static void testRateChanges(RateLimiterProvider provider, int... countsAndRates) {
+        RateLimiter rl = provider.getRateLimiter("alias=testing", String.valueOf(countsAndRates[1]));
+
+        for (int idx = 0; idx < countsAndRates.length; idx+=2) {
+            int count=countsAndRates[idx];
+            int rate=countsAndRates[idx+1];
+
+            long startAt = System.nanoTime();
+            rl.setRate(rate);
+            for (int i = 0; i < count; i++) {
+                rl.acquire();
+            }
+            long delay = rl.acquire();
+            long endAt = System.nanoTime();
+            double duration = (endAt - startAt) / 1000000000.0d;
+            double acqops = (count / duration);
+            System.out.println(
+                    String.format(
+                            "count: %9d, duration %.3f, acquires/s %.3f, nanos/op: %f, delay: %d",
+                            count,duration,acqops,(1000000000.0d/acqops), delay)
+            );
+//            System.out.println(String.format("duration: %.3f", duration));
+//            System.out.println(String.format("acquires/s: %.3f", acqops));
+//            System.out.println(String.format("effective nanos/op: %f", (1000000000.0d / acqops)));
+
+        }
+
+    }
+
     /**
      * This test assumes that 100Mops/s is slow enough to make the rate
      * limiter control throttling

@@ -21,7 +21,7 @@ public interface TestableRateLimiter extends RateLimiter {
 
     long setClock(long newValue);
     long getClock();
-
     long getTicksTime();
 
+    long getLastSeenNanoTimeline();
 }

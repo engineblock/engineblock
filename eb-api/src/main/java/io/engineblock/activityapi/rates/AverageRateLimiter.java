@@ -251,7 +251,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     /**
      * * visible for testing
      *
-     * @return allocatedNanos value - the long value of the shared timeslice marker
+     * @return allocatedOpNanos value - the long value of the shared timeslice marker
      */
     public AtomicLong getTicksTimeline() {
         return this.ticksTimeline;
