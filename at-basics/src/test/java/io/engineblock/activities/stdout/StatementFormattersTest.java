@@ -35,13 +35,13 @@ public class StatementFormattersTest {
     @Test
     public void testInlineJSONFormat() {
         String csv = TemplateFormat.inlinejson.format(false,Arrays.asList("alpha", "beta"));
-        assertThat(csv).isEqualTo("\\{alpha:\"{alpha}\", beta:\"{beta}\"\\}");
+        assertThat(csv).isEqualTo("\\{\"alpha\":\"{alpha}\", \"beta\":\"{beta}\"\\}");
     }
 
     @Test
     public void testBlockJSONFormat() {
         String csv = TemplateFormat.json.format(false,Arrays.asList("alpha", "beta"));
-        assertThat(csv).isEqualTo("\\{\n alpha:\"{alpha}\",\n beta:\"{beta}\"\n\\}");
+        assertThat(csv).isEqualTo("\\{\n \"alpha\":\"{alpha}\",\n \"beta\":\"{beta}\"\n\\}");
     }
 
     @Test

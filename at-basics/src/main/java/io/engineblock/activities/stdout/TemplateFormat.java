@@ -69,12 +69,12 @@ public enum TemplateFormat {
                 break;
             case json:
                 template = fieldNames
-                        .stream().map(s -> s + ":\"{" + s + "}\"")
+                        .stream().map(s -> "\"" + s + "\":\"{" + s + "}\"")
                         .collect(Collectors.joining(",\n ", "\\{\n ", "\n\\}"));
                 break;
             case inlinejson:
                 template = fieldNames
-                        .stream().map(s -> s + ":\"{" + s + "}\"")
+                        .stream().map(s -> "\""+ s + "\":\"{" + s + "}\"")
                         .collect(Collectors.joining(", ", "\\{", "\\}"));
                 break;
             default:
