@@ -95,6 +95,12 @@
             <version>1.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler</artifactId>
+            <version>4.0.56.Final</version>
+        </dependency>
+
     </dependencies>
 
 
