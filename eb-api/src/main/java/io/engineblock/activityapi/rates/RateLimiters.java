@@ -28,11 +28,12 @@ public class RateLimiters {
     public static synchronized RateLimiter createOrUpdate(ActivityDef def, String label, RateLimiter extant, RateSpec spec) {
 
         if (extant == null) {
-            logger.info("Using average rate limiter for speed: " + spec);
-            return new DynamicRateLimiter(def, label, spec);
+            DynamicRateLimiter rateLimiter = new DynamicRateLimiter(def, label, spec);
+            logger.info("Using rate limiter: " + rateLimiter.toString());
+            return rateLimiter;
         } else {
-            logger.debug("updating rate limiter for speed: " + spec);
             extant.setRateSpec(spec);
+            logger.debug("Updated rate limiter: " + extant.toString());
             return extant;
         }
     }
