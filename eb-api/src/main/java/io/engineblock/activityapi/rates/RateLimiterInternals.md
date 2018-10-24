@@ -1,3 +1,9 @@
+# idea: The op nanos is adjusted depending on whether there is waittime
+# the pacing is always strict.
+
+
+
+
 # Core Rate Limiter
 
 This document elaborates on the design of the core rate limiters, to help
