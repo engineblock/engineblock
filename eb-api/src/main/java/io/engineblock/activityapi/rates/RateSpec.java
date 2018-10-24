@@ -19,8 +19,11 @@ package io.engineblock.activityapi.rates;
 
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.util.Unit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RateSpec {
+    private final static Logger logger = LoggerFactory.getLogger(RateSpec.class);
     /**
      * Target rate in Operations Per Second
      */
@@ -28,13 +31,8 @@ public class RateSpec {
 
     public double burstRatio = 1.1D;
 
-    /**
-     * If true, report total scheduling delay from ideal schedule.
-     */
-    public boolean reportCoDelay = false;
-
     public RateSpec(double opsPerSec) {
-        this(opsPerSec, 0.0d, false);
+        this(opsPerSec, 0.0d);
     }
     public RateSpec(double opsPerSec, double burstRatio) {
         this(opsPerSec, burstRatio, false);
@@ -42,13 +40,12 @@ public class RateSpec {
     public RateSpec(double opsPerSec, double burstRatio, boolean reportCoDelay) {
         this.opsPerSec = opsPerSec;
         this.burstRatio = burstRatio;
-        this.reportCoDelay = reportCoDelay;
     }
 
     public RateSpec(ParameterMap.NamedParameter tuple) {
         this(tuple.value);
         if (tuple.name.startsWith("co_")) {
-            reportCoDelay =true;
+            logger.warn("The co_ prefix on " + tuple.name + " is no longer needed. All rate limiters now provide standard coordinated omission metrics.");
         }
     }
 
@@ -56,9 +53,12 @@ public class RateSpec {
         String[] specs = spec.split("[,:;]");
         switch (specs.length) {
             case 3:
-                reportCoDelay = (specs[2].toLowerCase().matches("co|true|report"));
+                logger.warn("the third 'report delay' option on rate limiters is no longer needed. For example 1000,1.2,true can be simply 1000,1.2");
             case 2:
                 burstRatio = Double.valueOf(specs[1]);
+                if (burstRatio<1.0) {
+                    throw new RuntimeException("burst ratios less than 1.0 are invalid.");
+                }
             case 1:
                 opsPerSec = Unit.doubleCountFor(specs[0]).orElseThrow(() -> new RuntimeException("Unparsable:" + specs[0]));
                 break;
@@ -68,13 +68,20 @@ public class RateSpec {
     }
 
     public String toString() {
-        return "rate:" + opsPerSec
-                + ", burst:" + burstRatio
-                + ", report:" + reportCoDelay;
+        StringBuilder sb = new StringBuilder();
+
+        double ratePortion = Math.abs(opsPerSec - ((long)opsPerSec));
+        String ratefmt = (ratePortion>0.001D) ? String.format("%,.3f",opsPerSec) : String.format("%,d",(long)opsPerSec);
+
+        double br = burstRatio*opsPerSec;
+        double burstPortion = Math.abs(br - ((long)br));
+        String burstfmt = (burstPortion>0.001D) ? String.format("%,.3f",br) : String.format("%,d",(long)br);
+
+        return String.format("rate=%s burstRatio=%.3f (%s SOPSS %s BOPSS)",ratefmt,burstRatio,ratefmt,burstfmt);
     }
 
     public RateSpec withOpsPerSecond(double rate) {
-        return new RateSpec(rate,this.burstRatio,this.reportCoDelay);
+        return new RateSpec(rate,this.burstRatio);
     }
 
     public RateSpec withReportCoDelay(boolean reportCoDelay) {
@@ -82,7 +89,7 @@ public class RateSpec {
     }
 
     public RateSpec withBurstRatio(double burstRatio) {
-        return new RateSpec(this.opsPerSec, burstRatio, this.reportCoDelay);
+        return new RateSpec(this.opsPerSec, burstRatio);
     }
 
 
@@ -117,7 +124,7 @@ public class RateSpec {
 
         if (Double.compare(rateSpec.opsPerSec, opsPerSec) != 0) return false;
         if (Double.compare(rateSpec.burstRatio, burstRatio) != 0) return false;
-        return reportCoDelay == rateSpec.reportCoDelay;
+        return true;
     }
 
     @Override
@@ -128,11 +135,6 @@ public class RateSpec {
         result = (int) (temp ^ (temp >>> 32));
         temp = Double.doubleToLongBits(burstRatio);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (reportCoDelay ? 1 : 0);
         return result;
-    }
-
-    public boolean getReportCoDelay() {
-        return reportCoDelay;
     }
 }

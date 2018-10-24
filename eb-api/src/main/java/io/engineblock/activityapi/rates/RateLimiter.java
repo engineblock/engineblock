@@ -21,17 +21,17 @@ import io.engineblock.activityapi.core.Startable;
 
 public interface RateLimiter extends Startable {
 
-    /**
-     * Block until it is time for the next operation, according to number
-     * of nanoseconds allotted to this individual op.
-     * @param nanos Nanos to schedule for
-     * @return the number of nanos behind schedule when this method returns
-     */
-    long acquire(long nanos);
+//    /**
+//     * Block until it is time for the next operation, according to number
+//     * of nanoseconds allotted to this individual op.
+//     * @param nanos Nanos to schedule for
+//     * @return the number of nanos behind schedule when this method returns
+//     */
+//    long acquire(long nanos);
 
     /**
      * Block until it is time for the next operation, according to the
-     * nanoseconds per op as set by {@link #setRate(double)}
+     * nanoseconds per op as set by {@link #setRateSpec(RateSpec)}
      * @return the number of nanos behind schedule when this op returns
      */
     long acquire();
@@ -43,26 +43,35 @@ public interface RateLimiter extends Startable {
      * an accumulator and also included in any subsequent measurement.
      * @return nanoseconds behind schedule since the rate limiter was started
      */
-    long getTotalSchedulingDelay();
+    long getTotalWaitTime();
 
     /**
-     * Set the rate in ops/s. This is a friendly way to calculate the
-     * nanoseconds per op.
-     * @param rate The desired ops/s rate.
+     * Return the total number of nanoseconds behind schedule
+     * that this rate limiter is, but only since the last time the rate spec
+     * has changed. When the rate is changed, this value is check-pointed to
+     * an accumulator and also included in any subsequent measurement.
+     * @return nanoseconds behind schedule since the rate limiter was started
      */
-    void setRate(double rate);
+    long getWaitTime();
 
-    /**
-     * Return the rate in ops/s.
-     * @return ops/s
-     */
-    double getRate();
-
-    /**
-     * Get the number of nanoseconds allotted to each operations.
-     * @return nanosecond op length
-     */
-    long getOpNanos();
+//    /**
+//     * Set the rate in ops/s. This is a friendly way to calculate the
+//     * nanoseconds per op.
+//     * @param rate The desired ops/s rate.
+//     */
+//    void setRate(double rate);
+//
+//    /**
+//     * Return the rate in ops/s.
+//     * @return ops/s
+//     */
+//    double getRate();
+//
+//    /**
+//     * Get the number of nanoseconds allotted to each operations.
+//     * @return nanosecond op length
+//     */
+//    long getOpNanos();
 
     /**
      * Modify the rate of a running rate limiter.

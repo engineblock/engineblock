@@ -28,21 +28,12 @@ public class RateSpecTest {
         RateSpec r = new RateSpec("523");
         assertThat(r.opsPerSec).isEqualTo(523.0d);
         assertThat(r.burstRatio).isEqualTo(1.1d);
-        assertThat(r.reportCoDelay).isFalse();
     }
 
     public void testBurstRatioPattern() {
         RateSpec r = new RateSpec("12345,1.3");
         assertThat(r.opsPerSec).isEqualTo(12345.0d);
         assertThat(r.burstRatio).isEqualTo(1.3d);
-        assertThat(r.reportCoDelay).isFalse();
-    }
-
-    public void testReportPattern() {
-        RateSpec r = new RateSpec("12345,1.3,co");
-        assertThat(r.opsPerSec).isEqualTo(12345.0d);
-        assertThat(r.burstRatio).isEqualTo(1.3d);
-        assertThat(r.reportCoDelay).isTrue();
     }
 
 }

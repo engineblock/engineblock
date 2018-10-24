@@ -17,8 +17,6 @@
 
 package io.engineblock.activityapi.rates;
 
-public interface TestableRateLimiter extends RateLimiter {
-
-    long setClock(long newValue);
-    long getClock();
+public interface DiagUpdateRate {
+    void setDiagModulo(long diagModulo);
 }

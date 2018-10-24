@@ -29,7 +29,7 @@ public class RateLimiters {
 
         if (extant == null) {
             logger.info("Using average rate limiter for speed: " + spec);
-            return new AverageRateLimiter(def, label, spec);
+            return new DynamicRateLimiter(def, label, spec);
         } else {
             extant.setRateSpec(spec);
             return extant;
@@ -40,17 +40,17 @@ public class RateLimiters {
         return createOrUpdate(def, label, null, new RateSpec(specString));
     }
 
-    public static class DelayGauge implements Gauge<Long> {
+    public static class WaitTimeGuage implements Gauge<Long> {
 
         private final RateLimiter rateLimiter;
 
-        public DelayGauge(RateLimiter rateLimiter) {
+        public WaitTimeGuage(RateLimiter rateLimiter) {
             this.rateLimiter = rateLimiter;
         }
 
         @Override
         public Long getValue() {
-            return rateLimiter.getTotalSchedulingDelay();
+            return rateLimiter.getTotalWaitTime();
         }
     }
 
