@@ -21,4 +21,5 @@ public interface ProgressMeter {
     double getProgress();
     String getProgressName();
     RunState getProgressState();
+    String getProgressDetails();
 }

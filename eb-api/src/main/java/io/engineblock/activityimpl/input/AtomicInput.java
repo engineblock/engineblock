@@ -92,8 +92,14 @@ public class AtomicInput implements Input, ActivityDefObserver, ProgressCapable 
     }
 
     @Override
+    public String getProgressDetails() {
+        return "min=" +min.get() + " cycle=" + cycleValue.get() + " max=" + max.get() +
+                (recycleMax.get()>0L ? " recycles=" + recycleValue.get() +"/" + recycleMax.get() : "");
+    }
+
+    @Override
     public String toString() {
-        return "TargetRateInput{" +
+        return "AtomicInput{" +
                 "cycleValue=" + cycleValue +
                 ", min=" + min +
                 ", max=" + max +

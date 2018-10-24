@@ -29,8 +29,8 @@ public class Unit {
 
     private final static Logger logger = LoggerFactory.getLogger(Unit.class);
 
-    private static Pattern numberFmtPattern = Pattern.compile(" *(?<number>[0-9]+(\\.[0-9]+)?(E[0-9]+)?) *(?<unit>[^ ]+?)? *");
-    private static Pattern numberExponentPattern = Pattern.compile(" *(?<pre>.*?)?(?<number>[0-9]+)\\^(?<exponent>[0-9]+)(?<post>.*?)?");
+    private static Pattern numberFmtPattern = Pattern.compile(" *(?<number>(?<whole>[0-9]+)(?<fractional>\\.[0-9]+)?(?<to10power>E[0-9]+)?) *(?<unit>[^ ]+?)? *");
+    private static Pattern numberExponentPattern = Pattern.compile(" *(?<pre>.*?)?(?<number>([0-9]+)(\\.[0-9]+)?+)\\^(?<exponent>[0-9]+)(?<post>.*?)?");
 
     private static long nanoPerSecond = 1000000000;
     private static long bytesPerGB = 1000000000;
@@ -85,6 +85,13 @@ public class Unit {
     }
 
     public static Optional<Double> convertDoubleCount(Count resultUnit, String spec) {
+        Matcher e = numberExponentPattern.matcher(spec);
+        if (e.matches()) {
+            double base= Double.valueOf(e.group("number"));
+            double exponent = Double.valueOf(e.group("exponent"));
+            double value= Math.pow(base, exponent);
+            spec = e.group("pre")+ String.valueOf(value) + e.group("post");
+        }
         Matcher m = numberFmtPattern.matcher(spec);
         if (m.matches()) {
             String numberpart = m.group("number");
@@ -110,7 +117,7 @@ public class Unit {
 
     public static Optional<Long> longCountFor(String spec) {
         spec = longConversions(spec);
-        spec = spec.replace("MAX",String.valueOf(Long.MAX_VALUE));
+        spec = spec.replace("MAX", String.valueOf(Long.MAX_VALUE));
         try {
             long value = Long.parseLong(spec);
             return Optional.of(value);
@@ -151,22 +158,35 @@ public class Unit {
 
     private static String longConversions(String spec) {
         spec = spec.replace("MAX", String.valueOf(Long.MAX_VALUE));
-        Matcher matcher = numberExponentPattern.matcher(spec);
 
-        if (matcher.matches()) {
-            long number=Long.valueOf(matcher.group("number"));
-            long exponent = Long.valueOf(matcher.group("exponent"));
+        Matcher scinoteMatcher = numberFmtPattern.matcher(spec);
+        if (scinoteMatcher.matches() &&
+                ( scinoteMatcher.group("to10power")!=null
+                || scinoteMatcher.group("fractional")!=null)) {
+            Double doubleValue = Double.valueOf(scinoteMatcher.group("number"));
+            spec = spec.replace(scinoteMatcher.group("number"),String.valueOf(doubleValue.longValue()));
+        }
 
-            if (number==2L) {
-                if (exponent>63) {
+        Matcher exponentMatcher = numberExponentPattern.matcher(spec);
+        if (exponentMatcher.matches()) {
+            long number = Long.valueOf(exponentMatcher.group("number"));
+            long exponent = Long.valueOf(exponentMatcher.group("exponent"));
+            if (number == 1L) {
+                logger.warn("If you are using exponent notation for '" + spec + "', you'll only ever get 1L.  " +
+                        "Did you intend to use scientific notation, where the exponent is implied to the base 10? " +
+                        "That looks like 1E5, which is shorthand for 1x10^5, for example.");
+            }
+            if (number == 2L) {
+                if (exponent > 63) {
                     throw new InvalidParameterException("Exponent for powers of two must be 63 or less. It is " + exponent);
                 }
-                long value = 1L<<exponent;
-                spec= matcher.group("pre") + String.valueOf(value) + matcher.group("post");
+                long value = 1L << exponent;
+                spec= exponentMatcher.group("pre") + String.valueOf(value) + exponentMatcher.group("post");
             } else {
-                spec= matcher.group("pre") + (long) Math.pow(number,exponent) + matcher.group("post");
+                spec= exponentMatcher.group("pre") + (long) Math.pow(number, exponent) + exponentMatcher.group("post");
             }
         }
+
 
         return spec;
 
@@ -205,7 +225,7 @@ public class Unit {
         GIGA("G", "giga", 1000000000.0),
         TERA("T", "tera", 1000000000000.0),
         PETA("P", "peta", 1000000000000000.0),
-        EXA("E", "exa",   1000000000000000000.0);
+        EXA("E", "exa", 1000000000000000000.0);
 
         private final String label;
         private final String name;

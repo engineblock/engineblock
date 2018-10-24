@@ -40,8 +40,20 @@ public class UnitParserTests {
     }
 
     @Test
-    public void testExponentialNotation() {
+    public void testExponentialNotationDouble() {
         assertThat(Unit.doubleCountFor("1.0E10")).isPresent().contains(10000000000.0d);
+    }
+
+    @Test
+    public void testPowerNotationDouble() {
+        assertThat(Unit.doubleCountFor("2.7^10")).isPresent();
+        assertThat(Unit.doubleCountFor("9.9^2").get()).isCloseTo(98.01,Offset.offset(0.1D));
+    }
+
+    @Test
+    public void testExponentialNotationLong() {
+        assertThat(Unit.longCountFor("1E9")).isPresent().contains((long)1E9);
+        assertThat(Unit.longCountFor("10E9")).isPresent().contains((long)10E9);
     }
 
     @Test

@@ -441,6 +441,14 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
     }
 
     @Override
+    public String getProgressDetails() {
+        return motors.stream().map(Motor::getInput).distinct().findFirst()
+                .filter(i -> i instanceof ProgressCapable)
+                .map(i -> ((ProgressCapable)i).getProgressDetails()).orElse("");
+    }
+
+
+    @Override
     public String getProgressName() {
         return activityDef.getAlias();
     }
@@ -452,6 +460,7 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
                 .distinct().sorted().findFirst();
         return first.orElse(RunState.Uninitialized);
     }
+
 
     public synchronized void notifyException(Thread t, Throwable e) {
         //logger.error("Uncaught exception in activity thread forwarded to activity executor:", e);
