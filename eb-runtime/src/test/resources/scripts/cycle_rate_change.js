@@ -18,7 +18,7 @@
 cycle_rate = {
     "alias" : "cycle_rate",
     "type" : "diag",
-    "cycles" : "0..100000",
+    "cycles" : "0..300000",
     "threads" : "10",
     "cyclerate" : "2000",
     "interval" : "2000"
@@ -29,11 +29,22 @@ scenario.start(cycle_rate);
 print('started');
 print('cyclerate at 0ms:' + activities.cycle_rate.cyclerate);
 scenario.waitMillis(1000);
-activities.cycle_rate.cyclerate=25000;
-print('cyclerate at after 1000ms:' + activities.cycle_rate.cyclerate);
-print('cycle_rate activity finished');
+activities.cycle_rate.cyclerate='50000';
+print("measured cycle increment per second is expected to adjust to 50000");
+print('cyclerate now:' + activities.cycle_rate.cyclerate);
 
-print("cycle_rate.cycles.meanRate = " + metrics.cycle_rate.cycles.meanRate);
-print("value is expected to be 25000 +-1000");
+var lastcount=metrics.cycle_rate.cycles.count;
+for(i=0;i<10;i++) {
+    scenario.waitMillis(1000);
+    var nextcount=metrics.cycle_rate.cycles.count;
+    var cycles = (nextcount - lastcount);
+    print("new this second: " + (nextcount - lastcount));
+    lastcount=nextcount;
+    if (cycles>49000 && cycles<51000) {
+        print("cycles adjusted, exiting on iteration " + i)
+        break;
+    }
+}
+print('cycle_rate activity finished');
 
 

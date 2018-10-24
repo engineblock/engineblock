@@ -32,10 +32,11 @@ import static io.engineblock.util.Colors.Reset;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * These tests run all the rate limiter micro benches with average rate
- * limiting only, due to the burstRatio level being set to 0.0D.
+ * These tests are disabled by default because they are not really unit tests. They
+ * are used to verify expected behavior of the rate limiter implementation under
+ * artificial load, and can be uncommented as needed during rate limiter development.
  */
-@Test(groups = {"perftest"}, enabled = false)
+@Test(groups = {"perftest"}, enabled = true)
 public class TestRateLimiterPerformance {
 
     @Test(groups = {"perftest"}, enabled = false)

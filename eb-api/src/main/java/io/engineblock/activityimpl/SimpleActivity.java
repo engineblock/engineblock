@@ -203,15 +203,15 @@ public class SimpleActivity implements Activity {
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
 
-        activityDef.getParams().getOptionalNamedParameter("striderate", "co_striderate")
+        activityDef.getParams().getOptionalNamedParameter("striderate")
                 .map(RateSpec::new)
                 .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "stride", strideLimiter, spec));
 
-        activityDef.getParams().getOptionalNamedParameter("cyclerate", "co_cyclerate", "targetrate", "co_targetrate")
+        activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate")
                 .map(RateSpec::new).ifPresent(
                         spec-> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycle", cycleLimiter, spec));
 
-        activityDef.getParams().getOptionalNamedParameter("phaserate", "co_phaserate")
+        activityDef.getParams().getOptionalNamedParameter("phaserate")
                 .map(RateSpec::new)
                 .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "phase", phaseLimiter, spec));
 

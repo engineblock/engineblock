@@ -2,7 +2,7 @@
 activitydef = {
     "alias" : "target_rate",
     "type" : "diag",
-    "cycles" : "1K",
+    "cycles" : "10K",
     "threads" : "10",
     "targetrate" : "1K",
     "phases" : 15

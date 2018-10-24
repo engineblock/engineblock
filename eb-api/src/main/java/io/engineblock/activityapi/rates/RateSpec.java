@@ -28,7 +28,6 @@ public class RateSpec {
      * Target rate in Operations Per Second
      */
     public double opsPerSec = 1.0D;
-
     public double burstRatio = 1.1D;
 
     public RateSpec(double opsPerSec) {

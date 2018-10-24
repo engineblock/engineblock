@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Test
+@Test(singleThreaded = true)
 public class ScriptTests {
 
     public static ScenarioResult runScenario(String scriptname, String... params) {
@@ -73,7 +73,7 @@ public class ScriptTests {
         String digits = m.group(1);
         assertThat(digits).isNotEmpty();
         double rate = Double.valueOf(digits);
-        assertThat(rate).isCloseTo(15000, Offset.offset(1000.0));
+        assertThat(rate).isCloseTo(15000, Offset.offset(2000.0));
     }
 
     @Test
@@ -213,24 +213,31 @@ public class ScriptTests {
     }
 
     @Test
-    public void testReportedCoDelay() {
-        ScenarioResult scenarioResult = runScenario("cocycledelay");
-        assertThat(scenarioResult.getIOLog()).contains("step1 metrics.co_cycle_delay=");
-        assertThat(scenarioResult.getIOLog()).contains("step2 metrics.co_cycle_delay=");
-        System.out.println(scenarioResult.getIOLog());
-        Pattern delayPattern = Pattern.compile(".*step1 metrics.co_cycle_delay=(\\d+).*", Pattern.MULTILINE | Pattern.DOTALL);
-        Matcher matcher = delayPattern.matcher(scenarioResult.getIOLog());
-        assertThat(matcher.matches()).isTrue();
-        String digits = matcher.group(1);
-        assertThat(digits).isNotEmpty();
-        Long delayValue = Long.valueOf(digits);
-        assertThat(delayValue).isBetween(750000000L, 950000000L);
-
+    public void testReportedCoDelayBursty() {
+        ScenarioResult scenarioResult = runScenario("cocycledelay_bursty");
+        assertThat(scenarioResult.getIOLog()).contains("step1 metrics.waittime=");
+        assertThat(scenarioResult.getIOLog()).contains("step2 metrics.waittime=");
+        String iolog = scenarioResult.getIOLog();
+        System.out.println(iolog);
+        assertThat(iolog).contains("waittime trended to 0 as expected");
     }
+    @Test
+    public void testReportedCoDelayStrict() {
+        ScenarioResult scenarioResult = runScenario("cocycledelay_strict");
+        assertThat(scenarioResult.getIOLog()).contains("step1 metrics.waittime=");
+        assertThat(scenarioResult.getIOLog()).contains("step2 metrics.waittime=");
+        String iolog = scenarioResult.getIOLog();
+        System.out.println(iolog);
+        // TODO: ensure that waittime is staying the same or increasing
+        // after investigating minor decreasing effect
+    }
+
 
     @Test
     public void testCycleRateChange() {
         ScenarioResult scenarioResult = runScenario("cycle_rate_change");
+        String ioLog = scenarioResult.getIOLog();
+        assertThat(ioLog.contains("cycles adjusted, exiting on iteration"));
 
     }
 

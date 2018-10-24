@@ -83,12 +83,11 @@ public class DynamicRateLimiter implements Startable, RateLimiter, DiagUpdateRat
     private final AtomicLong cumulativeWaitTimeNanos = new AtomicLong(0L);
     protected long burstWindow;
     protected volatile long clock;
-    protected volatile long scheduledNanos;
+    private final AtomicLong scheduledNanos = new AtomicLong(0L);
     private String label;
     private ActivityDef activityDef;
     private RateSpec rateSpec;
     private volatile long starttime;
-    private volatile long dynamicNanos;
     private long strictNanos = 0L; // Number of dynamicNanos representing one grant at target rate
     private long burstNanos = 0L; // Number of dynamicNanos representing one grant at burst rate
     private volatile long allowedGraceOps = 1L; // Number of ops to allow to proceed without sleeping to compensate for sleep overhead
@@ -154,7 +153,7 @@ public class DynamicRateLimiter implements Startable, RateLimiter, DiagUpdateRat
 //        boolean trace = ((calls++ % diagModulo) == 0);
 
         long scheduledAt_IDEAL = allocatedIdealNanos.getAndAdd(strictNanos);
-        long thisOpAtNanos = this.scheduledNanos;
+        long thisOpAtNanos = this.scheduledNanos.get();
 
         thisOpAtNanos = Math.max(thisOpAtNanos, Math.max(scheduledAt_IDEAL, clock));
 
@@ -167,7 +166,7 @@ public class DynamicRateLimiter implements Startable, RateLimiter, DiagUpdateRat
             }
         }
 
-        scheduledNanos = thisOpAtNanos + burstNanos;
+        scheduledNanos.set(thisOpAtNanos + burstNanos);
 
         if (clock < thisOpAtNanos) { // if this op starts in the future, even with an updated clock reference
             if (graceOps++ < allowedGraceOps) {
@@ -178,7 +177,8 @@ public class DynamicRateLimiter implements Startable, RateLimiter, DiagUpdateRat
             }
 
             long sleepfor = thisOpAtNanos - clock;
-            if (sleepfor > 1000) { // only bother with sleeping if it is in the microsecond range
+            if (sleepfor > 500) { // adjusted to be closer to calling overhead of sleep
+//                if (sleepfor > 1000) { // only bother with sleeping if it is in the microsecond range
 //                sleeps++;
 //                sleeptime += sleepfor;
 //                if (trace) {
@@ -230,7 +230,7 @@ public class DynamicRateLimiter implements Startable, RateLimiter, DiagUpdateRat
                 this.allocatedIdealNanos.set(nanos);
                 this.starttime = nanos;
                 this.cumulativeWaitTimeNanos.set(0L);
-                this.scheduledNanos = nanos;
+                this.scheduledNanos.set(nanos);
                 break;
             case Started:
                 cumulativeWaitTimeNanos.addAndGet(getWaitTime());
@@ -254,10 +254,22 @@ public class DynamicRateLimiter implements Startable, RateLimiter, DiagUpdateRat
 
         this.strictNanos = updatingRateSpec.getCalculatedNanos();
         this.burstNanos = updatingRateSpec.getCalculatedBurstNanos();
-        this.dynamicNanos = strictNanos;
         this.burstWindow = (long) ((updatingRateSpec.getCalculatedNanos() / 10) * strictNanos); // 1/10 sec of ops
         // TODO: This value has a tremendous impact on the trade-off between accuracy and performance, make it configurable and document it
-        this.allowedGraceOps = Math.max(500 / strictNanos, (long) updatingRateSpec.getRate() / 100);
+
+        double rate = updatingRateSpec.getRate();
+        long graceOpsToSet;
+        if (rate <= 100000) {
+            graceOpsToSet= (long) rate / 1000;
+        } else if (rate <= 500000) {
+            graceOpsToSet = (long) rate / 50;
+        } else if (rate <= 10000000) {
+            graceOpsToSet = (long) rate / 10;
+        } else {
+            graceOpsToSet = (long) rate / 5;
+        }
+        this.allowedGraceOps=Math.max(500L, graceOpsToSet);
+
         switch (this.state) {
             case Started:
                 sync();
@@ -283,14 +295,13 @@ public class DynamicRateLimiter implements Startable, RateLimiter, DiagUpdateRat
         return
                 String.format("spec=[%s]:%s", label, rateSpec) +
 //                "\n  (∑⥁/∑(⥁⇉) (API⏲,SYS⏲)=(" +
-                        String.format("\n  (⏲ DYN, ∑running)=(%d, %d, %fS)",
+                        String.format("\n  (⏲, ∑running)=(%d, %fS)",
                                 (getNanoClockTime() - starttime),
-                                (dynamicNanos),
                                 (System.nanoTime() - starttime) / 1_000_000_000.0D
                         ) +
                         String.format(" (alloc sched)=(%d %d)",
                                 (allocatedIdealNanos.get() - starttime),
-                                (scheduledNanos - starttime)
+                                (scheduledNanos.get() - starttime)
                         ) +
                         String.format(" (getwait get∑wait)=(%.3f %.3f)",
                                 (getWaitTime() / 1_000_000_000.0D),
