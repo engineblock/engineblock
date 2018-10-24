@@ -119,7 +119,8 @@ public class HashedErrorHandlerTest {
         handler.setGroup("index", IndexOutOfBoundsException.class, ArrayIndexOutOfBoundsException.class);
         Set<Class<? extends Throwable>> groups = handler.getGroup("index");
         assertThat(groups).isNotNull();
-        assertThat(groups).contains(IndexOutOfBoundsException.class);
+        assertThat(groups).hasSize(2);
+        assertThat(groups.contains(IndexOutOfBoundsException.class)).isTrue();
         handler.setHandlerForPattern("Dyahwemo", CycleErrorHandlers.rethrow("Journey through the klein bottle."));
     }
 

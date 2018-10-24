@@ -73,6 +73,11 @@ public class ScenarioController {
         run(timeout, ad);
     }
 
+    /**
+     * Synchronously run the defined activity with a timeout in seconds.
+     * @param timeout seconds to await completion of the activity.
+     * @param activityDef A definition for an activity to run
+     */
     public synchronized void run(int timeout, ActivityDef activityDef) {
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef,true);
         activityExecutor.startActivity();

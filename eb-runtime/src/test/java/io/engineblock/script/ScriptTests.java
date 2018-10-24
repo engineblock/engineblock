@@ -212,7 +212,6 @@ public class ScriptTests {
         assertThat(scenarioResult.getException()).isNotNull();
     }
 
-
     @Test
     public void testReportedCoDelay() {
         ScenarioResult scenarioResult = runScenario("cocycledelay");
@@ -226,6 +225,12 @@ public class ScriptTests {
         assertThat(digits).isNotEmpty();
         Long delayValue = Long.valueOf(digits);
         assertThat(delayValue).isBetween(750000000L, 950000000L);
+
+    }
+
+    @Test
+    public void testCycleRateChange() {
+        ScenarioResult scenarioResult = runScenario("cycle_rate_change");
 
     }
 

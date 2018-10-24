@@ -43,7 +43,7 @@ public class ConsoleLogging {
         ple.setContext(loggerContext);
         ple.start();
         ca.setEncoder(ple);
-        LevelFilter levelFilter = new LevelFilter(level);
+        LevelFilter<ILoggingEvent> levelFilter = new LevelFilter<>(level);
         levelFilter.start();
         ca.addFilter(levelFilter);
         ca.start();
@@ -53,7 +53,7 @@ public class ConsoleLogging {
         root.setLevel(Level.TRACE);
     }
 
-    private static class LevelFilter extends AbstractMatcherFilter {
+    private static class LevelFilter<E> extends AbstractMatcherFilter<E> {
 
         private final Level filterLevel;
 

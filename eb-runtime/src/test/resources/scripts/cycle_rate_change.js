@@ -20,13 +20,18 @@ cycle_rate = {
     "type" : "diag",
     "cycles" : "0..100000",
     "threads" : "10",
-    "cyclerate" : "25000",
+    "cyclerate" : "2000",
     "interval" : "2000"
 };
 
-print('running cycle_rate');
-scenario.run(10000,cycle_rate);
-print('cycle_rate finished');
+print('starting cycle_rate');
+scenario.start(cycle_rate);
+print('started');
+print('cyclerate at 0ms:' + activities.cycle_rate.cyclerate);
+scenario.waitMillis(1000);
+activities.cycle_rate.cyclerate=25000;
+print('cyclerate at after 1000ms:' + activities.cycle_rate.cyclerate);
+print('cycle_rate activity finished');
 
 print("cycle_rate.cycles.meanRate = " + metrics.cycle_rate.cycles.meanRate);
 print("value is expected to be 25000 +-1000");
