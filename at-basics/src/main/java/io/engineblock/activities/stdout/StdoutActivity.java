@@ -27,7 +27,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @SuppressWarnings("Duplicates")
 public class StdoutActivity extends SimpleActivity implements ActivityDefObserver {
@@ -128,12 +128,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
             }
         } else if (stmtsDocList.getDocBindings().size() > 0) {
             logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");
-            String generatedStmt = stmtsDocList.getDocBindings().keySet()
-                    .stream().map(s -> "{" + s + "}")
-                    .collect(Collectors.joining(","));
-            if (getParams().getOptionalBoolean("newline").orElse(true)) {
-                generatedStmt=generatedStmt+"\n";
-            }
+            String generatedStmt = genStatementTemplate(stmtsDocList.getDocBindings().keySet());
 
             BindingsTemplate bt = new BindingsTemplate(stmtsDocList.getDocBindings());
             StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
@@ -153,6 +148,13 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         }
 
         return opSequence;
+    }
+
+    private String genStatementTemplate(Set<String> keySet) {
+        TemplateFormat format = getParams().getOptionalString("format").map(TemplateFormat::valueOf).orElse(TemplateFormat.assignments);
+        boolean ensureNewline = getParams().getOptionalBoolean("newline").orElse(true);
+        String stmtTemplate = format.format(ensureNewline,new ArrayList<>(keySet));
+        return stmtTemplate;
     }
 
     @Override

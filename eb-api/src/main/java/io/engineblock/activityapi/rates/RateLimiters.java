@@ -31,6 +31,7 @@ public class RateLimiters {
             logger.info("Using average rate limiter for speed: " + spec);
             return new DynamicRateLimiter(def, label, spec);
         } else {
+            logger.debug("updating rate limiter for speed: " + spec);
             extant.setRateSpec(spec);
             return extant;
         }
