@@ -21,6 +21,7 @@ package io.engineblock.core;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.Slf4jReporter;
 import io.engineblock.metrics.ActivityMetrics;
+import io.engineblock.metrics.ChartReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +35,11 @@ public class ScenarioResult {
     private Exception exception;
     private String iolog;
     private String report;
+    private ChartReporter chartReporter;
 
-    public ScenarioResult(String iolog) {
+    public ScenarioResult(String iolog, ChartReporter chartReporter) {
         this.iolog = iolog;
+        this.chartReporter = chartReporter;
     }
 
     public ScenarioResult(Exception e) {
@@ -53,6 +56,11 @@ public class ScenarioResult {
                 .outputTo(logger)
                 .build();
         reporter.report();
+
+        if (chartReporter != null) {
+            chartReporter.generateChart();
+        }
+
         logger.info("-- END METRICS DETAIL --");
 
     }
