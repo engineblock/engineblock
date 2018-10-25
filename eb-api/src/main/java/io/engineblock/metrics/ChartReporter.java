@@ -50,7 +50,7 @@ public class ChartReporter extends ScheduledReporter {
 
     public void generateChart(){
         for (Map.Entry<String, ArrayList<Double>> p99KV : p99sOverTime.entrySet()) {
-            System.out.println(String.format("Charting p99 Latencies (in microseconds) for %s:",p99KV.getKey()));
+            System.out.println(String.format("Charting p99 Latencies (in microseconds) over time (one second intervals) for %s:",p99KV.getKey()));
             double[] p99s = p99KV.getValue().stream().mapToDouble(Double::doubleValue).toArray(); //via method reference
             System.out.println(ASCIIGraph
                     .fromSeries(p99s)
