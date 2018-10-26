@@ -1,5 +1,6 @@
 package io.engineblock.cli;
 
+import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.core.ActivityType;
 import io.engineblock.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.engineblock.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 public class EBCLI {
 
     private static final Logger logger = LoggerFactory.getLogger(EBCLI.class);
+    private static final String CHART_HDR_LOG_NAME = "hdrdata-for-chart.log";
 
     private String commandName;
 
@@ -118,6 +120,17 @@ public class EBCLI {
         }
 
         String sessionName = new SessionNamer().format(options.getSessionName());
+
+        if (options.wantsEnableChart()){
+            logger.info("Charting enabled");
+            if (options.getHistoLoggerConfigs().size() == 0) {
+                logger.info("Adding default histologger configs");
+                String pattern = ".*";
+                String file = CHART_HDR_LOG_NAME;
+                String interval = "1s";
+                options.setHistoLoggerConfigs(pattern, file, interval);
+            }
+        }
 
         for (EBCLIOptions.LoggerConfig histoLogger : options.getHistoLoggerConfigs()) {
             ActivityMetrics.addHistoLogger(sessionName, histoLogger.pattern, histoLogger.file, histoLogger.interval);

@@ -41,6 +41,11 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
     private final String sessionName;
     //    private final long intervalMillis;
     private long intervalLength;
+
+    public File getLogfile() {
+        return logfile;
+    }
+
     private File logfile;
     private PrintStream logStream;
     private HistogramLogWriter writer;
@@ -132,6 +137,7 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
             logger.debug("Not writing last partial histo log <1s:" + this);
         }
         logStream.close();
+        HistoLogChartGenerator.generateChartFromHistoLog(this);
     }
 
     private static class WriterTarget implements Comparable<WriterTarget> {
