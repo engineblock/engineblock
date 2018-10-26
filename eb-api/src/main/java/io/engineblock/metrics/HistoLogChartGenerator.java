@@ -29,7 +29,7 @@ public class HistoLogChartGenerator {
                 Histogram histogram = (Histogram)reader.nextIntervalHistogram();
                 String tag = histogram.getTag();
 
-                double value= (double)histogram.getValueAtPercentile(99);
+                double value= (double)histogram.getValueAtPercentile(99)/1000;
                 ArrayList<Double> valueList = p99sOverTime.get(tag);
                 if (valueList == null){
                     valueList = new ArrayList<>();
