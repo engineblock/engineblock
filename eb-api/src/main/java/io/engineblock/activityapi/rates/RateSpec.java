@@ -29,16 +29,21 @@ public class RateSpec {
      */
     public double opsPerSec = 1.0D;
     public double burstRatio = 1.1D;
+    public Type type= Type.average;
 
-    public RateSpec(double opsPerSec) {
-        this(opsPerSec, 0.0d);
+    public enum Type {
+        average,
+        dynamic,
+        token
     }
+
     public RateSpec(double opsPerSec, double burstRatio) {
-        this(opsPerSec, burstRatio, false);
+        this(opsPerSec, burstRatio, Type.average);
     }
-    public RateSpec(double opsPerSec, double burstRatio, boolean reportCoDelay) {
+    public RateSpec(double opsPerSec, double burstRatio, Type type) {
         this.opsPerSec = opsPerSec;
         this.burstRatio = burstRatio;
+        this.type = type;
     }
 
     public RateSpec(ParameterMap.NamedParameter tuple) {
@@ -52,7 +57,8 @@ public class RateSpec {
         String[] specs = spec.split("[,:;]");
         switch (specs.length) {
             case 3:
-                logger.warn("the third 'report delay' option on rate limiters is no longer needed. For example 1000,1.2,true can be simply 1000,1.2");
+                type = Type.valueOf(specs[2].toLowerCase());
+                logger.debug("selected rate limiter type: " + type);
             case 2:
                 burstRatio = Double.valueOf(specs[1]);
                 if (burstRatio<1.0) {
@@ -83,9 +89,6 @@ public class RateSpec {
         return new RateSpec(rate,this.burstRatio);
     }
 
-    public RateSpec withReportCoDelay(boolean reportCoDelay) {
-        return new RateSpec(this.opsPerSec,this.burstRatio,reportCoDelay);
-    }
 
     public RateSpec withBurstRatio(double burstRatio) {
         return new RateSpec(this.opsPerSec, burstRatio);

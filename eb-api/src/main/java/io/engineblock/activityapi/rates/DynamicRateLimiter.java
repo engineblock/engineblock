@@ -268,6 +268,7 @@ public class DynamicRateLimiter implements Startable, RateLimiter, DiagUpdateRat
         } else {
             graceOpsToSet = (long) rate / 5;
         }
+        logger.debug("grace ops: " + graceOpsToSet);
         this.allowedGraceOps=Math.max(500L, graceOpsToSet);
 
         switch (this.state) {

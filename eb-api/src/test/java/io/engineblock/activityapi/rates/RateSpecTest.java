@@ -36,4 +36,11 @@ public class RateSpecTest {
         assertThat(r.burstRatio).isEqualTo(1.3d);
     }
 
+    public void testTypeSelection() {
+        RateSpec a = new RateSpec("12345,1.4,average");
+        assertThat(a.type).isEqualTo(RateSpec.Type.average);
+        RateSpec d = new RateSpec("12345,1.4,dynamic");
+        assertThat(d.type).isEqualTo(RateSpec.Type.dynamic);
+
+    }
 }

@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>engineblock</artifactId>
@@ -39,7 +40,7 @@
 
     <build>
         <plugins>
-           <!-- Force version on maven-release-plugin -->
+            <!-- Force version on maven-release-plugin -->
             <plugin>
                 <version>2.5.3</version>
                 <artifactId>maven-release-plugin</artifactId>
@@ -59,26 +60,39 @@
                     <execution>
                         <id>wrap-eb</id>
                         <phase>package</phase>
-                        <goals><goal>exec</goal></goals>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
                         <configuration>
                             <executable>${project.basedir}/wrap_eb.sh</executable>
                         </configuration>
                     </execution>
                     <!--<execution>-->
-                        <!--<id>publish-eb</id>-->
-                        <!--<phase>deploy</phase>-->
+                        <!--<id>find-help-topics</id>-->
+                        <!--<phase>prepare-package</phase>-->
                         <!--<goals>-->
                             <!--<goal>exec</goal>-->
                         <!--</goals>-->
                         <!--<configuration>-->
-                            <!--<executable>${project.basedir}/publish.sh</executable>-->
+                            <!--<executable>${project.basedir}/find_help_topics.sh}</executable>-->
                         <!--</configuration>-->
+                    <!--</execution>-->
+
+                    <!--<execution>-->
+                    <!--<id>publish-eb</id>-->
+                    <!--<phase>deploy</phase>-->
+                    <!--<goals>-->
+                    <!--<goal>exec</goal>-->
+                    <!--</goals>-->
+                    <!--<configuration>-->
+                    <!--<executable>${project.basedir}/publish.sh</executable>-->
+                    <!--</configuration>-->
                     <!--</execution>-->
 
                 </executions>
             </plugin>
 
-    </plugins>
+        </plugins>
     </build>
 
 
@@ -95,7 +109,7 @@
         <connection>scm:git:https://github.com/engineblock/engineblock.git</connection>
         <developerConnection>scm:git:https://github.com/engineblock/engineblock.git</developerConnection>
         <url>scm:git:git@github.com:engineblock/engineblock.git</url>
-      <tag>engineblock-2.0.102-SNAPSHOT</tag>
+        <tag>engineblock-2.0.102-SNAPSHOT</tag>
     </scm>
 
     <distributionManagement>

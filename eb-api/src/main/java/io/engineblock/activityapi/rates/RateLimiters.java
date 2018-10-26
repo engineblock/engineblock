@@ -28,12 +28,28 @@ public class RateLimiters {
     public static synchronized RateLimiter createOrUpdate(ActivityDef def, String label, RateLimiter extant, RateSpec spec) {
 
         if (extant == null) {
-            DynamicRateLimiter rateLimiter = new DynamicRateLimiter(def, label, spec);
+//            String type=def.getParams().getOptionalString("")
+            RateLimiter rateLimiter;
+            switch (spec.type) {
+                case average:
+                    rateLimiter = new AverageRateLimiter(def, label, spec);
+                    break;
+                case dynamic:
+                    rateLimiter = new DynamicRateLimiter(def, label, spec);
+                    break;
+                case token:
+                    rateLimiter = new TokenRateLimiter(def, label, spec);
+                    break;
+                default:
+                    throw new RuntimeException("Unknown rate limiter type: " + spec.type);
+
+            }
+
             logger.info("Using rate limiter: " + rateLimiter.toString());
             return rateLimiter;
         } else {
             extant.setRateSpec(spec);
-            logger.debug("Updated rate limiter: " + extant.toString());
+            logger.info("Updated rate limiter: " + extant.toString());
             return extant;
         }
     }

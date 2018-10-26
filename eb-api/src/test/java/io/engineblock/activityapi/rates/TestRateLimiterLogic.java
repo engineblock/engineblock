@@ -42,7 +42,7 @@ public class TestRateLimiterLogic {
     public void testReportedStrictDelay() {
         AtomicLong clock = new AtomicLong(50_000);
         TestableDynamicRateLimiter rl =
-                new TestableDynamicRateLimiter(clock,new RateSpec("1000,1.0,true"),ActivityDef.parseActivityDef("alias=testing"));
+                new TestableDynamicRateLimiter(clock,new RateSpec("1000,1.0,dynamic"),ActivityDef.parseActivityDef("alias=testing"));
         //rl.start;
         clock.set(clock.get() + 1000);
         long delay0 = rl.acquire();
@@ -61,7 +61,7 @@ public class TestRateLimiterLogic {
     public void testReportedBurstDelay() {
         AtomicLong clock = new AtomicLong(50_000);
         TestableDynamicRateLimiter rl =
-                new TestableDynamicRateLimiter(clock,new RateSpec("1000,1.5,true"),ActivityDef.parseActivityDef("alias=testing"));
+                new TestableDynamicRateLimiter(clock,new RateSpec("1000,1.5,dynamic"),ActivityDef.parseActivityDef("alias=testing"));
         //rl.start;
         clock.set(clock.get() + 1000000);
         long delay0 = rl.acquire();
@@ -82,7 +82,7 @@ public class TestRateLimiterLogic {
     public void testDelayCalculations() {
         AtomicLong clock = new AtomicLong(50_000);
         TestableDynamicRateLimiter rl = new TestableDynamicRateLimiter(
-                clock, new RateSpec(1000D, 0.0, true), ActivityDef.parseActivityDef("alias=testing")
+                clock, new RateSpec(1000D, 0.0), ActivityDef.parseActivityDef("alias=testing")
         );
         //rl.start;
 //        assertThat(rl.getLastSeenNanoTimeline()).isEqualTo(50_000L);
