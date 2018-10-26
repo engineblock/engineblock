@@ -148,7 +148,7 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (!options.wantsDisableChart()){
+        if (options.wantsEnableChart()){
             logger.info("Charting enabled");
             scenario.enableCharting();
         } else{
