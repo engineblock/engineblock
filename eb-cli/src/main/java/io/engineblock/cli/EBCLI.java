@@ -148,6 +148,13 @@ public class EBCLI {
             System.exit(0);
         }
 
+        if (options.wantsEnableChart()){
+            logger.info("Charting enabled");
+            scenario.enableCharting();
+        } else{
+            logger.info("Charting disabled");
+        }
+
         scenario.addScenarioScriptParams(scriptData.getScriptParams());
         scenario.addScriptText(scriptData.getScriptTextIgnoringParams());
         ScenarioLogger sl = new ScenarioLogger(scenario)

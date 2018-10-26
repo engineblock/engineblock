@@ -15,6 +15,7 @@
 package io.engineblock.script;
 
 import ch.qos.logback.classic.Logger;
+import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Charsets;
 import io.engineblock.activitycore.ProgressIndicator;
@@ -23,6 +24,7 @@ import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenarioResult;
 import io.engineblock.extensions.ScriptingPluginInfo;
 import io.engineblock.metrics.ActivityMetrics;
+import io.engineblock.metrics.ChartReporter;
 import io.engineblock.metrics.MetricRegistryBindings;
 import io.engineblock.scripting.ScriptEnvBuffer;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Scenario implements Callable<ScenarioResult> {
@@ -54,6 +57,7 @@ public class Scenario implements Callable<ScenarioResult> {
     private String name;
     private ScenarioLogger scenarioLogger;
     private ScriptParams scenarioScriptParams;
+    private ChartReporter chartReporter;
 
     public Scenario(String name, String progressInterval) {
         this.name = name;
@@ -120,6 +124,7 @@ public class Scenario implements Callable<ScenarioResult> {
             scriptEngine.put(extensionDescriptor.getBaseVariableName(), extensionObject);
         }
 
+
     }
 
     public void run() {
@@ -166,7 +171,7 @@ public class Scenario implements Callable<ScenarioResult> {
     public ScenarioResult call() {
         run();
         String iolog = scriptEnv.getTimedLog();
-        return new ScenarioResult(iolog);
+        return new ScenarioResult(iolog, chartReporter);
     }
 
     @Override
@@ -211,6 +216,12 @@ public class Scenario implements Callable<ScenarioResult> {
     }
     public void addScenarioScriptParams(Map<String,String> scriptParams) {
         addScenarioScriptParams(new ScriptParams() {{ putAll(scriptParams);}});
+    }
+
+    public void enableCharting() {
+        MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
+        chartReporter = new ChartReporter(metricRegistry,"chart-reporter", MetricFilter.ALL, TimeUnit.SECONDS, TimeUnit.MICROSECONDS);
+        chartReporter.start(1, TimeUnit.SECONDS);
     }
 }
 
