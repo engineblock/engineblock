@@ -17,7 +17,17 @@ import java.util.*;
 
 public class HistoLogChartGenerator {
 
-    private static Map<String, ArrayList<Double>> p99sOverTime = new HashMap<>();
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+
+    private static Map<String, ArrayList<Histogram>> histogramsOverTime = new HashMap<>();
 
     public static void generateChartFromHistoLog(HistoIntervalLogger histoIntervalLogger) {
         File logFile = histoIntervalLogger.getLogfile();
@@ -30,24 +40,37 @@ public class HistoLogChartGenerator {
                 String tag = histogram.getTag();
 
                 double value= (double)histogram.getValueAtPercentile(99)/1000;
-                ArrayList<Double> valueList = p99sOverTime.get(tag);
-                if (valueList == null){
-                    valueList = new ArrayList<>();
+                ArrayList<Histogram> histogramList = histogramsOverTime.get(tag);
+                if (histogramList == null){
+                    histogramList = new ArrayList<>();
                 }
-                valueList.add(value);
-                p99sOverTime.put(tag, valueList);
+                histogramList.add(histogram);
+                histogramsOverTime.put(tag, histogramList);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
-        for (Map.Entry<String, ArrayList<Double>> p99KV : p99sOverTime.entrySet()) {
+
+
+        for (Map.Entry<String, ArrayList<Histogram>> p99KV : histogramsOverTime.entrySet()) {
             System.out.println(String.format("Charting p99 Latencies (in microseconds) over time (one second intervals) for %s:",p99KV.getKey()));
-            double[] p99s = p99KV.getValue().stream().mapToDouble(Double::doubleValue).toArray(); //via method reference
-            System.out.println(ASCIIGraph
+            double[] p99s = p99KV.getValue().stream().mapToDouble(x -> x.getValueAtPercentile(99)).toArray(); //via method reference
+            System.out.println(ANSI_RED +
+                    ASCIIGraph
                     .fromSeries(p99s)
                     .withNumRows(8)
-                    .plot());
+                    .plot()
+                    + ANSI_RESET);
+
+            System.out.println(String.format("Charting throughput (number of transactions per second) for %s:", p99KV.getKey()));
+            double[] rates= p99KV.getValue().stream().mapToDouble(x -> x.getTotalCount()).toArray(); //via method reference
+            System.out.println(ANSI_GREEN +
+                    ASCIIGraph
+                            .fromSeries(rates)
+                            .withNumRows(8)
+                            .plot()
+                    + ANSI_GREEN);
         }
     }
 }
