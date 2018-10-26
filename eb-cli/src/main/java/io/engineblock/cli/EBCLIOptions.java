@@ -61,7 +61,7 @@ public class EBCLIOptions {
     private static final String LOG_STATS = "--log-histostats";
     private static final String CLASSIC_HISTOS = "--classic-histograms";
     private final static String LOG_LEVEL_OVERRIDE = "--log-level-override";
-    private final static String DISABLE_CHART = "--disable-chart";
+    private final static String ENABLE_CHART = "--enable-chart";
 
     private static final Set<String> reserved_words = new HashSet<String>() {{
         addAll(
@@ -100,7 +100,7 @@ public class EBCLIOptions {
     private String consoleLoggingPattern = DEFAULT_CONSOLE_LOGGING_PATTERN;
     private String logsLevel = "INFO";
     private Map<String,Level> logLevelsOverrides = new HashMap<>();
-    private boolean disableChart = false;
+    private boolean enableChart = false;
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -201,9 +201,9 @@ public class EBCLIOptions {
                     arglist.removeFirst();
                     wantsAdvancedHelp = true;
                     break;
-                case DISABLE_CHART:
+                case ENABLE_CHART:
                     arglist.removeFirst();
-                    disableChart = true;
+                    enableChart = true;
                     break;
                 case HELP:
                 case "-h":
@@ -362,8 +362,8 @@ public class EBCLIOptions {
         return wantsAdvancedHelp;
     }
 
-    public boolean wantsDisableChart() {
-        return disableChart;
+    public boolean wantsEnableChart() {
+        return enableChart;
     }
 
     public int getReportInterval() {
