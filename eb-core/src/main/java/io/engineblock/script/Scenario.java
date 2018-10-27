@@ -18,13 +18,13 @@ import ch.qos.logback.classic.Logger;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Charsets;
+import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activitycore.ProgressIndicator;
 import io.engineblock.core.ScenarioController;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenarioResult;
 import io.engineblock.extensions.ScriptingPluginInfo;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.metrics.ChartReporter;
 import io.engineblock.metrics.MetricRegistryBindings;
 import io.engineblock.scripting.ScriptEnvBuffer;
 import org.slf4j.LoggerFactory;
@@ -57,7 +57,7 @@ public class Scenario implements Callable<ScenarioResult> {
     private String name;
     private ScenarioLogger scenarioLogger;
     private ScriptParams scenarioScriptParams;
-    private ChartReporter chartReporter;
+    private boolean areChartsEnabled;
 
     public Scenario(String name, String progressInterval) {
         this.name = name;
@@ -171,7 +171,7 @@ public class Scenario implements Callable<ScenarioResult> {
     public ScenarioResult call() {
         run();
         String iolog = scriptEnv.getTimedLog();
-        return new ScenarioResult(iolog, chartReporter);
+        return new ScenarioResult(iolog);
     }
 
     @Override
@@ -220,8 +220,6 @@ public class Scenario implements Callable<ScenarioResult> {
 
     public void enableCharting() {
         MetricRegistry metricRegistry = ActivityMetrics.getMetricRegistry();
-        chartReporter = new ChartReporter(metricRegistry,"chart-reporter", MetricFilter.ALL, TimeUnit.SECONDS, TimeUnit.MICROSECONDS);
-        chartReporter.start(1, TimeUnit.SECONDS);
     }
 }
 

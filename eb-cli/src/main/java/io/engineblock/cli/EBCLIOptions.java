@@ -517,6 +517,11 @@ public class EBCLIOptions {
         return logLevelsOverrides;
     }
 
+    public void setHistoLoggerConfigs(String pattern, String file, String interval) {
+        //--log-histograms 'hdrdata.log:.*:2m'
+        histoLoggerConfigs.add(String.format("%s:%s:%s",file,pattern,interval));
+    }
+
     public static enum CmdType {
         start,
         run,
