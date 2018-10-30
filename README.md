@@ -43,6 +43,8 @@ EngineBlock is licensed under the Apache Public License 2.0
 
 ## Thanks
 
+![YourKit Logo](https://www.yourkit.com/images/yklogo.png)
+
 This project uses tools provided by YourKit, LLC, the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a>. YourKit supports open source projects with its full-featured Java Profiler.
 YourKit, LLC is the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a>
 and <a href="https://www.yourkit.com/.net/profiler/">YourKit .NET Profiler</a>,
