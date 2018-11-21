@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <virtdata-version>1.2.38</virtdata-version>
+        <virtdata-version>2.11.03</virtdata-version>
         <metrics-version>3.2.6</metrics-version>
     </properties>
 
@@ -45,11 +45,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.8.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <compilerArgument>-Xlint:unchecked</compilerArgument>
+                    <release>11</release>
+                    <source>11</source>
+                    <target>11</target>
+                    <!--<compilerArgument>-Xdoclint:all</compilerArgument>-->
+                    <compilerArgument>-Xlint:all</compilerArgument>
                 </configuration>
             </plugin>
 
@@ -109,7 +111,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.2.0</version>
                     <executions>
                         <execution>
                             <phase>package</phase>
