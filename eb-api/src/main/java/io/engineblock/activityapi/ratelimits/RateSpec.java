@@ -101,19 +101,8 @@ public class RateSpec {
         return new RateSpec(this.opsPerSec, burstRatio);
     }
 
-
-    public long getCalculatedBurstNanos() {
-        if (burstRatio==0.0) {
-            return 0L;
-        }
-        if (burstRatio<1.0) {
-            throw new RuntimeException("burst ratio must be either 0.0 (disabled), or be greater or equal to 1.0");
-        }
-        return (long) ((double)1_000_000_000L / (burstRatio*opsPerSec));
-    }
-
-    public long getCalculatedNanos() {
-        return (long) ((double)1_000_000_000L / opsPerSec);
+    public long getNanosPerOp() {
+        return (long) (1E9 / opsPerSec);
     }
 
     public double getRate() {

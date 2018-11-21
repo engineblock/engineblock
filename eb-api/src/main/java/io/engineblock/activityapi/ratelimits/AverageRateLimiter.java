@@ -178,7 +178,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
             return;
         }
 
-        this.opTicks = updatingRateSpec.getCalculatedNanos();
+        this.opTicks = updatingRateSpec.getNanosPerOp();
         this.rateSpec = updatingRateSpec;
         switch (this.state) {
             case Started:

@@ -21,16 +21,16 @@ import io.engineblock.activityimpl.ActivityDef;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class TestableDynamicRateLimiter extends DynamicRateLimiter implements TestableRateLimiter {
+public class TestableHybridRateLimiter extends HybridRateLimiter {
 
     private AtomicLong clock;
 
-    public TestableDynamicRateLimiter(AtomicLong clock, RateSpec rateSpec, ActivityDef def) {
+    public TestableHybridRateLimiter(AtomicLong clock, RateSpec rateSpec, ActivityDef def) {
         setActivityDef(def);
         setRateSpec(rateSpec);
         setLabel("test");
         this.clock = clock;
-        init();
+        init(def);
     }
 
     public long setClock(long newValue) {
