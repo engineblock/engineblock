@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activityapi.rates;
+package io.engineblock.activityapi.ratelimits;
 
 import io.engineblock.activityimpl.ActivityDef;
 

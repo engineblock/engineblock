@@ -25,7 +25,7 @@ import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuf
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.output.Output;
-import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;

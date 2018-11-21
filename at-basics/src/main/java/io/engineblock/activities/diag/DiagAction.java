@@ -17,7 +17,7 @@ package io.engineblock.activities.diag;
 import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityapi.core.MultiPhaseAction;
 import io.engineblock.activityapi.core.SyncAction;
-import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -19,7 +19,7 @@ package io.engineblock.activities.diag;
 import io.engineblock.activityapi.core.BaseAsyncAction;
 import io.engineblock.activityapi.core.ops.BaseOpContext;
 import io.engineblock.activityapi.core.ops.OpContext;
-import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import org.slf4j.Logger;
