@@ -32,7 +32,14 @@ public interface RateLimiter extends Startable {
     /**
      * Block until it is time for the next operation, according to the
      * nanoseconds per op as set by {@link #setRateSpec(RateSpec)}
-     * @return the number of nanos behind schedule when this op returns
+     * @return the waittime as nanos behind schedule when this op returns.
+     * The returned value is required to be greater than or equal to zero.
+     *
+     * Note that accuracy of the returned value is limited by timing
+     * precision and calling overhead of the real time clock. It will not
+     * generally be better than microseconds. Also, some rate limiting
+     * algorithms are unable to efficiently track per-op waittime at speed
+     * due to bulk allocation mechanisms necessary to support higher rates.
      */
     long acquire();
 

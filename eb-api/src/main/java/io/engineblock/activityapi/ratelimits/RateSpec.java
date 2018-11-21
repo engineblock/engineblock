@@ -24,17 +24,24 @@ import org.slf4j.LoggerFactory;
 
 public class RateSpec {
     private final static Logger logger = LoggerFactory.getLogger(RateSpec.class);
+    public static final double DEFAULT_RATE_OPS_S = 1.0D;
+    public static final double DEFAULT_BURST_RATIO = 1.1D;
+
     /**
      * Target rate in Operations Per Second
      */
-    public double opsPerSec = 1.0D;
-    public double burstRatio = 1.1D;
-    public Type type= Type.average;
+    public double opsPerSec = DEFAULT_RATE_OPS_S;
+    public double burstRatio = DEFAULT_BURST_RATIO;
+
+    public Type type= Type.hybrid; // Most users will expect limited bursting
+
+    public Type getype() {
+        return type;
+    }
 
     public enum Type {
-        average,
-        dynamic,
-        token
+        average,    // no limit to bursting, but will aggressively track to overall average if allowed
+        hybrid      // bursting is limited to a speed factor, and a background thread generates grants
     }
 
     public RateSpec(double opsPerSec, double burstRatio) {

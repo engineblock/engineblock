@@ -34,11 +34,8 @@ public class RateLimiters {
                 case average:
                     rateLimiter = new AverageRateLimiter(def, label, spec);
                     break;
-                case dynamic:
-                    rateLimiter = new DynamicRateLimiter(def, label, spec);
-                    break;
-                case token:
-                    rateLimiter = new TokenRateLimiter(def, label, spec);
+                case hybrid:
+                    rateLimiter = new HybridRateLimiter(def, label, spec);
                     break;
                 default:
                     throw new RuntimeException("Unknown rate limiter type: " + spec.type);
