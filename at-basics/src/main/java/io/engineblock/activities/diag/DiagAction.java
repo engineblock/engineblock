@@ -51,7 +51,7 @@ public class DiagAction implements SyncAction, ActivityDefObserver, MultiPhaseAc
 
     /**
      * idempotently assign the last append reference time and the interval which, when added to it, represent when this
-     * diagnostic thread should take its turn to log cycle info. Also, append the modulo parameter.
+     * diagnostic thread should takeUpTo its turn to log cycle info. Also, append the modulo parameter.
      */
     private void updateReportTime() {
         reportModulo = activityDef.getParams().getOptionalLong("modulo").orElse(10000000L);
