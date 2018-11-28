@@ -43,8 +43,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * needed. Some practical limitations affect how accurate we can be:
  *
  * <OL>
- * <LI>This is not a realtime system with guarantees on scheduling.</LI>
- * <LI>Calling overhead is significant for reading the RTC, as well as asking a thread to delay.</LI>
+ * <LI>This is not a real-time system with guarantees on scheduling.</LI>
+ * <LI>Calling overhead is significant for reading the RTC or sleeping.</LI>
+ * <LI>Controlling the accuracy of a delay is not possible under any level of load.</LI>
  * <LI>It is undesirable (wasteful) to use spin loops to delay.</LI>
  * </OL>
  *
@@ -75,7 +76,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class HybridRateLimiter implements Startable, RateLimiter {
 
-    private TokenFiller filler;
+    private volatile TokenFiller filler;
     private volatile long starttime;
 
     // rate controls
@@ -94,6 +95,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     private TokenPool tokens;
     // diagnostics
 
+    // TODO Doc rate limiter scenarios, including when you want to reset the waittime, and when you don't
     private AtomicLong cumulativeWaitTimeNanos = new AtomicLong(0L);
 
     protected HybridRateLimiter() {
@@ -136,14 +138,15 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     }
 
     @Override
-    public void setRateSpec(RateSpec updatingRateSpec) {
-        RateSpec oldRateSpec = this.rateSpec;
-        this.rateSpec = updatingRateSpec;
-        this.nanosPerOp = rateSpec.getNanosPerOp();
-
-        if (oldRateSpec != null && oldRateSpec.equals(this.rateSpec)) {
+    public synchronized void setRateSpec(RateSpec updatingRateSpec) {
+        if (updatingRateSpec!=null && updatingRateSpec.equals(this.rateSpec)) {
             return;
         }
+
+        this.rateSpec = updatingRateSpec;
+        this.filler = (this.filler==null) ? new TokenFiller(rateSpec):  filler.apply(rateSpec);
+        this.tokens = this.filler.getTokenPool();
+        this.nanosPerOp = rateSpec.getNanosPerOp();
 
         switch (this.state) {
             case Started:
@@ -153,7 +156,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     }
 
     protected void init(ActivityDef activityDef) {
-        this.delayGauge = ActivityMetrics.gauge(activityDef, label + ".waittime", new RateLimiters.WaitTimeGuage(this));
+        this.delayGauge = ActivityMetrics.gauge(activityDef, label + ".waittime", new RateLimiters.WaitTimeGauge(this));
         this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + ".config_cyclerate", new RateLimiters.RateGauge(this));
         this.burstRateGauge = ActivityMetrics.gauge(activityDef, label + ".config_burstrate", new RateLimiters.BurstRateGauge(this));
 
@@ -166,8 +169,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
                 break;
             case Idle:
                 sync();
-                this.filler = new TokenFiller(rateSpec).start();
-                this.tokens = filler.getTokenPool();
+                this.filler.start();
                 state = State.Started;
                 break;
         }
@@ -193,7 +195,9 @@ public class HybridRateLimiter implements Startable, RateLimiter {
 
     @Override
     public String toString() {
-        return this.getRateSpec().toString();
+        return
+                //"ID:"+System.identityHashCode(this)+" "+
+                this.getRateSpec().toString() + "(" + this.state + ") pool:" + filler;
     }
 
     private enum State {

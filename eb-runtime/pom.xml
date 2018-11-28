@@ -16,6 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javadoc.name>EngineBlock Runtime</javadoc.name>
     </properties>
 
     <dependencies>
@@ -54,55 +55,6 @@
     </dependencies>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.20.1</version>
-                <executions>
-                    <execution>
-                        <id>run-tests</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <includes>
-                        <include>**/*Tests.java</include>
-                    </includes>
-                    <properties>
-                        <property>
-                            <name>parallel</name>
-                            <value>methods</value>
-                        </property>
-                    </properties>
-                </configuration>
-
-            </plugin>
-
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.4</version>
-                <configuration>
-                    <doctitle>EngineBlock Runtime</doctitle>
-                    <windowtitle>EngineBlock Runtime</windowtitle>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadoc</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

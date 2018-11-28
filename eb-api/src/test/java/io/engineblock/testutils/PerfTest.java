@@ -34,7 +34,7 @@ public class PerfTest {
         assertThat(p.isConverged(Result::getOpsPerSec,0.2d, 3)).isFalse();
         p.add("3",0,100,1431);
         double[] deltas = p.getDeltas(Result::getOpsPerSec);
-        System.out.println(p.toStringDelta(Result::getOpsPerSec, "D_ops_s"));
+        System.out.println("Sanity Check for Perf methods:\n"+p.toStringDelta(Result::getOpsPerSec, "D_ops_s"));
         assertThat(p.isConverged(Result::getOpsPerSec,0.2d, 3)).isFalse();
         p.add("4",0,100,1441);
         assertThat(p.isConverged(Result::getOpsPerSec,0.2d, 3)).isTrue();

@@ -55,11 +55,11 @@ public class RateLimiters {
         return createOrUpdate(def, label, null, new RateSpec(specString));
     }
 
-    public static class WaitTimeGuage implements Gauge<Long> {
+    public static class WaitTimeGauge implements Gauge<Long> {
 
         private final RateLimiter rateLimiter;
 
-        public WaitTimeGuage(RateLimiter rateLimiter) {
+        public WaitTimeGauge(RateLimiter rateLimiter) {
             this.rateLimiter = rateLimiter;
         }
 

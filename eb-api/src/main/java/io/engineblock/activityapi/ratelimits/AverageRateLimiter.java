@@ -71,7 +71,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     }
 
     protected void init() {
-        this.delayGauge = ActivityMetrics.gauge(activityDef, label+".cco_delay_gauge", new RateLimiters.WaitTimeGuage(this));
+        this.delayGauge = ActivityMetrics.gauge(activityDef, label+".cco_delay_gauge", new RateLimiters.WaitTimeGauge(this));
         //this.sleepCounter = ActivityMetrics.counter(activityDef, label + "_ratelogic.sleep_counter");
         //this.fastpathCounter = ActivityMetrics.counter(activityDef, label + "_ratelogic.fast_counter");
         this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + ".avg_targetrate_gauge", new RateLimiters.RateGauge(this));

@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test(singleThreaded = true)
-public class ScriptTests {
+public class ScriptIntegrationTests {
 
     public static ScenarioResult runScenario(String scriptname, String... params) {
         if ((params.length % 2) != 0) {
@@ -47,8 +47,9 @@ public class ScriptTests {
         for (int i = 0; i < params.length; i += 2) {
             paramsMap.put(params[i], params[i + 1]);
         }
-        String scenarioName = "testing activity" + scriptname;
-        ScenariosExecutor e = new ScenariosExecutor(ScriptTests.class.getSimpleName() + ":" + scriptname, 1);
+        String scenarioName = "scenario " + scriptname;
+        System.out.println("Running integration test for: " + scenarioName);
+        ScenariosExecutor e = new ScenariosExecutor(ScriptIntegrationTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName);
         s.addScenarioScriptParams(paramsMap);
         s.addScriptText("load('classpath:scripts/" + scriptname + ".js');");

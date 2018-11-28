@@ -9,8 +9,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <virtdata-version>2.11.03</virtdata-version>
+        <virtdata-version>2.11.07</virtdata-version>
         <metrics-version>3.2.6</metrics-version>
+        <javadoc.name>EngineBlock</javadoc.name>
     </properties>
 
     <name>${project.artifactId}</name>
@@ -41,6 +42,35 @@
     <build>
         <plugins>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.1</version>
+                <executions>
+                    <execution>
+                        <id>run-tests</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includes>
+                        <include>**/*IntegrationTest.java</include>
+                        <include>**/*IntegrationTests.java</include>
+                    </includes>
+                    <properties>
+                        <property>
+                            <name>parallel</name>
+                            <value>methods</value>
+                        </property>
+                    </properties>
+                </configuration>
+
+            </plugin>
+
             <!-- Compile & Source 1.8 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -61,8 +91,8 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <doctitle>EngineBlock API</doctitle>
-                    <windowtitle>EngineBlock API</windowtitle>
+                    <doctitle>${javadoc.name}</doctitle>
+                    <windowtitle>${javadoc.name}</windowtitle>
                 </configuration>
                 <executions>
                     <execution>

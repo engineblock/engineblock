@@ -4,7 +4,7 @@ co_cycle_delay = {
     "diagrate" : "800",
     "cycles" : "0..10000",
     "threads" : "1",
-    "cyclerate" : "1000,1.0,dynamic"
+    "cyclerate" : "1000,1.0,hybrid"
 };
 
 print('starting activity co_cycle_delay');

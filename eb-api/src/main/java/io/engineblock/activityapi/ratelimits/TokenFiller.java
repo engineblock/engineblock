@@ -27,12 +27,11 @@ public class TokenFiller implements Runnable {
     public final static double MIN_PER_SECOND = 10D;
     public final static double MAX_PER_SECOND = 1000D;
     private final SysPerfData PERFDATA = SysPerf.get().getPerfData(false);
-    private final long lockOverhead = (long) PERFDATA.getAvgNanos_LockSupport_ParkNanos();
-    private final long interval;
-    private final long interruptsPerSecond;
+    private final long interval = (long) 1E6;
 
-    private TokenPool tokenPool;
+    private final TokenPool tokenPool;
     private volatile boolean running = true;
+    private RateSpec rateSpec;
     private Thread thread;
 
     /**
@@ -43,12 +42,19 @@ public class TokenFiller implements Runnable {
      * @param rateSpec A rate specifier
      */
     public TokenFiller(RateSpec rateSpec) {
-        this.interruptsPerSecond = (long) Math.min(Math.max(rateSpec.getRate() * 10D, MAX_PER_SECOND), MIN_PER_SECOND);
-        this.tokenPool = new TokenPool(rateSpec);
+        this.rateSpec = rateSpec;
+        this.tokenPool= new TokenPool(rateSpec);
         this.tokenPool.refill(rateSpec.getNanosPerOp());
-        this.interval = (long) 1E6;
-        //(long) Math.max(tokenPool.getMaxActivePool() / 10D, 1E6);
-        //this.interval = (long)(1E9/(double)interruptsPerSecond);
+    }
+
+    public TokenFiller apply(RateSpec rateSpec) {
+        this.rateSpec = rateSpec;
+        this.tokenPool.apply(rateSpec);
+        return this;
+    }
+
+    private void stop() {
+        this.running=false;
     }
 
     public TokenPool getTokenPool() {
@@ -87,6 +93,7 @@ public class TokenFiller implements Runnable {
 
     @Override
     public String toString() {
-        return "TokenFiller_" + this.interval + "ns pool:" + tokenPool;
+        return "TokenFiller spec=" + rateSpec + " interval=" + this.interval + "ns pool:" + tokenPool +" running=" + running;
     }
+
 }

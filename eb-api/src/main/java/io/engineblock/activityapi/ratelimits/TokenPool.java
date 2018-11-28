@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
  */
 public class TokenPool {
     private final static Logger logger = LoggerFactory.getLogger(TokenPool.class);
-    private final long maxActivePool;
-    private final long maxOverActivePool;
-    private final double burstRatio;
+    private long maxActivePool;
+    private long maxOverActivePool;
+    private double burstRatio;
     private volatile long activePool;
     private volatile long waitingPool;
 
@@ -57,13 +57,21 @@ public class TokenPool {
      * @param rateSpec a {@link RateSpec}
      */
     public TokenPool(RateSpec rateSpec) {
+        apply(rateSpec);
+        logger.debug("initialized token pool: " + this.toString() + " for rate:" + rateSpec.toString());
+    }
 
+//    public TokenPool(TokenPool tokenPool, RateSpec rateSpec) {
+//        this(rateSpec);
+//        this.waitingPool=tokenPool.getWaitPool();
+//        this.activePool=tokenPool.getActivePool();
+//        logger.debug("continued token pool: " + this.toString() + " for rate:" + rateSpec.toString());
+//    }
+
+    public void apply(RateSpec rateSpec) {
         this.maxActivePool = Math.max((long) 1E6, (long) ((double) rateSpec.getNanosPerOp()));
-
-//        this.maxActivePool = Math.max((long)(1E9/1E3),rateSpec.getNanosPerOp());
         this.maxOverActivePool = (long) (maxActivePool * rateSpec.getBurstRatio());
         this.burstRatio = rateSpec.getBurstRatio();
-        logger.debug("initialized token pool: " + this.toString() + " for rate:" + rateSpec.toString());
     }
 
     //    public TokenPool(long maxActivePool, double burstRatio) {
@@ -210,6 +218,11 @@ public class TokenPool {
 
     @Override
     public String toString() {
-        return "Tokens: active=" + activePool + " waiting=" + waitingPool;
+        return "Tokens: active=" + activePool +"/" + maxActivePool
+                + String.format(
+                        " (%3.1f%%)A (%3.1f%%)B ",
+                (((double)activePool/(double)maxActivePool)*100.0),
+                (((double)activePool/(double)maxOverActivePool)*100.0)) + " waiting=" + waitingPool;
     }
+
 }

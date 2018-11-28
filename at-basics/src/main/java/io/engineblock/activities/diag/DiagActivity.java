@@ -46,7 +46,7 @@ public class DiagActivity extends SimpleActivity implements Activity, ActivityDe
             Thread.sleep(initdelay);
         } catch (InterruptedException ignored) {
         }
-        onActivityDefUpdate(activityDef);
+        //onActivityDefUpdate(activityDef);
         if (isAsync()) {
             pendingOpsCounter = ActivityMetrics.counter(this.activityDef,"pending_ops");
         }

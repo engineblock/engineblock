@@ -60,4 +60,19 @@ public class TokenPoolTest {
         assertThat(p.takeUpTo(1L)).isEqualTo(0L);
     }
 
+    @Test
+    public void testChangedParameters() {
+
+        RateSpec s1 = new RateSpec(1000L, 1.10D);
+        TokenPool p = new TokenPool(s1);
+        long r = p.refill(10000000);
+        assertThat(r).isEqualTo(10000000L);
+        assertThat(p.getActivePool()).isEqualTo(10000000L);
+        assertThat(p.getWaitPool()).isEqualTo(0L);
+
+        RateSpec s2 = new RateSpec(1000000L, 1.10D);
+        p.apply(s2);
+
+
+    }
 }

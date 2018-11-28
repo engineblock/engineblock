@@ -16,6 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javadoc.name>EngineBlock Command Line</javadoc.name>
     </properties>
 
     <dependencies>
@@ -52,63 +53,12 @@
     </dependencies>
 
     <build>
-        <plugins>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.20.1</version>
-                <executions>
-                    <execution>
-                        <id>run-tests</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <includes>
-                        <include>**/*IntegrationTest.java</include>
-                        <include>**/*IntegrationTests.java</include>
-                    </includes>
-                    <properties>
-                        <property>
-                            <name>parallel</name>
-                            <value>methods</value>
-                        </property>
-                    </properties>
-                </configuration>
-
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <doctitle>EngineBlock CLI</doctitle>
-                    <windowtitle>EngineBlock CLI</windowtitle>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadoc</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
         </resources>
-
     </build>
 
     <profiles>
