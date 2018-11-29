@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
  * within the active token pool are saved in a waiting token pool and
  * used to backfill when allowed according to the backfill rate.
  *
- * A detailed explanation for how this works is included at @link "http://docs.engineblock.io/dev-notes/rate_limiter_design/"
- *
+ * A detailed explanation for how this works will be included
+ * at @link "http://docs.engineblock.io/" under dev notes.
  *
  * <p>This is the basis for the token-based rate limiters in
  * EngineBlock. This mechanism is easily adaptable to bursting
@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 public class TokenPool {
     private final static Logger logger = LoggerFactory.getLogger(TokenPool.class);
     private long maxActivePool;
+    private long maxBurstLimit;
     private long maxOverActivePool;
     private double burstRatio;
     private volatile long activePool;
@@ -61,30 +62,20 @@ public class TokenPool {
         logger.debug("initialized token pool: " + this.toString() + " for rate:" + rateSpec.toString());
     }
 
-//    public TokenPool(TokenPool tokenPool, RateSpec rateSpec) {
-//        this(rateSpec);
-//        this.waitingPool=tokenPool.getWaitPool();
-//        this.activePool=tokenPool.getActivePool();
-//        logger.debug("continued token pool: " + this.toString() + " for rate:" + rateSpec.toString());
-//    }
-
     public void apply(RateSpec rateSpec) {
         this.maxActivePool = Math.max((long) 1E6, (long) ((double) rateSpec.getNanosPerOp()));
         this.maxOverActivePool = (long) (maxActivePool * rateSpec.getBurstRatio());
         this.burstRatio = rateSpec.getBurstRatio();
-    }
 
-    //    public TokenPool(long maxActivePool, double burstRatio) {
-//        this.maxActivePool=maxActivePool;
-//        this.burstRatio = burstRatio;
-//        this.maxOverActivePool = (long)(maxActivePool*burstRatio);
-//    }
-//
+        this.maxBurstLimit = maxOverActivePool - maxActivePool;
+    }
 
     public TokenPool(long poolsize, double burstRatio) {
         this.maxActivePool = poolsize;
         this.burstRatio = burstRatio;
         this.maxOverActivePool = (long) (maxActivePool * burstRatio);
+
+        this.maxBurstLimit = maxOverActivePool - maxActivePool;
     }
     public long getMaxActivePool() {
         return maxActivePool;
@@ -93,7 +84,6 @@ public class TokenPool {
     public double getBurstRatio() {
         return burstRatio;
     }
-
 
     /**
      * Take tokens up to amt tokens form the pool and report
@@ -170,13 +160,15 @@ public class TokenPool {
 
         long needed = Math.max(maxActivePool - activePool, 0L);
         long adding = Math.min(newTokens, needed);
-        long unused = newTokens - adding;
-        waitingPool += unused;
         activePool += adding;
 
-        double backfillFactor = (double) newTokens / maxActivePool;
+        long overflow = newTokens - adding;
+        waitingPool += overflow;
 
+        double backfillFactor = Math.min((double) newTokens / maxActivePool, 1.0D);
+        long backFillAllowed =(long) (backfillFactor*maxBurstLimit);
         long backfill = Math.min(maxOverActivePool - activePool, waitingPool);
+        backfill = Math.min(backfill, backFillAllowed);
 
         waitingPool -= backfill;
         activePool += backfill;

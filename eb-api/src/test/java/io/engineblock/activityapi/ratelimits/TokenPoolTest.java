@@ -44,10 +44,10 @@ public class TokenPoolTest {
         assertThat(p.getWaitPool()).isEqualTo(0L);
         assertThat(p.refill(100L,0.5D)).isEqualTo(105L);
         assertThat(p.getWaitPool()).isEqualTo(95L);
-        assertThat(p.refill(10L)).isEqualTo(110L);
-        assertThat(p.getWaitPool()).isEqualTo(100L);
+        assertThat(p.refill(10L)).isEqualTo(106L);
+        assertThat(p.getWaitPool()).isEqualTo(104);
 
-        assertThat(p.refill(10)).isEqualTo(110L);
+        assertThat(p.refill(10)).isEqualTo(107L);
         assertThat(p.takeUpTo(100)).isEqualTo(100L);
 
     }
@@ -66,9 +66,9 @@ public class TokenPoolTest {
         RateSpec s1 = new RateSpec(1000L, 1.10D);
         TokenPool p = new TokenPool(s1);
         long r = p.refill(10000000);
-        assertThat(r).isEqualTo(10000000L);
-        assertThat(p.getActivePool()).isEqualTo(10000000L);
-        assertThat(p.getWaitPool()).isEqualTo(0L);
+        assertThat(r).isEqualTo(1100000L);
+        assertThat(p.getActivePool()).isEqualTo(1100000L);
+        assertThat(p.getWaitPool()).isEqualTo(8900000L);
 
         RateSpec s2 = new RateSpec(1000000L, 1.10D);
         p.apply(s2);
