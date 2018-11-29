@@ -2,20 +2,16 @@
 
 The EngineBlock rate limiter is based on a hybrid design, combining ideas
 from well-known algorithms with a heavy dose of mechanical sympathy. The
-end resulting implementation provides the following:
+resulting implementation provides the following:
 
 1. A basic design that can be explained in one page (this page!)
 2. High throughput, compared to other rate limiters tested.
-3. Graceful degradation with increasing thread contention.
+3. Graceful degradation with increasing concurrency.
 4. Clearly defined behavioral semantics.
 5. Efficient burst capability, for tunable catch-up rates.
 6. Efficient calculation of wait time.
 
-## Usage
-
-This section will explain how the rate limiter is intended to be configured.
-
-### Parameters
+## Parameters
 
 **op rate** - In simplest terms, users simply need to configure the *op rate*.
 For example, `cyclerate=12000` specifies an op rate of 12000 per second.

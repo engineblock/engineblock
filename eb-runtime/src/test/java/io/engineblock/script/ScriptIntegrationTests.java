@@ -222,6 +222,7 @@ public class ScriptIntegrationTests {
         System.out.println(iolog);
         assertThat(iolog).contains("waittime trended to 0 as expected");
     }
+
     @Test
     public void testReportedCoDelayStrict() {
         ScenarioResult scenarioResult = runScenario("cocycledelay_strict");

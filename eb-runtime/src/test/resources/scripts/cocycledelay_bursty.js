@@ -37,4 +37,5 @@ for (i = 0; i < 10; i++) {
 }
 //scenario.awaitActivity("co_cycle_delay");
 print('step2 metrics.waittime=' + metrics.co_cycle_delay.cycle.waittime.value);
-print("awaited activity");
+scenario.stop(co_cycle_delay);
+print("stopped activity co_cycle_delay");
