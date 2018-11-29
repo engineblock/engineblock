@@ -1,8 +1,8 @@
-basicdiag = params.withOverrides({
-    "alias" : "basicdiag",
+basic_diag = params.withOverrides({
+    "alias" : "basic_diag",
     "type" : "diag"
 });
 
 
-print('starting activity basicdiag');
+print('starting activity basic_diag');
 scenario.start(basic_diag);

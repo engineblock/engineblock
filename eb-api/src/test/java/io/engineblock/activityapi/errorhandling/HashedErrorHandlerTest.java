@@ -44,8 +44,9 @@ public class HashedErrorHandlerTest {
 
     @Test
     public void testSuperclassErrorHandler() {
+        List<CycleErrorHandler.Triple> errorList = new ArrayList<>();
         handler.setHandlerForClasses(
-                CycleErrorHandlers.log(true), IndexOutOfBoundsException.class
+                CycleErrorHandlers.store(errorList, true), IndexOutOfBoundsException.class
         );
         try {
             String[] a = new String[10];
@@ -53,6 +54,7 @@ public class HashedErrorHandlerTest {
         } catch (Exception e) {
             handler.handleError(2L, e);
         }
+        assertThat(errorList).hasSize(1);
     }
 
     @Test
