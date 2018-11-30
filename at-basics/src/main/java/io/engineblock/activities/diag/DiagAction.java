@@ -128,7 +128,7 @@ public class DiagAction implements SyncAction, ActivityDefObserver, MultiPhaseAc
         }
 
         if (diagRateLimiter!=null) {
-            diagRateLimiter.acquire();
+            long waittime = diagRateLimiter.maybeWaitForOp();
         }
 
         long now = System.currentTimeMillis();

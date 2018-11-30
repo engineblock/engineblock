@@ -81,8 +81,6 @@ public class HybridRateLimiter implements Startable, RateLimiter {
 
     // rate controls
     private RateSpec rateSpec;
-    private long nanosPerOp;
-    // private long backfillPerPulse;
 
     // basic state
     private ActivityDef activityDef;
@@ -117,9 +115,8 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     }
 
     @Override
-    public long acquire() {
-        tokens.blockAndtake(nanosPerOp);
-        return tokens.getWaitPool();
+    public long maybeWaitForOp() {
+        return tokens.blockAndtake();
     }
 
     @Override
@@ -146,7 +143,6 @@ public class HybridRateLimiter implements Startable, RateLimiter {
         this.rateSpec = updatingRateSpec;
         this.filler = (this.filler==null) ? new TokenFiller(rateSpec):  filler.apply(rateSpec);
         this.tokens = this.filler.getTokenPool();
-        this.nanosPerOp = rateSpec.getNanosPerOp();
 
         switch (this.state) {
             case Started:

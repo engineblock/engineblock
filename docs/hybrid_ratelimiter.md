@@ -145,9 +145,15 @@ Trying to go above 50M ops/s while also forcing isochronous behavior will result
 in artificial wait-time. For this reason, the pool size itself is not
 user-configurable at this time.
 
-- The pool size will always be at least as big as an op, or 1/1000 of a second,
-   (1E6 nanos) whichever is bigger.
-- The number of ops that can fit in the pool will determine how many ops
+- The pool size will always be at least as big as two ops.
+   This rule ensures that there is adequate buffer
+   space for tokens when callers are accessing the token pools near the rate of
+   the filler thread. If this were not ensured, then artificial wait time would
+   be injected due to actual overflow error.
+-  The pool size will always be at least as big as 1E6 nanos, or 1/1000 of a second.
+   This rule ensures that the filler thread has a reasonably attainable
+   update frequency which will prevent underflow in the active or burst pools.
+-  The number of ops that can fit in the pool will determine how many ops
    can be dispatched between fills. For example, an op rate of 1E6 will mean
    that up to 1000 ops worth of tokens may be present between fills, and
    up to 1000 ops may be allowed to start at any time before the next fill.

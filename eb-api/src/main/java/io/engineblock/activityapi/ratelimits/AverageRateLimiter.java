@@ -84,7 +84,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     }
 
     @Override
-    public long acquire() {
+    public long maybeWaitForOp() {
         long opScheduleTime = ticksTimeline.getAndAdd(opTicks);
         long timelinePosition = lastSeenNanoTime;
 

@@ -73,7 +73,7 @@ public class RateLimiterPerfTestMethods {
             RateLimiter rl = rlf.apply(rs);
             long start = System.nanoTime();
             for (long iter = 0; iter < bounds.getValue(); iter++) {
-                long result = rl.acquire();
+                long result = rl.maybeWaitForOp();
             }
             long end = System.nanoTime();
 
@@ -86,12 +86,12 @@ public class RateLimiterPerfTestMethods {
 
 
     /**
-     * This test method will call acquire on a getOpsPerSec limiter with a sequence of different
+     * This test method will call {@link  RateLimiter#maybeWaitForOp()} on a rate limiter with a sequence of different
      * getOpsPerSec specifiers. For each 4-tuple in the second varargs argument, the following fields
      * are used to control how the getOpsPerSec limiter is configured and called:
      *
      * <OL>
-     * <LI>count - how many times to call acquire</LI>
+     * <LI>count - how many times to call maybeWaitForOp</LI>
      * <LI>getOpsPerSec - the getOpsPerSec to set the getOpsPerSec limiter to</LI>
      * <LI>divisions - the number of sub-segments to iterate and record</LI>
      * <LI>clientrate - the artificially limited client getOpsPerSec</LI>
@@ -127,11 +127,11 @@ public class RateLimiterPerfTestMethods {
                 long then = System.nanoTime();
                 for (int i = 0; i < perDivision; i++) {
                     then += clientnanos;
-                    rl.acquire();
+                    rl.maybeWaitForOp();
                     while (System.nanoTime() < then) {
                     }
                 }
-                divDelay = rl.acquire();
+                divDelay = rl.maybeWaitForOp();
                 results.add(divDelay);
             }
 
@@ -311,7 +311,7 @@ public class RateLimiterPerfTestMethods {
 //            }
             long startTime = System.nanoTime();
             for (int i = 0; i < iterations; i++) {
-                long time = limiter.acquire();
+                long time = limiter.maybeWaitForOp();
             }
             long endTime = System.nanoTime();
             return new Result("thread " + this.threadIdx, startTime, endTime, iterations);
@@ -320,7 +320,7 @@ public class RateLimiterPerfTestMethods {
         @Override
         public void run() {
             for (int i = 0; i < iterations; i++) {
-                limiter.acquire();
+                limiter.maybeWaitForOp();
             }
         }
     }

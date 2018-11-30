@@ -20,6 +20,8 @@ package io.engineblock.activityapi.ratelimits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.engineblock.util.Colors.*;
+
 /**
  * <h2>Synopsis</h2>
  *
@@ -42,12 +44,20 @@ import org.slf4j.LoggerFactory;
  */
 public class TokenPool {
     private final static Logger logger = LoggerFactory.getLogger(TokenPool.class);
+
+    public static final double MIN_CONCURRENT_OPS = 2;
+
     private long maxActivePool;
     private long maxBurstLimit;
     private long maxOverActivePool;
     private double burstRatio;
     private volatile long activePool;
     private volatile long waitingPool;
+    private RateSpec rateSpec;
+    private long nanosPerOp;
+//    private long debugTrigger=0L;
+//    private long debugRate=1000000000;
+    private long blocks = 0L;
 
 
     /**
@@ -62,24 +72,30 @@ public class TokenPool {
         logger.debug("initialized token pool: " + this.toString() + " for rate:" + rateSpec.toString());
     }
 
-    public void apply(RateSpec rateSpec) {
-        this.maxActivePool = Math.max((long) 1E6, (long) ((double) rateSpec.getNanosPerOp()));
-        this.maxOverActivePool = (long) (maxActivePool * rateSpec.getBurstRatio());
-        this.burstRatio = rateSpec.getBurstRatio();
-
-        this.maxBurstLimit = maxOverActivePool - maxActivePool;
-    }
-
     public TokenPool(long poolsize, double burstRatio) {
         this.maxActivePool = poolsize;
         this.burstRatio = burstRatio;
         this.maxOverActivePool = (long) (maxActivePool * burstRatio);
-
         this.maxBurstLimit = maxOverActivePool - maxActivePool;
     }
-    public long getMaxActivePool() {
-        return maxActivePool;
+
+    /**
+     * Change the settings of this token pool, and wake any blocked callers
+     * just in case it allows them to proceed.
+     *
+     * @param rateSpec The rate specifier.
+     */
+    public synchronized void apply(RateSpec rateSpec) {
+        this.rateSpec=rateSpec;
+        this.maxActivePool = Math.max((long) 1E6, (long) ((double) rateSpec.getNanosPerOp() * MIN_CONCURRENT_OPS));
+        this.maxOverActivePool = (long) (maxActivePool * rateSpec.getBurstRatio());
+        this.burstRatio = rateSpec.getBurstRatio();
+
+        this.maxBurstLimit = maxOverActivePool - maxActivePool;
+        this.nanosPerOp = rateSpec.getNanosPerOp();
+        notifyAll();
     }
+
 
     public double getBurstRatio() {
         return burstRatio;
@@ -102,11 +118,11 @@ public class TokenPool {
      * wait for the given number of tokens to be available, and then remove
      * them from the pool.
      *
-     * @param amt The number of tokens to take
      * @return the total number of tokens untaken, including wait tokens
      */
-    public synchronized long blockAndtake(long amt) {
-        while (activePool < amt) {
+    public synchronized long blockAndtake() {
+        while (activePool < nanosPerOp) {
+            blocks++;
             //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
             try {
                 wait(maxActivePool / 1000000, (int) maxActivePool % 1000000);
@@ -118,19 +134,28 @@ public class TokenPool {
         }
         //System.out.println(ANSI_BrightYellow + "taking " + amt + "/" + activePool + ANSI_Reset);
 
-        activePool -= amt;
+        activePool -= nanosPerOp;
         return waitingPool + activePool;
     }
 
-    public synchronized boolean takeIfAvailable(long amt) {
-        if (activePool < amt) {
-            return false;
+    public synchronized long blockAndtake(long tokens) {
+        while (activePool < tokens) {
+            //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
+            try {
+                wait(maxActivePool / 1000000, (int) maxActivePool % 1000000);
+            } catch (InterruptedException ignored) {
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            //System.out.println("waited for " + amt + "/" + activePool + " tokens");
         }
-        activePool -= amt;
-        return true;
+        //System.out.println(ANSI_BrightYellow + "taking " + amt + "/" + activePool + ANSI_Reset);
+
+        activePool -= tokens;
+        return waitingPool + activePool;
     }
 
-    public long getTokenCount() {
+    public long getWaitTime() {
         return activePool + waitingPool;
     }
 
@@ -154,9 +179,15 @@ public class TokenPool {
      * scheduling.
      *
      * @param newTokens The number of new tokens to add to the token pools
-     * @return the number of tokens in the active pool
+     * @return the total number of tokens in all pools
      */
     public synchronized long refill(long newTokens) {
+        boolean debugthis=false;
+//        long debugAt = System.nanoTime();
+//        if (debugAt>debugTrigger+debugRate) {
+//            debugTrigger=debugAt;
+//            debugthis=true;
+//        }
 
         long needed = Math.max(maxActivePool - activePool, 0L);
         long adding = Math.min(newTokens, needed);
@@ -173,39 +204,21 @@ public class TokenPool {
         waitingPool -= backfill;
         activePool += backfill;
 
+        if (debugthis) {
+            System.out.print(this);
+            System.out.print(ANSI_BrightBlue + " adding=" + adding);
+            if (overflow>0) {
+                System.out.print(ANSI_Red + " OVERFLOW:" + overflow + ANSI_Reset);
+            }
+            if (backfill>0) {
+                System.out.print(ANSI_BrightGreen + " BACKFILL:" + backfill + ANSI_Reset);
+            }
+            System.out.println();
+        }
         //System.out.println(this);
         notifyAll();
 
-        return activePool;
-    }
-
-    /**
-     * This method of calling refill allows for correction of the backfill rate
-     * with respect to refill frequency. For example, if you call this method
-     * for times as often, set the backfill ratio to 0.25D, and so on.
-     *
-     * @param newTokens     The number of new tokens to add to the token pools
-     * @param backfillRatio The proportion of available backfill to use, maximum
-     * @return the number of tokens in the active pool
-     */
-    public synchronized long refill(long newTokens, double backfillRatio) {
-        long needed = Math.max(maxActivePool - activePool, 0L);
-        long adding = Math.min(newTokens, needed);
-        long unused = newTokens - adding;
-        waitingPool += unused;
-        activePool += adding;
-
-        long backfill = Math.min(maxOverActivePool - activePool, waitingPool);
-        backfill = (long) (backfillRatio * (double) backfill);
-
-        waitingPool -= backfill;
-        activePool += backfill;
-
-        //System.out.println(this);
-        notifyAll();
-
-        return activePool;
-
+        return activePool+waitingPool;
     }
 
     @Override
@@ -214,7 +227,13 @@ public class TokenPool {
                 + String.format(
                         " (%3.1f%%)A (%3.1f%%)B ",
                 (((double)activePool/(double)maxActivePool)*100.0),
-                (((double)activePool/(double)maxOverActivePool)*100.0)) + " waiting=" + waitingPool;
+                (((double)activePool/(double)maxOverActivePool)*100.0)) + " waiting=" + waitingPool +
+                " blocks=" + blocks +
+                " rateSpec:"+ ((rateSpec!=null) ? rateSpec.toString() : "NULL");
+    }
+
+    public RateSpec getRateSpec() {
+        return rateSpec;
     }
 
 }

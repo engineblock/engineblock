@@ -141,7 +141,7 @@ public class AsyncDiagAction extends BaseAsyncAction<OpContext, DiagActivity> {
         }
 
         if (diagRateLimiter != null) {
-            diagRateLimiter.acquire();
+            diagRateLimiter.maybeWaitForOp();
         }
 
         long now = System.currentTimeMillis();
