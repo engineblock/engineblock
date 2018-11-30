@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class BaseOpContext implements OpContext {
+public class BaseOpContext<D> implements OpContext<D> {
 
     private final static OpEvents NULLSINK = new NullOpEvents();
     private static AtomicLong idgen = new AtomicLong(0L);
@@ -39,6 +39,7 @@ public class BaseOpContext implements OpContext {
 
     private int tries=0;
     private List<OpEvents> opEvents = new ArrayList<OpEvents>();
+    private D data;
 
     public BaseOpContext() {
     }
@@ -54,6 +55,7 @@ public class BaseOpContext implements OpContext {
         cycle=0L;
         result=0;
         opEvents =null;
+
         opEvents.clear();
         return this;
     }
@@ -155,6 +157,16 @@ public class BaseOpContext implements OpContext {
     @Override
     public long getCtxId() {
         return ctxid;
+    }
+
+    @Override
+    public D getData() {
+        return data;
+    }
+
+    @Override
+    public OpContext<D> setData(D data) {
+        return null;
     }
 
     @Override

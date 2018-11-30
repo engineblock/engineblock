@@ -17,8 +17,8 @@
 
 package io.engineblock.activityapi.core;
 
-import io.engineblock.activityapi.core.ops.BaseOpContext;
-import io.engineblock.activityapi.core.ops.OpContext;
+import io.engineblock.activityapi.core.ops.fluent.OpTracker;
+import io.engineblock.activityapi.core.ops.fluent.TrackedOp;
 
 /**
  * <p>An AsyncAction allows an activity type to implement asynchronous
@@ -34,7 +34,7 @@ import io.engineblock.activityapi.core.ops.OpContext;
  * In such cases, the action should implement the {@link SyncAction} API instead.
  * </p>
  */
-public interface AsyncAction<T extends OpContext> extends Action {
+public interface AsyncAction<D> extends Action {
 
     /**
      * Enqueue a cycle to be executed by the action. This method should block unless
@@ -58,7 +58,7 @@ public interface AsyncAction<T extends OpContext> extends Action {
      * @param opc The op context that holds state for this operation
      * @return true, if the action is ready immediately for another operation
      */
-    boolean enqueue(T opc);
+    boolean enqueue(TrackedOp opc);
 
     /**
      * Await completion of all pending operations for this thread.
@@ -70,12 +70,12 @@ public interface AsyncAction<T extends OpContext> extends Action {
     boolean awaitCompletion(long timeout);
 
     /**
-     * Since each activity type may want to specialize the op context, each activity
-     * is responsible for generating new op contexts.
-     * @return a new op context or a sup-type thereof
+     * Once constructed, all async actions are expected to provide a tracker
+     * object which can be used to register callback for operational events,
+     * as well as to provide a diagnostic view of what is happening with
+     * the number of pending operations per thread.
+     * @return An async operations tracker
      */
-    default OpContext newOpContext() {
-        return new BaseOpContext();
-    }
+    OpTracker getTracker();
 
 }

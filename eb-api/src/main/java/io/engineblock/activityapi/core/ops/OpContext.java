@@ -40,8 +40,9 @@ import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
  *
  * The default implementation of this interface is {@link BaseAsyncAction}. It is recommended that implementors
  * use that as the base op context type when implementing {@link AsyncAction} for an {@link ActivityType}.
+ *
  */
-public interface OpContext extends
+public interface OpContext<D> extends
         ScheduledOperation,
         TimedOperation,
         RetryableOperation,
@@ -55,6 +56,15 @@ public interface OpContext extends
     long getCtxId();
 
     /**
+     * Get the data associated with this op context. The data is specific to the
+     * activity type, and allows actions that work with the op context to have behavior
+     * that is depending on the op state as contained in the data.
+     * @return
+     */
+    D getData();
+    OpContext<D> setData(D data);
+
+    /**
      * @param waitTimeNanos How long the op was delayed from its ideal scheduled time
      *                      according to the configured op rate
      * @return the op context, for method chaining
@@ -65,7 +75,6 @@ public interface OpContext extends
      * Add an observer to state changes on this op context. Each opEvents can implement which methods
      * it needs.
      * @param opEvents A {@link OpEvents} implementor.
-     * @return the op context, for method chaining.
      */
     OpContext addSink(OpEvents opEvents);
 

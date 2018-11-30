@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
 import java.util.function.Predicate;
 
 /**
- * Implements a convenient target buffer for Marker data that can be sued
+ * Implements a convenient target buffer for Marker data that can be used
  * to create nio ByteBuffers easily.
  *
  * This is not thread-safe. It is not meant to be used by concurrent callers.

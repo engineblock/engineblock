@@ -17,7 +17,6 @@
 package io.engineblock.activities.diag;
 
 import io.engineblock.activityapi.core.BaseAsyncAction;
-import io.engineblock.activityapi.core.ops.BaseOpContext;
 import io.engineblock.activityapi.core.ops.OpContext;
 import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
@@ -27,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 
-public class AsyncDiagAction extends BaseAsyncAction<OpContext, DiagActivity> {
+public class AsyncDiagAction extends BaseAsyncAction<DiagOpContext, DiagActivity> {
 
     private final static Logger logger = LoggerFactory.getLogger(AsyncDiagAction.class);
 
@@ -112,16 +111,10 @@ public class AsyncDiagAction extends BaseAsyncAction<OpContext, DiagActivity> {
         this.asyncOps = new ArrayDeque<>(this.getMaxPendingOps(activityDef));
     }
 
-    @Override
-    public boolean enqueue(OpContext opc) {
-        if (available()==0) {
-            finishOpCycle();
-        }
-        return super.enqueue(opc);
-    }
+
 
     @Override
-    protected OpContext startOpCycle(OpContext opc) {
+    protected DiagOpContext startOpCycle(DiagOpContext opc) {
         opc.start();
         this.asyncOps.addLast(opc);
         return opc;
@@ -185,29 +178,4 @@ public class AsyncDiagAction extends BaseAsyncAction<OpContext, DiagActivity> {
         return result;
     }
 
-    @Override
-    public boolean awaitCompletion(long timeout) {
-        while (pending()>0) {
-            finishOpCycle();
-        }
-        return true; // Diag action doesn't have any asynchronous logic to demonstrate
-    }
-
-    @Override
-    public DiagOpContext newOpContext() {
-        return new DiagOpContext("This is a diag op context.");
-    }
-
-    public static class DiagOpContext extends BaseOpContext {
-        private String description;
-
-        DiagOpContext(String description) {
-            this.description = description;
-        }
-
-        @Override
-        public String toString() {
-            return super.toString() + ", description:'" + description;
-        }
-    }
 }
