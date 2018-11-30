@@ -23,7 +23,7 @@ import io.engineblock.activityapi.output.OutputDispenser;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.activityimpl.SimpleActivity;
-import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityapi.ratelimits.RateLimiter;
 
 import java.util.function.Supplier;
 

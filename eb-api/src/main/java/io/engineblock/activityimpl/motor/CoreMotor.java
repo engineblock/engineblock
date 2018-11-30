@@ -25,7 +25,7 @@ import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuf
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityapi.output.Output;
-import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
 import io.engineblock.metrics.ActivityMetrics;
@@ -247,7 +247,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
                     if (strideRateLimiter != null) {
                         // block for strides rate limiter
-                        strideDelay = strideRateLimiter.acquire();
+                        strideDelay = strideRateLimiter.maybeWaitForOp();
                     }
 
                     StrideTracker strideTracker =
@@ -273,7 +273,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
                         if (cycleRateLimiter != null) {
                             // Block for cycle rate limiter
-                            cycleDelay = cycleRateLimiter.acquire();
+                            cycleDelay = cycleRateLimiter.maybeWaitForOp();
                         }
 
                         try {
@@ -334,7 +334,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
                     if (strideRateLimiter != null) {
                         // block for strides rate limiter
-                        strideDelay = strideRateLimiter.acquire();
+                        strideDelay = strideRateLimiter.maybeWaitForOp();
                     }
 
                     long strideStart = System.nanoTime();
@@ -358,7 +358,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
 
                             if (cycleRateLimiter != null) {
                                 // Block for cycle rate limiter
-                                cycleDelay = cycleRateLimiter.acquire();
+                                cycleDelay = cycleRateLimiter.maybeWaitForOp();
                             }
 
                             long cycleStart = System.nanoTime();
@@ -368,7 +368,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                                 // runCycle
                                 long phaseStart = System.nanoTime();
                                 if (phaseRateLimiter != null) {
-                                    phaseDelay = phaseRateLimiter.acquire();
+                                    phaseDelay = phaseRateLimiter.maybeWaitForOp();
                                 }
                                 result = sync.runCycle(cyclenum);
                                 long phaseEnd = System.nanoTime();
@@ -379,7 +379,7 @@ public class CoreMotor implements ActivityDefObserver, Motor, Stoppable {
                                     while (multiPhaseAction.incomplete()) {
                                         phaseStart = System.nanoTime();
                                         if (phaseRateLimiter != null) {
-                                            phaseDelay = phaseRateLimiter.acquire();
+                                            phaseDelay = phaseRateLimiter.maybeWaitForOp();
                                         }
                                         result = multiPhaseAction.runPhase(cyclenum);
                                         phaseEnd = System.nanoTime();

@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activityapi.rates;
+package io.engineblock.activityapi.ratelimits;
 
 import org.testng.annotations.Test;
 
@@ -26,21 +26,20 @@ public class RateSpecTest {
 
     public void testDefaultRateSpecPattern() {
         RateSpec r = new RateSpec("523");
-        assertThat(r.opsPerSec).isEqualTo(523.0d);
-        assertThat(r.burstRatio).isEqualTo(1.1d);
+        assertThat(r.getRate()).isEqualTo(523.0d);
+        assertThat(r.getBurstRatio()).isEqualTo(1.1d);
     }
 
     public void testBurstRatioPattern() {
         RateSpec r = new RateSpec("12345,1.3");
-        assertThat(r.opsPerSec).isEqualTo(12345.0d);
-        assertThat(r.burstRatio).isEqualTo(1.3d);
+        assertThat(r.getRate()).isEqualTo(12345.0d);
+        assertThat(r.getBurstRatio()).isEqualTo(1.3d);
     }
 
     public void testTypeSelection() {
         RateSpec a = new RateSpec("12345,1.4,average");
-        assertThat(a.type).isEqualTo(RateSpec.Type.average);
-        RateSpec d = new RateSpec("12345,1.4,dynamic");
-        assertThat(d.type).isEqualTo(RateSpec.Type.dynamic);
-
+        assertThat(a.getype()).isEqualTo(RateSpec.Type.average);
+        RateSpec d = new RateSpec("12345,1.4,hybrid");
+        assertThat(d.type).isEqualTo(RateSpec.Type.hybrid);
     }
 }

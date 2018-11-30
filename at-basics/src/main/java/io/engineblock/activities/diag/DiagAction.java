@@ -17,7 +17,7 @@ package io.engineblock.activities.diag;
 import io.engineblock.activityapi.core.ActivityDefObserver;
 import io.engineblock.activityapi.core.MultiPhaseAction;
 import io.engineblock.activityapi.core.SyncAction;
-import io.engineblock.activityapi.rates.RateLimiter;
+import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class DiagAction implements SyncAction, ActivityDefObserver, MultiPhaseAc
 
     /**
      * idempotently assign the last append reference time and the interval which, when added to it, represent when this
-     * diagnostic thread should take its turn to log cycle info. Also, append the modulo parameter.
+     * diagnostic thread should takeUpTo its turn to log cycle info. Also, append the modulo parameter.
      */
     private void updateReportTime() {
         reportModulo = activityDef.getParams().getOptionalLong("modulo").orElse(10000000L);
@@ -128,7 +128,7 @@ public class DiagAction implements SyncAction, ActivityDefObserver, MultiPhaseAc
         }
 
         if (diagRateLimiter!=null) {
-            diagRateLimiter.acquire();
+            long waittime = diagRateLimiter.maybeWaitForOp();
         }
 
         long now = System.currentTimeMillis();

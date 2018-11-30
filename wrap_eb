@@ -9,7 +9,7 @@ if test -n "$JAVA_HOME"; then
     java="$JAVA_HOME/bin/java"
 fi
 #printf "java='%s' java_args='%s' MYSELF='%s'\n" "${java}" "${java_args}" "${MYSELF}"
-exec "$java" $java_args -jar $MYSELF "$@"
+exec "$java" --no-deprecation-warning $java_args -jar $MYSELF "$@"
 exit 1 
 EOSTUB
 ) >bin/eb

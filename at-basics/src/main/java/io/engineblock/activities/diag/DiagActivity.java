@@ -18,9 +18,9 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.core.ActivityDefObserver;
-import io.engineblock.activityapi.rates.RateLimiter;
-import io.engineblock.activityapi.rates.RateLimiters;
-import io.engineblock.activityapi.rates.RateSpec;
+import io.engineblock.activityapi.ratelimits.RateLimiter;
+import io.engineblock.activityapi.ratelimits.RateLimiters;
+import io.engineblock.activityapi.ratelimits.RateSpec;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.metrics.ActivityMetrics;
@@ -46,7 +46,7 @@ public class DiagActivity extends SimpleActivity implements Activity, ActivityDe
             Thread.sleep(initdelay);
         } catch (InterruptedException ignored) {
         }
-        onActivityDefUpdate(activityDef);
+        //onActivityDefUpdate(activityDef);
         if (isAsync()) {
             pendingOpsCounter = ActivityMetrics.counter(this.activityDef,"pending_ops");
         }

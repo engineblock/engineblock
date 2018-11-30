@@ -20,7 +20,6 @@ package activityconfig.rawyaml;
 import activityconfig.snakecharmer.SnakeYamlCharmer;
 import io.engineblock.activityimpl.ActivityInitializationError;
 import io.engineblock.util.EngineBlockFiles;
-import jdk.nashorn.internal.runtime.ParserException;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
@@ -91,12 +90,12 @@ public class RawYamlStatementLoader {
                 stmtListList.add(tgsd);
             }
             return new RawStmtsDocList(stmtListList);
-        } catch (ParserException pe) {
-            if (logger != null) logger.error("yaml-parsing-error: Error parsing YAML:"
-                    + pe.getMessage() + "" +
-                    " For more details on this error see " +
-                    "http://docs.engineblock.io/user-guide/standard_yaml/#yaml-parsing-error", pe);
-            throw pe;
+//        } catch (ParserException pe) {
+//            if (logger != null) logger.error("yaml-parsing-error: Error parsing YAML:"
+//                    + pe.getMessage() + "" +
+//                    " For more details on this error see " +
+//                    "http://docs.engineblock.io/user-guide/standard_yaml/#yaml-parsing-error", pe);
+//            throw pe;
         } catch (Exception e) {
             if (logger != null) logger.error("yaml-construction-error: Error building configuration:"
                     + e.getMessage() + "" +

@@ -23,16 +23,16 @@ import org.testng.annotations.Test;
  * them to be included in builds
  */
 @Test
-public class SpeedChecks {
+public class SpeedCheckIntegrationTests {
 
     @Test(enabled = false)
     public void testSpeedSanity() {
-        ScenarioResult scenarioResult = ScriptTests.runScenario("speedcheck");
+        ScenarioResult scenarioResult = ScriptIntegrationTests.runScenario("speedcheck");
     }
 
     @Test(enabled = false)
     public void testThreadSpeeds() {
-        ScenarioResult scenarioResult = ScriptTests.runScenario("threadspeeds");
+        ScenarioResult scenarioResult = ScriptIntegrationTests.runScenario("threadspeeds");
     }
 
 

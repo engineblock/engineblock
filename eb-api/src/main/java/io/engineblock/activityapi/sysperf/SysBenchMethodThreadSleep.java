@@ -15,10 +15,26 @@
  * /
  */
 
-package io.engineblock.activityapi.rates;
+package io.engineblock.activityapi.sysperf;
 
-public interface TestableRateLimiter extends RateLimiter {
+import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 
-    long setClock(long newValue);
-    long getClock();
+import java.util.concurrent.TimeUnit;
+
+public class SysBenchMethodThreadSleep {
+
+    @Benchmark
+    @BenchmarkMode({Mode.AverageTime})
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Threads(1)
+    @Warmup(iterations=1, timeUnit= TimeUnit.SECONDS,time=10)
+    @Measurement(iterations=1,timeUnit=TimeUnit.SECONDS,time=10)
+    public void callThreadSleep(Blackhole spaceTimeSwirls) {
+        try {
+            Thread.sleep(0, 1);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
 }

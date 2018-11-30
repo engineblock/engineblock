@@ -40,7 +40,7 @@ public class MultiMapLookup implements Map<String, String> {
     @Override
     public int size() {
         long count = maps.stream().map(Map::keySet).flatMap(Set::stream).distinct().count();
-        return new Long(count).intValue();
+        return (int) count;
     }
 
     @Override

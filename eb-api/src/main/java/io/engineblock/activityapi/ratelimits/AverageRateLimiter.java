@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activityapi.rates;
+package io.engineblock.activityapi.ratelimits;
 
 import com.codahale.metrics.Gauge;
 import io.engineblock.activityapi.core.Startable;
@@ -71,7 +71,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     }
 
     protected void init() {
-        this.delayGauge = ActivityMetrics.gauge(activityDef, label+".cco_delay_gauge", new RateLimiters.WaitTimeGuage(this));
+        this.delayGauge = ActivityMetrics.gauge(activityDef, label+".cco_delay_gauge", new RateLimiters.WaitTimeGauge(this));
         //this.sleepCounter = ActivityMetrics.counter(activityDef, label + "_ratelogic.sleep_counter");
         //this.fastpathCounter = ActivityMetrics.counter(activityDef, label + "_ratelogic.fast_counter");
         this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + ".avg_targetrate_gauge", new RateLimiters.RateGauge(this));
@@ -84,7 +84,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
     }
 
     @Override
-    public long acquire() {
+    public long maybeWaitForOp() {
         long opScheduleTime = ticksTimeline.getAndAdd(opTicks);
         long timelinePosition = lastSeenNanoTime;
 
@@ -178,7 +178,7 @@ public class AverageRateLimiter implements Startable, RateLimiter {
             return;
         }
 
-        this.opTicks = updatingRateSpec.getCalculatedNanos();
+        this.opTicks = updatingRateSpec.getNanosPerOp();
         this.rateSpec = updatingRateSpec;
         switch (this.state) {
             case Started:

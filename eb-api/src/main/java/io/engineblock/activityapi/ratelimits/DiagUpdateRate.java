@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activityapi.rates;
+package io.engineblock.activityapi.ratelimits;
 
 public interface DiagUpdateRate {
     void setDiagModulo(long diagModulo);
