@@ -25,14 +25,6 @@ import io.engineblock.activityapi.core.ops.fluent.TrackedOp;
  * operations within each thread.
  * </p>
  *
- * <p>
- * An action that does not have the ability to asynchronously submit work
- * in an unblocking fashion should not use this {@link AsyncAction} API.
- * In other words, the action should not defer work for which is needed before
- * an operation is effectively submitted or offloaded to the target system.
- * This would degrade the accuracy of timing metrics.
- * In such cases, the action should implement the {@link SyncAction} API instead.
- * </p>
  */
 public interface AsyncAction<D> extends Action {
 
@@ -52,8 +44,9 @@ public interface AsyncAction<D> extends Action {
      * its own limits of concurrency. The {@link BaseAsyncAction} base class is a
      * convenient starting point for such implementations.
      *
-     * If the action is known to have additional headroom according to the configured
-     * concurrency limits, it can signal such by returning true from this method.
+     * If the action is known to have additional open slots for an operations to
+     * be started (according to the configured concurrency limits),
+     * then it can signal such by returning true from this method.
      *
      * @param opc The op context that holds state for this operation
      * @return true, if the action is ready immediately for another operation
