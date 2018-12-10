@@ -20,6 +20,7 @@ import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.core.ops.OpContext;
 import io.engineblock.activityapi.core.ops.OpResultBuffer;
+import io.engineblock.activityapi.core.ops.fluent.OpImpl;
 import io.engineblock.activityapi.core.ops.fluent.OpTracker;
 import io.engineblock.activityapi.core.ops.fluent.TrackedOp;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
@@ -52,7 +53,7 @@ import static io.engineblock.activityapi.core.RunState.*;
  * with new async logic.
  *
  */
-public class CoreMotor<T extends OpContext> implements ActivityDefObserver, Motor, Stoppable {
+public class CoreMotor<D> implements ActivityDefObserver, Motor, Stoppable {
 
     private static final Logger logger = LoggerFactory.getLogger(CoreMotor.class);
 
@@ -235,8 +236,8 @@ public class CoreMotor<T extends OpContext> implements ActivityDefObserver, Moto
             if (action instanceof AsyncAction) {
 
                 @SuppressWarnings("unchecked")
-                AsyncAction<T> async = AsyncAction.class.cast(action);
-                OpTracker tracker = async.getTracker();
+                AsyncAction<D> async = AsyncAction.class.cast(action);
+                OpTracker<D> tracker = async.getTracker();
 
                 while (slotState.get() == Running) {
 
@@ -284,9 +285,12 @@ public class CoreMotor<T extends OpContext> implements ActivityDefObserver, Moto
                         }
 
                         try {
-                            TrackedOp tracked = tracker.allocate(cyclenum);
-                            tracked.setWaitTime(cycleDelay);
-                            async.enqueue(tracked);
+                            TrackedOp<D> op = new OpImpl<>(tracker);
+                            op.setData(async.allocateOpData(cyclenum));
+                            op.setWaitTime(cycleDelay);
+
+                            async.enqueue(op);
+
 //                            T opc = async.newOpContext();
 //                            opc.addSink(strideTracker);
 //                            async.enqueue(opc);

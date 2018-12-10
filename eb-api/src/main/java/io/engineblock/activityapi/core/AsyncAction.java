@@ -51,7 +51,7 @@ public interface AsyncAction<D> extends Action {
      * @param opc The op context that holds state for this operation
      * @return true, if the action is ready immediately for another operation
      */
-    boolean enqueue(TrackedOp opc);
+    boolean enqueue(TrackedOp<D> opc);
 
     /**
      * Await completion of all pending operations for this thread.
@@ -69,6 +69,16 @@ public interface AsyncAction<D> extends Action {
      * the number of pending operations per thread.
      * @return An async operations tracker
      */
-    OpTracker getTracker();
+    OpTracker<D> getTracker();
+
+    /**
+     * When the activity needs to create a new op context which tracks all
+     * things interesting for the operation, it will call this method.
+     * The payload type D determines any and all of what an async action
+     * may know about an op.
+     *
+     * @return A new op payload of type D
+     */
+    D allocateOpData(long cycle);
 
 }

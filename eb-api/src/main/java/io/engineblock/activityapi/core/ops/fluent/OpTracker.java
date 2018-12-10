@@ -1,7 +1,13 @@
 package io.engineblock.activityapi.core.ops.fluent;
 
-public interface OpTracker {
-    TrackedOp allocate(long cycle);
-    StartedOp start(TrackedOp op);
-    CompletedOp stop(StartedOp op);
+public interface OpTracker<D> {
+    void onStarted(StartedOp<D> op);
+    void onCompleted(CompletedOp<D> op);
+
+    void setMaxPendingOps(int maxPendingOps);
+    int getMaxPendingOps();
+
+    boolean isFull();
+    int getPendingOps();
+
 }

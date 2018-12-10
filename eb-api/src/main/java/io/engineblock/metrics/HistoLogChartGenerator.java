@@ -72,5 +72,6 @@ public class HistoLogChartGenerator {
                             .plot()
                     + ANSI_GREEN);
         }
+        System.out.println(ANSI_RESET);
     }
 }

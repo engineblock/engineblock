@@ -18,6 +18,9 @@ package io.engineblock.activities.diag;
 
 import io.engineblock.activityapi.core.BaseAsyncAction;
 import io.engineblock.activityapi.core.ops.OpContext;
+import io.engineblock.activityapi.core.ops.fluent.CompletedOp;
+import io.engineblock.activityapi.core.ops.fluent.StartedOp;
+import io.engineblock.activityapi.core.ops.fluent.TrackedOp;
 import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
@@ -114,18 +117,39 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpContext, DiagActivity
 
 
     @Override
-    protected DiagOpContext startOpCycle(DiagOpContext opc) {
-        opc.start();
-        this.asyncOps.addLast(opc);
+    public DiagOpContext allocateOpData(long opCycle) {
+        DiagOpContext opc = new DiagOpContext("a diag op context");
+        opc.setCycle(opCycle);
         return opc;
     }
 
-    private void finishOpCycle() {
-        OpContext opc = asyncOps.removeFirst();
-        opc.stop(runCycle(opc.getCycle()));
-        decrementOps();
+    @Override
+    public StartedOp<DiagOpContext> startOpCycle(TrackedOp<DiagOpContext> opc) {
+        opc.getData().log("starting at " + System.nanoTime());
+        return opc.start();
     }
 
+    @Override
+    public CompletedOp<DiagOpContext> completeOpCycle(StartedOp<DiagOpContext> opc) {
+        opc.getData().log("completing at " + System.nanoTime());
+        int result = runCycle(opc.getData().getCycle());
+        return opc.stop(result);
+    }
+
+    //    @Override
+//    protected DiagOpContext startOpCycle(DiagOpContext opc) {
+//        opc.start();
+//        this.asyncOps.addLast(opc);
+//        return opc;
+//    }
+//
+//    private void finishOpCycle() {
+//        OpContext opc = asyncOps.removeFirst();
+//        opc.stop(runCycle(opc.getCycle()));
+//        decrementOps();
+//    }
+//
+//
 
     private int runCycle(long cycle) {
 

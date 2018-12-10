@@ -19,35 +19,48 @@ package io.engineblock.activityapi.core.ops.fluent;
 
 public class OpImpl<D> implements OpFacets<D> {
 
+    private OpTracker<D> tracker;
+
     private long cycle;
     private long waitTime;
     private long endedAtNanos;
     private long delayNanos;
     private long startedAtNanos;
-    private long usages;
+    //    private long usages;
+    private int tries = 0;
     private D data;
 
+    public OpImpl(OpTracker<D> tracker) {
+        this.tracker = tracker;
+    }
+
     @Override
-    public OpImpl setWaitTime(long delayNanos) {
+    public StartedOp<D> start() {
         this.endedAtNanos = Long.MIN_VALUE;
-        this.delayNanos = delayNanos;
         this.startedAtNanos = System.nanoTime();
-        usages++;
+        tries = 1;
+        tracker.onStarted(this);
         return this;
     }
 
 
     @Override
-    public StartedOp start() {
-        return null;
+    public OpImpl<D> setWaitTime(long delayNanos) {
+        this.endedAtNanos = Long.MIN_VALUE;
+        this.delayNanos = delayNanos;
+        this.startedAtNanos = System.nanoTime();
+//        usages++;
+        return this;
     }
 
     @Override
-    public CompletedOp stop(int status) {
-        return null;
+    public CompletedOp<D> stop(int status) {
+        this.endedAtNanos = System.nanoTime();
+        tracker.onCompleted(this);
+        return this;
     }
 
-    public OpImpl setCycle(long cycle) {
+    public OpImpl<D> setCycle(long cycle) {
         this.cycle = cycle;
         return this;
     }
@@ -60,6 +73,11 @@ public class OpImpl<D> implements OpFacets<D> {
     @Override
     public void setData(D data) {
         this.data = data;
+    }
+
+    @Override
+    public int getTries() {
+        return tries;
     }
 
 
