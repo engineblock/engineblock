@@ -80,7 +80,11 @@ public class ParsedStmtTest {
         ParsedStmt parsed1 = stmtDef1.getParsed();
         assertThat(parsed1.getMissingBindings().isEmpty());
         assertThat(parsed1.hasError()).isFalse();
-        assertThat(parsed1.getSpecificBindings()).containsOnlyKeys("alpha");
+        assertThat(parsed1.getSpecificBindings().size() == 2);
+        assertThat(parsed1.getSpecificBindings().containsKey("alpha"));
+        for (String key: parsed1.getSpecificBindings().keySet()) {
+            assertThat(key.startsWith("alpha"));
+        }
 
     }
 
