@@ -82,7 +82,12 @@ public class ParsedStmt {
             spans.add(pre);
 
             if (extraBindings.contains(tokenName)) {
-                specificBindings.put(tokenName, stmtDef.getBindings().get(tokenName));
+                if (specificBindings.get(tokenName) != null){
+                    String postfix = UUID.randomUUID().toString();
+                    specificBindings.put(tokenName+postfix, stmtDef.getBindings().get(tokenName));
+                }else {
+                    specificBindings.put(tokenName, stmtDef.getBindings().get(tokenName));
+                }
             } else {
                 missingBindings.add(tokenName);
             }
