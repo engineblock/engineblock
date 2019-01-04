@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activityapi.core.ops;
+package io.engineblock.activityapi.core.ops.fluent.opcontext;
 
 import io.engineblock.activityapi.core.ActivityType;
 import io.engineblock.activityapi.core.AsyncAction;

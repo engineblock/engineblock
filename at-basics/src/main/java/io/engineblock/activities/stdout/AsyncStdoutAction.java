@@ -2,9 +2,8 @@ package io.engineblock.activities.stdout;
 
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.BaseAsyncAction;
-import io.engineblock.activityapi.core.ops.fluent.CompletedOp;
-import io.engineblock.activityapi.core.ops.fluent.StartedOp;
-import io.engineblock.activityapi.core.ops.fluent.TrackedOp;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.StartedOp;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.engineblock.activityapi.planning.OpSequence;
 import io.engineblock.activityimpl.ActivityDef;
 import io.virtdata.templates.StringBindings;
@@ -42,19 +41,17 @@ public class AsyncStdoutAction extends BaseAsyncAction<StdoutOpContext, StdoutAc
     }
 
     @Override
-    public StartedOp<StdoutOpContext> startOpCycle(TrackedOp<StdoutOpContext> opc) {
+    public void startOpCycle(TrackedOp<StdoutOpContext> opc) {
         StartedOp<StdoutOpContext> started = opc.start();
+        int result=0;
         try (Timer.Context executeTime = activity.executeTimer.time()) {
             activity.write(opc.getData().statement);
         } catch (Exception e) {
+            result=1;
             throw new RuntimeException("Error writing output:" + e, e);
+        } finally {
+            started.stop(result);
         }
-        return started;
-    }
-
-    @Override
-    public CompletedOp<StdoutOpContext> completeOpCycle(StartedOp<StdoutOpContext> opc) {
-        return opc.stop(0);
     }
 
 }

@@ -240,8 +240,15 @@ public class ScriptIntegrationTests {
         ScenarioResult scenarioResult = runScenario("cycle_rate_change");
         String ioLog = scenarioResult.getIOLog();
         assertThat(ioLog.contains("cycles adjusted, exiting on iteration"));
-
     }
+
+    @Test
+    public void testCycleRateChangeAsync() {
+        ScenarioResult scenarioResult = runScenario("cycle_rate_change_async");
+        String ioLog = scenarioResult.getIOLog();
+        assertThat(ioLog.contains("cycles adjusted, exiting on iteration"));
+    }
+
 
     @Test
     public void testExitAsyncLogic() {

@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activityapi.core.ops;
+package io.engineblock.activityapi.core.ops.fluent.opcontext;
 
 public interface TimedOperation {
 

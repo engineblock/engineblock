@@ -18,7 +18,7 @@
 package io.engineblock.activityapi.core;
 
 import io.engineblock.activityapi.core.ops.fluent.OpTracker;
-import io.engineblock.activityapi.core.ops.fluent.TrackedOp;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.TrackedOp;
 
 /**
  * <p>An AsyncAction allows an activity type to implement asynchronous

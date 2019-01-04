@@ -20,10 +20,10 @@ package io.engineblock.activityapi.core;
 import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityapi.output.OutputDispenser;
+import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.activityimpl.SimpleActivity;
-import io.engineblock.activityapi.ratelimits.RateLimiter;
 
 import java.util.function.Supplier;
 
@@ -170,4 +170,12 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver {
      */
     RateLimiter getPhaseRateLimiter(Supplier<? extends RateLimiter> supplier);
 
+    /**
+     * Get or create the instrumentation needed for this activity. This provides
+     * a single place to find and manage, and document instrumentation that is
+     * uniform across all activities.
+     *
+     * @return A new or existing instrumentation object for this activity.
+     */
+    ActivityInstrumentation getInstrumentation();
 }

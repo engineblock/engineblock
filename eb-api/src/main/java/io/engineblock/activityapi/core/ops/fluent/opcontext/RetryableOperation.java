@@ -15,26 +15,23 @@
  * /
  */
 
-package io.engineblock.activityapi.core;
+package io.engineblock.activityapi.core.ops.fluent.opcontext;
 
-import io.engineblock.activityapi.core.ops.fluent.opcontext.BaseOpContext;
-import org.testng.annotations.Test;
+public interface RetryableOperation {
 
-import static org.assertj.core.api.Assertions.assertThat;
+    /**
+     * Retry this operation. Set the start timer to when the method is called, and increment
+     * the tries counter.
+     * @return The op context after modifications
+     */
+    RetryableOperation retry();
 
-@Test
-public class BaseOpContextTest {
-
-    @Test
-    public void testRunningStatus() {
-        BaseOpContext c = new BaseOpContext();
-        assertThat(c.isRunning()).isFalse();
-        c.setCycle(3L);
-        c.setWaitTime(0L);
-        assertThat(c.isRunning()).isTrue();
-        c.stop(23);
-        assertThat(c.isRunning()).isFalse();
-
-    }
+    /**
+     * Get the number of times start or restart were called, cumulatively, since this operation
+     * was initialized.
+     * @return total attempts to complete this op
+     */
+    int getTries();
 
 }
+

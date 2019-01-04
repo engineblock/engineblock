@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.activityapi.core.ops;
+package io.engineblock.activityapi.core.ops.fluent.opcontext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,6 @@ public class BaseOpContext<D> implements OpContext<D> {
     private static AtomicLong idgen = new AtomicLong(0L);
     public final long ctxid = idgen.getAndIncrement();
     private long usages = 0L;
-
-    private OpEvents nullHandler = NULLSINK;
 
     private long delayNanos;
     private long startedAtNanos = 0L;
@@ -65,8 +63,6 @@ public class BaseOpContext<D> implements OpContext<D> {
         this.opEvents.add(opEvents);
         return this;
     }
-
-
 
     @Override
     public OpContext setWaitTime(long delayNanos) {
@@ -166,7 +162,7 @@ public class BaseOpContext<D> implements OpContext<D> {
 
     @Override
     public OpContext<D> setData(D data) {
-        return null;
+        return this;
     }
 
     @Override
@@ -199,6 +195,10 @@ public class BaseOpContext<D> implements OpContext<D> {
     }
 
     private final static class NullOpEvents implements OpEvents {
+    }
+
+    protected long getStartedAtNanos() {
+        return startedAtNanos;
     }
 
 }

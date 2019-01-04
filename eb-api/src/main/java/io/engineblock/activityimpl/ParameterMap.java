@@ -51,6 +51,14 @@ public class ParameterMap extends ConcurrentHashMap<String,Object> implements Bi
         super.putAll(valueMap);
     }
 
+    public void assertOnlyOneOf(String... paramName) {
+        Object[] objects = Arrays.stream(paramName).map(super::get).filter(Objects::nonNull).toArray();
+        if (objects.length>1) {
+            throw new RuntimeException("Multiple incompatible parameters are specified: " + Arrays.toString(paramName)
+                    + ". Just use one of them.");
+        }
+    }
+
     public Optional<String> getOptionalString(String... paramName) {
         Object[] objects = Arrays.stream(paramName).map(super::get).filter(Objects::nonNull).toArray();
         if (objects.length>1) {

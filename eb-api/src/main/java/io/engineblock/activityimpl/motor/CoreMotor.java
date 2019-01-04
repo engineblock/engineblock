@@ -18,11 +18,11 @@ package io.engineblock.activityimpl.motor;
 
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.*;
-import io.engineblock.activityapi.core.ops.OpContext;
+import io.engineblock.activityapi.core.ops.fluent.opcontext.OpContext;
 import io.engineblock.activityapi.core.ops.OpResultBuffer;
-import io.engineblock.activityapi.core.ops.fluent.OpImpl;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.OpImpl;
 import io.engineblock.activityapi.core.ops.fluent.OpTracker;
-import io.engineblock.activityapi.core.ops.fluent.TrackedOp;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
@@ -31,7 +31,6 @@ import io.engineblock.activityapi.output.Output;
 import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SlotStateTracker;
-import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -192,15 +191,13 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor, Stoppable {
     public void run() {
 
         try {
-            String metricSuffix = this.strictmetricnames ? "-servicetime" : "";
-            stridesTimer = ActivityMetrics.timer(activity.getActivityDef(), "strides"+ metricSuffix);
-            cyclesTimer = ActivityMetrics.timer(activity.getActivityDef(), "cycles" + metricSuffix);
-            phasesTimer = ActivityMetrics.timer(activity.getActivityDef(), "phases"+ metricSuffix);
-            inputTimer = ActivityMetrics.timer(activity.getActivityDef(), "read_input");
-
             strideRateLimiter = activity.getStrideLimiter();
             cycleRateLimiter = activity.getCycleLimiter();
             phaseRateLimiter = activity.getPhaseLimiter();
+
+            stridesTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
+            inputTimer = activity.getInstrumentation().getOrCreateInputTimer();
+
 
             if (slotState.get() == Finished) {
                 logger.warn("Input was already exhausted for slot " + slotId + ", remaining in finished state.");
@@ -323,6 +320,10 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor, Stoppable {
 
 
             } else if (action instanceof SyncAction) {
+
+                cyclesTimer = activity.getInstrumentation().getOrCreateCyclesServiceTimer();
+                stridesTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
+                phasesTimer = activity.getInstrumentation().getOrCreatePhasesServiceTimer();
 
                 if (activity.getActivityDef().getParams().containsKey("async")) {
                     throw new RuntimeException("The async parameter was given for this activity, but it does not seem to know how to do async.");

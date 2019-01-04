@@ -15,23 +15,17 @@
  * /
  */
 
-package io.engineblock.activityapi.core.ops;
+package io.engineblock.activityapi.core.ops.fluent.opcontext;
 
-public interface RetryableOperation {
-
-    /**
-     * Retry this operation. Set the start timer to when the method is called, and increment
-     * the tries counter.
-     * @return The op context after modifications
-     */
-    RetryableOperation retry();
+public interface ScheduledOperation {
 
     /**
-     * Get the number of times start or restart were called, cumulatively, since this operation
-     * was initialized.
-     * @return total attempts to complete this op
+     * Get the number of nanoseconds between the time that this operation was scheduled to run,
+     * and when it was initiated.
+     *
+     * @return nanoseconds of wait time
      */
-    int getTries();
+    long getWaitTime();
 
 }
 

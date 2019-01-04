@@ -17,6 +17,8 @@
 
 package io.engineblock.activityapi.core.ops;
 
+import io.engineblock.activityapi.core.ops.fluent.opcontext.BaseOpContext;
+import io.engineblock.activityapi.core.ops.fluent.opcontext.OpContext;
 import io.engineblock.activityapi.cyclelog.buffers.Buffer;
 
 /**

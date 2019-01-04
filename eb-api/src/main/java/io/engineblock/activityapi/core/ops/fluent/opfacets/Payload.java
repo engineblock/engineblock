@@ -15,17 +15,9 @@
  * /
  */
 
-package io.engineblock.activityapi.core.ops;
+package io.engineblock.activityapi.core.ops.fluent.opfacets;
 
-public interface ScheduledOperation {
-
-    /**
-     * Get the number of nanoseconds between the time that this operation was scheduled to run,
-     * and when it was initiated.
-     *
-     * @return nanoseconds of wait time
-     */
-    long getWaitTime();
-
+public interface Payload<D> {
+    D getData();
+    void setData(D data);
 }
-

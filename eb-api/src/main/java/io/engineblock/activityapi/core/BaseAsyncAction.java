@@ -18,14 +18,21 @@
 package io.engineblock.activityapi.core;
 
 import com.codahale.metrics.Counter;
-import io.engineblock.activityapi.core.ops.OpContext;
-import io.engineblock.activityapi.core.ops.fluent.*;
+import io.engineblock.activityapi.core.ops.fluent.opcontext.OpContext;
+import io.engineblock.activityapi.core.ops.fluent.OpTracker;
+import io.engineblock.activityapi.core.ops.fluent.OpTrackerImpl;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *
+ * @param <D> An type of state holder for an operation, holding everything unique to that cycle and operation
+ * @param <A> An type of of an Activity, a state holder for a runtime instance of an Activity
+ */
 public abstract class BaseAsyncAction<D, A extends Activity> implements AsyncAction<D>, Stoppable, ActivityDefObserver {
     private final static Logger logger = LoggerFactory.getLogger("BaseAsyncAction");
 
@@ -40,7 +47,9 @@ public abstract class BaseAsyncAction<D, A extends Activity> implements AsyncAct
         this.activity = activity;
         this.slot = slot;
         pendingOpsCounter = ActivityMetrics.counter(activity.getActivityDef(), "pending_ops");
-        tracker = new OpTrackerImpl<>(pendingOpsCounter);
+        boolean enableCOMetrics= (activity.getCycleLimiter()!=null);
+
+        tracker = new OpTrackerImpl<>(activity, slot);
         onActivityDefUpdate(activity.getActivityDef());
     }
 
@@ -49,10 +58,10 @@ public abstract class BaseAsyncAction<D, A extends Activity> implements AsyncAct
         ParameterMap params = activityDef.getParams();
         params.getOptionalInteger("async").orElseThrow(
                 () -> new RuntimeException("the async parameter is required to activate async actions"));
-        this.tracker.setMaxPendingOps(getMaxPendingOps(activityDef));
+        this.tracker.setMaxPendingOps(getMaxPendingOpsForThisThread(activityDef));
     }
 
-    protected int getMaxPendingOps(ActivityDef def) {
+    protected int getMaxPendingOpsForThisThread(ActivityDef def) {
         int maxTotalOpsInFlight = def.getParams().getOptionalInteger("async").orElse(1);
         int threads = def.getThreads();
         return (maxTotalOpsInFlight / threads) + (slot < (maxTotalOpsInFlight % threads) ? 1 : 0);
@@ -91,9 +100,9 @@ public abstract class BaseAsyncAction<D, A extends Activity> implements AsyncAct
      *
      * @param opc The type-specific {@link OpContext}
      */
-    public abstract StartedOp<D> startOpCycle(TrackedOp<D> opc);
+    public abstract void startOpCycle(TrackedOp<D> opc);
 
-    public abstract CompletedOp<D> completeOpCycle(StartedOp<D> opc);
+//    public abstract CompletedOp<D> completeOpCycle(StartedOp<D> opc) {}
 
     @Override
     public void requestStop() {

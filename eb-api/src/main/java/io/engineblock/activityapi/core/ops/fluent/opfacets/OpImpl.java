@@ -15,7 +15,9 @@
  * /
  */
 
-package io.engineblock.activityapi.core.ops.fluent;
+package io.engineblock.activityapi.core.ops.fluent.opfacets;
+
+import io.engineblock.activityapi.core.ops.fluent.OpTracker;
 
 public class OpImpl<D> implements OpFacets<D> {
 
@@ -26,6 +28,7 @@ public class OpImpl<D> implements OpFacets<D> {
     private long endedAtNanos;
     private long delayNanos;
     private long startedAtNanos;
+
     //    private long usages;
     private int tries = 0;
     private D data;
@@ -78,6 +81,16 @@ public class OpImpl<D> implements OpFacets<D> {
     @Override
     public int getTries() {
         return tries;
+    }
+
+    @Override
+    public long getServiceTime() {
+        return this.endedAtNanos - this.startedAtNanos;
+    }
+
+    @Override
+    public long getResponseTime() {
+        return waitTime + getServiceTime();
     }
 
 

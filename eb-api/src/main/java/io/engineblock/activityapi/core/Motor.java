@@ -17,7 +17,7 @@
 
 package io.engineblock.activityapi.core;
 
-import io.engineblock.activityapi.core.ops.OpContext;
+import io.engineblock.activityapi.core.ops.fluent.opcontext.OpContext;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityimpl.SlotStateTracker;
 

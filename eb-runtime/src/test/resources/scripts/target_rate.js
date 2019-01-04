@@ -10,7 +10,7 @@ activitydef = {
 
 scenario.run(activitydef);
 
-print("current cycle = " + metrics.target_rate.cycles.count);
+print("current cycle = " + metrics.target_rate.cycles.servicetime.count);
 print("mean cycle rate = " + metrics.target_rate.cycles.meanRate);
 print("current phase = " + metrics.target_rate.phases.count);
 print("mean phase rate = " + metrics.target_rate.phases.meanRate);

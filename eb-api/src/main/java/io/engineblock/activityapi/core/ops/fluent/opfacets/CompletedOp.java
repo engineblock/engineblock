@@ -15,26 +15,11 @@
  * /
  */
 
-package io.engineblock.activityapi.core;
+package io.engineblock.activityapi.core.ops.fluent.opfacets;
 
-import io.engineblock.activityapi.core.ops.fluent.opcontext.BaseOpContext;
-import org.testng.annotations.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@Test
-public class BaseOpContextTest {
-
-    @Test
-    public void testRunningStatus() {
-        BaseOpContext c = new BaseOpContext();
-        assertThat(c.isRunning()).isFalse();
-        c.setCycle(3L);
-        c.setWaitTime(0L);
-        assertThat(c.isRunning()).isTrue();
-        c.stop(23);
-        assertThat(c.isRunning()).isFalse();
-
-    }
+public interface CompletedOp<D> extends Payload<D> {
+    public int getTries();
+    public long getServiceTime();
+    public long getResponseTime();
 
 }

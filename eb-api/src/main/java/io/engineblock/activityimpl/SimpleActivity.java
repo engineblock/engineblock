@@ -19,6 +19,7 @@ import java.util.function.Supplier;
  */
 public class SimpleActivity implements Activity {
     private final static Logger logger = LoggerFactory.getLogger(SimpleActivity.class);
+
     protected ActivityDef activityDef;
     private List<AutoCloseable> closeables = new ArrayList<>();
     private MotorDispenser motorDispenser;
@@ -31,6 +32,7 @@ public class SimpleActivity implements Activity {
     private RateLimiter cycleLimiter;
     private RateLimiter phaseLimiter;
     private ActivityController activityController;
+    private ActivityInstrumentation activityInstrumentation;
 
     public SimpleActivity(ActivityDef activityDef) {
         this.activityDef = activityDef;
@@ -201,6 +203,14 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
+    public synchronized ActivityInstrumentation getInstrumentation() {
+        if (activityInstrumentation==null) {
+            activityInstrumentation=new CoreActivityInstrumentation(this);
+        }
+        return activityInstrumentation;
+    }
+
+    @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
 
         activityDef.getParams().getOptionalNamedParameter("striderate")
@@ -216,5 +226,6 @@ public class SimpleActivity implements Activity {
                 .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "phase", phaseLimiter, spec));
 
     }
+
 
 }
