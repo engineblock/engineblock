@@ -15,18 +15,22 @@
  * /
  */
 
-stride_rate = {
-    "alias" : "stride_rate",
+var csvlogger = csvmetrics.log("csvmetricstestdir");
+
+activitydef = {
+    "alias" : "csvmetrics",
     "type" : "diag",
-    "cycles" : "0..100000",
-    "threads" : "10",
-    "striderate" : "25000",
-    "interval" : "2000"
+    "cycles" : "50000",
+    "threads" : "20",
+    "interval" : "2000",
+    "targetrate" : "10000.0",
+    "async" : "1000"
 };
+scenario.start(activitydef);
+csvlogger.add(metrics.csvmetrics.cycles.servicetime);
+csvlogger.start(500,"MILLISECONDS");
 
-print('running stride_rate');
-scenario.run(10000,stride_rate);
-print('stride_rate finished');
+scenario.waitMillis(2000);
+scenario.stop(activitydef);
 
-print("stride_rate.strides.meanRate = " + metrics.stride_rate.strides.meanRate);
-
+csvlogger.report();

@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Test(singleThreaded = true)
-public class ScriptIntegrationTests {
+public class AsyncScriptIntegrationTests {
 
     public static ScenarioResult runScenario(String scriptname, String... params) {
         if ((params.length % 2) != 0) {
@@ -51,10 +51,10 @@ public class ScriptIntegrationTests {
         String scenarioName = "scenario " + scriptname;
         System.out.println("SYNC "+ "=".repeat(30));
         System.out.println("Running integration test for: " + scenarioName);
-        ScenariosExecutor e = new ScenariosExecutor(ScriptIntegrationTests.class.getSimpleName() + ":" + scriptname, 1);
+        ScenariosExecutor e = new ScenariosExecutor(AsyncScriptIntegrationTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName);
         s.addScenarioScriptParams(paramsMap);
-        s.addScriptText("load('classpath:scripts/sync/" + scriptname + ".js');");
+        s.addScriptText("load('classpath:scripts/async/" + scriptname + ".js');");
         ScenarioLogger scenarioLogger = new ScenarioLogger(s).setMaxLogs(0).setLogDir("logs/test").start();
         e.execute(s, scenarioLogger);
         ScenariosResults scenariosResults = e.awaitAllResults();
@@ -63,16 +63,13 @@ public class ScriptIntegrationTests {
         return scenarioResult;
     }
 
-
     @BeforeClass
     public void logit() {
-        System.out.println("Running SYNC version of Script Integration Tests.");
+        System.out.println("Running ASYNC version of Script Integration Tests.");
     }
-
 
     @Test
     public void testCycleRate() {
-
         ScenarioResult scenarioResult = runScenario("cycle_rate");
         String iolog = scenarioResult.getIOLog();
         System.out.println("iolog\n" + iolog);
@@ -100,22 +97,6 @@ public class ScriptIntegrationTests {
         double rate = Double.valueOf(digits);
         assertThat(rate).isCloseTo(10000.0D, Offset.offset(1000D));
     }
-
-    @Test
-    public void testPhaseRateOnly() {
-        ScenarioResult scenarioResult = runScenario("phase_rate");
-        String iolog = scenarioResult.getIOLog();
-        System.out.println("iolog\n" + iolog);
-        Pattern p = Pattern.compile(".*phase_rate.phases.servicetime.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
-        Matcher m = p.matcher(iolog);
-        assertThat(m.matches()).isTrue();
-
-        String digits = m.group(1);
-        assertThat(digits).isNotEmpty();
-        double rate = Double.valueOf(digits);
-        assertThat(rate).isCloseTo(25000.0D, Offset.offset(5000D));
-    }
-
 
     @Test
     public void testExtensionPoint() {
@@ -244,8 +225,15 @@ public class ScriptIntegrationTests {
     }
 
 
+    @Test(enabled=false)
+    public void testCycleRateChangeOldMetrics() {
+        ScenarioResult scenarioResult = runScenario("cycle_rate_change_deprecated");
+        String ioLog = scenarioResult.getIOLog();
+        assertThat(ioLog).contains("cycles adjusted, exiting on iteration");
+    }
+
     @Test
-    public void testCycleRateChange() {
+    public void testCycleRateChangeNewMetrics() {
         ScenarioResult scenarioResult = runScenario("cycle_rate_change");
         String ioLog = scenarioResult.getIOLog();
         assertThat(ioLog).contains("cycles adjusted, exiting on iteration");

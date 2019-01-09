@@ -1,3 +1,4 @@
+
 /*
  *
  *    Copyright 2016 jshook
@@ -15,17 +16,19 @@
  * /
  */
 
-package io.engineblock.activityapi.core.ops.fluent.opcontext;
+activitydef = {
+    "alias" : "cycle_rate",
+    "type" : "diag",
+    "cycles" : "5K",
+    "threads" : "10",
+    "cyclerate" : "1K",
+    "async" : 1000
+};
 
-public interface ScheduledOperation {
+scenario.run(activitydef);
 
-    /**
-     * Get the number of nanoseconds between the time that this operation was scheduled to run,
-     * and when it was initiated.
-     *
-     * @return nanoseconds of wait time
-     */
-    long getWaitTime();
+print("current cycle = " + metrics.cycle_rate.cycles.servicetime.count);
+print("mean cycle rate = " + metrics.cycle_rate.cycles.servicetime.meanRate);
 
-}
+
 
