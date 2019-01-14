@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  */
 public class MetricsMapper {
     private final static Logger logger = LoggerFactory.getLogger(MetricsMapper.class);
-    private static Set<Class> metricsElements = new HashSet<>() {{
+    private static Set<Class<?>> metricsElements = new HashSet<>() {{
         add(Meter.class);
         add(Counter.class);
         add(Timer.class);

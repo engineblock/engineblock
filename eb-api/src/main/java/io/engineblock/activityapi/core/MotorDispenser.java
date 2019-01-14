@@ -16,7 +16,6 @@
  */
 package io.engineblock.activityapi.core;
 
-import io.engineblock.activityapi.core.ops.fluent.opcontext.OpContext;
 import io.engineblock.activityimpl.ActivityDef;
 
 /**
@@ -25,7 +24,7 @@ import io.engineblock.activityimpl.ActivityDef;
  * The MotorDispenser is responsible for choosing how the motor is resolved,
  * whether that is a shared thread-safe motor or, more conventionally, a separate motor per slot.
  */
-public interface MotorDispenser<T extends OpContext> {
+public interface MotorDispenser<T> {
 
     /**
      * Resolve (find or create) a Motor instance for the slot specified.

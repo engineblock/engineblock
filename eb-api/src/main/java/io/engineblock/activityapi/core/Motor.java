@@ -17,14 +17,13 @@
 
 package io.engineblock.activityapi.core;
 
-import io.engineblock.activityapi.core.ops.fluent.opcontext.OpContext;
 import io.engineblock.activityapi.input.Input;
 import io.engineblock.activityimpl.SlotStateTracker;
 
 /**
  * The core threading harness within an activity.
  */
-public interface Motor<T extends OpContext> extends Runnable, Stoppable {
+public interface Motor<T> extends Runnable, Stoppable {
 
     /**
      * Set the input on this motor. It will be read from each cycle before applying the action.

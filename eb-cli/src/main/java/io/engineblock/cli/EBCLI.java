@@ -1,6 +1,5 @@
 package io.engineblock.cli;
 
-import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.core.ActivityType;
 import io.engineblock.activityapi.cyclelog.outputs.cyclelog.CycleLogDumperUtility;
 import io.engineblock.activityapi.cyclelog.outputs.cyclelog.CycleLogImporterUtility;
