@@ -57,15 +57,12 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <forkMode>always</forkMode>
                     <includes>
                         <include>**/*IntegrationTest.java</include>
                         <include>**/*IntegrationTests.java</include>
                     </includes>
                     <properties>
-                        <property>
-                            <name>parallel</name>
-                            <value>methods</value>
-                        </property>
                     </properties>
                 </configuration>
 
