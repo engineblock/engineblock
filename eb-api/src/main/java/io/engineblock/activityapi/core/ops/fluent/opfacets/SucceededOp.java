@@ -24,8 +24,11 @@ import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
  * @param <D> The type of delegate needed for the implementing protocol
  */
 public interface SucceededOp<D> extends Payload<D>, CycleResult {
+
     long getStartedAtNanos();
+
     public int getTries();
+
     public long getServiceTimeNanos();
     public long getResponseTimeNanos();
 

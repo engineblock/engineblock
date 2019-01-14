@@ -20,8 +20,9 @@ package io.engineblock.activityapi.core.ops.fluent.opfacets;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 
 /**
- * A failed op is any operation which has an exception
- * @param <D>
+ * A failed op is any operation which has an error, according to the semantics
+ * of the implementing activity type.
+ * @param <D> The delegate type needed by the implementing activity type
  */
 public interface FailedOp<D> extends Payload<D>, CycleResult {
     long getStartedAtNanos();

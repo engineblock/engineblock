@@ -68,6 +68,21 @@ public class OpTrackerImpl<D> implements OpTracker<D>, ActivityDefObserver {
     }
 
     @Override
+    public void onOpSkipped(SkippedOp<D> op) {
+        pendingOpsCounter.dec();
+        int pending = this.pendingOps.decrementAndGet();
+
+        if (pending< maxPendingOps) {
+            synchronized (this) {
+                notify();
+            }
+        }
+
+    }
+
+
+
+    @Override
     public void onOpFailure(FailedOp<D> op) {
         pendingOpsCounter.dec();
         int pending = this.pendingOps.decrementAndGet();
@@ -130,7 +145,6 @@ public class OpTrackerImpl<D> implements OpTracker<D>, ActivityDefObserver {
         }
         return getPendingOps() == 0;
     }
-
 
     @Override
     public String toString() {

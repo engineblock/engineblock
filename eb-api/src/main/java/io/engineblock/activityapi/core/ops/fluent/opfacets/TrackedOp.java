@@ -25,7 +25,34 @@ import io.engineblock.activityapi.cyclelog.buffers.results.CycleMutable;
  * @param <D> The payload type of this op.
  */
 public interface TrackedOp<D> extends Payload<D>, CycleMutable {
+
+    /**
+     * Signify to EngineBlock that the associated operation is known to have started
+     * processing in some specific way according to the implementing activity type.
+     *
+     * This should be called after any operational setup work that would not occur
+     * in a typical application client scenario. The moment this is called, the
+     * start time for the operation is marked.
+     *
+     * @return a StartedOp of the appropriate generic delegate type
+     */
     StartedOp<D> start();
+
+    /**
+     * Mark that this operation is being skipped by the activity type for some reason.
+     *
+     * @param reason An integer code, activity type specific, to track why the operation was skipped
+     * @return a SkippedOp of the appropriate generic delegate type
+     */
+    SkippedOp<D> skip(int reason);
+
+    /**
+     * Indicate to this op, how much wait time elapsed between the time it was expected
+     * to start and the time it actually started. This is used to calculate the response time
+     * once service time is known.
+     * @param cycleDelay nanosecond delay
+     * @return a TrackedOp for method chaining
+     */
     TrackedOp<D> setWaitTime(long cycleDelay);
 
 }

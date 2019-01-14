@@ -20,5 +20,6 @@ package io.engineblock.activityapi.core.ops.fluent.opfacets;
 public interface OpEvents<D> {
     void onOpStarted(StartedOp<D> op);
     void onOpSuccess(SucceededOp<D> op);
+    void onOpSkipped(SkippedOp<D> op);
     void onOpFailure(FailedOp<D> op);
 }

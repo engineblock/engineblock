@@ -70,6 +70,12 @@ public class StrideTracker<D> extends Buffer<CycleResult> implements OpEvents<D>
         super.put(op);
     }
 
+    @Override
+    public void onOpSkipped(SkippedOp<D> op) {
+        super.put(op);
+    }
+
+
     /**
      * When a stride is complete, do house keeping. This effectively means when N==stride ops have been
      * submitted to this buffer, which is tracked by {@link Buffer#put(Object)}.

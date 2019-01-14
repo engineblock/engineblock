@@ -66,6 +66,10 @@ public class EventedOpImpl<D> extends OpImpl<D> {
         }
 
         @Override
+        public void onOpSkipped(SkippedOp<D> op) {
+        }
+
+        @Override
         public void onOpFailure(FailedOp<D> op) {
         }
     }
