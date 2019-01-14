@@ -33,7 +33,7 @@ package io.engineblock.activityapi.core.ops.fluent.opfacets;
  *           be used  to carry any state which is needed to support a specific type of
  *           operation.
  */
-public interface OpFacets<D> extends TrackedOp<D>, StartedOp<D>, CompletedOp<D> {
+public interface OpFacets<D> extends TrackedOp<D>, StartedOp<D>, SucceededOp<D>, FailedOp<D>, SkippedOp<D> {
 
     default int compareTo(OpFacets<D> o) {
         return Long.compare(getCycle(),o.getCycle());

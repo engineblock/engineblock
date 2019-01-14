@@ -51,9 +51,9 @@ public class EBCLIScriptAssembly {
                     sb.append("// from CLI as ").append(cmd).append("\n");
                     sb.append("scenario.awaitActivity(\"").append(cmdSpec).append("\");\n");
                     break;
-                case stop: // stop activity
+                case stop: // succeed activity
                     sb.append("// from CLI as ").append(cmd).append("\n");
-                    sb.append("scenario.stop(\"").append(cmdSpec).append("\");\n");
+                    sb.append("scenario.succeed(\"").append(cmdSpec).append("\");\n");
                     break;
                 case waitmillis:
                     sb.append("// from CLI as ").append(cmd).append("\n");

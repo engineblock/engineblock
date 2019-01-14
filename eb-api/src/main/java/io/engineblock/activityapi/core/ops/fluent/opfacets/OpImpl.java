@@ -31,6 +31,7 @@ public class OpImpl<D> implements OpFacets<D> {
 
     //    private long usages;
     private int tries = 0;
+    private int skipreason;
 
 
     public OpImpl() {
@@ -55,7 +56,14 @@ public class OpImpl<D> implements OpFacets<D> {
     }
 
     @Override
-    public CompletedOp<D> stop(int status) {
+    public SucceededOp<D> succeed(int status) {
+        this.endedAtNanos = System.nanoTime();
+        this.cycleResult = status;
+        return this;
+    }
+
+    @Override
+    public FailedOp<D> fail(int status) {
         this.endedAtNanos = System.nanoTime();
         this.cycleResult = status;
         return this;
@@ -66,6 +74,12 @@ public class OpImpl<D> implements OpFacets<D> {
         this.startedAtNanos = System.nanoTime();
         this.endedAtNanos = Long.MIN_VALUE;
         tries++;
+        return this;
+    }
+
+    @Override
+    public SkippedOp<D> skip(int reason) {
+        this.skipreason=reason;
         return this;
     }
 
@@ -100,6 +114,16 @@ public class OpImpl<D> implements OpFacets<D> {
     }
 
     @Override
+    public long getCurrentServiceTimeNanos() {
+        return System.nanoTime() - this.startedAtNanos;
+    }
+
+    @Override
+    public long getCurrentResponseTimeNanos() {
+        return waitTime + getCurrentServiceTimeNanos();
+    }
+
+    @Override
     public long getServiceTimeNanos() {
         return this.endedAtNanos - this.startedAtNanos;
     }
@@ -127,4 +151,8 @@ public class OpImpl<D> implements OpFacets<D> {
                 '}';
     }
 
+    @Override
+    public int getSkippedReason() {
+        return skipreason;
+    }
 }

@@ -41,10 +41,18 @@ public class EventedOpImpl<D> extends OpImpl<D> {
     }
 
     @Override
-    public CompletedOp<D> stop(int status) {
-        super.stop(status);
-        opTracker.onOpCompleted(this);
-        strideTracker.onOpCompleted(this);
+    public SucceededOp<D> succeed(int status) {
+        super.succeed(status);
+        opTracker.onOpSuccess(this);
+        strideTracker.onOpSuccess(this);
+        return this;
+    }
+
+    @Override
+    public FailedOp<D> fail(int status) {
+        super.fail(status);
+        opTracker.onOpFailure(this);
+        strideTracker.onOpFailure(this);
         return this;
     }
 
@@ -54,7 +62,11 @@ public class EventedOpImpl<D> extends OpImpl<D> {
         }
 
         @Override
-        public void onOpCompleted(CompletedOp<D> op) {
+        public void onOpSuccess(SucceededOp<D> op) {
+        }
+
+        @Override
+        public void onOpFailure(FailedOp<D> op) {
         }
     }
 

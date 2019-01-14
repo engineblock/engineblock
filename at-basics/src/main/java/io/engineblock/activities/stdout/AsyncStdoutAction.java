@@ -49,9 +49,10 @@ public class AsyncStdoutAction extends BaseAsyncAction<StdoutOpContext, StdoutAc
             activity.write(opc.getData().statement);
         } catch (Exception e) {
             result=1;
+            started.fail(result);
             throw new RuntimeException("Error writing output:" + e, e);
         } finally {
-            started.stop(result);
+            started.succeed(result);
         }
     }
 

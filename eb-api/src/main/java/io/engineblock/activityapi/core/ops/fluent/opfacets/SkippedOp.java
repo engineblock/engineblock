@@ -17,13 +17,6 @@
 
 package io.engineblock.activityapi.core.ops.fluent.opfacets;
 
-import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
-
-public interface CompletedOp<D> extends Payload<D>, CycleResult {
-    long getStartedAtNanos();
-    public int getTries();
-    public long getServiceTimeNanos();
-    public long getResponseTimeNanos();
-
-
+public interface SkippedOp<D> {
+    int getSkippedReason();
 }

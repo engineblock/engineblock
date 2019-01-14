@@ -152,28 +152,6 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
         opQueue.add(started);
     }
 
-//    @Override
-//    public CompletedOp<DiagOpContext> completeOpCycle(StartedOp<DiagOpContext> opc) {
-//        opc.getData().log("completing at " + System.nanoTime());
-//        int result = runCycle(opc.getData().getCycle());
-//        return opc.stop(result);
-//    }
-
-    //    @Override
-//    protected DiagOpContext startOpCycle(DiagOpContext opc) {
-//        opc.start();
-//        this.asyncOps.addLast(opc);
-//        return opc;
-//    }
-//
-//    private void finishOpCycle() {
-//        OpContext opc = asyncOps.removeFirst();
-//        opc.stop(runCycle(opc.getCycle()));
-//        decrementOps();
-//    }
-//
-//
-
     private int backendExecuteOp(StartedOp<DiagOpData> opc) {
 
         long cycle = opc.getCycle();
@@ -207,7 +185,7 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
         int result = resultFunc.applyAsInt(cycle);
 
         if (erroroncycle == cycle) {
-            activity.getActivityController().stopActivityWithReasonAsync("Diag was requested to stop on cycle " + erroroncycle);
+            activity.getActivityController().stopActivityWithReasonAsync("Diag was requested to succeed on cycle " + erroroncycle);
         }
 
         if (throwoncycle == cycle) {
@@ -265,7 +243,11 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
                     }
 
                     int result = action.backendExecuteOp(opc);
-                    opc.stop(result);
+                    if (result==0) {
+                        opc.succeed(result);
+                    } else {
+                        opc.fail(result);
+                    }
                 } catch (InterruptedException ignored) {
                 }
 

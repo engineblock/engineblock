@@ -17,6 +17,11 @@
 
 package io.engineblock.activityapi.core.ops.fluent.opfacets;
 
+/**
+ * This op context carries with it a data element which a protocol-specific
+ * implementation can use to hold the state and logic for operations.
+ * @param <D> The type of delegate needed for the implementing protocol
+ */
 public interface Payload<D> {
     D getData();
     void setData(D data);

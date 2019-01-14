@@ -1,0 +1,16 @@
+@startuml
+scale 600 width
+[*] --> TrackedOp : track()
+TrackedOp --> StartedOp : start()
+TrackedOp -> SkippedOp : skip()
+
+StartedOp -> StartedOp : retry()
+
+StartedOp --> SucceededOp : succeed()
+StartedOp --> FailedOp: fail()
+StartedOp --> SkippedOp : skip()
+SucceededOp --> [*]
+FailedOp --> [*]
+SkippedOp --> [*]
+
+@enduml

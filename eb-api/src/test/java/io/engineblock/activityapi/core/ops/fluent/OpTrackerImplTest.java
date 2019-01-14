@@ -2,7 +2,7 @@ package io.engineblock.activityapi.core.ops.fluent;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
-import io.engineblock.activityapi.core.ops.fluent.opfacets.CompletedOp;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.SucceededOp;
 import io.engineblock.activityapi.core.ops.fluent.opfacets.EventedOpImpl;
 import io.engineblock.activityapi.core.ops.fluent.opfacets.StartedOp;
 import io.engineblock.activityapi.core.ops.fluent.opfacets.TrackedOp;
@@ -17,7 +17,7 @@ public class OpTrackerImplTest {
         TrackedOp<String> tracked = new EventedOpImpl<>(tracker);
         StartedOp<String> started = tracked.start();
         tracker.onOpStarted(started);
-        CompletedOp stop = started.stop(23);
+        SucceededOp stop = started.succeed(23);
     }
 
 }

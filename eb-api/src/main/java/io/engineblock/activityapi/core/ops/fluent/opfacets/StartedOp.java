@@ -20,7 +20,12 @@ package io.engineblock.activityapi.core.ops.fluent.opfacets;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleReadable;
 
 public interface StartedOp<D> extends Payload<D>, CycleReadable {
-    CompletedOp<D> stop(int status);
+    SkippedOp<D> skip(int reason);
     StartedOp<D> retry();
+    SucceededOp<D> succeed(int status);
+    FailedOp<D> fail(int status);
     long getStartedAtNanos();
+    public long getCurrentServiceTimeNanos();
+    public long getCurrentResponseTimeNanos();
+
 }

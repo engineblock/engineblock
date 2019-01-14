@@ -53,7 +53,22 @@ public class OpTrackerImpl<D> implements OpTracker<D>, ActivityDefObserver {
     }
 
     @Override
-    public void onOpCompleted(CompletedOp<D> op) {
+    public void onOpSuccess(SucceededOp<D> op) {
+        pendingOpsCounter.dec();
+        int pending = this.pendingOps.decrementAndGet();
+
+        cycleServiceTimer.update(op.getServiceTimeNanos(), TimeUnit.NANOSECONDS);
+        if (cycleResponseTimer !=null) { cycleResponseTimer.update(op.getResponseTimeNanos(), TimeUnit.NANOSECONDS); }
+
+        if (pending< maxPendingOps) {
+            synchronized (this) {
+                notify();
+            }
+        }
+    }
+
+    @Override
+    public void onOpFailure(FailedOp<D> op) {
         pendingOpsCounter.dec();
         int pending = this.pendingOps.decrementAndGet();
 

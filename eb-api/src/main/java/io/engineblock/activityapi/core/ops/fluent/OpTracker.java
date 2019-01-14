@@ -14,6 +14,8 @@ public interface OpTracker<D> extends OpEvents<D> {
     int getPendingOps();
 
     void setCycleOpFunction(LongFunction<D> newOpFunction);
+
+    // By making the op tracker the factory for ops, we allow it to hook their event streams
     TrackedOp<D> newOp(long cycle, OpEvents<D> strideTracker);
 
     boolean awaitCompletion(long timeout);

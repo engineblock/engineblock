@@ -18,10 +18,7 @@
 package io.engineblock.activityimpl.motor;
 
 import com.codahale.metrics.Timer;
-import io.engineblock.activityapi.core.ops.fluent.opfacets.CompletedOp;
-import io.engineblock.activityapi.core.ops.fluent.opfacets.OpEvents;
-import io.engineblock.activityapi.core.ops.fluent.opfacets.OpImpl;
-import io.engineblock.activityapi.core.ops.fluent.opfacets.StartedOp;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.*;
 import io.engineblock.activityapi.cyclelog.buffers.Buffer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 import io.engineblock.activityapi.output.Output;
@@ -64,7 +61,12 @@ public class StrideTracker<D> extends Buffer<CycleResult> implements OpEvents<D>
     }
 
     @Override
-    public void onOpCompleted(CompletedOp op) {
+    public void onOpSuccess(SucceededOp op) {
+        super.put(op);
+    }
+
+    @Override
+    public void onOpFailure(FailedOp op) {
         super.put(op);
     }
 
