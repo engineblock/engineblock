@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright 2016 jshook
+ *    Copyright 2018 jshook
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
  *    You may obtain a copy of the License at
@@ -17,5 +17,25 @@
 
 package io.engineblock.activityapi.core.ops.fluent.opfacets;
 
+/**
+ * This interface represents the union of interfaces needed for all of the
+ * behavioral facets of a useful Op implementation. By implementing
+ * these faceted interfaces by way of the OpFacets interface, an
+ * implementation can be a state carrier that exposes a contextual
+ * interface by declaration.
+ *
+ * While this not a secure method of
+ * enforcing type and interface over shared state, it does provide
+ * a high degree of simplification for developers who wish to constrain
+ * the operational view of an object according to an implied state machine.
+ *
+ * @param <D> The data carrier parameter type. Any OpFacets implementation can
+ *           be used  to carry any state which is needed to support a specific type of
+ *           operation.
+ */
 public interface OpFacets<D> extends TrackedOp<D>, StartedOp<D>, CompletedOp<D> {
+
+    default int compareTo(OpFacets<D> o) {
+        return Long.compare(getCycle(),o.getCycle());
+    }
 }

@@ -1,11 +1,11 @@
 package io.engineblock.activityapi.core.ops.fluent;
 
-import io.engineblock.activityapi.core.ops.fluent.opfacets.CompletedOp;
-import io.engineblock.activityapi.core.ops.fluent.opfacets.StartedOp;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.OpEvents;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.TrackedOp;
 
-public interface OpTracker<D> {
-    void onStarted(StartedOp<D> op);
-    void onCompleted(CompletedOp<D> op);
+import java.util.function.LongFunction;
+
+public interface OpTracker<D> extends OpEvents<D> {
 
     void setMaxPendingOps(int maxPendingOps);
     int getMaxPendingOps();
@@ -13,4 +13,8 @@ public interface OpTracker<D> {
     boolean isFull();
     int getPendingOps();
 
+    void setCycleOpFunction(LongFunction<D> newOpFunction);
+    TrackedOp<D> newOp(long cycle, OpEvents<D> strideTracker);
+
+    boolean awaitCompletion(long timeout);
 }

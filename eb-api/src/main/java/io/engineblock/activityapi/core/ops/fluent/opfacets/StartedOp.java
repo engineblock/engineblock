@@ -17,6 +17,10 @@
 
 package io.engineblock.activityapi.core.ops.fluent.opfacets;
 
-public interface StartedOp<D> extends Payload<D> {
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleReadable;
+
+public interface StartedOp<D> extends Payload<D>, CycleReadable {
     CompletedOp<D> stop(int status);
+    StartedOp<D> retry();
+    long getStartedAtNanos();
 }

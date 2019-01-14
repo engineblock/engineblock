@@ -17,7 +17,15 @@
 
 package io.engineblock.activityapi.core.ops.fluent.opfacets;
 
-public interface TrackedOp<D> extends Payload<D> {
+import io.engineblock.activityapi.cyclelog.buffers.results.CycleMutable;
+
+/**
+ * A tracked op is one that has been added to a tracker, and can
+ * then be started.
+ * @param <D> The payload type of this op.
+ */
+public interface TrackedOp<D> extends Payload<D>, CycleMutable {
     StartedOp<D> start();
     TrackedOp<D> setWaitTime(long cycleDelay);
+
 }

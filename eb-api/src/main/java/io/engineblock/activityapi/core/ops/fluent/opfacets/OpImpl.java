@@ -17,24 +17,23 @@
 
 package io.engineblock.activityapi.core.ops.fluent.opfacets;
 
-import io.engineblock.activityapi.core.ops.fluent.OpTracker;
-
 public class OpImpl<D> implements OpFacets<D> {
 
-    private OpTracker<D> tracker;
+//    private OpTracker<D> tracker;
 
+    private D data;
     private long cycle;
+    private int cycleResult;
+
     private long waitTime;
     private long endedAtNanos;
-    private long delayNanos;
     private long startedAtNanos;
 
     //    private long usages;
     private int tries = 0;
-    private D data;
 
-    public OpImpl(OpTracker<D> tracker) {
-        this.tracker = tracker;
+
+    public OpImpl() {
     }
 
     @Override
@@ -42,15 +41,14 @@ public class OpImpl<D> implements OpFacets<D> {
         this.endedAtNanos = Long.MIN_VALUE;
         this.startedAtNanos = System.nanoTime();
         tries = 1;
-        tracker.onStarted(this);
         return this;
     }
 
 
     @Override
-    public OpImpl<D> setWaitTime(long delayNanos) {
+    public OpImpl<D> setWaitTime(long waitTime) {
         this.endedAtNanos = Long.MIN_VALUE;
-        this.delayNanos = delayNanos;
+        this.waitTime = waitTime;
         this.startedAtNanos = System.nanoTime();
 //        usages++;
         return this;
@@ -59,13 +57,31 @@ public class OpImpl<D> implements OpFacets<D> {
     @Override
     public CompletedOp<D> stop(int status) {
         this.endedAtNanos = System.nanoTime();
-        tracker.onCompleted(this);
+        this.cycleResult = status;
         return this;
     }
 
-    public OpImpl<D> setCycle(long cycle) {
-        this.cycle = cycle;
+    @Override
+    public StartedOp<D> retry() {
+        this.startedAtNanos = System.nanoTime();
+        this.endedAtNanos = Long.MIN_VALUE;
+        tries++;
         return this;
+    }
+
+    @Override
+    public long getCycle() {
+        return this.cycle;
+    }
+
+    @Override
+    public void setCycle(long cycle) {
+        this.cycle = cycle;
+    }
+
+    @Override
+    public long getStartedAtNanos() {
+        return startedAtNanos;
     }
 
     @Override
@@ -84,184 +100,31 @@ public class OpImpl<D> implements OpFacets<D> {
     }
 
     @Override
-    public long getServiceTime() {
+    public long getServiceTimeNanos() {
         return this.endedAtNanos - this.startedAtNanos;
     }
 
     @Override
-    public long getResponseTime() {
-        return waitTime + getServiceTime();
+    public long getResponseTimeNanos() {
+        return waitTime + getServiceTimeNanos();
     }
 
+    @Override
+    public int getResult() {
+        return this.cycleResult;
+    }
 
-//    @Override
-//    public StartedOp start() {
-//        this.endedAtNanos = Long.MIN_VALUE;
-//        this.startedAtNanos = System.nanoTime();
-//        tries=1;
-//        usages++;
-//        for (OpEvents opEvents : this.opEvents) {
-//            opEvents.onOpStart(this);
-//        }
-//        return this;
-//    }
-
-
-//    private final static OpEvents NULLSINK = new NullOpEvents();
-//    private static AtomicLong idgen = new AtomicLong(0L);
-//    public final long ctxid = idgen.getAndIncrement();
-//    private long usages = 0L;
-//
-//    private OpEvents nullHandler = NULLSINK;
-//
-//    private long delayNanos;
-//    private long startedAtNanos = 0L;
-//    private long endedAtNanos = 0L;
-//
-//    private long cycle;
-//    private int result;
-//
-//    private int tries=0;
-//    private List<OpEvents> opEvents = new ArrayList<OpEvents>();
-//    private D data;
-//
-//    public OpImpl() {
-//    }
-//
-//    @Override
-//    public OpContext reset() {
-//        for (OpEvents opEvents : this.opEvents) {
-//            opEvents.onOpReset(this);
-//        }
-//        startedAtNanos=0L;
-//        delayNanos=0L;
-//        endedAtNanos=0L;
-//        cycle=0L;
-//        result=0;
-//        opEvents =null;
-//
-//        opEvents.clear();
-//        return this;
-//    }
-//
-//    @Override
-//    public OpContext addSink(OpEvents opEvents) {
-//        this.opEvents.add(opEvents);
-//        return this;
-//    }
-//
-//
-//
-//
-//    public OpContext retry() {
-//        this.startedAtNanos = System.nanoTime();
-//        this.endedAtNanos = Long.MIN_VALUE;
-//        usages++;
-//        tries++;
-//        for (OpEvents opEvents : this.opEvents) {
-//            opEvents.onOpRestart(this);
-//        }
-//        return this;
-//    }
-//
-//    @Override
-//    public OpContext stop(int result) {
-//        this.endedAtNanos = System.nanoTime();
-//        this.result = result;
-//        for (OpEvents opEvents : this.opEvents) {
-//            opEvents.onAfterOpStop(this);
-//        }
-//        synchronized(this) {
-//            notifyAll();
-//        }
-//        return this;
-//    }
-//
-//    @Override
-//    public long getFinalServiceTime() {
-//        return (endedAtNanos - startedAtNanos);
-//    }
-//
-//    @Override
-//    public long getCumulativeServiceTime() {
-//        return System.nanoTime() - startedAtNanos;
-//    }
-//
-//    @Override
-//    public long getFinalResponseTime() {
-//        return delayNanos + (endedAtNanos - startedAtNanos);
-//    }
-//
-//    @Override
-//    public long getCumulativeResponseTime() {
-//        return delayNanos + (System.nanoTime() - startedAtNanos);
-//    }
-//
-//    @Override
-//    public long getWaitTime() {
-//        return delayNanos;
-//    }
-//
-//    @Override
-//    public int getResult() {
-//        return result;
-//    }
-//
-//    @Override
-//    public int getTries() {
-//        return tries;
-//    }
-//
-//    @Override
-//    public long getCycle() {
-//        return cycle;
-//    }
-//
-//    @Override
-//    public long getCtxId() {
-//        return ctxid;
-//    }
-//
-//    @Override
-//    public D getData() {
-//        return data;
-//    }
-//
-//    @Override
-//    public OpContext<D> setData(D data) {
-//        return null;
-//    }
-//
-//    @Override
-//    public boolean isRunning() {
-//        return endedAtNanos < 0L;
-//    }
-//
-//    @Override
-//    public String toString() {
-//        return "BasicOpContext{" +
-//                "(S-state,I-id,C-cycle,T-tries,U-use)=(S-" +
-//                (startedAtNanos<=0 ? "RESET" : (endedAtNanos<=0 ? "RUNNING" : "STOPPED") ) +
-//                ",I-" + ctxid +
-//                ",C-" + cycle +
-//                ",T-" + tries +
-//                ",U-" + usages +
-//                ")" +
-//                ", result=" + result +
-//                ", delayNanos=" + delayNanos +
-//                ", startedAtNanos=" + startedAtNanos +
-//                ", endedAtNanos=" + endedAtNanos +
-//                ", usages=" + usages +
-//                ", opEvents=" + opEvents.size() +
-//                '}';
-//    }
-//
-//    @Override
-//    public void setCycle(long cycle) {
-//        this.cycle = cycle;
-//    }
-//
-//    private final static class NullOpEvents implements OpEvents {
-//    }
+    @Override
+    public String toString() {
+        return "Op{" +
+                "cycle=" + cycle +
+                ", result=" + cycleResult +
+                ", wait=" + waitTime +
+                ", started=" + startedAtNanos +
+                ", ended=" + endedAtNanos +
+                ", tries=" + tries +
+                ", data=" + (data == null ? "NULL" : data.toString()) +
+                '}';
+    }
 
 }

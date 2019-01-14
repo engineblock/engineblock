@@ -10,6 +10,8 @@ import io.virtdata.templates.StringBindings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.function.LongFunction;
+
 @SuppressWarnings("Duplicates")
 public class AsyncStdoutAction extends BaseAsyncAction<StdoutOpContext, StdoutActivity> {
     private final static Logger logger = LoggerFactory.getLogger(AsyncStdoutAction.class);
@@ -26,7 +28,6 @@ public class AsyncStdoutAction extends BaseAsyncAction<StdoutOpContext, StdoutAc
         this.sequencer = activity.getOpSequence();
     }
 
-    @Override
     public StdoutOpContext allocateOpData(long cycle) {
 
         StdoutOpContext opc = new StdoutOpContext();
@@ -54,4 +55,8 @@ public class AsyncStdoutAction extends BaseAsyncAction<StdoutOpContext, StdoutAc
         }
     }
 
+    @Override
+    public LongFunction<StdoutOpContext> getOpInitFunction() {
+        return this::allocateOpData;
+    }
 }
