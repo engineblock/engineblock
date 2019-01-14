@@ -185,7 +185,7 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
         int result = resultFunc.applyAsInt(cycle);
 
         if (erroroncycle == cycle) {
-            activity.getActivityController().stopActivityWithReasonAsync("Diag was requested to succeed on cycle " + erroroncycle);
+            activity.getActivityController().stopActivityWithReasonAsync("Diag was requested to stop on cycle " + erroroncycle);
         }
 
         if (throwoncycle == cycle) {

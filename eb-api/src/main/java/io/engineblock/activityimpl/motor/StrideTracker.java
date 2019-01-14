@@ -75,7 +75,7 @@ public class StrideTracker<D> extends Buffer<CycleResult> implements OpEvents<D>
      * submitted to this buffer, which is tracked by {@link Buffer#put(Object)}.
      */
     public void onFull() {
-        strideOp.stop(0);
+        strideOp.succeed(0);
         logger.trace("completed strideOp with first result cycle (" + strideOp.getCycle() + ")");
         strideServiceTimer.update(strideOp.getResponseTimeNanos(), TimeUnit.NANOSECONDS);
         if (strideResponseTimer!=null) {
