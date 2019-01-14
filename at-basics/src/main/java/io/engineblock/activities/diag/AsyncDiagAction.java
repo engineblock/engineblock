@@ -17,17 +17,22 @@
 package io.engineblock.activities.diag;
 
 import io.engineblock.activityapi.core.BaseAsyncAction;
-import io.engineblock.activityapi.core.ops.BaseOpContext;
-import io.engineblock.activityapi.core.ops.OpContext;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.StartedOp;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.locks.LockSupport;
+import java.util.function.LongFunction;
+import java.util.function.LongToIntFunction;
+import java.util.function.LongUnaryOperator;
 
-public class AsyncDiagAction extends BaseAsyncAction<OpContext, DiagActivity> {
+public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> implements Thread.UncaughtExceptionHandler {
 
     private final static Logger logger = LoggerFactory.getLogger(AsyncDiagAction.class);
 
@@ -36,19 +41,29 @@ public class AsyncDiagAction extends BaseAsyncAction<OpContext, DiagActivity> {
     private long reportModulo;
     private int phasesPerCycle;
     private int completedPhase;
-    private int resultmodulo = Integer.MIN_VALUE;
     private long erroroncycle = Long.MIN_VALUE;
     private long throwoncycle = Long.MIN_VALUE;
     private boolean logcycle;
-    private int staticvalue = Integer.MIN_VALUE;
     private RateLimiter diagRateLimiter = null;
 
-    private ArrayDeque<OpContext> asyncOps;
+    private LongToIntFunction resultFunc;
+    private LongUnaryOperator delayFunc;
+
+
+//    private PriorityBlockingQueue<StartedOp<DiagOpData>> asyncOps;
+    private LinkedBlockingDeque<StartedOp<DiagOpData>> opQueue;
+    private OpFinisher finisher;
 
 
     public AsyncDiagAction(DiagActivity activity, int slot) {
         super(activity, slot);
         onActivityDefUpdate(activity.getActivityDef());
+    }
+
+    @Override
+    public void requestStop() {
+        super.requestStop();
+
     }
 
     /**
@@ -97,44 +112,49 @@ public class AsyncDiagAction extends BaseAsyncAction<OpContext, DiagActivity> {
 
 
     @Override
+    public void init() {
+
+//        this.asyncOps = new PriorityBlockingQueue<>(1, Comparator.comparingLong(o -> o.getData().getSimulatedDelayNanos()));
+        this.opQueue = new LinkedBlockingDeque<StartedOp<DiagOpData>>();
+        this.finisher = new OpFinisher(activity.getAlias()+"_finisher_" + slot, opQueue, this);
+    }
+
+    @Override
     public void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
 
         ParameterMap params = activityDef.getParams();
         updateReportTime();
 
-        this.resultmodulo = params.getOptionalInteger("resultmodulo").orElse(Integer.MIN_VALUE);
+        this.delayFunc = activity.getDelayFunc();
+        this.resultFunc = activity.getResultFunc();
+
         this.erroroncycle = params.getOptionalLong("erroroncycle").orElse(Long.MIN_VALUE);
         this.throwoncycle = params.getOptionalLong("throwoncycle").orElse(Long.MIN_VALUE);
         this.logcycle = params.getOptionalBoolean("logcycle").orElse(false);
-        this.staticvalue = params.getOptionalInteger("staticvalue").orElse(-1);
+
         this.diagRateLimiter = activity.getDiagRateLimiter();
-        this.asyncOps = new ArrayDeque<>(this.getMaxPendingOps(activityDef));
+
+
     }
 
     @Override
-    public boolean enqueue(OpContext opc) {
-        if (available()==0) {
-            finishOpCycle();
-        }
-        return super.enqueue(opc);
+    public LongFunction<DiagOpData> getOpInitFunction() {
+        return (l) -> new DiagOpData("a diag op");
     }
+
 
     @Override
-    protected OpContext startOpCycle(OpContext opc) {
-        opc.start();
-        this.asyncOps.addLast(opc);
-        return opc;
+    public void startOpCycle(TrackedOp<DiagOpData> opc) {
+        opc.getData().log("starting at " + System.nanoTime());
+        opc.getData().setSimulatedDelayNanos(delayFunc.applyAsLong(opc.getCycle()));
+        StartedOp<DiagOpData> started = opc.start();
+        opQueue.add(started);
     }
 
-    private void finishOpCycle() {
-        OpContext opc = asyncOps.removeFirst();
-        opc.stop(runCycle(opc.getCycle()));
-        decrementOps();
-    }
+    private int backendExecuteOp(StartedOp<DiagOpData> opc) {
 
-
-    private int runCycle(long cycle) {
+        long cycle = opc.getCycle();
 
         if (logcycle) {
             logger.trace("cycle " + cycle);
@@ -162,17 +182,7 @@ public class AsyncDiagAction extends BaseAsyncAction<OpContext, DiagActivity> {
 
         completedPhase++;
 
-        int result = 0;
-
-        if (resultmodulo >= 0) {
-            if ((cycle % resultmodulo) == 0) {
-                result = 1;
-            }
-        } else if (staticvalue >= 0) {
-            return staticvalue;
-        } else {
-            result = (byte) (cycle % 128);
-        }
+        int result = resultFunc.applyAsInt(cycle);
 
         if (erroroncycle == cycle) {
             activity.getActivityController().stopActivityWithReasonAsync("Diag was requested to stop on cycle " + erroroncycle);
@@ -183,31 +193,68 @@ public class AsyncDiagAction extends BaseAsyncAction<OpContext, DiagActivity> {
         }
 
         return result;
+
     }
 
     @Override
-    public boolean awaitCompletion(long timeout) {
-        while (pending()>0) {
-            finishOpCycle();
+    public void uncaughtException(Thread t, Throwable e) {
+        logger.error("Error on finisher thread: " +t.getName() + ", error: " + e.getMessage());
+        requestStop();
+    }
+
+    private static class OpFinisher implements Runnable {
+        final BlockingQueue<StartedOp<DiagOpData>> queue;
+        private final AsyncDiagAction action;
+        AsyncDiagAction mainContext;
+        private volatile boolean running = true;
+        private Thread thread;
+        private String name;
+
+        public OpFinisher(String name, BlockingQueue<StartedOp<DiagOpData>> queue, AsyncDiagAction action) {
+            this.queue = queue;
+            this.action=action;
+            this.name = name;
+
+            thread = new Thread(this);
+            thread.setName(name);
+            thread.setUncaughtExceptionHandler(action);
+            thread.start();
         }
-        return true; // Diag action doesn't have any asynchronous logic to demonstrate
-    }
 
-    @Override
-    public DiagOpContext newOpContext() {
-        return new DiagOpContext("This is a diag op context.");
-    }
-
-    public static class DiagOpContext extends BaseOpContext {
-        private String description;
-
-        DiagOpContext(String description) {
-            this.description = description;
+        public void requestStop() {
+            running=false;
         }
 
         @Override
-        public String toString() {
-            return super.toString() + ", description:'" + description;
+        public void run() {
+            logger.debug("stopping finisher thread for diagnostic action " + name);
+            while (running) {
+                StartedOp<DiagOpData> opc;
+                try {
+                    opc=queue.take();
+
+                    DiagOpData op = opc.getData();
+                    long now = System.nanoTime();
+                    long simulatedCompletionTime = opc.getStartedAtNanos() + op.getSimulatedDelayNanos();
+
+                    long nanodelay = Math.max(0L,simulatedCompletionTime-now);
+                    if (nanodelay>=1000) { // It's not worth calling this for very small values
+                        LockSupport.parkNanos(nanodelay);
+                    }
+
+                    int result = action.backendExecuteOp(opc);
+                    if (result==0) {
+                        opc.succeed(result);
+                    } else {
+                        opc.fail(result);
+                    }
+                } catch (InterruptedException ignored) {
+                }
+
+            }
+            logger.debug("stopping finisher thread for diagnostic action " + name);
+
         }
     }
+
 }

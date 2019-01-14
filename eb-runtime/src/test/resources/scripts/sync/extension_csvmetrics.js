@@ -9,7 +9,7 @@ activitydef = {
     "targetrate" : "10000.0"
 };
 scenario.start(activitydef);
-csvlogger.add(metrics.csvmetrics.cycles);
+csvlogger.add(metrics.csvmetrics.cycles.servicetime);
 csvlogger.start(500,"MILLISECONDS");
 
 scenario.waitMillis(2000);

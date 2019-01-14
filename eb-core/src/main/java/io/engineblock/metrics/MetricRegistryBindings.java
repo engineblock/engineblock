@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRegistryListener {
 
@@ -59,11 +60,12 @@ public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRe
 
     @Override
     public Object get(Object key) {
-        Object o = metricMap.map.get(key);
-        if (o == null) {
-            logger.info("fishing for a metric with '" + key + "'? we have:" + this.keySet());
+        Object got = metricMap.map.get(key);
+        if (got==null) {
+            throw new RuntimeException("Attempted to get metrics node with name '" + key + "', but it was not found. Perhaps you " +
+                    "were looking for one of " + this.keySet().stream().collect(Collectors.joining(",","[","]")));
         }
-        return o;
+        return got;
     }
 
     @Override
@@ -240,7 +242,12 @@ public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRe
 
         @Override
         public boolean containsKey(Object key) {
-            return map.containsKey(key);
+            boolean containsKey=map.containsKey(key);
+            if (containsKey==false) {
+                throw new RuntimeException("Attempted to get metrics node with name '" + key + "', but it was not found. Perhaps you " +
+                        "were looking for one of " + this.map.keySet().stream().collect(Collectors.joining(",","[","]")));
+            }
+            return true;
         }
 
         @Override
@@ -250,7 +257,12 @@ public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRe
 
         @Override
         public Object get(Object key) {
-            return map.get(key);
+            Object got=map.get(key);
+            if (got==null) {
+                throw new RuntimeException("Attempted to get metrics node with name '" + key + "', but it was not found. Perhaps you " +
+                        "were looking for one of " + this.map.keySet().stream().collect(Collectors.joining(",","[","]")));
+            }
+            return got;
         }
 
         @Override

@@ -1,0 +1,19 @@
+@startuml
+scale 600 width
+[*] --> TrackedOp : track()
+
+State InProtocol {
+
+    TrackedOp --> StartedOp : start()
+    StartedOp -> StartedOp : retry()
+
+    StartedOp --> SucceededOp : succeed()
+    StartedOp --> FailedOp: fail()
+}
+    TrackedOp --> SkippedOp : skip()
+
+SucceededOp --> [*]
+FailedOp --> [*]
+SkippedOp --> [*]
+
+@enduml

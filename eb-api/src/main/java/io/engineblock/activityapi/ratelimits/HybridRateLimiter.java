@@ -116,7 +116,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
 
     @Override
     public long maybeWaitForOp() {
-        return tokens.blockAndtake();
+        return tokens.blockAndTake();
     }
 
     @Override
@@ -153,8 +153,8 @@ public class HybridRateLimiter implements Startable, RateLimiter {
 
     protected void init(ActivityDef activityDef) {
         this.delayGauge = ActivityMetrics.gauge(activityDef, label + ".waittime", new RateLimiters.WaitTimeGauge(this));
-        this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + ".config_cyclerate", new RateLimiters.RateGauge(this));
-        this.burstRateGauge = ActivityMetrics.gauge(activityDef, label + ".config_burstrate", new RateLimiters.BurstRateGauge(this));
+        this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + ".config.cyclerate", new RateLimiters.RateGauge(this));
+        this.burstRateGauge = ActivityMetrics.gauge(activityDef, label + ".config.burstrate", new RateLimiters.BurstRateGauge(this));
 
         start();
     }

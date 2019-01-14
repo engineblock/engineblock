@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 
 public class ActivityExecutor implements ActivityController, ParameterMap.Listener, ProgressMeter {
     private static final Logger logger = LoggerFactory.getLogger(ActivityExecutor.class);
-    private final List<Motor> motors = new ArrayList<>();
+    private final List<Motor<?>> motors = new ArrayList<>();
     private final Activity activity;
     private final ActivityDef activityDef;
     private ExecutorService executorService;

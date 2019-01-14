@@ -130,12 +130,12 @@ public interface ActivityType<A extends Activity> extends Named {
         return CoreServices.getInputDispenser(activity);
     }
 
-    default MotorDispenser getMotorDispenser(
+    default <T> MotorDispenser<T> getMotorDispenser(
             A activity,
             InputDispenser inputDispenser,
             ActionDispenser actionDispenser,
             OutputDispenser outputDispenser) {
-        return new CoreMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser);
+        return new CoreMotorDispenser<T> (activity, inputDispenser, actionDispenser, outputDispenser);
     }
 
 

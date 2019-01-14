@@ -21,6 +21,7 @@ import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenarioResult;
 import io.engineblock.core.ScenariosResults;
 import org.assertj.core.data.Offset;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -48,11 +49,12 @@ public class ScriptIntegrationTests {
             paramsMap.put(params[i], params[i + 1]);
         }
         String scenarioName = "scenario " + scriptname;
+        System.out.println("SYNC "+ "=".repeat(30));
         System.out.println("Running integration test for: " + scenarioName);
         ScenariosExecutor e = new ScenariosExecutor(ScriptIntegrationTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName);
         s.addScenarioScriptParams(paramsMap);
-        s.addScriptText("load('classpath:scripts/" + scriptname + ".js');");
+        s.addScriptText("load('classpath:scripts/sync/" + scriptname + ".js');");
         ScenarioLogger scenarioLogger = new ScenarioLogger(s).setMaxLogs(0).setLogDir("logs/test").start();
         e.execute(s, scenarioLogger);
         ScenariosResults scenariosResults = e.awaitAllResults();
@@ -61,20 +63,27 @@ public class ScriptIntegrationTests {
         return scenarioResult;
     }
 
-    @Test
-    public void testTargetRatePhased() {
 
-        ScenarioResult scenarioResult = runScenario("target_rate");
+    @BeforeClass
+    public void logit() {
+        System.out.println("Running SYNC version of Script Integration Tests.");
+    }
+
+
+    @Test
+    public void testCycleRate() {
+
+        ScenarioResult scenarioResult = runScenario("cycle_rate");
         String iolog = scenarioResult.getIOLog();
         System.out.println("iolog\n" + iolog);
-        Pattern p = Pattern.compile(".*mean phase rate = (\\d[.\\d]+).*", Pattern.DOTALL);
+        Pattern p = Pattern.compile(".*mean cycle rate = (\\d[.\\d]+).*", Pattern.DOTALL);
         Matcher m = p.matcher(iolog);
         assertThat(m.matches()).isTrue();
 
         String digits = m.group(1);
         assertThat(digits).isNotEmpty();
         double rate = Double.valueOf(digits);
-        assertThat(rate).isCloseTo(15000, Offset.offset(2000.0));
+        assertThat(rate).isCloseTo(1000, Offset.offset(100.0));
     }
 
     @Test
@@ -82,14 +91,14 @@ public class ScriptIntegrationTests {
         ScenarioResult scenarioResult = runScenario("stride_rate");
         String iolog = scenarioResult.getIOLog();
         System.out.println("iolog\n" + iolog);
-        Pattern p = Pattern.compile(".*stride_rate.strides.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
+        Pattern p = Pattern.compile(".*stride_rate.strides.servicetime.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
         Matcher m = p.matcher(iolog);
         assertThat(m.matches()).isTrue();
 
         String digits = m.group(1);
         assertThat(digits).isNotEmpty();
         double rate = Double.valueOf(digits);
-        assertThat(rate).isCloseTo(25000.0D, Offset.offset(5000D));
+        assertThat(rate).isCloseTo(10000.0D, Offset.offset(1000D));
     }
 
     @Test
@@ -97,7 +106,7 @@ public class ScriptIntegrationTests {
         ScenarioResult scenarioResult = runScenario("phase_rate");
         String iolog = scenarioResult.getIOLog();
         System.out.println("iolog\n" + iolog);
-        Pattern p = Pattern.compile(".*phase_rate.phases.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
+        Pattern p = Pattern.compile(".*phase_rate.phases.servicetime.meanRate = (\\d[.\\d]+).*", Pattern.DOTALL);
         Matcher m = p.matcher(iolog);
         assertThat(m.matches()).isTrue();
 
@@ -146,7 +155,7 @@ public class ScriptIntegrationTests {
         List<String> strings = Files.readAllLines(Paths.get("histostats.csv"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains("min,p25,p50,p75,p90,p95,");
-        assertThat(logdata.split("Tag=testhistostatslogger.cycles,").length).isGreaterThanOrEqualTo(3);
+        assertThat(logdata.split("Tag=testhistostatslogger.cycles.servicetime,").length).isGreaterThanOrEqualTo(3);
     }
 
     @Test
@@ -156,7 +165,7 @@ public class ScriptIntegrationTests {
         List<String> strings = Files.readAllLines(Paths.get("hdrhistodata.log"));
         String logdata = strings.stream().collect(Collectors.joining("\n"));
         assertThat(logdata).contains(",HIST");
-        assertThat(logdata.split("Tag=testhistologger.cycles,").length).isGreaterThanOrEqualTo(3);
+        assertThat(logdata.split("Tag=testhistologger.cycles.servicetime,").length).isGreaterThanOrEqualTo(3);
     }
 
     @Test
@@ -226,8 +235,8 @@ public class ScriptIntegrationTests {
     @Test
     public void testReportedCoDelayStrict() {
         ScenarioResult scenarioResult = runScenario("cocycledelay_strict");
-        assertThat(scenarioResult.getIOLog()).contains("step1 metrics.waittime=");
-        assertThat(scenarioResult.getIOLog()).contains("step2 metrics.waittime=");
+        assertThat(scenarioResult.getIOLog()).contains("step1 cycles.waittime=");
+        assertThat(scenarioResult.getIOLog()).contains("step2 cycles.waittime=");
         String iolog = scenarioResult.getIOLog();
         System.out.println(iolog);
         // TODO: ensure that waittime is staying the same or increasing
@@ -239,15 +248,14 @@ public class ScriptIntegrationTests {
     public void testCycleRateChange() {
         ScenarioResult scenarioResult = runScenario("cycle_rate_change");
         String ioLog = scenarioResult.getIOLog();
-        assertThat(ioLog.contains("cycles adjusted, exiting on iteration"));
-
+        assertThat(ioLog).contains("cycles adjusted, exiting on iteration");
     }
 
     @Test
-    public void testExitAsyncLogic() {
+    public void testExitLogic() {
         ScenarioResult scenarioResult = runScenario(
                 "basicdiag",
-                "type", "diag", "async", "15", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
+                "type", "diag", "cyclerate", "5", "erroroncycle", "10", "cycles", "2000"
         );
     }
 

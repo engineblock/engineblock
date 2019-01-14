@@ -15,18 +15,11 @@
  * /
  */
 
-stride_rate = {
-    "alias" : "stride_rate",
-    "type" : "diag",
-    "cycles" : "0..100000",
-    "threads" : "10",
-    "striderate" : "25000",
-    "interval" : "2000"
-};
+package io.engineblock.activityapi.core.ops.fluent.opfacets;
 
-print('running stride_rate');
-scenario.run(10000,stride_rate);
-print('stride_rate finished');
-
-print("stride_rate.strides.meanRate = " + metrics.stride_rate.strides.meanRate);
-
+public interface OpEvents<D> {
+    void onOpStarted(StartedOp<D> op);
+    void onOpSuccess(SucceededOp<D> op);
+    void onOpSkipped(SkippedOp<D> op);
+    void onOpFailure(FailedOp<D> op);
+}

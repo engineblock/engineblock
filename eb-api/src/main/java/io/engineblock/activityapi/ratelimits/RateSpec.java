@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 public class RateSpec {
     private final static Logger logger = LoggerFactory.getLogger(RateSpec.class);
+
+    public static Type DEFAULT_LIMITER_TYPE = Type.hybrid;
     public static final double DEFAULT_RATE_OPS_S = 1.0D;
     public static final double DEFAULT_BURST_RATIO = 1.1D;
 
@@ -45,7 +47,7 @@ public class RateSpec {
     }
 
     public RateSpec(double opsPerSec, double burstRatio) {
-        this(opsPerSec, burstRatio, Type.average);
+        this(opsPerSec, burstRatio, DEFAULT_LIMITER_TYPE);
     }
     public RateSpec(double opsPerSec, double burstRatio, Type type) {
         this.opsPerSec = opsPerSec;

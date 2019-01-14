@@ -15,19 +15,19 @@
  * /
  */
 
-phase_rate = {
-    "alias" : "phase_rate",
+activitydef = {
+    "alias" : "testhistostatslogger",
     "type" : "diag",
-    "cycles" : "0..100000",
-    "threads" : "10",
-    "phaserate" : "25000",
-    "interval" : "2000"
+    "cycles" : "50000",
+    "threads" : "20",
+    "interval" : "2000",
+    "targetrate" : "10000.0",
+    "async" : "1000"
 };
 
-print('running phase_rate');
-scenario.run(10000,phase_rate);
-print('phase_rate finished');
+histostatslogger.logHistoStats("testing extention histostatslogger", ".*", "histostats.csv", "0.5s");
+print("started logging to histostats.csv for all metrics at 1/2 second intervals.");
 
-print("phase_rate.phases.meanRate = " + metrics.phase_rate.phases.meanRate);
-print("value is expected to be 25000 +-1000");
-
+scenario.start(activitydef);
+scenario.waitMillis(2000);
+scenario.stop(activitydef);

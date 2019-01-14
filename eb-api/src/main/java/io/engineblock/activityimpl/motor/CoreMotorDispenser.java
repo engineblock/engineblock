@@ -29,7 +29,7 @@ import java.util.function.IntPredicate;
  * Produce index ActivityMotor instances with an input and action,
  * given the input and an action factory.
  */
-public class CoreMotorDispenser implements MotorDispenser {
+public class CoreMotorDispenser<D> implements MotorDispenser<D> {
 
     private final Activity activity;
     private InputDispenser inputDispenser;
@@ -48,7 +48,7 @@ public class CoreMotorDispenser implements MotorDispenser {
     }
 
     @Override
-    public Motor getMotor(ActivityDef activityDef, int slotId) {
+    public Motor<D> getMotor(ActivityDef activityDef, int slotId) {
         Action action = actionDispenser.getAction(slotId);
         Input input = inputDispenser.getInput(slotId);
         Output output = null;
@@ -56,7 +56,7 @@ public class CoreMotorDispenser implements MotorDispenser {
             output = outputDispenser.getOutput(slotId);
         }
         IntPredicate resultFilter = null;
-        Motor am = new CoreMotor(activity, slotId, input, action, output);
+        Motor<D> am = new CoreMotor<>(activity, slotId, input, action, output);
         return am;
     }
 }

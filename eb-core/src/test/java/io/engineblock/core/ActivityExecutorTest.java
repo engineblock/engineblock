@@ -46,7 +46,7 @@ public class ActivityExecutorTest {
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
         OutputDispenser tdisp = CoreServices.getOutputDispenser(a).orElse(null);
-        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
+        MotorDispenser<?> mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
         a.setActionDispenserDelegate(adisp);
         a.setOutputDispenserDelegate(tdisp);
         a.setInputDispenserDelegate(idisp);
@@ -66,14 +66,14 @@ public class ActivityExecutorTest {
         ActivityDef ad = ActivityDef.parseActivityDef("type=diag;alias=test;cycles=1000;");
         Optional<ActivityType> activityType = ActivityType.FINDER.get(ad.getActivityType());
         Input longSupplier = new AtomicInput(ad);
-        MotorDispenser cmf = getActivityMotorFactory(
+        MotorDispenser<?> cmf = getActivityMotorFactory(
                 ad, motorActionDelay(999), longSupplier
         );
         Activity a = new SimpleActivity(ad);
         InputDispenser idisp = new CoreInputDispenser(a);
         ActionDispenser adisp = new CoreActionDispenser(a);
         OutputDispenser tdisp = CoreServices.getOutputDispenser(a).orElse(null);
-        MotorDispenser mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
+        MotorDispenser<?> mdisp = new CoreMotorDispenser(a, idisp, adisp, tdisp);
         a.setActionDispenserDelegate(adisp);
         a.setInputDispenserDelegate(idisp);
         a.setMotorDispenserDelegate(mdisp);
@@ -98,11 +98,11 @@ public class ActivityExecutorTest {
     }
 
     private MotorDispenser getActivityMotorFactory(final ActivityDef ad, Action lc, final Input ls) {
-        MotorDispenser cmf = new MotorDispenser() {
+        MotorDispenser<?> cmf = new MotorDispenser() {
             @Override
             public Motor getMotor(ActivityDef activityDef, int slotId) {
                 Activity activity = new SimpleActivity(activityDef);
-                Motor cm = new CoreMotor(activity, slotId, ls);
+                Motor<?> cm = new CoreMotor(activity, slotId, ls);
                 cm.setAction(lc);
                 return cm;
             }

@@ -16,16 +16,16 @@ for (i = 0; i < 5; i++) {
         print("scenario exited prematurely, aborting.");
         break;
     }
-    print("backlogging, cycles=" + metrics.co_cycle_delay.cycles.count +
-        " waittime=" + metrics.co_cycle_delay.cycle.waittime.value +
+    print("backlogging, cycles=" + metrics.co_cycle_delay.cycles.servicetime.count +
+        " waittime=" + metrics.co_cycle_delay.cycles.waittime.value +
         " diagrate=" + activities.co_cycle_delay.diagrate +
         " cyclerate=" + activities.co_cycle_delay.cyclerate
     );
 
     // print("config: " +
-    //     " cycle.config_cyclerate=" + metrics.co_cycle_delay.cycle.config_cyclerate.value +
-    //     " cycle.config_burstrate=" + metrics.co_cycle_delay.cycle.config_burstrate.value +
-    //     " cycle.waittime=" + metrics.co_cycle_delay.cycle.waittime.value
+    //     " cycles.config_cyclerate=" + metrics.co_cycle_delay.cycles.config_cyclerate.value +
+    //     " cycles.config_burstrate=" + metrics.co_cycle_delay.cycles.config_burstrate.value +
+    //     " cycles.waittime=" + metrics.co_cycle_delay.cycles.waittime.value
     // );
     //
     // print("diag config: " +
@@ -35,7 +35,7 @@ for (i = 0; i < 5; i++) {
     // );
 
 }
-print('step1 metrics.waittime=' + metrics.co_cycle_delay.cycle.waittime.value);
+print('step1 metrics.waittime=' + metrics.co_cycle_delay.cycles.waittime.value);
 activities.co_cycle_delay.diagrate = "10000";
 
 for (i = 0; i < 10; i++) {
@@ -43,16 +43,16 @@ for (i = 0; i < 10; i++) {
         print("scenario exited prematurely, aborting.");
         break;
     }
-    print("recovering, cycles=" + metrics.co_cycle_delay.cycles.count +
-        " waittime=" + metrics.co_cycle_delay.cycle.waittime.value +
+    print("recovering, cycles=" + metrics.co_cycle_delay.cycles.servicetime.count +
+        " waittime=" + metrics.co_cycle_delay.cycles.waittime.value +
         " diagrate=" + activities.co_cycle_delay.diagrate +
         " cyclerate=" + activities.co_cycle_delay.cyclerate
     );
 
-    // print("cycle config: " +
-    //     " cycle.config_cyclerate=" + metrics.co_cycle_delay.cycle.config_cyclerate.value +
-    //     " cycle.config_burstrate=" + metrics.co_cycle_delay.cycle.config_burstrate.value +
-    //     " cycle.waittime=" + metrics.co_cycle_delay.cycle.waittime.value
+    // print("cycles.config: " +
+    //     " cycles.config_cyclerate=" + metrics.co_cycle_delay.cycles.config_cyclerate.value +
+    //     " cycles.config_burstrate=" + metrics.co_cycle_delay.cycles.config_burstrate.value +
+    //     " cycles.waittime=" + metrics.co_cycle_delay.cycles.waittime.value
     // );
     //
     // print("diag config: " +
@@ -63,12 +63,12 @@ for (i = 0; i < 10; i++) {
 
 
     scenario.waitMillis(1000);
-    if (metrics.co_cycle_delay.cycle.waittime.value == 0) {
+    if (metrics.co_cycle_delay.cycles.waittime.value == 0) {
         print("waittime trended to 0 as expected, exiting on iteration " + i);
         break;
     }
 }
 //scenario.awaitActivity("co_cycle_delay");
-print('step2 metrics.waittime=' + metrics.co_cycle_delay.cycle.waittime.value);
+print('step2 metrics.waittime=' + metrics.co_cycle_delay.cycles.waittime.value);
 scenario.stop(co_cycle_delay);
 print("stopped activity co_cycle_delay");

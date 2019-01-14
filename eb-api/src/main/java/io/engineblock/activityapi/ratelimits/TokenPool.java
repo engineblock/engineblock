@@ -120,7 +120,7 @@ public class TokenPool {
      *
      * @return the total number of tokens untaken, including wait tokens
      */
-    public synchronized long blockAndtake() {
+    public synchronized long blockAndTake() {
         while (activePool < nanosPerOp) {
             blocks++;
             //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
@@ -138,7 +138,7 @@ public class TokenPool {
         return waitingPool + activePool;
     }
 
-    public synchronized long blockAndtake(long tokens) {
+    public synchronized long blockAndTake(long tokens) {
         while (activePool < tokens) {
             //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
             try {

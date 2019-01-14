@@ -7,10 +7,10 @@ activitydef = {
 };
 scenario.start(activitydef);
 
-while (metrics.testactivity.cycles.count < 1000) {
-    print('waiting 10ms because metrics.testactivity.cycles<10000 : ' + metrics.testactivity.cycles.count);
+while (metrics.testactivity.cycles.servicetime.count < 1000) {
+    print('waiting 10ms because cycles<10000 : ' + metrics.testactivity.cycles.servicetime.count);
     scenario.waitMillis(10);
 
 }
 scenario.stop(activitydef);
-print("count: " + metrics.testactivity.cycles.count);
+print("count: " + metrics.testactivity.cycles.servicetime.count);

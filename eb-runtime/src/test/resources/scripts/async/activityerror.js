@@ -15,17 +15,18 @@
  * /
  */
 
-package io.engineblock.activityapi.core.ops;
+activitydef1 = {
+    "alias" : "erroring_activity",
+    "type" : "diag",
+    "cycles" : "0..1500000",
+    "threads" : "1",
+    "targetrate" : "500",
+    "async" : "1000"
+};
 
-public interface ScheduledOperation {
-
-    /**
-     * Get the number of nanoseconds between the time that this operation was scheduled to run,
-     * and when it was initiated.
-     *
-     * @return nanoseconds of wait time
-     */
-    long getWaitTime();
-
-}
-
+print('starting activity erroring_activity');
+scenario.start(activitydef1);
+scenario.waitMillis(2000);
+activities.erroring_activity.modulo="unparsable";
+scenario.awaitActivity("erroring_activity");
+print("awaited activity");

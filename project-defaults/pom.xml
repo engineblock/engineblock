@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <virtdata-version>2.11.09</virtdata-version>
+        <virtdata-version>2.11.11</virtdata-version>
         <metrics-version>3.2.6</metrics-version>
         <javadoc.name>EngineBlock</javadoc.name>
     </properties>
@@ -57,15 +57,12 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <forkMode>always</forkMode>
                     <includes>
                         <include>**/*IntegrationTest.java</include>
                         <include>**/*IntegrationTests.java</include>
                     </includes>
                     <properties>
-                        <property>
-                            <name>parallel</name>
-                            <value>methods</value>
-                        </property>
                     </properties>
                 </configuration>
 

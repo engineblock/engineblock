@@ -15,26 +15,22 @@
  * /
  */
 
-package io.engineblock.activityapi.core;
+var csvlogger = csvmetrics.log("csvmetricstestdir");
 
-import io.engineblock.activityapi.core.ops.BaseOpContext;
-import org.testng.annotations.Test;
+activitydef = {
+    "alias" : "csvmetrics",
+    "type" : "diag",
+    "cycles" : "50000",
+    "threads" : "20",
+    "interval" : "2000",
+    "targetrate" : "10000.0",
+    "async" : "1000"
+};
+scenario.start(activitydef);
+csvlogger.add(metrics.csvmetrics.cycles.servicetime);
+csvlogger.start(500,"MILLISECONDS");
 
-import static org.assertj.core.api.Assertions.assertThat;
+scenario.waitMillis(2000);
+scenario.stop(activitydef);
 
-@Test
-public class BaseOpContextTest {
-
-    @Test
-    public void testRunningStatus() {
-        BaseOpContext c = new BaseOpContext();
-        assertThat(c.isRunning()).isFalse();
-        c.setCycle(3L);
-        c.setWaitTime(0L);
-        assertThat(c.isRunning()).isTrue();
-        c.stop(23);
-        assertThat(c.isRunning()).isFalse();
-
-    }
-
-}
+csvlogger.report();

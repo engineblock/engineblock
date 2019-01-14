@@ -1,3 +1,4 @@
+
 /*
  *
  *    Copyright 2016 jshook
@@ -15,23 +16,19 @@
  * /
  */
 
-package io.engineblock.activityapi.core.ops;
+activitydef = {
+    "alias" : "cycle_rate",
+    "type" : "diag",
+    "cycles" : "5K",
+    "threads" : "10",
+    "cyclerate" : "1K",
+    "async" : 1000
+};
 
-public interface RetryableOperation {
+scenario.run(activitydef);
 
-    /**
-     * Retry this operation. Set the start timer to when the method is called, and increment
-     * the tries counter.
-     * @return The op context after modifications
-     */
-    RetryableOperation retry();
+print("current cycle = " + metrics.cycle_rate.cycles.servicetime.count);
+print("mean cycle rate = " + metrics.cycle_rate.cycles.servicetime.meanRate);
 
-    /**
-     * Get the number of times start or restart were called, cumulatively, since this operation
-     * was initialized.
-     * @return total attempts to complete this op
-     */
-    int getTries();
 
-}
 
