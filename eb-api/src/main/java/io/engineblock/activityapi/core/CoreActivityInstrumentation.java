@@ -27,9 +27,9 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
 
     private static final String STRICTMETRICNAMES = "strictmetricnames";
 
-    private static final String WAIT_TIME = ".wait";
-    private static final String SERVICE_TIME = ".service";
-    private static final String RESPONSE_TIME = ".response";
+    private static final String WAIT_TIME = ".waittime";
+    private static final String SERVICE_TIME = ".servicetime";
+    private static final String RESPONSE_TIME = ".responsetime";
 
     private final Activity activity;
     private final ActivityDef def;

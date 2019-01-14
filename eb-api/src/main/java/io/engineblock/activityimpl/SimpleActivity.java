@@ -215,15 +215,15 @@ public class SimpleActivity implements Activity {
 
         activityDef.getParams().getOptionalNamedParameter("striderate")
                 .map(RateSpec::new)
-                .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "stride", strideLimiter, spec));
+                .ifPresent(spec -> strideLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "strides", strideLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate")
                 .map(RateSpec::new).ifPresent(
-                        spec-> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycle", cycleLimiter, spec));
+                        spec-> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("phaserate")
                 .map(RateSpec::new)
-                .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "phase", phaseLimiter, spec));
+                .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "phases", phaseLimiter, spec));
 
     }
 
