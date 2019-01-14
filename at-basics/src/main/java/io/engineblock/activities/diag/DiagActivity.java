@@ -48,7 +48,7 @@ public class DiagActivity extends SimpleActivity implements Activity, ActivityDe
     @Override
     public void initActivity() {
         super.initActivity();
-        delayHistogram = ActivityMetrics.histogram(activityDef, "delay");
+        delayHistogram = ActivityMetrics.histogram(activityDef, "diagdelay");
         Integer initdelay = activityDef.getParams().getOptionalInteger("initdelay").orElse(0);
         try {
             Thread.sleep(initdelay);

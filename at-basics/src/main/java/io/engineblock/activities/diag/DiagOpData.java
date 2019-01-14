@@ -1,25 +1,24 @@
 package io.engineblock.activities.diag;
 
-import io.engineblock.activityapi.core.ops.fluent.opcontext.BaseOpContext;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.LongToIntFunction;
 
-public class DiagOpContext extends BaseOpContext {
+public class DiagOpData {
+
     private String description;
     private List<String> diaglog = new ArrayList<>();
 
     private LongToIntFunction resultFunc;
     private long simulatedDelayNanos;
 
-    public DiagOpContext(String description) {
+    public DiagOpData(String description) {
         this.description = description;
     }
 
     /**
      * If this function is provided, the result will be set to the value of the
-     * evaluted function with the op cycle.
+     * evaluated function with the op cycle.
      *
      * This is known as "resultfunc" in parameter space.
      *
@@ -28,7 +27,7 @@ public class DiagOpContext extends BaseOpContext {
      * @param resultFunc A function to map the cycle to the result value
      * @return this, for method chaining
      */
-    public DiagOpContext withResultFunction(LongToIntFunction resultFunc) {
+    public DiagOpData withResultFunction(LongToIntFunction resultFunc) {
         this.resultFunc = resultFunc;
         return this;
     }
@@ -43,9 +42,13 @@ public class DiagOpContext extends BaseOpContext {
      * @param simulatedDelayNanos The amount of nanos ensure as a minimum
      *                            of processing time for this op
      */
-    public DiagOpContext setSimulatedDelayNanos(long simulatedDelayNanos) {
+    public DiagOpData setSimulatedDelayNanos(long simulatedDelayNanos) {
         this.simulatedDelayNanos = simulatedDelayNanos;
         return this;
+    }
+
+    public long getSimulatedDelayNanos() {
+        return simulatedDelayNanos;
     }
 
     @Override
@@ -60,9 +63,6 @@ public class DiagOpContext extends BaseOpContext {
     }
     public List<String> getDiagLog() {
         return diaglog;
-    }
-    public long getSimulatedCompletionTime() {
-        return this.getStartedAtNanos() + simulatedDelayNanos;
     }
 
 }
