@@ -57,6 +57,7 @@ public class OpImpl<D> implements OpFacets<D> {
 
     @Override
     public SucceededOp<D> succeed(int status) {
+        // TODO: Enable a debug version of OpImpl which can assert invariants (succeed is only called once after start, ...)
         this.endedAtNanos = System.nanoTime();
         this.cycleResult = status;
         return this;
