@@ -21,6 +21,8 @@ import com.codahale.metrics.Gauge;
 import io.engineblock.activityapi.core.Startable;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.metrics.ActivityMetrics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -76,6 +78,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class HybridRateLimiter implements Startable, RateLimiter {
 
+    private final static Logger logger = LoggerFactory.getLogger(HybridRateLimiter.class);
+
     private volatile TokenFiller filler;
     private volatile long starttime;
 
@@ -102,8 +106,8 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     public HybridRateLimiter(ActivityDef def, String label, RateSpec rateSpec) {
         setActivityDef(def);
         setLabel(label);
-        this.setRateSpec(rateSpec);
         init(activityDef);
+        this.applyRateSpec(rateSpec);
     }
 
     protected void setLabel(String label) {
@@ -126,7 +130,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
 
     @Override
     public long getWaitTime() {
-        return tokens.getWaitPool();
+        return tokens.getWaitTime();
     }
 
     @Override
@@ -135,54 +139,71 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     }
 
     @Override
-    public synchronized void setRateSpec(RateSpec updatingRateSpec) {
-        if (updatingRateSpec!=null && updatingRateSpec.equals(this.rateSpec)) {
+    public synchronized void applyRateSpec(RateSpec updatingRateSpec) {
+
+        if (updatingRateSpec == null) {
+            throw new RuntimeException("RateSpec must be defined");
+        }
+
+        if (updatingRateSpec.equals(this.rateSpec) && !updatingRateSpec.isRestart()) {
             return;
         }
 
         this.rateSpec = updatingRateSpec;
-        this.filler = (this.filler==null) ? new TokenFiller(rateSpec):  filler.apply(rateSpec);
+        this.filler = (this.filler == null) ? new TokenFiller(rateSpec) : filler.apply(rateSpec);
         this.tokens = this.filler.getTokenPool();
 
-        switch (this.state) {
-            case Started:
-                sync();
-            case Idle:
+        if (this.state == State.Idle && updatingRateSpec.isAutoStart()) {
+            this.start();
+        } else if (updatingRateSpec.isRestart()) {
+            this.restart();
         }
     }
+
 
     protected void init(ActivityDef activityDef) {
         this.delayGauge = ActivityMetrics.gauge(activityDef, label + ".waittime", new RateLimiters.WaitTimeGauge(this));
         this.avgRateGauge = ActivityMetrics.gauge(activityDef, label + ".config.cyclerate", new RateLimiters.RateGauge(this));
         this.burstRateGauge = ActivityMetrics.gauge(activityDef, label + ".config.burstrate", new RateLimiters.BurstRateGauge(this));
-
-        start();
     }
 
     public synchronized void start() {
+
         switch (state) {
             case Started:
-                break;
+                logger.warn("Tried to start a rate limiter that was already started. If this is desired, use restart() instead");
             case Idle:
-                sync();
+                long nanos = getNanoClockTime();
+                this.starttime = nanos;
                 this.filler.start();
                 state = State.Started;
                 break;
         }
     }
 
-    private synchronized void sync() {
-        long nanos = getNanoClockTime();
-
-        switch (this.state) {
+    public synchronized long restart() {
+        switch (state) {
             case Idle:
-                this.starttime = nanos;
-                this.cumulativeWaitTimeNanos.set(0L);
-                break;
+                this.start();
+                return 0L;
             case Started:
-                cumulativeWaitTimeNanos.addAndGet(getWaitTime());
-                break;
+                long accumulatedWaitSinceLastStart = cumulativeWaitTimeNanos.get();
+                cumulativeWaitTimeNanos.set(0L);
+                return this.filler.restart() + accumulatedWaitSinceLastStart;
+            default:
+                return 0L;
         }
+    }
+
+    @Override
+    public long getStartTime() {
+        return 0;
+    }
+
+    private synchronized void checkpointCumulativeWaitTime() {
+        long nanos = getNanoClockTime();
+        this.starttime = nanos;
+        cumulativeWaitTimeNanos.addAndGet(getWaitTime());
     }
 
     protected long getNanoClockTime() {
@@ -195,6 +216,10 @@ public class HybridRateLimiter implements Startable, RateLimiter {
                 //"ID:"+System.identityHashCode(this)+" "+
                 this.getRateSpec().toString() + "(" + this.state + ") pool:" + filler;
     }
+
+//    public String getRefillLog() {
+//        return this.filler.getRefillLog();
+//    }
 
     private enum State {
         Idle,

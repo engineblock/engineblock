@@ -23,7 +23,7 @@ public interface RateLimiter extends Startable {
 
     /**
      * Block until it is time for the next operation, according to the
-     * nanoseconds per op as set by {@link #setRateSpec(RateSpec)}
+     * nanoseconds per op as set by {@link #applyRateSpec(RateSpec)}
      * @return the waittime as nanos behind schedule when this op returns.
      * The returned value is required to be greater than or equal to zero.
      *
@@ -57,7 +57,15 @@ public interface RateLimiter extends Startable {
      * Modify the rate of a running rate limiter.
      * @param spec The rate and burstRatio specification
      */
-    void setRateSpec(RateSpec spec);
+    void applyRateSpec(RateSpec spec);
+
+
+    /**
+     * Return the system nanoseconds at the time when the last rate change
+     * was made active by a starting or restarting rate spec.
+     * @return long nanoseconds
+     */
+    long getStartTime();
 
     /**
      * Get the rate spec that this rate limiter was created from.

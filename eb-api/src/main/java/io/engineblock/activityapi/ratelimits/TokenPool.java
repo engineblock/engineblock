@@ -43,14 +43,16 @@ import static io.engineblock.util.Colors.*;
  * </p>
  */
 public class TokenPool {
+
     private final static Logger logger = LoggerFactory.getLogger(TokenPool.class);
 
     public static final double MIN_CONCURRENT_OPS = 2;
 
     private long maxActivePool;
-    private long maxBurstLimit;
+    private long burstPoolSize;
     private long maxOverActivePool;
     private double burstRatio;
+    // TODO Consider removing volatile after investigating 
     private volatile long activePool;
     private volatile long waitingPool;
     private RateSpec rateSpec;
@@ -76,7 +78,7 @@ public class TokenPool {
         this.maxActivePool = poolsize;
         this.burstRatio = burstRatio;
         this.maxOverActivePool = (long) (maxActivePool * burstRatio);
-        this.maxBurstLimit = maxOverActivePool - maxActivePool;
+        this.burstPoolSize = maxOverActivePool - maxActivePool;
     }
 
     /**
@@ -91,7 +93,7 @@ public class TokenPool {
         this.maxOverActivePool = (long) (maxActivePool * rateSpec.getBurstRatio());
         this.burstRatio = rateSpec.getBurstRatio();
 
-        this.maxBurstLimit = maxOverActivePool - maxActivePool;
+        this.burstPoolSize = maxOverActivePool - maxActivePool;
         this.nanosPerOp = rateSpec.getNanosPerOp();
         notifyAll();
     }
@@ -190,28 +192,32 @@ public class TokenPool {
 //        }
 
         long needed = Math.max(maxActivePool - activePool, 0L);
-        long adding = Math.min(newTokens, needed);
-        activePool += adding;
+        long allocatedToActivePool = Math.min(newTokens, needed);
+        activePool += allocatedToActivePool;
 
-        long overflow = newTokens - adding;
-        waitingPool += overflow;
 
-        double backfillFactor = Math.min((double) newTokens / maxActivePool, 1.0D);
-        long backFillAllowed =(long) (backfillFactor*maxBurstLimit);
-        long backfill = Math.min(maxOverActivePool - activePool, waitingPool);
-        backfill = Math.min(backfill, backFillAllowed);
+        // overflow logic
+        long allocatedToOverflowPool = newTokens - allocatedToActivePool;
+        waitingPool += allocatedToOverflowPool;
 
-        waitingPool -= backfill;
-        activePool += backfill;
+        // backfill logic
+        double refillFactor = Math.min((double) newTokens / maxActivePool, 1.0D);
+        long burstFillAllowed =(long) (refillFactor* burstPoolSize);
+
+        burstFillAllowed = Math.min(maxOverActivePool - activePool, burstFillAllowed);
+        long burstFill = Math.min(burstFillAllowed, waitingPool);
+
+        waitingPool -= burstFill;
+        activePool += burstFill;
 
         if (debugthis) {
             System.out.print(this);
-            System.out.print(ANSI_BrightBlue + " adding=" + adding);
-            if (overflow>0) {
-                System.out.print(ANSI_Red + " OVERFLOW:" + overflow + ANSI_Reset);
+            System.out.print(ANSI_BrightBlue + " adding=" + allocatedToActivePool);
+            if (allocatedToOverflowPool>0) {
+                System.out.print(ANSI_Red + " OVERFLOW:" + allocatedToOverflowPool + ANSI_Reset);
             }
-            if (backfill>0) {
-                System.out.print(ANSI_BrightGreen + " BACKFILL:" + backfill + ANSI_Reset);
+            if (burstFill>0) {
+                System.out.print(ANSI_BrightGreen + " BACKFILL:" + burstFill + ANSI_Reset);
             }
             System.out.println();
         }
@@ -236,4 +242,11 @@ public class TokenPool {
         return rateSpec;
     }
 
+    public synchronized long restart() {
+        long wait=activePool+waitingPool;
+        activePool=0L;
+        waitingPool=0L;
+        return wait;
+
+    }
 }

@@ -27,7 +27,7 @@ public class TestableHybridRateLimiter extends HybridRateLimiter {
 
     public TestableHybridRateLimiter(AtomicLong clock, RateSpec rateSpec, ActivityDef def) {
         setActivityDef(def);
-        setRateSpec(rateSpec);
+        applyRateSpec(rateSpec);
         setLabel("test");
         this.clock = clock;
         init(def);

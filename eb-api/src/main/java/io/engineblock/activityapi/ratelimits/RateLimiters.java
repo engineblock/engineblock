@@ -28,24 +28,12 @@ public class RateLimiters {
     public static synchronized RateLimiter createOrUpdate(ActivityDef def, String label, RateLimiter extant, RateSpec spec) {
 
         if (extant == null) {
-//            String type=def.getParams().getOptionalString("")
-            RateLimiter rateLimiter;
-            switch (spec.type) {
-                case average:
-                    rateLimiter = new AverageRateLimiter(def, label, spec);
-                    break;
-                case hybrid:
-                    rateLimiter = new HybridRateLimiter(def, label, spec);
-                    break;
-                default:
-                    throw new RuntimeException("Unknown rate limiter type: " + spec.type);
-
-            }
+            RateLimiter rateLimiter= new HybridRateLimiter(def, label, spec);
 
             logger.info("Using rate limiter: " + rateLimiter.toString());
             return rateLimiter;
         } else {
-            extant.setRateSpec(spec);
+            extant.applyRateSpec(spec);
             logger.info("Updated rate limiter: " + extant.toString());
             return extant;
         }
