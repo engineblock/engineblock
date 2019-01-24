@@ -45,7 +45,7 @@ public class Perf implements Iterable<Result> {
      * easy to takeUpTo the results in tabular form and display them
      * "as of" a given result index.
      *
-     * @param resultProperty A function that yeilds a double from a Result
+     * @param resultProperty A function that yields a double from a Result
      * @return an array of deltas of that property
      */
     public double[] getDeltas(Function<Result, Double> resultProperty) {
