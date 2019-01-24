@@ -33,7 +33,7 @@ import java.util.function.Function;
 @Test(singleThreaded = true, enabled=false)
 public class TestRateLimiterPerfSingle {
 
-    private Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(ActivityDef.parseActivityDef("alias=tokenrl"),"hybrid", rs);
+    private Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(ActivityDef.parseActivityDef("alias=tokenrl"),"hybrid", rs.withVerb(RateSpec.Verb.start));
     private RateLimiterPerfTestMethods methods = new RateLimiterPerfTestMethods();
 
     @Test(enabled=false)
