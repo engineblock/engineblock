@@ -63,7 +63,7 @@ public class RateLimiterPerfTestMethods {
     }
 
     public Result rateLimiterSingleThreadedConvergence(Function<RateSpec,RateLimiter> rlf, RateSpec rs, long startingCycles, double margin) {
-        //rl.setRateSpec(rl.getRateSpec().withOpsPerSecond(1E9));
+        //rl.applyRateSpec(rl.getRateSpec().withOpsPerSecond(1E9));
         Bounds bounds = new Bounds(startingCycles, 2);
         Perf perf = new Perf("nanotime");
 
@@ -120,7 +120,7 @@ public class RateLimiterPerfTestMethods {
             System.out.println("client nanos: " + clientnanos);
 
             long startAt = System.nanoTime();
-            rl.setRateSpec(rl.getRateSpec().withOpsPerSecond(rate));
+            rl.applyRateSpec(rl.getRateSpec().withOpsPerSecond(rate));
             int perDivision = count / divisions;
             long divDelay = 0L;
             for (int div = 0; div < divisions; div++) {
@@ -187,17 +187,22 @@ public class RateLimiterPerfTestMethods {
         }
         RateLimiterPerfTestMethods.TestExceptionHandler errorhandler = new RateLimiterPerfTestMethods.TestExceptionHandler();
         RateLimiterPerfTestMethods.TestThreadFactory threadFactory = new RateLimiterPerfTestMethods.TestThreadFactory(errorhandler);
-        ExecutorService tp = Executors.newFixedThreadPool(threadCount, threadFactory);
+        ExecutorService tp = Executors.newFixedThreadPool(threadCount+1, threadFactory);
 
         System.out.format("Running %d iterations split over %d threads (%d) at getOpsPerSec %.3f\n", iterations, threadCount, (iterations / threadCount), rate);
         RateLimiterPerfTestMethods.Acquirer[] threads = new RateLimiterPerfTestMethods.Acquirer[threadCount];
         DeltaHdrHistogramReservoir stats = new DeltaHdrHistogramReservoir("times", 5);
 
-        CyclicBarrier barrier = new CyclicBarrier(threadCount);
+        CyclicBarrier barrier = new CyclicBarrier(threadCount+1);
+
+        RateLimiterStarter starter = new RateLimiterStarter(barrier, rl);
+
         for (int i = 0; i < threadCount; i++) {
-            threads[i] = new RateLimiterPerfTestMethods.Acquirer(i, rl, (int) (iterations), stats, barrier);
+            threads[i] = new RateLimiterPerfTestMethods.Acquirer(i, rl, (int) (iterationsPerThread), stats, barrier);
 //            threads[i] = new RateLimiterPerfTestMethods.Acquirer(i, rl, (int) (iterations / threadCount), stats, barrier);
         }
+
+        tp.execute(starter);
 
         System.out.println("limiter stats:" + rl);
         System.out.format("submitting (%d threads)...\n", threads.length);
@@ -231,37 +236,36 @@ public class RateLimiterPerfTestMethods {
 
         System.out.println(aggregatePerf);
 
+//        if (rl instanceof HybridRateLimiter) {
+//            String refillLog = ((HybridRateLimiter) rl).getRefillLog();
+//            System.out.println("refill log:\n" + refillLog);
+//        }
         Perf perf = aggregatePerf.reduceConcurrent();
         return perf;
 
-//        double avgStart = results.stream().mapToLong(AckResult::getStart).average().orElseThrow(() -> new RuntimeException("No results for test"));
-//        double avgEnd = results.stream().mapToLong(AckResult::getEnd).average().orElseThrow(() -> new RuntimeException("No results for test"));
-//        long totalOps = iterations*threadCount;
-//
-//        long totaltimeNs = futures.stream().map(value -> {
-//            try {
-//                return value.get(60, TimeUnit.SECONDS);
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//        }).mapToLong(RateLimiterPerfTestMethods.AckResult::time).sum();
-//
-////        long totaltimeNs = Arrays.stream(threads)
-////                .map(BasicAcquirer::time)
-////                .mapToLong(Long::valueOf)
-////                .sum();
-//        double totalTimeSecs = (double) totaltimeNs / 1_000_000_000d;
-//        double linearizedOpRate = (iterations / totalTimeSecs);
-//        double concurrentOpRate = linearizedOpRate * threadCount;
-//
-//        System.out.format("totals (seconds, cycles): (%.6f, %d)\n", totalTimeSecs, iterations);
-//        System.out.println(String.format("total thread duration: %.3f", totalTimeSecs));
-//        System.out.println(String.format("linearized acquires/s: %.3f  (%d / %f)", linearizedOpRate, iterations, totalTimeSecs));
-//        System.out.println(String.format("linearized nanos/op: %f", (1000000000.0d / linearizedOpRate)));
-//        System.out.println(String.format("effective concurrent acquires/s: %.3f", concurrentOpRate));
-//        System.out.println(String.format("effective concurrent nanos/op: %f", (1_000_000_000D / concurrentOpRate)));
-//
-//        return new Perf("result for " + rl.toString()).add("result",0L,totaltimeNs,iterations);
+    }
+
+    private static class RateLimiterStarter implements Runnable {
+        private CyclicBarrier barrier;
+        private RateLimiter rl;
+
+        public RateLimiterStarter(CyclicBarrier barrier, RateLimiter rl) {
+            this.barrier = barrier;
+            this.rl = rl;
+        }
+
+        @Override
+        public void run() {
+            try {
+                System.out.println("awaiting barrier (starter) (" + barrier.getNumberWaiting() + " awaiting)");
+                barrier.await(60, TimeUnit.SECONDS);
+                System.out.println("started the rate limiter (starter) (" + barrier.getNumberWaiting() + " awaiting)");
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            rl.start();
+        }
     }
 
     private static class TestExceptionHandler implements Thread.UncaughtExceptionHandler {
@@ -301,7 +305,7 @@ public class RateLimiterPerfTestMethods {
         public Result call() {
 //            synchronized (barrier) {
                 try {
-  //                  System.out.println("awaiting barrier " + this.threadIdx + " (" + barrier.getNumberWaiting() + " awaiting)");
+                    System.out.println("awaiting barrier " + this.threadIdx + " (" + barrier.getNumberWaiting() + " awaiting)");
                     barrier.await(60, TimeUnit.SECONDS);
 
 //                    System.out.println("starting " + this.threadIdx);

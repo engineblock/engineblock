@@ -33,43 +33,40 @@ import java.util.function.Function;
 @Test(singleThreaded = true, enabled=false)
 public class TestRateLimiterPerf1E7 {
 
-    private Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(ActivityDef.parseActivityDef("alias=tokenrl"),"hybrid", rs);
+    private Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(ActivityDef.parseActivityDef("alias=tokenrl"),"hybrid", rs.withVerb(RateSpec.Verb.configure));
     private RateLimiterPerfTestMethods methods = new RateLimiterPerfTestMethods();
 
     // 160 threads at 10_000_000 ops/s
     // JVM 11.0.1
     // 160000000_ops 18.122886_S 8828615.971_ops_s, 113_ns_op
-    @Test(enabled=false)
     public void test10Mops_160threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 1_000_000,160);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 20_000_000,160);
         System.out.println(perf.getLastResult());
     }
 
     // 80 threads at 10_000_000 ops/s
     // JVM 11.0.1
     // 80000000_ops 8.354648_S 9575507.945_ops_s, 104_ns_op
-    @Test(enabled=false)
     public void test10Mops_80threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 1_000_000,80);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 20_000_000,80);
         System.out.println(perf.getLastResult());
     }
 
     // 40 threads at 10_000_000 ops/s
     // JVM 11.0.1
     // 40000000_ops 4.001661_S 9995849.116_ops_s, 100_ns_op
-    @Test(enabled=false)
     public void test10Mops_40threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 1_000_000,40);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 20_000_000,40);
         System.out.println(perf.getLastResult());
     }
 
     // 20 threads at 10_000_000 ops/s
     // JVM 11.0.1
     // 20000000_ops 1.914366_S 10447323.063_ops_s, 96_ns_op
-    @Test(enabled=false)
     public void test10Mops_20threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 1_000_000,20);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 10), 20_000_000,20);
         System.out.println(perf.getLastResult());
+
     }
 
     // 10 threads at 10_000_000 ops/s
@@ -78,9 +75,8 @@ public class TestRateLimiterPerf1E7 {
     // 100000000_ops 9.842758_S 10159754.498_ops_s, 98_ns_op
     // 100000000_ops 10.123873_S 9877642.338_ops_s, 101_ns_op
     // 100000000_ops 10.078673_S 9921941.517_ops_s, 101_ns_op
-    @Test(enabled=false)
     public void test10Mops_10threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 10_000_000,10);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 20_000_000,10);
         System.out.println(perf.getLastResult());
     }
 
@@ -92,9 +88,8 @@ public class TestRateLimiterPerf1E7 {
     // 50000000_ops 4.924924_S 10152441.416_ops_s, 98_ns_op
     // 200000000_ops 19.761154_S 10120866.172_ops_s, 99_ns_op
     // 200000000_ops 19.928625_S 10035815.505_ops_s, 100_ns_op
-    @Test(enabled=false)
     public void test10Mops_5threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 10_000_000,5);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E7, 1.1), 20_000_000,5);
         System.out.println(perf.getLastResult());
     }
 

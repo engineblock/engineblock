@@ -33,7 +33,7 @@ import java.util.function.Function;
 @Test(singleThreaded = true, enabled=false)
 public class TestRateLimiterPerf1E8 {
 
-    private Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(ActivityDef.parseActivityDef("alias=tokenrl"),"hybrid", rs);
+    private Function<RateSpec, RateLimiter> rlFunction = rs -> new HybridRateLimiter(ActivityDef.parseActivityDef("alias=tokenrl"),"hybrid", rs.withVerb(RateSpec.Verb.configure));
     private RateLimiterPerfTestMethods methods = new RateLimiterPerfTestMethods();
 
     // 160 threads at 100_000_000 ops/s
@@ -43,9 +43,8 @@ public class TestRateLimiterPerf1E8 {
     // 1600000000_ops 159.234501_S 10_048_073.673_ops_s, 100_ns_op
     // 1600000000_ops 158.224286_S 10_112_227.620_ops_s, 99_ns_op
     //
-    @Test(enabled=false)
     public void test100Mops_160threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 10_000_000,160);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,160);
         System.out.println(perf.getLastResult());
     }
 
@@ -53,9 +52,8 @@ public class TestRateLimiterPerf1E8 {
     // JVM 11.0.1, Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz
     // 800000000_ops 74.104295_S 10795595.534_ops_s, 93_ns_op
     // 800000000_ops 74.155495_S 10788141.933_ops_s, 93_ns_op
-    @Test(enabled=false)
     public void test100Mops_80threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 10_000_000,80);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,80);
         System.out.println(perf.getLastResult());
     }
 
@@ -65,9 +63,8 @@ public class TestRateLimiterPerf1E8 {
     // 800000000_ops 60.616158_S 13197801.155_ops_s, 76_ns_op
     // JVM 11.0.1, Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz
     // 400000000_ops 33.622751_S 11896706.363_ops_s, 84_ns_op
-    @Test(enabled=false)
     public void test100Mops_40threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 10_000_000,40);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,40);
         System.out.println(perf.getLastResult());
     }
 
@@ -84,9 +81,8 @@ public class TestRateLimiterPerf1E8 {
     // 200000000_ops 15.915484_S 12566379.106_ops_s, 80_ns_op
     // 200000000_ops 17.691698_S 11304737.461_ops_s, 88_ns_op
 
-    @Test(enabled=false)
     public void test100Mops_20threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 10_000_000,20);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,20);
         System.out.println(perf.getLastResult());
     }
 
@@ -99,9 +95,8 @@ public class TestRateLimiterPerf1E8 {
     // JVM 11.0.1, Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz
     // 100000000_ops 7.751758_S 12900299.587_ops_s, 78_ns_op
     // 100000000_ops 7.864851_S 12714799.657_ops_s, 79_ns_op
-    @Test(enabled=false)
     public void test100Mops_10threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 10_000_000,10);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,10);
         System.out.println(perf.getLastResult());
     }
 
@@ -115,9 +110,8 @@ public class TestRateLimiterPerf1E8 {
     // 50000000_ops 2.390485_S 20916254.150_ops_s, 48_ns_op
     // 100000000_ops 6.317008_S 15830279.182_ops_s, 63_ns_op
     // 200000000_ops 13.551712_S 14758282.931_ops_s, 68_ns_op
-    @Test(enabled=false)
     public void test100Mops_5threads() {
-        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 40_000_000,5);
+        Perf perf = methods.testRateLimiterMultiThreadedContention(rlFunction, new RateSpec(1E8, 1.1), 100_000_000,5);
         System.out.println(perf.getLastResult());
     }
 
