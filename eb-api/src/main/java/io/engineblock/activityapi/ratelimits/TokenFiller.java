@@ -19,10 +19,13 @@ package io.engineblock.activityapi.ratelimits;
 
 import io.engineblock.activityapi.sysperf.SysPerf;
 import io.engineblock.activityapi.sysperf.SysPerfData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.locks.LockSupport;
 
 public class TokenFiller implements Runnable {
+    private final static Logger logger = LoggerFactory.getLogger(TokenFiller.class);
 
     public final static double MIN_PER_SECOND = 10D;
     public final static double MAX_PER_SECOND = 1000D;
@@ -33,6 +36,7 @@ public class TokenFiller implements Runnable {
     private volatile boolean running = true;
     private RateSpec rateSpec;
     private Thread thread;
+    private volatile long lastRefillAt;
 
     /**
      * A token filler adds tokens to a {@link TokenPool} at some rate.
@@ -63,7 +67,7 @@ public class TokenFiller implements Runnable {
 
     @Override
     public void run() {
-        long lastRefillAt = System.nanoTime();
+        lastRefillAt = System.nanoTime();
         while (running) {
             long nextRefillTime = lastRefillAt + interval;
             long thisRefillTime = System.nanoTime();
@@ -74,20 +78,26 @@ public class TokenFiller implements Runnable {
                 LockSupport.parkNanos(parkfor);
                 thisRefillTime = System.nanoTime();
             }
+
+//            this.times[iteration]=thisRefillTime;
             long delta = thisRefillTime - lastRefillAt;
+//            this.amounts[iteration]=delta;
             lastRefillAt = thisRefillTime;
 
             //System.out.println(this);
             tokenPool.refill(delta);
+//            iteration++;
+
         }
     }
 
     public TokenFiller start() {
         thread = new Thread(this);
         thread.setName(this.toString());
+        thread.setPriority(Thread.MAX_PRIORITY);
         thread.setDaemon(true);
         thread.start();
-        //System.out.println("Starting token filler thread: " + this.toString());
+        System.out.println("Starting token filler thread: " + this.toString());
         return this;
     }
 
@@ -96,4 +106,18 @@ public class TokenFiller implements Runnable {
         return "TokenFiller spec=" + rateSpec + " interval=" + this.interval + "ns pool:" + tokenPool +" running=" + running;
     }
 
+//    public String getRefillLog() {
+//        StringBuilder sb = new StringBuilder();
+//        for (int iter = 0; iter < iteration; iter++) {
+//            sb.append(times[iter]).append(" ").append(amounts[iter]).append("\n");
+//        }
+//        return sb.toString();
+//    }
+
+    public synchronized long restart() {
+        this.lastRefillAt=System.nanoTime();
+        logger.debug("Restarting token filler at " + lastRefillAt + " thread: " + this.toString());
+        long wait = this.tokenPool.restart();
+        return wait;
+    }
 }
