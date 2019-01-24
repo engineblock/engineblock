@@ -37,9 +37,11 @@ public class RateSpecTest {
     }
 
     public void testTypeSelection() {
-        RateSpec a = new RateSpec("12345,1.4,average");
-        assertThat(a.getype()).isEqualTo(RateSpec.Type.average);
-        RateSpec d = new RateSpec("12345,1.4,hybrid");
-        assertThat(d.type).isEqualTo(RateSpec.Type.hybrid);
+        RateSpec a = new RateSpec("12345,1.4,configure");
+        assertThat(a.getVerb()).isEqualTo(RateSpec.Verb.configure);
+        RateSpec d = new RateSpec("12345,1.4,restart");
+        assertThat(d.verb).isEqualTo(RateSpec.Verb.restart);
+        RateSpec c = new RateSpec("12345,1.1");
+        assertThat(c.verb== RateSpec.Verb.start);
     }
 }
