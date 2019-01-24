@@ -21,7 +21,7 @@ co_cycle_delay = {
     "diagrate": "500",
     "cycles": "0..1000000",
     "threads": "10",
-    "cyclerate": "1000,1.5,hybrid",
+    "cyclerate": "1000,1.5",
     "modulo": "1000",
     "async" : "1000"
 };
