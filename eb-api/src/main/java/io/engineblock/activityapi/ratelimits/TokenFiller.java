@@ -17,11 +17,15 @@
 
 package io.engineblock.activityapi.ratelimits;
 
+import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.sysperf.SysPerf;
 import io.engineblock.activityapi.sysperf.SysPerfData;
+import io.engineblock.activityimpl.ActivityDef;
+import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 public class TokenFiller implements Runnable {
@@ -37,18 +41,21 @@ public class TokenFiller implements Runnable {
     private RateSpec rateSpec;
     private Thread thread;
     private volatile long lastRefillAt;
+    private Timer timer;
 
     /**
      * A token filler adds tokens to a {@link TokenPool} at some rate.
      * By default, this rate is at least every millisecond +- scheduling jitter
      * in the JVM.
      *
-     * @param rateSpec A rate specifier
+     * @param rateSpec A {@link RateSpec}
+     * @param def An {@link ActivityDef}
      */
-    public TokenFiller(RateSpec rateSpec) {
+    public TokenFiller(RateSpec rateSpec, ActivityDef def) {
         this.rateSpec = rateSpec;
         this.tokenPool= new TokenPool(rateSpec);
         this.tokenPool.refill(rateSpec.getNanosPerOp());
+        this.timer = ActivityMetrics.timer(def, "tokenfiller");
     }
 
     public TokenFiller apply(RateSpec rateSpec) {
@@ -86,6 +93,7 @@ public class TokenFiller implements Runnable {
 
             //System.out.println(this);
             tokenPool.refill(delta);
+            timer.update(delta, TimeUnit.NANOSECONDS);
 //            iteration++;
 
         }
@@ -120,4 +128,5 @@ public class TokenFiller implements Runnable {
         long wait = this.tokenPool.restart();
         return wait;
     }
+
 }

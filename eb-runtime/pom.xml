@@ -34,7 +34,13 @@
 
         <dependency>
             <groupId>io.engineblock</groupId>
-            <artifactId>at-basics</artifactId>
+            <artifactId>at-stdout</artifactId>
+            <version>2.11.05-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.engineblock</groupId>
+            <artifactId>at-diag</artifactId>
             <version>2.11.05-SNAPSHOT</version>
         </dependency>
 

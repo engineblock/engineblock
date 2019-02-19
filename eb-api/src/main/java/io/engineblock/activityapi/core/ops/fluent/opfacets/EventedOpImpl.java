@@ -29,7 +29,7 @@ public class EventedOpImpl<D> extends OpImpl<D> {
 
     public EventedOpImpl(OpEvents<D> opTracker) {
         this.opTracker = opTracker;
-        this.strideTracker = NULL_TRACKER;
+        this.strideTracker = new NullTracker<>();
     }
 
     @Override
@@ -74,6 +74,5 @@ public class EventedOpImpl<D> extends OpImpl<D> {
         }
     }
 
-    private static NullTracker NULL_TRACKER = new NullTracker<>();
 
 }

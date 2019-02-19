@@ -15,10 +15,7 @@
 package io.engineblock.script;
 
 import ch.qos.logback.classic.Logger;
-import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Charsets;
-import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activitycore.ProgressIndicator;
 import io.engineblock.core.ScenarioController;
 import io.engineblock.core.ScenarioLogger;
@@ -33,6 +30,7 @@ import javax.script.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Scenario implements Callable<ScenarioResult> {
@@ -146,7 +143,7 @@ public class Scenario implements Callable<ScenarioResult> {
                 String diagname = "diag_" + System.currentTimeMillis() + ".js";
                 try {
                     Path diagFilePath = Paths.get(scenarioLogger.getLogDir(), diagname);
-                    Files.write(diagFilePath,script.getBytes(Charsets.UTF_8));
+                    Files.write(diagFilePath,script.getBytes(StandardCharsets.UTF_8));
                 } catch (Exception ignored) {
                 }
                 String errorDesc = "Script error while running scenario:" + e.toString() + ", script content is at " + diagname;

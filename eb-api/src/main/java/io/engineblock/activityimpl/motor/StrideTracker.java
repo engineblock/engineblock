@@ -41,7 +41,7 @@ public class StrideTracker<D> extends Buffer<CycleResult> implements OpEvents<D>
         this.strideServiceTimer = strideServiceTimer;
         this.strideResponseTimer = strideResponseTimer;
 
-        this.strideOp =new OpImpl();
+        this.strideOp =new OpImpl<>();
         strideOp.setCycle(initialCycle);
         strideOp.setWaitTime(strideWaitTime);
 

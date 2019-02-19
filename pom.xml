@@ -21,13 +21,15 @@
 
     <modules>
         <module>project-defaults</module> <!-- Holds project level defaults -->
-        <module>at-basics</module> <!-- ActivityType driver for diagnostics, file, etc -->
+        <module>at-diag</module> <!-- ActivityType driver for diagnostics, file, etc -->
         <module>eb-api</module> <!-- APIs needed to implement drivers to be loaded by the core -->
         <module>eb-core</module> <!-- Scripting harness and executive logic -->
         <module>eb-runtime</module> <!-- Binds the core, drivers, and APIs into a single artifact -->
         <module>eb-cli</module> <!-- restful server for EB runtime -->
         <module>eb-extensions</module> <!-- scripting sandbox extensions for EB -->
         <module>eb-vis</module>
+        <module>at-stdout</module>
+        <module>at-tcp</module>
     </modules>
 
     <licenses>

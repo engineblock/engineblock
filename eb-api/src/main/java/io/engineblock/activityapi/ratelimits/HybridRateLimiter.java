@@ -150,7 +150,7 @@ public class HybridRateLimiter implements Startable, RateLimiter {
         }
 
         this.rateSpec = updatingRateSpec;
-        this.filler = (this.filler == null) ? new TokenFiller(rateSpec) : filler.apply(rateSpec);
+        this.filler = (this.filler == null) ? new TokenFiller(rateSpec, activityDef) : filler.apply(rateSpec);
         this.tokens = this.filler.getTokenPool();
 
         if (this.state == State.Idle && updatingRateSpec.isAutoStart()) {
@@ -226,4 +226,20 @@ public class HybridRateLimiter implements Startable, RateLimiter {
         Started
     }
 
+    private class PoolGauge implements Gauge<Long> {
+        private final HybridRateLimiter rl;
+
+        public PoolGauge(HybridRateLimiter hybridRateLimiter) {
+            this.rl = hybridRateLimiter;
+        }
+
+        @Override
+        public Long getValue() {
+            TokenPool pool = rl.filler.getTokenPool();
+            if (pool==null) {
+                return 0L;
+            }
+            return pool.getWaitTime();
+        }
+    }
 }

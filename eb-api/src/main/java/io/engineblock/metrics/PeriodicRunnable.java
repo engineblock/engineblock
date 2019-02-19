@@ -17,7 +17,6 @@
 
 package io.engineblock.metrics;
 
-import com.google.common.util.concurrent.Uninterruptibles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +48,10 @@ public class PeriodicRunnable<T extends Runnable> implements Runnable, AutoClose
     public synchronized void close()
     {
         running = false;
-        Uninterruptibles.joinUninterruptibly(thread);
+        try {
+            thread.join(0L);
+        } catch (InterruptedException ignored) {
+        }
     }
 
     public synchronized PeriodicRunnable<T> startMainThread() {

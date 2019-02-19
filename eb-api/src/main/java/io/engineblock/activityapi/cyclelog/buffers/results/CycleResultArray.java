@@ -17,12 +17,11 @@
 
 package io.engineblock.activityapi.cyclelog.buffers.results;
 
-import com.google.common.collect.Iterators;
 import io.engineblock.activityapi.cyclelog.outputs.CanSortCycles;
-
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class CycleResultArray implements CycleResultsSegment, CanSortCycles {
 
@@ -53,11 +52,36 @@ public class CycleResultArray implements CycleResultsSegment, CanSortCycles {
 
     @Override
     public Iterator<CycleResult> iterator() {
-        return Iterators.forArray(cycleResults);
+        return new CycleResultArrayIterator(cycleResults);
     }
 
     @Override
     public void sort() {
         Arrays.sort(cycleResults);
+    }
+
+    private static class CycleResultArrayIterator implements Iterator<CycleResult> {
+        private final CycleResult[] results;
+        private int idx;
+
+        public CycleResultArrayIterator(CycleResult[] results) {
+            this.results = results;
+            this.idx=0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return (idx<results.length);
+        }
+
+        @Override
+        public CycleResult next() {
+            if (idx>=results.length) {
+                throw new NoSuchElementException("Unable to read array past last value");
+            }
+            CycleResult result = results[idx];
+            idx++;
+            return result;
+        }
     }
 }

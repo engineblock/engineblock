@@ -49,8 +49,7 @@ public class ScriptIntegrationTests {
             paramsMap.put(params[i], params[i + 1]);
         }
         String scenarioName = "scenario " + scriptname;
-        System.out.println("SYNC "+ "=".repeat(30));
-        System.out.println("Running integration test for: " + scenarioName);
+        System.out.println("=".repeat(29) + " Running SYNC integration test for: " + scenarioName);
         ScenariosExecutor e = new ScenariosExecutor(ScriptIntegrationTests.class.getSimpleName() + ":" + scriptname, 1);
         Scenario s = new Scenario(scenarioName);
         s.addScenarioScriptParams(paramsMap);
