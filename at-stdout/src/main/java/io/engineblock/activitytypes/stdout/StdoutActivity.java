@@ -17,6 +17,7 @@
 
 package io.engineblock.activitytypes.stdout;
 
+import activityconfig.ParsedStmt;
 import activityconfig.StatementsLoader;
 import activityconfig.yaml.StmtDef;
 import activityconfig.yaml.StmtsDocList;
@@ -32,19 +33,18 @@ import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.ExceptionMeterMetrics;
 import io.engineblock.util.StrInterpolater;
+import io.virtdata.core.Bindings;
 import io.virtdata.core.BindingsTemplate;
 import io.virtdata.templates.StringBindings;
 import io.virtdata.templates.StringBindingsTemplate;
+import io.virtdata.templates.StringCompositor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("Duplicates")
 public class StdoutActivity extends SimpleActivity implements ActivityDefObserver {
@@ -132,15 +132,16 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
         if (stmts.size() > 0) {
             for (StmtDef stmt : stmts) {
-                BindingsTemplate bt = new BindingsTemplate(stmt.getBindings());
-                String statement = stmt.getStmt();
-                Objects.requireNonNull(statement);
-                if (!statement.endsWith("\n") && getParams().getOptionalBoolean("newline").orElse(true)) {
-                    statement = statement+"\n";
-                }
+                ParsedStmt parsed = stmt.getParsed().orError();
 
-                StringBindingsTemplate sbt = new StringBindingsTemplate(stmt.getStmt(), bt);
-                StringBindings sb = sbt.resolve();
+                new StringCompositor(stmt.getStmt());
+                StringCompositor compositor = new StringCompositor(stmt.getStmt());
+                Map<String, String> bindingsMap = parsed.getBindings();
+                BindingsTemplate bt = new BindingsTemplate(stmt.getBindings());
+                Bindings bindings = bt.resolveBindings();
+                StringBindings sb = new StringBindings(compositor, bindings);
+
+                //StringBindings sb = sbt.resolve();
                 sequencer.addOp(sb,Long.valueOf(stmt.getParams().getOrDefault("ratio","1")));
             }
         } else if (stmtsDocList.getDocBindings().size() > 0) {
