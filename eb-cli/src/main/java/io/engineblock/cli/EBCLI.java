@@ -10,6 +10,7 @@ import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
 import io.engineblock.core.ShutdownManager;
 import io.engineblock.metrics.ActivityMetrics;
+import io.engineblock.metrics.HistoLogChartGenerator;
 import io.engineblock.metrics.MetricReporters;
 import io.engineblock.script.MetricsMapper;
 import io.engineblock.script.Scenario;
@@ -178,8 +179,7 @@ public class EBCLI {
 
         executor.execute(scenario, sl);
         ScenariosResults scenariosResults = executor.awaitAllResults();
-        ActivityMetrics.closeMetrics();
-        //scenariosResults.reportSummaryTo(System.out);
+        ActivityMetrics.closeMetrics(options.wantsEnableChart());
         scenariosResults.reportToLog();
         ShutdownManager.shutdown();
 

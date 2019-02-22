@@ -10,6 +10,8 @@ package io.engineblock.metrics;
 import com.mitchtalmadge.asciidata.graph.ASCIIGraph;
 import org.HdrHistogram.HistogramLogReader;
 import org.HdrHistogram.Histogram;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,6 +30,7 @@ public class HistoLogChartGenerator {
     public static final String ANSI_WHITE = "\u001B[37m";
 
     private static Map<String, ArrayList<Histogram>> histogramsOverTime = new HashMap<>();
+    private static Logger logger = LoggerFactory.getLogger(HistoLogChartGenerator.class);
 
     public static void generateChartFromHistoLog(HistoIntervalLogger histoIntervalLogger) {
         File logFile = histoIntervalLogger.getLogfile();
@@ -37,15 +40,16 @@ public class HistoLogChartGenerator {
 
             while (reader.hasNext()){
                 Histogram histogram = (Histogram)reader.nextIntervalHistogram();
-                String tag = histogram.getTag();
+                if (histogram != null) {
+                    String tag = histogram.getTag();
 
-                double value= (double)histogram.getValueAtPercentile(99)/1000;
-                ArrayList<Histogram> histogramList = histogramsOverTime.get(tag);
-                if (histogramList == null){
-                    histogramList = new ArrayList<>();
+                    ArrayList<Histogram> histogramList = histogramsOverTime.get(tag);
+                    if (histogramList == null) {
+                        histogramList = new ArrayList<>();
+                    }
+                    histogramList.add(histogram);
+                    histogramsOverTime.put(tag, histogramList);
                 }
-                histogramList.add(histogram);
-                histogramsOverTime.put(tag, histogramList);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -55,22 +59,30 @@ public class HistoLogChartGenerator {
 
         for (Map.Entry<String, ArrayList<Histogram>> p99KV : histogramsOverTime.entrySet()) {
             System.out.println(String.format("Charting p99 Latencies (in microseconds) over time (one second intervals) for %s:",p99KV.getKey()));
-            double[] p99s = p99KV.getValue().stream().mapToDouble(x -> x.getValueAtPercentile(99)).toArray(); //via method reference
-            System.out.println(ANSI_RED +
-                    ASCIIGraph
-                    .fromSeries(p99s)
-                    .withNumRows(8)
-                    .plot()
-                    + ANSI_RESET);
+            double[] p99s = p99KV.getValue().stream().mapToDouble(x -> x.getValueAtPercentile(99)/1000).toArray(); //via method reference
+            System.out.println("checking histogram length");
+            System.out.flush();
+            if (p99s.length < 2){
+                System.out.println("Not enough data to chart");
+                System.out.flush();
+                continue;
+            }else {
+                System.out.println(ANSI_RED +
+                        ASCIIGraph
+                                .fromSeries(p99s)
+                                .withNumRows(8)
+                                .plot()
+                        + ANSI_RESET);
 
-            System.out.println(String.format("Charting throughput (number of transactions per second) for %s:", p99KV.getKey()));
-            double[] rates= p99KV.getValue().stream().mapToDouble(x -> x.getTotalCount()).toArray(); //via method reference
-            System.out.println(ANSI_GREEN +
-                    ASCIIGraph
-                            .fromSeries(rates)
-                            .withNumRows(8)
-                            .plot()
-                    + ANSI_GREEN);
+                System.out.println(String.format("Charting throughput (number of transactions per second) for %s:", p99KV.getKey()));
+                double[] rates = p99KV.getValue().stream().mapToDouble(x -> x.getTotalCount()).toArray(); //via method reference
+                System.out.println(ANSI_GREEN +
+                        ASCIIGraph
+                                .fromSeries(rates)
+                                .withNumRows(8)
+                                .plot()
+                        + ANSI_GREEN);
+            }
         }
         System.out.println(ANSI_RESET);
     }
