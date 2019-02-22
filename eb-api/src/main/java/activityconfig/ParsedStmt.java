@@ -18,13 +18,13 @@
 package activityconfig;
 
 import activityconfig.yaml.StmtDef;
+import io.virtdata.templates.ParsedTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.regex.Matcher;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Allow for uniform statement anchor parsing, using the <pre>?anchor</pre>
@@ -37,13 +37,10 @@ public class ParsedStmt {
 
     private final static Pattern stmtToken = Pattern.compile("\\?(\\w+[-_\\d\\w]*)|\\{(\\w+[-_\\d\\w.]*)}");
     private final static Logger logger = LoggerFactory.getLogger(ParsedStmt.class);
+    private ParsedTemplate template;
 
     private final StmtDef stmtDef;
-    private final String[] spans;
-    private final Set<String> missingBindings = new HashSet<>();
-    private final Set<String> extraBindings = new HashSet<>();
-    private final Map<String, String> specificBindings = new LinkedHashMap<>();
-    private String anchor;
+    private final ParsedTemplate parsed;
 
     /**
      * Construct a new ParsedStatement from the provided stmtDef and anchor token.
@@ -52,7 +49,7 @@ public class ParsedStmt {
      */
     public ParsedStmt(StmtDef stmtDef) {
         this.stmtDef = stmtDef;
-        this.spans = parse();
+        parsed = new ParsedTemplate(stmtDef.getStmt(), stmtDef.getBindings());
     }
 
     public ParsedStmt orError() {
@@ -62,54 +59,15 @@ public class ParsedStmt {
         return this;
     }
 
-    private String[] parse() {
-        List<String> spans = new ArrayList<>();
-
-        extraBindings.addAll(stmtDef.getBindings().keySet());
-
-        String statement = stmtDef.getStmt();
-
-        Matcher m = stmtToken.matcher(statement);
-        int lastMatch = 0;
-        String remainder = "";
-        while (m.find(lastMatch)) {
-            String pre = statement.substring(lastMatch, m.start());
-
-            String form1 = m.group(1);
-            String form2 = m.group(2);
-            String tokenName = (form1 != null && !form1.isEmpty()) ? form1 : form2;
-            lastMatch = m.end();
-            spans.add(pre);
-
-            if (extraBindings.contains(tokenName)) {
-                specificBindings.put(tokenName, stmtDef.getBindings().get(tokenName));
-            } else {
-                missingBindings.add(tokenName);
-            }
-        }
-        specificBindings.forEach((k,v) -> extraBindings.remove(k));
-
-        if (lastMatch >= 0) {
-            spans.add(statement.substring(lastMatch));
-        } else {
-            spans.add(statement);
-        }
-
-        return spans.toArray(new String[0]);
-    }
-
     public String toString() {
-        String summary =
-                (this.missingBindings.size() > 0) ?
-                        "\nundefined bindings:" + this.missingBindings.stream().collect(Collectors.joining(",", "[", "]")) : "";
-        return "STMT:" + stmtDef.getStmt() + "\n" + summary;
+        return parsed.toString();
     }
 
     /**
      * @return true if the parsed statement is not usable.
      */
     public boolean hasError() {
-        return missingBindings.size() > 0;
+        return parsed.hasError();
     }
 
     /**
@@ -122,7 +80,7 @@ public class ParsedStmt {
      * in either <pre>{anchor}</pre> or <pre>?anchor</pre> form.
      */
     public Set<String> getExtraBindings() {
-        return extraBindings;
+        return parsed.getExtraBindings();
     }
 
     /**
@@ -135,7 +93,7 @@ public class ParsedStmt {
      * @return A list of binding names which were referenced but not defined*
      */
     public Set<String> getMissingBindings() {
-        return missingBindings;
+        return parsed.getMissingBindings();
     }
 
     /**
@@ -146,7 +104,7 @@ public class ParsedStmt {
      * @return a bindings map of referenced bindings in the statement
      */
     public Map<String, String> getSpecificBindings() {
-        return specificBindings;
+        return parsed.getSpecificBindings();
     }
 
     /**
@@ -157,6 +115,7 @@ public class ParsedStmt {
      * @return A driver or usage-specific format of the statement, with anchors
      */
     public String getPositionalStatement(String anchorToken) {
+        String[] spans = parsed.getSpans();
         StringBuilder sb = new StringBuilder(spans[0]);
         for (int i = 1; i < spans.length; i++) {
             sb.append(anchorToken).append(spans[i]);

@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <virtdata-version>2.11.12</virtdata-version>
+        <virtdata-version>2.11.13</virtdata-version>
         <metrics-version>3.2.6</metrics-version>
         <javadoc.name>EngineBlock</javadoc.name>
     </properties>
@@ -18,9 +18,8 @@
     <url>http://engineblock.io/</url>
     <description>
         EngineBlock is the core of a programmable load test runtime.
-        This module acts as the parent pom for engineblock Maven modules.
+        This module acts as the parent pom for EngineBlock Maven modules.
     </description>
-
 
     <licenses>
         <license>
