@@ -259,11 +259,14 @@ public class ActivityMetrics {
      * This should be called at the end of a process, so that open intervals can be finished, logs closed properly,
      * etc.
      */
-    public static void closeMetrics() {
+    public static void closeMetrics(boolean showChart) {
         logger.trace("Closing all registered metrics closable objects.");
         for (MetricsCloseable metricsCloseable : metricsCloseables) {
             logger.trace("closing metrics closeable: " + metricsCloseable);
             metricsCloseable.closeMetrics();
+            if (showChart){
+                metricsCloseable.chart();
+            }
         }
     }
 

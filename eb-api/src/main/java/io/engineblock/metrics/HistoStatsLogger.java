@@ -130,6 +130,11 @@ public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment
         }
     }
 
+    @Override
+    public void chart() {
+       // nothing-to-do we only chart HistoIntervals not HistoStats
+    }
+
     private static class WriterTarget implements Comparable<WriterTarget> {
 
         public String name;

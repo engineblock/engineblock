@@ -137,6 +137,10 @@ public class HistoIntervalLogger extends  CapabilityHook<HdrDeltaHistogramAttach
             logger.debug("Not writing last partial histo log <1s:" + this);
         }
         logStream.close();
+    }
+
+    @Override
+    public void chart() {
         HistoLogChartGenerator.generateChartFromHistoLog(this);
     }
 

@@ -19,4 +19,5 @@ package io.engineblock.metrics;
 
 public interface MetricsCloseable {
     void closeMetrics();
+    void chart();
 }
