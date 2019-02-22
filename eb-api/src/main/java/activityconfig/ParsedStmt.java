@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -111,16 +112,12 @@ public class ParsedStmt {
      * Return the statement that can be used as-is by any driver specific version.
      * This uses the anchor token as provided to yield a version of the statement
      * which contains positional anchors, but no named bindings.
-     * @param anchorToken The token which is to be used as a positional place holder
+     * @param tokenMapper A function which maps the anchor name to the needed form
+     *                    in the callers driver context
      * @return A driver or usage-specific format of the statement, with anchors
      */
-    public String getPositionalStatement(String anchorToken) {
-        String[] spans = parsed.getSpans();
-        StringBuilder sb = new StringBuilder(spans[0]);
-        for (int i = 1; i < spans.length; i++) {
-            sb.append(anchorToken).append(spans[i]);
-        }
-        return sb.toString();
+    public String getPositionalStatement(Function<String,String> tokenMapper) {
+        return parsed.getPositionalStatement(tokenMapper);
     }
 
     /**
