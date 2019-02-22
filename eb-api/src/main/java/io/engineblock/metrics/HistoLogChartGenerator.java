@@ -40,14 +40,16 @@ public class HistoLogChartGenerator {
 
             while (reader.hasNext()){
                 Histogram histogram = (Histogram)reader.nextIntervalHistogram();
-                String tag = histogram.getTag();
+                if (histogram != null) {
+                    String tag = histogram.getTag();
 
-                ArrayList<Histogram> histogramList = histogramsOverTime.get(tag);
-                if (histogramList == null){
-                    histogramList = new ArrayList<>();
+                    ArrayList<Histogram> histogramList = histogramsOverTime.get(tag);
+                    if (histogramList == null) {
+                        histogramList = new ArrayList<>();
+                    }
+                    histogramList.add(histogram);
+                    histogramsOverTime.put(tag, histogramList);
                 }
-                histogramList.add(histogram);
-                histogramsOverTime.put(tag, histogramList);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
