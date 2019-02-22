@@ -59,6 +59,7 @@ public class HistoLogChartGenerator {
             System.out.println(String.format("Charting p99 Latencies (in microseconds) over time (one second intervals) for %s:",p99KV.getKey()));
             double[] p99s = p99KV.getValue().stream().mapToDouble(x -> x.getValueAtPercentile(99)/1000).toArray(); //via method reference
             System.out.println("checking histogram length");
+            System.out.flush();
             if (p99s.length < 2){
                 System.out.println("Not enough data to chart");
                 System.out.flush();
