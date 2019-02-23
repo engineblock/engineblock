@@ -18,10 +18,12 @@
 package activityconfig;
 
 import activityconfig.yaml.StmtDef;
+import io.virtdata.templates.BindPoint;
 import io.virtdata.templates.ParsedTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -155,4 +157,7 @@ public class ParsedStmt {
         return stmtDef.getParams();
     }
 
+    public List<BindPoint> getBindPoints() {
+        return parsed.getBindPoints();
+    }
 }

@@ -17,6 +17,7 @@
 
 package io.engineblock.activitytypes.stdout;
 
+import activityconfig.ParsedStmt;
 import activityconfig.StatementsLoader;
 import activityconfig.yaml.StmtDef;
 import activityconfig.yaml.StmtsDocList;
@@ -45,6 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 @SuppressWarnings("Duplicates")
 public class StdoutActivity extends SimpleActivity implements ActivityDefObserver {
@@ -130,10 +132,12 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
 
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
         List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
+
         if (stmts.size() > 0) {
             for (StmtDef stmt : stmts) {
-                BindingsTemplate bt = new BindingsTemplate(stmt.getBindings());
-                String statement = stmt.getStmt();
+                ParsedStmt parsed = stmt.getParsed().orError();
+                BindingsTemplate bt = new BindingsTemplate(parsed.getBindPoints());
+                String statement = parsed.getPositionalStatement(Function.identity());
                 Objects.requireNonNull(statement);
                 if (!statement.endsWith("\n") && getParams().getOptionalBoolean("newline").orElse(true)) {
                     statement = statement+"\n";
@@ -146,8 +150,8 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         } else if (stmtsDocList.getDocBindings().size() > 0) {
             logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");
             String generatedStmt = genStatementTemplate(stmtsDocList.getDocBindings().keySet());
-
-            BindingsTemplate bt = new BindingsTemplate(stmtsDocList.getDocBindings());
+            BindingsTemplate bt = new BindingsTemplate();
+            stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);
             StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
             StringBindings sb = sbt.resolve();
             sequencer.addOp(sb,1L);
