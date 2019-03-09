@@ -9,5 +9,6 @@ local/**
 **/logs
 **/*.csv
 **/*.*log
+**/.DS_Store
 metrics/**
 bin/**

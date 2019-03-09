@@ -9,37 +9,31 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.Activity;
 import io.engineblock.activityapi.core.ActivityDefObserver;
+import io.engineblock.activityapi.planning.OpSequence;
+import io.engineblock.activityapi.planning.SequencePlanner;
+import io.engineblock.activityapi.planning.SequencerType;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.SimpleActivity;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.util.TagFilter;
-import io.virtdata.api.ValuesBinder;
-import io.virtdata.core.Bindings;
 import io.virtdata.core.BindingsTemplate;
-import io.virtdata.core.ContextualBindingsTemplate;
+import io.virtdata.templates.StringBindings;
+import io.virtdata.templates.StringBindingsTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 public class HttpActivity extends SimpleActivity implements Activity, ActivityDefObserver {
     private final static Logger logger = LoggerFactory.getLogger(HttpActivity.class);
     private final ActivityDef activityDef;
 
-    public ContextualBindingsTemplate getContextualBindingsTemplate() {
-        return contextualBindingsTemplate;
+    public StmtsDocList getStmtsDocList() {
+        return stmtsDocList;
     }
 
-    private ContextualBindingsTemplate contextualBindingsTemplate;
+    private final StmtsDocList stmtsDocList;
 
-    public StmtsDocList getStmtDocList() {
-        return stmtDocList;
-    }
-
-    private final StmtsDocList stmtDocList;
 
     private int stride;
     private Integer maxTries;
@@ -52,6 +46,12 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
     public Histogram skippedTokens;
     public Timer resultSuccessTimer;
 
+    private String[] hosts;
+    private int port;
+
+    private OpSequence<StringBindings> opSequence;
+
+
 
     public HttpActivity(ActivityDef activityDef) {
         super(activityDef);
@@ -60,7 +60,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
 
         String yaml_loc = activityDef.getParams().getOptionalString("yaml").orElse("default");
 
-        stmtDocList = StatementsLoader.load(logger,yaml_loc, "activities");
+        stmtsDocList = StatementsLoader.load(logger,yaml_loc, "activities");
     }
 
 
@@ -74,7 +74,11 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         maxTries = activityDef.getParams().getOptionalInteger("maxTries").orElse(1);
         showstmnts = activityDef.getParams().getOptionalBoolean("showstmnts").orElse(false);
 
-        contextualBindingsTemplate = createContextualBindingsTemplate();
+        hosts = activityDef.getParams().getOptionalString("host").orElse("localhost").split(",");
+        port = activityDef.getParams().getOptionalInteger("port").orElse(80);
+
+
+        opSequence = initOpSequencer();
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
@@ -86,31 +90,46 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
 
         onActivityDefUpdate(activityDef);
     }
+
+    private OpSequence<StringBindings> initOpSequencer() {
+        SequencerType sequencerType = SequencerType.valueOf(
+                getParams().getOptionalString("seq").orElse("bucket")
+        );
+        SequencePlanner<StringBindings> sequencer = new SequencePlanner<>(sequencerType);
+
+        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
+        List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
+
+        if (stmts.size() > 0) {
+            for (StmtDef stmt : stmts) {
+                ParsedStmt parsed = stmt.getParsed().orError();
+                BindingsTemplate bt = new BindingsTemplate(parsed.getBindPoints());
+                String statement = parsed.getPositionalStatement(Function.identity());
+                Objects.requireNonNull(statement);
+
+                StringBindingsTemplate sbt = new StringBindingsTemplate(stmt.getStmt(), bt);
+                StringBindings sb = sbt.resolve();
+                sequencer.addOp(sb,Long.valueOf(stmt.getParams().getOrDefault("ratio","1")));
+            }
+        } else {
+            logger.error("Unable to create an HTTP statement if no bindings or statements are defined.");
+        }
+//
+        OpSequence<StringBindings> opSequence = sequencer.resolve();
+        if (getActivityDef().getCycleCount() == 0) {
+            if (getParams().containsKey("cycles")) {
+                throw new RuntimeException("You specified cycles, but the range specified means zero cycles: " + getParams().get("cycles"));
+            }
+            logger.debug("Adjusting cycle count for " + activityDef.getAlias() + " to " + opSequence.getOps().size() +", which the size of the planned statement sequence.");
+            getActivityDef().setCycles(String.valueOf(opSequence.getOps().size()));
+        }
+
+        return opSequence;
+    }
+
     @Override
     public synchronized void onActivityDefUpdate(ActivityDef activityDef) {
         super.onActivityDefUpdate(activityDef);
-    }
-
-    private ContextualBindingsTemplate createContextualBindingsTemplate() {
-
-        String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
-
-        TagFilter ts = new TagFilter(tagfilter);
-        List<StmtDef> stmts = stmtDocList.getStmtDocs().stream()
-                .flatMap(d -> d.getStmts().stream())
-                .filter(ts::matchesTagged)
-                .collect(Collectors.toList());
-
-        for (StmtDef stmt: stmts) {
-
-            ParsedStmt parsed = stmt.getParsed();
-
-            BindingsTemplate bindingsTemplate = new BindingsTemplate(parsed.getBindPoints());
-            contextualBindingsTemplate = new ContextualBindingsTemplate<StmtDef, String>
-                        (stmt, bindingsTemplate, new HttpStatementValueBinder(stride, this));
-        }
-
-        return contextualBindingsTemplate;
     }
 
     public Integer getMaxTries() {
@@ -121,78 +140,15 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         return showstmnts;
     }
 
-    public static class HttpStatementValueBinder implements ValuesBinder<StmtDef, String> {
-
-        private final static Pattern stmtToken = Pattern.compile("\\{(\\w+)\\}");
-        private final HttpActivity httpActivity;
-        private int repeat;
-
-        public HttpStatementValueBinder(int repeat, HttpActivity httpActivity) {
-            this.repeat = repeat;
-            this.httpActivity = httpActivity;
-        }
-
-        @Override
-        public synchronized String bindValues(StmtDef context, Bindings bindings, long cycle) {
-
-            String docStatement = context.getStmt();
-
-            String[] fields = getFields(docStatement, bindings.getAllMap(cycle));
-            Map<String, Object> iteratedSuffixMap = bindings.getIteratedSuffixMap(cycle, repeat, fields);
-
-            docStatement = getCookedStatement(docStatement);
-
-            String statement = context.getStmt().trim();
-
-            int i = 0;
-            for (Map.Entry<String, Object> bindingPair : iteratedSuffixMap.entrySet()) {
-                Pattern bindingToken = Pattern.compile("\\{(" + fields[i] + ")\\}");
-                statement = bindingToken.matcher(statement).replaceAll(bindingPair.getValue().toString());
-                i++;
-            }
-
-            return statement;
-        }
-
-        public String getCookedRepeatedStatement(String statement, int repeat) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < repeat; i++) {
-                String varSuffix = String.valueOf(i);
-                String indexedStmt = getCookedSuffixedStatement(statement,varSuffix);
-                sb.append(indexedStmt);
-                sb.append("\n");
-            }
-            return sb.toString();
-        }
-
-        public String getCookedSuffixedStatement(String statement, String suffix) {
-            return stmtToken.matcher(statement).replaceAll("$1" + suffix);
-        }
-
-        public String getCookedStatement(String statement){
-            return stmtToken.matcher(statement).replaceAll("$1");
-        }
-
-        public List<String> getCookedStatements(List<String> statements, int repeat){
-            return statements.stream().map((String statement) -> {
-                return getCookedRepeatedStatement(statement, repeat);
-            }).collect(Collectors.toList());
-        }
-
-        public String[] getFields(String statement, Map<String, Object> bindings){
-            ArrayList<String> fields = new ArrayList<String>();
-            Matcher m = stmtToken.matcher(statement);
-            while (m.find()) {
-                String namedAnchor = m.group(1);
-                if (!bindings.containsKey(namedAnchor)){
-                    throw new RuntimeException("Named anchor " + namedAnchor + " not found in bindings!");
-                }
-                fields.add(m.group(1));
-            }
-            return fields.toArray(new String[0]);
-        }
-
+    public String[] getHosts() {
+        return hosts;
     }
 
+    public int getPort() {
+        return port;
+    }
 
+    public OpSequence<StringBindings> getOpSequence() {
+        return opSequence;
+    }
 }
