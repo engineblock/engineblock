@@ -30,6 +30,7 @@
         <module>eb-vis</module>
         <module>at-stdout</module>
         <module>at-tcp</module>
+        <module>at-http</module>
     </modules>
 
     <licenses>
