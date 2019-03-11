@@ -23,6 +23,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum TemplateFormat {
+
     csv("value1,value2,..."),
     assignments("varname1=value1 varname2=value2 ..."),
     readout("varname1       : value1\nvarname2:      : value2\n..."),
@@ -70,12 +71,12 @@ public enum TemplateFormat {
             case json:
                 template = fieldNames
                         .stream().map(s -> "\"" + s + "\":\"{" + s + "}\"")
-                        .collect(Collectors.joining(",\n ", "\\{\n ", "\n\\}"));
+                        .collect(Collectors.joining(",\n ", "{\n ", "\n}"));
                 break;
             case inlinejson:
                 template = fieldNames
                         .stream().map(s -> "\""+ s + "\":\"{" + s + "}\"")
-                        .collect(Collectors.joining(", ", "\\{", "\\}"));
+                        .collect(Collectors.joining(", ", "{", "}"));
                 break;
             default:
                 throw new RuntimeException("No supported format was found for " + this.toString());
