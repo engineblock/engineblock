@@ -262,4 +262,8 @@ public class TokenPool {
     public synchronized  long getTimeline() {
         return timeline;
     }
+
+    public synchronized void setTimeline(long timeline) {
+        this.timeline = timeline;
+    }
 }
