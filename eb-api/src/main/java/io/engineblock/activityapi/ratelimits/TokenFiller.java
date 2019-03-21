@@ -92,7 +92,7 @@ public class TokenFiller implements Runnable {
             lastRefillAt = thisRefillTime;
 
             //System.out.println(this);
-            tokenPool.refill(delta);
+            tokenPool.refill(thisRefillTime);
             timer.update(delta, TimeUnit.NANOSECONDS);
 //            iteration++;
 

@@ -60,6 +60,7 @@ public class TokenPool {
 //    private long debugTrigger=0L;
 //    private long debugRate=1000000000;
     private long blocks = 0L;
+    private long timeline = System.nanoTime();
 
 
     /**
@@ -169,6 +170,13 @@ public class TokenPool {
         return activePool;
     }
 
+    public synchronized long refill (long newTimeline) {
+        long delta = newTimeline - timeline;
+        timeline = newTimeline;
+        return refillDelta(delta);
+    }
+
+
     /**
      * Add the given number of new tokens to the pool, forcing any amount
      * that would spill over the current pool size into the wait token pool, but
@@ -183,7 +191,7 @@ public class TokenPool {
      * @param newTokens The number of new tokens to add to the token pools
      * @return the total number of tokens in all pools
      */
-    public synchronized long refill(long newTokens) {
+    private synchronized long refillDelta(long newTokens) {
         boolean debugthis=false;
 //        long debugAt = System.nanoTime();
 //        if (debugAt>debugTrigger+debugRate) {
@@ -235,7 +243,8 @@ public class TokenPool {
                 (((double)activePool/(double)maxActivePool)*100.0),
                 (((double)activePool/(double)maxOverActivePool)*100.0)) + " waiting=" + waitingPool +
                 " blocks=" + blocks +
-                " rateSpec:"+ ((rateSpec!=null) ? rateSpec.toString() : "NULL");
+                " rateSpec:"+ ((rateSpec!=null) ? rateSpec.toString() : "NULL")
+                + "timeline:" + timeline;
     }
 
     public RateSpec getRateSpec() {
@@ -248,5 +257,9 @@ public class TokenPool {
         waitingPool=0L;
         return wait;
 
+    }
+
+    public synchronized  long getTimeline() {
+        return timeline;
     }
 }

@@ -26,21 +26,23 @@ public class TokenPoolTest {
 
     public void testBackfillFullRate() {
         TokenPool p = new TokenPool(100, 1.1);
-        assertThat(p.refill(100L)).isEqualTo(100L);
+        long timeline = p.getTimeline();
+
+        assertThat(p.refill(p.getTimeline()+100L)).isEqualTo(100L);
         assertThat(p.getWaitPool()).isEqualTo(0L);
-        assertThat(p.refill(100L)).isEqualTo(200);
+        assertThat(p.refill(p.getTimeline()+100L)).isEqualTo(200);
         assertThat(p.getWaitPool()).isEqualTo(90L);
-        assertThat(p.refill(10L)).isEqualTo(210L);
+        assertThat(p.refill(p.getTimeline()+10L)).isEqualTo(210L);
         assertThat(p.getWaitPool()).isEqualTo(100L);
 
-        assertThat(p.refill(10)).isEqualTo(220L);
+        assertThat(p.refill(p.getTimeline()+10L)).isEqualTo(220L);
         assertThat(p.takeUpTo(100)).isEqualTo(100L);
 
     }
 
     public void testTakeRanges() {
         TokenPool p = new TokenPool(100, 10);
-        p.refill(100);
+        p.refill(p.getTimeline()+100);
         assertThat(p.takeUpTo(99)).isEqualTo(99L);
         assertThat(p.takeUpTo(10)).isEqualTo(1L);
         assertThat(p.takeUpTo(1L)).isEqualTo(0L);
@@ -51,7 +53,7 @@ public class TokenPoolTest {
 
         RateSpec s1 = new RateSpec(1000L, 1.10D);
         TokenPool p = new TokenPool(s1);
-        long r = p.refill(10000000);
+        long r = p.refill(p.getTimeline()+10000000);
         assertThat(r).isEqualTo(10000000L);
         assertThat(p.getWaitTime()).isEqualTo(10000000L);
 
