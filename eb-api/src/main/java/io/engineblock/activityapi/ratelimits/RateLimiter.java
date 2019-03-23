@@ -34,6 +34,7 @@ public interface RateLimiter extends Startable {
      * due to bulk allocation mechanisms necessary to support higher rates.
      */
     long maybeWaitForOp();
+    long maybeWaitForOps(long opcount);
 
     /**
      * Return the total number of nanoseconds behind schedule

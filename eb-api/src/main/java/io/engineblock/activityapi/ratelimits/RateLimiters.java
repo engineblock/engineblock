@@ -28,7 +28,15 @@ public class RateLimiters {
     public static synchronized RateLimiter createOrUpdate(ActivityDef def, String label, RateLimiter extant, RateSpec spec) {
 
         if (extant == null) {
+
             RateLimiter rateLimiter= new HybridRateLimiter(def, label, spec);
+
+            Long ratebulking = def.getParams().getOptionalLong("bulkrate").orElse(0L);
+            if (ratebulking>0) {
+                logger.info("Using Bulking rate limiter with bulking=" + ratebulking);
+
+                rateLimiter = new BulkingRateLimiter(rateLimiter,ratebulking);
+            }
 
             logger.info("Using rate limiter: " + rateLimiter.toString());
             return rateLimiter;

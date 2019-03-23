@@ -124,6 +124,11 @@ public class HybridRateLimiter implements Startable, RateLimiter {
     }
 
     @Override
+    public long maybeWaitForOps(long opcount) {
+        return tokens.blockAndTakeFor(opcount);
+    }
+
+    @Override
     public long getTotalWaitTime() {
         return this.cumulativeWaitTimeNanos.get() + getWaitTime();
     }

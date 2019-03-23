@@ -140,6 +140,27 @@ public class TokenPool {
         return waitingPool + activePool;
     }
 
+    public synchronized long blockAndTakeFor(long opcount) {
+        long nanosToTake=nanosPerOp*opcount;
+
+        while (activePool < nanosToTake) {
+            blocks++;
+            //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
+            try {
+                wait(maxActivePool / 1000000, (int) maxActivePool % 1000000);
+            } catch (InterruptedException ignored) {
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            //System.out.println("waited for " + amt + "/" + activePool + " tokens");
+        }
+        //System.out.println(ANSI_BrightYellow + "taking " + amt + "/" + activePool + ANSI_Reset);
+
+        activePool -= nanosToTake;
+        return waitingPool + activePool;
+    }
+
+
     public synchronized long blockAndTake(long tokens) {
         while (activePool < tokens) {
             //System.out.println(ANSI_BrightRed +  "waiting for " + amt + "/" + activePool + " of max " + maxActivePool + ANSI_Reset);
@@ -249,4 +270,5 @@ public class TokenPool {
         return wait;
 
     }
+
 }
