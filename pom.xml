@@ -5,10 +5,10 @@
     <packaging>pom</packaging>
 
     <parent>
-        <artifactId>project-defaults</artifactId>
+        <artifactId>eb-defaults</artifactId>
         <groupId>io.engineblock</groupId>
         <version>2.11.14-SNAPSHOT</version>
-        <relativePath>project-defaults</relativePath>
+        <relativePath>eb-defaults</relativePath>
     </parent>
 
     <name>${project.artifactId}</name>
@@ -20,7 +20,7 @@
     </properties>
 
     <modules>
-        <module>project-defaults</module> <!-- Holds project level defaults -->
+        <module>eb-defaults</module> <!-- Holds project level defaults -->
         <module>at-diag</module> <!-- ActivityType driver for diagnostics, file, etc -->
         <module>eb-api</module> <!-- APIs needed to implement drivers to be loaded by the core -->
         <module>eb-core</module> <!-- Scripting harness and executive logic -->

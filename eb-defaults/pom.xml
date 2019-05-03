@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.engineblock</groupId>
-    <artifactId>project-defaults</artifactId>
+    <artifactId>eb-defaults</artifactId>
     <version>2.11.14-SNAPSHOT</version>
     <packaging>pom</packaging>
 
