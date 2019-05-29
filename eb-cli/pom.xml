@@ -7,7 +7,7 @@
     <parent>
         <artifactId>eb-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>2.11.16-SNAPSHOT</version>
+        <version>2.11.16</version>
         <relativePath>../eb-defaults</relativePath>
     </parent>
 
@@ -23,12 +23,12 @@
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-runtime</artifactId>
-            <version>2.11.16-SNAPSHOT</version>
+            <version>2.11.16</version>
         </dependency>
         <dependency>
             <groupId>io.engineblock</groupId>
             <artifactId>eb-vis</artifactId>
-            <version>2.11.16-SNAPSHOT</version>
+            <version>2.11.16</version>
         </dependency>
 
         <dependency>
