@@ -57,7 +57,6 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     public Timer executeTimer;
     public Timer resultTimer;
     public Histogram triesHisto;
-    private List<StringBindingsTemplate> templates = new ArrayList<>();
     private Writer pw;
     private String fileName;
     private ExceptionMeterMetrics exceptionMeterMetrics;
@@ -98,6 +97,8 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         onActivityDefUpdate(activityDef);
 
         opSequence = initOpSequencer();
+        setDefaultFromOpSequence(opSequence);
+
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
         resultTimer = ActivityMetrics.timer(activityDef, "result");
@@ -108,7 +109,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
     }
 
     protected Writer createPrintWriter() {
-        PrintWriter pw = null;
+        PrintWriter pw;
         if (fileName.toLowerCase().equals("stdout")) {
             pw = new PrintWriter(System.out);
         } else {
@@ -133,7 +134,17 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         String tagfilter = activityDef.getParams().getOptionalString("tags").orElse("");
         List<StmtDef> stmts = stmtsDocList.getStmts(tagfilter);
 
-        if (stmts.size() > 0) {
+        String format = getParams().getOptionalString("format").orElse(null);
+
+        if ((stmts.size()==0 && stmtsDocList.getDocBindings().size() > 0) || format!=null) {
+            logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");
+            String generatedStmt = genStatementTemplate(stmtsDocList.getDocBindings().keySet());
+            BindingsTemplate bt = new BindingsTemplate();
+            stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);
+            StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
+            StringBindings sb = sbt.resolve();
+            sequencer.addOp(sb,1L);
+        } else if (stmts.size() > 0) {
             for (StmtDef stmt : stmts) {
                 ParsedStmt parsed = stmt.getParsed().orError();
                 BindingsTemplate bt = new BindingsTemplate(parsed.getBindPoints());
@@ -147,33 +158,20 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
                 StringBindings sb = sbt.resolve();
                 sequencer.addOp(sb,Long.valueOf(stmt.getParams().getOrDefault("ratio","1")));
             }
-        } else if (stmtsDocList.getDocBindings().size() > 0) {
-            logger.info("Creating stdout statement template from bindings, since none is otherwise defined.");
-            String generatedStmt = genStatementTemplate(stmtsDocList.getDocBindings().keySet());
-            BindingsTemplate bt = new BindingsTemplate();
-            stmtsDocList.getDocBindings().forEach(bt::addFieldBinding);
-            StringBindingsTemplate sbt = new StringBindingsTemplate(generatedStmt, bt);
-            StringBindings sb = sbt.resolve();
-            sequencer.addOp(sb,1L);
         } else {
             logger.error("Unable to create a stdout statement if you have no active statements or bindings configured.");
         }
 
         OpSequence<StringBindings> opSequence = sequencer.resolve();
-        if (getActivityDef().getCycleCount() == 0) {
-            if (getParams().containsKey("cycles")) {
-                throw new RuntimeException("You specified cycles, but the range specified means zero cycles: " + getParams().get("cycles"));
-            }
-            logger.debug("Adjusting cycle count for " + activityDef.getAlias() + " to " + opSequence.getOps().size() +", which the size of the planned statement sequence.");
-            getActivityDef().setCycles(String.valueOf(opSequence.getOps().size()));
-        }
-
         return opSequence;
     }
 
     private String genStatementTemplate(Set<String> keySet) {
-        TemplateFormat format = getParams().getOptionalString("format").map(TemplateFormat::valueOf).orElse(TemplateFormat.assignments);
-        boolean ensureNewline = getParams().getOptionalBoolean("newline").orElse(true);
+        TemplateFormat format = getParams().getOptionalString("format")
+                .map(TemplateFormat::valueOf)
+                .orElse(TemplateFormat.assignments);
+        boolean ensureNewline = getParams().getOptionalBoolean("newline")
+                .orElse(true);
         String stmtTemplate = format.format(ensureNewline,new ArrayList<>(keySet));
         return stmtTemplate;
     }

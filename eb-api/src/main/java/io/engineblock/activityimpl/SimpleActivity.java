@@ -4,6 +4,7 @@ import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityapi.output.OutputDispenser;
+import io.engineblock.activityapi.planning.OpSequence;
 import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityapi.ratelimits.RateLimiters;
 import io.engineblock.activityapi.ratelimits.RateSpec;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -121,14 +123,14 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
-    public void setActivityController(ActivityController activityController) {
-        this.activityController = activityController;
-
+    public ActivityController getActivityController() {
+        return activityController;
     }
 
     @Override
-    public ActivityController getActivityController() {
-        return activityController;
+    public void setActivityController(ActivityController activityController) {
+        this.activityController = activityController;
+
     }
 
     @Override
@@ -204,8 +206,8 @@ public class SimpleActivity implements Activity {
 
     @Override
     public synchronized ActivityInstrumentation getInstrumentation() {
-        if (activityInstrumentation==null) {
-            activityInstrumentation=new CoreActivityInstrumentation(this);
+        if (activityInstrumentation == null) {
+            activityInstrumentation = new CoreActivityInstrumentation(this);
         }
         return activityInstrumentation;
     }
@@ -219,12 +221,39 @@ public class SimpleActivity implements Activity {
 
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate")
                 .map(RateSpec::new).ifPresent(
-                        spec-> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
+                spec -> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("phaserate")
                 .map(RateSpec::new)
                 .ifPresent(spec -> phaseLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "phases", phaseLimiter, spec));
 
+    }
+
+    /**
+     * Modify the provided ActivityDef with defaults for stride and cycles, if
+     * they haven't been provided, based on the length of the sequence as determined
+     * by the provided ratios.
+     */
+    public void setDefaultFromOpSequence(OpSequence seq) {
+        Optional<String> strideOpt = getParams().getOptionalString("stride");
+        if (strideOpt.isEmpty()) {
+            String stride = String.valueOf(seq.getSequence().length);
+            logger.info("defaulting stride to " + stride + " (the sequence length)");
+            getParams().set("stride", stride);
+        }
+
+        Optional<String> cyclesOpt = getParams().getOptionalString("cycles");
+        if (cyclesOpt.isEmpty()) {
+            String cycles = getParams().getOptionalString("stride").orElseThrow();
+            logger.info("defaulting cycles to " + cycles + " (the stride length)");
+            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
+        } else {
+            if (getActivityDef().getCycleCount() == 0) {
+                throw new RuntimeException(
+                        "You specified cycles, but the range specified means zero cycles: " + getParams().get("cycles")
+                );
+            }
+        }
     }
 
 
