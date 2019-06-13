@@ -111,9 +111,11 @@ public class EBCLIScriptAssembly {
     private static String toJSON(Map<?,?> map) {
         StringBuilder sb = new StringBuilder();
         sb.append("params={\n");
-        map.forEach((k,v) -> { sb.append(" '").append(k.toString()).append("',\n"); });
-        sb.setLength(sb.length()-1);
-        sb.append("};\n");
+        map.forEach((k,v) -> {
+            sb.append(" '").append(k.toString()).append("': '").append(v.toString()).append("',\n");
+        });
+        sb.setLength(sb.length()-2);
+        sb.append("\n};\n");
         return sb.toString();
     }
 }
