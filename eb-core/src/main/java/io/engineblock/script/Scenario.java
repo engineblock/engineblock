@@ -139,6 +139,8 @@ public class Scenario implements Callable<ScenarioResult> {
                 } else {
                     result = scriptEngine.eval(script);
                 }
+                System.err.flush();
+                System.out.flush();
             } catch (ScriptException e) {
                 String diagname = "diag_" + System.currentTimeMillis() + ".js";
                 try {
