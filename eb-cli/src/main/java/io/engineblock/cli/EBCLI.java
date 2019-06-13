@@ -106,12 +106,32 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsReportGraphiteTo() != null || options.wantsReportCsvTo() != null) {
+        String reportGraphiteTo = options.wantsReportGraphiteTo();
+        if (options.wantsDockerMetrics()){
+            logger.info("Docker metrics is enabled. Docker must be installed for this to work");
+            DockerMetricsHelper dmh= new DockerMetricsHelper();
+            dmh.startMetrics();
+            logger.info("Docker Containers are started, for grafana and prometheus, hit" +
+                    "these urls in your browser: http://<host>:3000 and http://<host>:9090" +
+                    "the default grafana creds are admin/admin");
+            if (reportGraphiteTo != null){
+                logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
+                    " but graphite reporting (--report-graphite-to) is set to %s \n" +
+                    "usually only one of the two is configured."),
+                    reportGraphiteTo);
+            }else{
+                //TODO: is this right?
+                logger.info("Setting graphite reporting to localhost");
+                reportGraphiteTo = "localhost:9109";
+            }
+        }
+
+        if (reportGraphiteTo != null || options.wantsReportCsvTo() != null) {
             MetricReporters reporters = MetricReporters.getInstance();
             reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
 
-            if (options.wantsReportGraphiteTo() != null) {
-                reporters.addGraphite(options.wantsReportGraphiteTo(), options.wantsMetricsPrefix());
+            if (reportGraphiteTo != null) {
+                reporters.addGraphite(reportGraphiteTo,  options.wantsMetricsPrefix());
             }
             if (options.wantsReportCsvTo() != null) {
                 reporters.addCSVReporter(options.wantsReportCsvTo(), options.wantsMetricsPrefix());

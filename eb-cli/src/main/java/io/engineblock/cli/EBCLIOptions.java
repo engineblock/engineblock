@@ -62,6 +62,7 @@ public class EBCLIOptions {
     private static final String CLASSIC_HISTOS = "--classic-histograms";
     private final static String LOG_LEVEL_OVERRIDE = "--log-level-override";
     private final static String ENABLE_CHART = "--enable-chart";
+    private final static String DOCKER_METRICS = "--docker-metrics";
 
     private static final Set<String> reserved_words = new HashSet<String>() {{
         addAll(
@@ -101,6 +102,7 @@ public class EBCLIOptions {
     private String logsLevel = "INFO";
     private Map<String,Level> logLevelsOverrides = new HashMap<>();
     private boolean enableChart = false;
+    private boolean dockerMetrics = false;
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -204,6 +206,10 @@ public class EBCLIOptions {
                 case ENABLE_CHART:
                     arglist.removeFirst();
                     enableChart = true;
+                    break;
+                case DOCKER_METRICS:
+                    arglist.removeFirst();
+                    dockerMetrics = true;
                     break;
                 case HELP:
                 case "-h":
@@ -364,6 +370,10 @@ public class EBCLIOptions {
 
     public boolean wantsEnableChart() {
         return enableChart;
+    }
+
+    public boolean wantsDockerMetrics() {
+        return dockerMetrics;
     }
 
     public int getReportInterval() {
