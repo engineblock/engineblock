@@ -77,7 +77,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
 
 
         opSequence = initOpSequencer();
-        setDefaultFromOpSequence(opSequence);
+        setDefaultsFromOpSequence(opSequence);
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");

@@ -114,4 +114,10 @@ public class StrInterpolaterTest {
         assertThat(b).isEqualTo("'a': 'b'");
     }
 
+    @Test
+    public void shouldWorkWithMultipleGroups() {
+        String a = interp.apply("<<Token:'Key': 'Value'>>.<<Token2:'Stuff'>>");
+        assertThat(a).isEqualTo("'Key': 'Value'.'Stuff'");
+    }
+
 }

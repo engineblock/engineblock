@@ -97,7 +97,7 @@ public class StdoutActivity extends SimpleActivity implements ActivityDefObserve
         onActivityDefUpdate(activityDef);
 
         opSequence = initOpSequencer();
-        setDefaultFromOpSequence(opSequence);
+        setDefaultsFromOpSequence(opSequence);
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");

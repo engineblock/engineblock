@@ -234,7 +234,7 @@ public class SimpleActivity implements Activity {
      * they haven't been provided, based on the length of the sequence as determined
      * by the provided ratios.
      */
-    public void setDefaultFromOpSequence(OpSequence seq) {
+    public void setDefaultsFromOpSequence(OpSequence seq) {
         Optional<String> strideOpt = getParams().getOptionalString("stride");
         if (strideOpt.isEmpty()) {
             String stride = String.valueOf(seq.getSequence().length);
@@ -253,7 +253,16 @@ public class SimpleActivity implements Activity {
                         "You specified cycles, but the range specified means zero cycles: " + getParams().get("cycles")
                 );
             }
+            long stride = getParams().getOptionalLong("stride").orElseThrow();
+            long cycles = getActivityDef().getCycleCount();
+            if (cycles<stride) {
+                throw new RuntimeException(
+                        "The specified cycles (" + cycles + ") are less than the stride (" + stride + "). This means there aren't enough cycles to cause a stride to be executed."
+                );
+            }
         }
+
+
     }
 
 
