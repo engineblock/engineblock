@@ -36,11 +36,11 @@ import java.util.concurrent.TimeUnit;
 
 public class DockerMetricsHelper {
 
-    String userHome = System.getProperty("user.home");
     private Client rsClient = ClientBuilder.newClient();
     private DockerClientConfig config;
     private DockerClient dockerClient;
     private Logger logger = LoggerFactory.getLogger(DockerMetricsHelper.class);
+    String userHome = System.getProperty("user.home");
 
     public DockerMetricsHelper() {
         this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
@@ -85,7 +85,7 @@ public class DockerMetricsHelper {
 
         volumeDescList = Arrays.asList(
                 //cwd+"/docker-metrics/prometheus:/prometheus",
-                userHome + "/.prometheus:/etc/prometheus"
+                userHome+"/.prometheus:/etc/prometheus"
                 //"./prometheus/tg_dse.json:/etc/prometheus/tg_dse.json"
         );
 
@@ -133,25 +133,14 @@ public class DockerMetricsHelper {
                     .withTailAll();
 
             final boolean[] httpStarted = {false};
-            cmd.exec(new LogContainerResultCallback() {
-                @Override
-                public void onNext(Frame item) {
-                    if (item.toString().contains("HTTP Server Listen")) {
-                        httpStarted[0] = true;
-                    }
-                }
-            });
+            cmd.exec(new LogCallback());
+
             loggingCallback.awaitCompletion(10, TimeUnit.SECONDS);
 
-            if (httpStarted[0]) {
-                logger.info("grafana container started, http listenning");
-
-                configureGrafana();
-            } else {
-                logger.error("grafana did not start");
             logger.info("grafana container started, http listenning");
 
             configureGrafana();
+
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -162,14 +151,14 @@ public class DockerMetricsHelper {
     private void setupPromFiles(String ip) {
         String datasource = EngineBlockFiles.readFile("docker/prometheus/prometheus.yml");
 
-        if (ip == null) {
+        if (ip == null){
             logger.error("IP for graphite container not found");
             System.exit(1);
         }
 
         datasource = datasource.replace("!!!GRAPHITE_IP!!!", ip);
 
-        new java.io.File(userHome, ".prometheus").mkdir();
+        new java.io.File(userHome,  ".prometheus").mkdir();
 
         try (PrintWriter out = new PrintWriter(
                 new FileWriter(userHome + "/.prometheus/prometheus.yml", false))) {
@@ -191,7 +180,7 @@ public class DockerMetricsHelper {
         response = post("http://localhost:3000/api/datasources", "docker/datasources/prometheus-datasource.yaml", true);
     }
 
-    private Response post(String url, String path, boolean auth) {
+    private Response post(String url, String path, boolean auth){
         if (auth) {
             HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic("admin", "admin");
             rsClient.register(feature);
@@ -208,7 +197,7 @@ public class DockerMetricsHelper {
             response
                     = invocationBuilder
                     .post(Entity.entity(dashboard, MediaType.APPLICATION_JSON));
-        } else {
+        }else{
             response
                     = invocationBuilder
                     .post(Entity.entity(null, MediaType.APPLICATION_JSON));
@@ -222,15 +211,15 @@ public class DockerMetricsHelper {
     private String startDocker(String IMG, String tag, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList, String reload) {
         ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(List.of("exited"));
         listContainersCmd.getFilters().put("name", Arrays.asList(name));
-        List<Container> stoppedContainers = null;
+        List<Container>  stoppedContainers = null;
         try {
             stoppedContainers = listContainersCmd.exec();
             for (Container stoppedContainer : stoppedContainers) {
                 String id = stoppedContainer.getId();
-                logger.info("Removing exited container: " + id);
+                logger.info("Removing exited container: " + id );
                 dockerClient.removeContainerCmd(id).exec();
             }
-        } catch (Exception e) {
+        }catch(Exception e){
             e.printStackTrace();
             logger.error("Unable to contact docker, make sure docker is up and try again.");
             logger.error("If docker is installed make sure this user has access to the docker group.");
@@ -239,8 +228,8 @@ public class DockerMetricsHelper {
         }
 
         Container containerId = searchContainer(name, reload);
-        if (containerId != null) {
-            return containerId.getId();
+        if (containerId != null){
+            return  containerId.getId();
         }
 
         Info info = dockerClient.infoCmd().exec();
@@ -249,7 +238,7 @@ public class DockerMetricsHelper {
         String term = IMG.split("/")[1];
         //List<SearchItem> dockerSearch = dockerClient.searchImagesCmd(term).exec();
         List<Image> dockerList = dockerClient.listImagesCmd().withImageNameFilter(IMG).exec();
-        if (dockerList.size() == 0) {
+        if (dockerList.size() == 0){
             dockerClient.pullImageCmd(IMG)
                     .withTag(tag)
                     .exec(new PullImageResultCallback()).awaitSuccess();
@@ -286,6 +275,7 @@ public class DockerMetricsHelper {
             volumeBindList.add(new Bind(volFrom, vol));
         }
 
+
         CreateContainerResponse containerResponse;
         if (envList == null) {
             containerResponse = dockerClient.createContainerCmd(IMG + ":" + tag)
@@ -300,7 +290,7 @@ public class DockerMetricsHelper {
                     .withName(name)
                     //.withVolumes(volumeList)
                     .exec();
-        } else {
+        }else{
             containerResponse = dockerClient.createContainerCmd(IMG + ":" + tag)
                     .withEnv(envList)
                     .withExposedPorts(tcpPorts)
@@ -325,16 +315,16 @@ public class DockerMetricsHelper {
 
         ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(List.of("running"));
         listContainersCmd.getFilters().put("name", Arrays.asList(name));
-        List<Container> runningContainers = null;
+        List<Container>  runningContainers = null;
         try {
             runningContainers = listContainersCmd.exec();
-        } catch (Exception e) {
+        }catch(Exception e){
             e.printStackTrace();
             logger.error("Unable to contact docker, make sure docker is up and try again.");
             System.exit(1);
         }
 
-        if (runningContainers.size() >= 1) {
+        if (runningContainers.size() >= 1){
             //Container test = runningContainers.get(0);
             logger.info(String.format("The container %s is already running", name));
 
@@ -349,7 +339,7 @@ public class DockerMetricsHelper {
         return null;
     }
 
-    public void stopMetrics() {
+    public void stopMetrics(){
         //TODO: maybe implement
     }
 
