@@ -15,6 +15,7 @@ import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.async.ResultCallbackTemplate;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import io.engineblock.util.EngineBlockFiles;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 
 public class DockerMetricsHelper {
 
@@ -113,8 +115,8 @@ public class DockerMetricsHelper {
         envList = Arrays.asList(
                 "GF_SECURITY_ADMIN_PASSWORD=admin",
                 "GF_AUTH_ANONYMOUS_ENABLED=\"true\"",
-                "GF_SNAPSHOTS_EXTERNAL_SNAPSHOT_URL=http://54.165.144.56:3001",
-                "GF_SNAPSHOTS_EXTERNAL_SNAPSHOT_NAME=\"Send to Wei\""
+                "GF_SNAPSHOTS_EXTERNAL_SNAPSHOT_URL=https://assethub.datastax.com:3001",
+                "GF_SNAPSHOTS_EXTERNAL_SNAPSHOT_NAME=\"Upload to DataStax\""
         );
 
         reload = null;
@@ -147,10 +149,9 @@ public class DockerMetricsHelper {
                 configureGrafana();
             } else {
                 logger.error("grafana did not start");
+            logger.info("grafana container started, http listenning");
 
-                System.exit(1);
-            }
-
+            configureGrafana();
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -232,6 +233,8 @@ public class DockerMetricsHelper {
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("Unable to contact docker, make sure docker is up and try again.");
+            logger.error("If docker is installed make sure this user has access to the docker group.");
+            logger.error("$ sudo gpasswd -a ${USER} docker && newgrp docker");
             System.exit(1);
         }
 
@@ -349,4 +352,19 @@ public class DockerMetricsHelper {
     public void stopMetrics() {
         //TODO: maybe implement
     }
+
+    private class LogCallback extends ResultCallbackTemplate<LogContainerResultCallback, Frame> {
+        @Override
+        public void onNext(Frame item) {
+            if (item.toString().contains("HTTP Server Listen")){
+                try {
+                    close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
 }
