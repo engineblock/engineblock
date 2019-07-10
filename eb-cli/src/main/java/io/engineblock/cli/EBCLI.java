@@ -117,8 +117,8 @@ public class EBCLI {
             if (reportGraphiteTo != null){
                 logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
                     " but graphite reporting (--report-graphite-to) is set to %s \n" +
-                    "usually only one of the two is configured."),
-                    reportGraphiteTo);
+                    "usually only one of the two is configured.",
+                    reportGraphiteTo));
             }else{
                 //TODO: is this right?
                 logger.info("Setting graphite reporting to localhost");
