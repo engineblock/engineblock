@@ -26,7 +26,9 @@ import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
  */
 public interface FailedOp<D> extends Payload<D>, CycleResult {
     long getStartedAtNanos();
+
     public int getTries();
+
     public long getServiceTimeNanos();
     public long getResponseTimeNanos();
 }
