@@ -24,11 +24,6 @@ import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
  * of the implementing activity type.
  * @param <D> The delegate type needed by the implementing activity type
  */
-public interface FailedOp<D> extends Payload<D>, CycleResult {
-    long getStartedAtNanos();
-
+public interface FailedOp<D> extends Payload<D>, CycleResult, CompletedOp<D> {
     public int getTries();
-
-    public long getServiceTimeNanos();
-    public long getResponseTimeNanos();
 }

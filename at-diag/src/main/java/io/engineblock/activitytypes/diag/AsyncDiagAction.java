@@ -17,22 +17,26 @@
 package io.engineblock.activitytypes.diag;
 
 import io.engineblock.activityapi.core.BaseAsyncAction;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.CompletedOp;
 import io.engineblock.activityapi.core.ops.fluent.opfacets.StartedOp;
 import io.engineblock.activityapi.core.ops.fluent.opfacets.TrackedOp;
+import io.engineblock.activityapi.cyclelog.buffers.op_output.StrideOutputConsumer;
 import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityimpl.ActivityDef;
 import io.engineblock.activityimpl.ParameterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.Collectors;
 
-public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> implements Thread.UncaughtExceptionHandler {
+public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> implements Thread.UncaughtExceptionHandler, StrideOutputConsumer<DiagOpData> {
 
     private final static Logger logger = LoggerFactory.getLogger(AsyncDiagAction.class);
 
@@ -53,6 +57,7 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
 //    private PriorityBlockingQueue<StartedOp<DiagOpData>> asyncOps;
     private LinkedBlockingDeque<StartedOp<DiagOpData>> opQueue;
     private OpFinisher finisher;
+    private boolean enableOutputProcessing;
 
 
     public AsyncDiagAction(DiagActivity activity, int slot) {
@@ -135,7 +140,7 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
 
         this.diagRateLimiter = activity.getDiagRateLimiter();
 
-
+        this.enableOutputProcessing = params.getOptionalBoolean("enable_output_processing").orElse(false);
     }
 
     @Override
@@ -202,6 +207,7 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
         requestStop();
     }
 
+
     private static class OpFinisher implements Runnable {
         final BlockingQueue<StartedOp<DiagOpData>> queue;
         private final AsyncDiagAction action;
@@ -256,5 +262,17 @@ public class AsyncDiagAction extends BaseAsyncAction<DiagOpData, DiagActivity> i
 
         }
     }
+
+    @Override
+    public void onStrideOutput(List<CompletedOp<DiagOpData>> completedOps) {
+        if (enableOutputProcessing) {
+            logger.info("processing stride output for " + completedOps.get(0).getCycle());
+            long start = completedOps.get(0).getCycle();
+            long endPlus = completedOps.get(completedOps.size()-1).getCycle()+1;
+            String diagLog = completedOps.get(0).getData().getDiagLog().stream().collect(Collectors.joining("\n"));
+            activity.getSequenceBlocker().awaitAndRun(start, endPlus, () -> logger.info(" => " + start + " -> " + endPlus + ": " + diagLog));
+        }
+    }
+
 
 }

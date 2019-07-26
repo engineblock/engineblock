@@ -39,6 +39,7 @@ public class DiagActivity extends SimpleActivity implements Activity, ActivityDe
 
     private LongToIntFunction resultFunc = new ResultFunc_Modulo128();
     private LongUnaryOperator delayFunc = new DelayFunc_NoDelay();
+    private SequenceBlocker sequenceBlocker;
 
 
     public DiagActivity(ActivityDef activityDef) {
@@ -126,6 +127,13 @@ public class DiagActivity extends SimpleActivity implements Activity, ActivityDe
         return activityDef.getParams().getOptionalInteger("async").orElse(1);
     }
 
+    public synchronized SequenceBlocker getSequenceBlocker() {
+        if (sequenceBlocker==null) {
+            sequenceBlocker = new SequenceBlocker(getActivityDef().getStartCycle(), true);
+        }
+        return sequenceBlocker;
+    }
+
 
     private final class DelayFunc_NoDelay implements LongUnaryOperator {
         @Override
@@ -170,5 +178,7 @@ public class DiagActivity extends SimpleActivity implements Activity, ActivityDe
             return (int)resultValue;
         }
     }
+
+
 
 }

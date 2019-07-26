@@ -19,6 +19,22 @@ package io.engineblock.activityapi.core.ops.fluent.opfacets;
 
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 
-public interface SkippedOp<D> extends Payload<D>, CycleResult, CompletedOp<D> {
-    int getSkippedReason();
+/**
+ * A CompletedOp can be any of
+ * <UL>
+ *     <LI>{@link SucceededOp}</LI>
+ *     <LI>{@link FailedOp}</LI>
+ *     <LI>{@link SkippedOp}</LI>
+ * </UL>
+ *
+ * It may be necessary to downcast a completed Op in order to
+ * get more contextual details from it.
+ *
+ * @param <D> The type of delegate needed for the
+ *           implementing protocol
+ */
+public interface CompletedOp<D> extends Payload<D>, CycleResult {
+    long getStartedAtNanos();
+    public long getServiceTimeNanos();
+    public long getResponseTimeNanos();
 }

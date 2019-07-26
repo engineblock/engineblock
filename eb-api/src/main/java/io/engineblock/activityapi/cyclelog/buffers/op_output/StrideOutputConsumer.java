@@ -15,10 +15,12 @@
  * /
  */
 
-package io.engineblock.activityapi.core.ops.fluent.opfacets;
+package io.engineblock.activityapi.cyclelog.buffers.op_output;
 
-import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
+import io.engineblock.activityapi.core.ops.fluent.opfacets.CompletedOp;
 
-public interface SkippedOp<D> extends Payload<D>, CycleResult, CompletedOp<D> {
-    int getSkippedReason();
+import java.util.List;
+
+public interface StrideOutputConsumer<D> {
+    public void onStrideOutput(List<CompletedOp<D>> ops);
 }

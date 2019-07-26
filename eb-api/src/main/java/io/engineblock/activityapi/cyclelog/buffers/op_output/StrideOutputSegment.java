@@ -15,10 +15,16 @@
  * /
  */
 
-package io.engineblock.activityapi.core.ops.fluent.opfacets;
+package io.engineblock.activityapi.cyclelog.buffers.op_output;
 
-import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 
-public interface SkippedOp<D> extends Payload<D>, CycleResult, CompletedOp<D> {
-    int getSkippedReason();
+
+public interface StrideOutputSegment<D> extends Comparable<StrideOutputSegment<D>>, Iterable<D> {
+    long getCount();
+    long getMinCycle();
+
+    default int compareTo(StrideOutputSegment other) {
+        return Long.compare(getMinCycle(),other.getMinCycle());
+    }
+
 }

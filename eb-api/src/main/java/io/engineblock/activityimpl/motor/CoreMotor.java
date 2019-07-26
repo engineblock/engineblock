@@ -21,6 +21,7 @@ import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.core.ops.fluent.OpTracker;
 import io.engineblock.activityapi.core.ops.fluent.OpTrackerImpl;
 import io.engineblock.activityapi.core.ops.fluent.opfacets.TrackedOp;
+import io.engineblock.activityapi.cyclelog.buffers.op_output.StrideOutputConsumer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
@@ -231,6 +232,11 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
             // the async action is proven durable
             if (action instanceof AsyncAction) {
 
+                StrideOutputConsumer outputreader = null;
+                if (action instanceof StrideOutputConsumer) {
+                    outputreader = (StrideOutputConsumer) action;
+                }
+
                 @SuppressWarnings("unchecked")
                 AsyncAction<D> async = AsyncAction.class.cast(action);
                 opTracker = new OpTrackerImpl<>(activity, slotId);
@@ -255,7 +261,14 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                         strideDelay = strideRateLimiter.maybeWaitForOp();
                     }
 
-                    StrideTracker<D> strideTracker = new StrideTracker<>(stridesServiceTimer,stridesResponseTimer, strideDelay, cycleSegment.peekNextCycle(), stride, output);
+                    StrideTracker<D> strideTracker = new StrideTracker<>(
+                            stridesServiceTimer,
+                            stridesResponseTimer,
+                            strideDelay,
+                            cycleSegment.peekNextCycle(),
+                            stride,
+                            output,
+                            outputreader);
                     strideTracker.start();
 
                     long strideStart = System.nanoTime();
