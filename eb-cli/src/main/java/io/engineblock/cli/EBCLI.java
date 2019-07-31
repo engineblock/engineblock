@@ -10,12 +10,12 @@ import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
 import io.engineblock.core.ShutdownManager;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.metrics.HistoLogChartGenerator;
 import io.engineblock.metrics.MetricReporters;
 import io.engineblock.script.MetricsMapper;
 import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
-import io.virtdata.apps.MainApp;
+import io.virtdata.apps.VirtDataMainApp;
+import io.virtdata.docsys.core.DocServerApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,11 @@ public class EBCLI {
 
     public void run(String[] args) { 
         if (args.length>0 && args[0].toLowerCase().equals("virtdata")) {
-            MainApp.main(Arrays.copyOfRange(args,1,args.length));
+            VirtDataMainApp.main(Arrays.copyOfRange(args,1,args.length));
+            System.exit(0);
+        }
+        if (args.length>0 && args[0].toLowerCase().equals("docserver")) {
+            DocServerApp.main(Arrays.copyOfRange(args,1,args.length));
             System.exit(0);
         }
 

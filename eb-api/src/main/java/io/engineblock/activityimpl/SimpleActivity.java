@@ -255,11 +255,19 @@ public class SimpleActivity implements Activity {
             }
             long stride = getParams().getOptionalLong("stride").orElseThrow();
             long cycles = getActivityDef().getCycleCount();
-            if (cycles<stride) {
+            if (cycles < stride) {
                 throw new RuntimeException(
-                        "The specified cycles (" + cycles + ") are less than the stride (" + stride + "). This means there aren't enough cycles to cause a stride to be executed."
+                        "The specified cycles (" + cycles + ") are less than the stride (" + stride + "). This means there aren't enough cycles to cause a stride to be executed." +
+                                " If this was intended, then set stride low enough to allow it."
                 );
             }
+        }
+
+        long cycleCount = getActivityDef().getCycleCount();
+        long stride = getActivityDef().getParams().getOptionalLong("stride").orElseThrow();
+        if ((cycleCount % stride) != 0) {
+            logger.warn("The stride does not evenly divide cycles. Only full strides will be executed," +
+                    "leaving some cycles unused.");
         }
 
 

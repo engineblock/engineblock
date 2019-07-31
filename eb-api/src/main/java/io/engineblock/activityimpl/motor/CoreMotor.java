@@ -232,15 +232,17 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
             // the async action is proven durable
             if (action instanceof AsyncAction) {
 
-                StrideOutputConsumer outputreader = null;
-                if (action instanceof StrideOutputConsumer) {
-                    outputreader = (StrideOutputConsumer) action;
-                }
 
                 @SuppressWarnings("unchecked")
                 AsyncAction<D> async = AsyncAction.class.cast(action);
+
                 opTracker = new OpTrackerImpl<>(activity, slotId);
-                opTracker.setCycleOpFunction(((AsyncAction<D>) action).getOpInitFunction());
+                opTracker.setCycleOpFunction(async.getOpInitFunction());
+
+                StrideOutputConsumer<D> outputreader = null;
+                if (action instanceof StrideOutputConsumer) {
+                    outputreader = (StrideOutputConsumer<D>) async;
+                }
 
                 while (slotState.get() == Running) {
 
@@ -261,7 +263,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                         strideDelay = strideRateLimiter.maybeWaitForOp();
                     }
 
-                    StrideTracker<D> strideTracker = new StrideTracker<>(
+                    StrideTracker<D> strideTracker = new StrideTracker<D>(
                             stridesServiceTimer,
                             stridesResponseTimer,
                             strideDelay,
