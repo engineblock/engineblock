@@ -17,6 +17,7 @@
 
 package io.engineblock.activityapi.core;
 
+import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityapi.output.OutputDispenser;
@@ -152,6 +153,8 @@ public interface Activity extends Comparable<Activity>, ActivityDefObserver {
      * @return The stride {@link RateLimiter}
      */
     RateLimiter getPhaseLimiter();
+
+    Timer getResultTimer();
 
     /**
      * Set the phase rate limiter for this activity. This method should only

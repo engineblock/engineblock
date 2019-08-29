@@ -22,7 +22,6 @@ cycle_rate = {
     "threads" : "10",
     "cyclerate" : "2000",
     "interval" : "2000",
-    "strictmetricnames" : "true",
     "async" : "1000"
 };
 
@@ -33,12 +32,13 @@ print('cyclerate at 0ms:' + activities.cycle_rate.cyclerate);
 scenario.waitMillis(1000);
 activities.cycle_rate.cyclerate='50000';
 print("measured cycle increment per second is expected to adjust to 50000");
+
 print('cyclerate now:' + activities.cycle_rate.cyclerate);
 
-var lastcount=metrics.cycle_rate.cycles.servicetime.count;
+var lastcount=metrics.cycle_rate.cycles.servicetime.count.servicetime;
 for(i=0;i<10;i++) {
     scenario.waitMillis(1000);
-    var nextcount=metrics.cycle_rate.cycles.servicetime.count;
+    var nextcount=metrics.cycle_rate.cycles.servicetime.count.servicetime;
     var cycles = (nextcount - lastcount);
     print("new this second: " + (nextcount - lastcount));
     lastcount=nextcount;

@@ -62,8 +62,8 @@ public class MetricRegistryBindings extends ReadOnlyBindings implements MetricRe
     public Object get(Object key) {
         Object got = metricMap.map.get(key);
         if (got==null) {
-            throw new RuntimeException("Attempted to get metrics node with name '" + key + "', but it was not found. Perhaps you " +
-                    "were looking for one of " + this.keySet().stream().collect(Collectors.joining(",","[","]")));
+            throw new RuntimeException("Attempted to get metrics node with name '" + key + "', but it was not found. Perhaps you were looking for one of its children: "
+                    + this.keySet().stream().collect(Collectors.joining(",","[","]")));
         }
         return got;
     }

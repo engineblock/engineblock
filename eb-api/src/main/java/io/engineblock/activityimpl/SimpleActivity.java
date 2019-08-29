@@ -1,5 +1,6 @@
 package io.engineblock.activityimpl;
 
+import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.engineblock.activityapi.input.InputDispenser;
@@ -8,6 +9,7 @@ import io.engineblock.activityapi.planning.OpSequence;
 import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityapi.ratelimits.RateLimiters;
 import io.engineblock.activityapi.ratelimits.RateSpec;
+import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -189,6 +191,12 @@ public class SimpleActivity implements Activity {
     @Override
     public RateLimiter getPhaseLimiter() {
         return phaseLimiter;
+    }
+
+
+    @Override
+    public Timer getResultTimer() {
+        return ActivityMetrics.timer(getActivityDef(),"result");
     }
 
     @Override

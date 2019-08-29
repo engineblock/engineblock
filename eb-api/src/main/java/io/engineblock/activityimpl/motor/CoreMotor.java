@@ -479,6 +479,10 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
         }
 
         this.stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
+        strideRateLimiter = activity.getStrideLimiter();
+        cycleRateLimiter = activity.getCycleLimiter();
+        phaseRateLimiter = activity.getPhaseLimiter();
+
     }
 
     @Override

@@ -18,6 +18,7 @@
 package io.engineblock.activitycore;
 
 import io.engineblock.activityapi.core.ProgressMeter;
+import io.engineblock.activityapi.core.RunState;
 import io.engineblock.core.ScenarioController;
 import io.engineblock.metrics.IndicatorMode;
 import io.engineblock.metrics.PeriodicRunnable;
@@ -26,7 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 public class ProgressIndicator implements Runnable {
 
@@ -35,6 +38,7 @@ public class ProgressIndicator implements Runnable {
     private final ScenarioController sc;
     private PeriodicRunnable<ProgressIndicator> runnable;
     private IndicatorMode indicatorMode = IndicatorMode.console;
+    private Set<String> seen = new HashSet<>();
 
     private long intervalMillis=1L;
 
@@ -75,8 +79,20 @@ public class ProgressIndicator implements Runnable {
     public void run() {
         Collection<ProgressMeter> progressMeters = sc.getProgressMeters();
         for (ProgressMeter meter : progressMeters) {
+
+            boolean lastReport=false;
+            if (meter.getProgress()>=1.0d || meter.getProgressState()== RunState.Finished) {
+                if (seen.contains(meter.getProgressName())) {
+                    continue;
+                } else {
+                    seen.add(meter.getProgressName());
+                    lastReport=true;
+                }
+            }
+
             String progress = meter.getProgressName() + ": " + formatProgress(meter.getProgress()) + "/" + meter.getProgressState() +
-                    " (details: " + meter.getProgressDetails()+")";
+                    " (details: " + meter.getProgressDetails()+")" + (lastReport ? " (last report)" : "");
+
             switch (indicatorMode) {
                 case console:
                     System.out.println(progress);

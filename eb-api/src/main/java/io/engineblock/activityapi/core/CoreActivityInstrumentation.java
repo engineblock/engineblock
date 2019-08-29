@@ -35,12 +35,14 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
     private final ActivityDef def;
     private final ParameterMap params;
     private final String svcTimeSuffix;
+    private final boolean strictNaming;
 
     public CoreActivityInstrumentation(Activity activity) {
         this.activity = activity;
         this.def = activity.getActivityDef();
         this.params = def.getParams();
-        svcTimeSuffix = params.getOptionalBoolean(STRICTMETRICNAMES).orElse(true) ? SERVICE_TIME : "";
+        this.strictNaming = params.getOptionalBoolean(STRICTMETRICNAMES).orElse(true);
+        svcTimeSuffix = strictNaming ? SERVICE_TIME : "";
     }
 
 
@@ -67,7 +69,7 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
 
     @Override
     public synchronized Timer getOrCreateCyclesServiceTimer() {
-        return ActivityMetrics.timer(def, "cycles" + SERVICE_TIME);
+        return ActivityMetrics.timer(def, "cycles" + svcTimeSuffix);
     }
 
     @Override

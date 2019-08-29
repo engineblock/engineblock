@@ -64,8 +64,12 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsVersion()) {
+        if (options.isWantsVersionShort()) {
             System.out.println(new VersionInfo().getVersion());
+            System.exit(0);
+        }
+
+        if (options.wantsVersionCoords()) {
             System.out.println(new VersionInfo().getArtifactCoordinates());
             System.exit(0);
         }

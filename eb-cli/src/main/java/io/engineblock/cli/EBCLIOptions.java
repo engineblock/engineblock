@@ -28,7 +28,8 @@ public class EBCLIOptions {
     private static final String ACTIVITY_TYPES = "--list-activity-types";
     private static final String WANTS_INPUT_TYPES = "--list-input-types";
     private static final String WANTS_OUTPUT_TYPES = "--list-output-types";
-    private static final String WANTS_VERSION_LONG = "--version";
+    private static final String WANTS_VERSION_COORDS = "--version-coords";
+    private static final String WANTS_VERSION_SHORT = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
 
     // Execution
@@ -75,7 +76,8 @@ public class EBCLIOptions {
 
     private LinkedList<Cmd> cmdList = new LinkedList<>();
     private int logsMax = 0;
-    private boolean wantsVersion = false;
+    private boolean wantsVersionShort = false;
+    private boolean wantsVersionCoords = false;
     private boolean wantsActivityHelp = false;
     private String wantsActivityHelpFor;
     private boolean wantsActivityTypes = false;
@@ -195,9 +197,13 @@ public class EBCLIOptions {
                     arglist.removeFirst();
                     progressSpec = readWordOrThrow(arglist, "a progress indicator, like 'log:1m' or 'screen:10s', or just 'log' or 'screen'");
                     break;
-                case WANTS_VERSION_LONG:
+                case WANTS_VERSION_SHORT:
                     arglist.removeFirst();
-                    wantsVersion = true;
+                    wantsVersionShort = true;
+                    break;
+                case WANTS_VERSION_COORDS:
+                    arglist.removeFirst();
+                    wantsVersionCoords = true;
                     break;
                 case ADVANCED_HELP:
                     arglist.removeFirst();
@@ -344,8 +350,12 @@ public class EBCLIOptions {
         return showScript;
     }
 
-    public boolean wantsVersion() {
-        return wantsVersion;
+    public boolean wantsVersionCoords() {
+        return wantsVersionCoords;
+    }
+
+    public boolean isWantsVersionShort() {
+        return wantsVersionShort;
     }
 
     public boolean wantsActivityTypes() {

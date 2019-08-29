@@ -30,9 +30,17 @@ public class TestEBCLIOptions {
     }
 
     @Test
-    public void shouldRecognizeVersion() {
+    public void shouldRecognizeShortVersion() {
         EBCLIOptions opts = new EBCLIOptions(new String[]{"--version"});
-        assertThat(opts.wantsVersion()).isTrue();
+        assertThat(opts.isWantsVersionShort()).isTrue();
+        assertThat(opts.wantsVersionCoords()).isFalse();
+    }
+
+    @Test
+    public void shouldRecognizeVersion() {
+        EBCLIOptions opts = new EBCLIOptions(new String[]{"--version-coords"});
+        assertThat(opts.isWantsVersionShort()).isFalse();
+        assertThat(opts.wantsVersionCoords()).isTrue();
     }
 
     @Test
