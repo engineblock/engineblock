@@ -64,37 +64,58 @@ public class SSLKsFactory {
                     logger.warn("Please update your 'ssl=true' parameter to 'ssl=jdk'");
                 }
 
-                String keystorePath = def.getParams().getOptionalString("keystore").orElse("JKS");
-                String keystorePass = def.getParams().getOptionalString("kspass").orElse("NONE");
+                Optional<String> keystorePath = def.getParams().getOptionalString("keystore");
+                Optional<String> keystorePass = def.getParams().getOptionalString("kspass");
+
+                Optional<String> truststorePath = def.getParams().getOptionalString("truststore");
+                Optional<String> truststorePass = def.getParams().getOptionalString("tspass");
+
                 String tlsVersion = def.getParams().getOptionalString("tlsversion").orElse("TLSv1.2");
 
-                try {
-                    KeyStore ks = KeyStore.getInstance("JKS");
-                    ks.load(new FileInputStream(keystorePath), keystorePass.toCharArray());
+                if (keystorePath.isPresent() && keystorePass.isPresent() && truststorePath.isPresent() && truststorePass.isPresent()) {
+                    try {
+                        KeyStore ks = KeyStore.getInstance("JKS");
+                        ks.load(new FileInputStream(keystorePath.get()), keystorePass.get().toCharArray());
 
-                    KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                    kmf.init(ks, keystorePass.toCharArray());
+                        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                        kmf.init(ks, keystorePass.get().toCharArray());
 
-                    TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                    String truststorePath = System.getProperty("javax.net.ssl.trustStore");
-                    if (truststorePath != null && !truststorePath.isEmpty()) {
-                        KeyStore ts = KeyStore.getInstance("JKS");
-                        InputStream trustStore = new FileInputStream(truststorePath);
+                        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                        if (!truststorePath.get().isEmpty()) {
+                            KeyStore ts = KeyStore.getInstance("JKS");
+                            InputStream trustStore = new FileInputStream(truststorePath.get());
 
-                        String truststorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
-                        ts.load(trustStore, truststorePassword.toCharArray());
-                        tmf.init(ts);
-                    } else {
-                        tmf.init(ks);
+                            String truststorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
+                            ts.load(trustStore, truststorePassword.toCharArray());
+                            tmf.init(ts);
+                        } else {
+                            tmf.init(ks);
+                        }
+
+                        SSLContext sc = SSLContext.getInstance(tlsVersion);
+                        sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+                        return sc;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
 
-                    SSLContext sc = SSLContext.getInstance(tlsVersion);
-                    sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-
-                    return sc;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                } else if (keystorePath.isEmpty() && keystorePass.isEmpty() && truststorePath.isPresent() && truststorePass.isPresent()) {
+                    try {
+                        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                        KeyStore ts = KeyStore.getInstance("JKS");
+                        InputStream trustStore = new FileInputStream(truststorePath.get());
+                        String truststorePassword = truststorePass.get();
+                        ts.load(trustStore, truststorePassword.toCharArray());
+                        tmf.init(ts);
+                        SSLContext sc = SSLContext.getInstance(tlsVersion);
+                        sc.init(null, tmf.getTrustManagers(), null);
+                        return sc;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+
 
             } else if (sslParam.get().equals("openssl")) {
 
@@ -103,6 +124,8 @@ public class SSLKsFactory {
                 String caCertFileLocation = def.getParams().getOptionalString("caCertFilePath").orElse(null);
                 String certFileLocation = def.getParams().getOptionalString("certFilePath").orElse(null);
                 String keyFileLocation = def.getParams().getOptionalString("keyFilePath").orElse(null);
+                String truststorePath = def.getParams().getOptionalString("truststore").orElse(null);
+                String truststorePass = def.getParams().getOptionalString("tspass").orElse(null);
 
                 try {
                     KeyStore ks = KeyStore.getInstance("JKS", "SUN");
@@ -116,13 +139,12 @@ public class SSLKsFactory {
                     ks.setCertificateEntry(cert.getSubjectX500Principal().getName(), cert);
 
                     TrustManagerFactory tMF = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                    String truststorePath = System.getProperty("javax.net.ssl.trustStore");
-                    if (truststorePath != null && !truststorePath.isEmpty()) {
+                    //String truststorePath = System.getProperty("javax.net.ssl.trustStore");
+
+                    if (truststorePath != null && !truststorePath.isEmpty() && truststorePass != null) {
                         KeyStore ts = KeyStore.getInstance("JKS");
                         InputStream trustStore = new FileInputStream(truststorePath);
-
-                        String truststorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
-                        ts.load(trustStore, truststorePassword.toCharArray());
+                        ts.load(trustStore, truststorePass.toCharArray());
                         tMF.init(ts);
                     } else {
                         tMF.init(ks);
@@ -150,5 +172,4 @@ public class SSLKsFactory {
         } else {
             return null;
         }
-    }
 }
