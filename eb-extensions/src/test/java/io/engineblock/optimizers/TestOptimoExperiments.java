@@ -55,28 +55,7 @@ public class TestOptimoExperiments {
     @Test
     public void testNewAlgo() {
 
-        MultivariateFunction m = new MultivariateFunction() {
-            private int iter;
-            private Random r = new Random(System.nanoTime());
-
-            @Override
-            public double value(double[] doubles) {
-                iter++;
-
-                double value = r.nextDouble()*10.0;
-                System.out.format("i:%d NOISE=%.3f GUESS=%s\n",iter, value,Arrays.toString(doubles));
-
-                double product = 1.0d;
-                for (double aDouble : doubles) {
-                    double component = 100.0 - Math.abs(aDouble-100);
-                    product+=component;
-                    System.out.print(" +" + component);
-                }
-                value += product;
-                System.out.format(" val=%.3f\n\n",value);
-                return value;
-            }
-        };
+        MultivariateFunction m = new SumDeltaNoise();
 
 //        MultivariateDifferentiableFunction mvdf =FunctionUtils.
 //        MultivariateVectorFunction mvf = new GradientFunction(mvdf);
@@ -107,6 +86,29 @@ public class TestOptimoExperiments {
                         " value=" + m.value(result.getPoint())
         );
 
+    }
+
+    private static class SumDeltaNoise implements MultivariateFunction {
+        private int iter;
+        private Random r = new Random(System.nanoTime());
+
+        @Override
+        public double value(double[] doubles) {
+            iter++;
+
+            double value = r.nextDouble()*10.0;
+            System.out.format("i:%d NOISE=%.3f GUESS=%s\n",iter, value, Arrays.toString(doubles));
+
+            double product = 1.0d;
+            for (double aDouble : doubles) {
+                double component = 100.0 - Math.abs(aDouble-100);
+                product+=component;
+                System.out.print(" +" + component);
+            }
+            value += product;
+            System.out.format(" val=%.3f\n\n",value);
+            return value;
+        }
     }
 
 //    private final static DoubleBinaryOperator f1 = (a,b) -> {

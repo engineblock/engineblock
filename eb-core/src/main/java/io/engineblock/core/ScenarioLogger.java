@@ -111,6 +111,7 @@ public class ScenarioLogger {
 
     private void purgeOldFiles(Logger logger) {
         if (maxLogfiles==0) {
+            logger.debug("Not purging old files, since maxLogFiles is 0.");
             return;
         }
 
