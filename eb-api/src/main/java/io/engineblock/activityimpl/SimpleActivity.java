@@ -240,7 +240,7 @@ public class SimpleActivity implements Activity {
     /**
      * Modify the provided ActivityDef with defaults for stride and cycles, if
      * they haven't been provided, based on the length of the sequence as determined
-     * by the provided ratios.
+     * by the provided ratios. Also, modify the ActivityDef with reasonable defaults when requested.
      */
     public void setDefaultsFromOpSequence(OpSequence seq) {
         Optional<String> strideOpt = getParams().getOptionalString("stride");
@@ -278,8 +278,33 @@ public class SimpleActivity implements Activity {
                     "leaving some cycles unused.");
         }
 
+        Optional<String> threadSpec = activityDef.getParams().getOptionalString("threads");
+        if (threadSpec.isPresent()) {
+            String spec = threadSpec.get();
+            int processors = Runtime.getRuntime().availableProcessors();
+            if (spec.toLowerCase().equals("auto")) {
+                int threads = processors*10;
+                logger.info("setting threads to " + threads + " (auto)");
+                activityDef.setThreads(threads);
+            } else if (spec.toLowerCase().matches("\\d+x")) {
+                String multiplier = spec.substring(0, spec.length() - 1);
+                int threads = processors * Integer.parseInt(multiplier);
+                logger.info("setting threads to " + threads + " (" + multiplier +"x)");
+                activityDef.setThreads(threads);
+            } else if (spec.toLowerCase().matches("\\d+")) {
+                logger.info("setting threads to " + spec + "(direct)");
+                activityDef.setThreads(Integer.parseInt(spec));
+            }
+        } else {
+            if (cycleCount>1000) {
+                logger.warn("For testing at scale, it is highly recommended that you " +
+                        "set threads to a value higher than the default of 1." +
+                        " hint: you can use threads=auto for reasonable default, or" +
+                        " consult the topic on threads with `help threads` for" +
+                        " more information.");
+
+            }
+        }
 
     }
-
-
 }
