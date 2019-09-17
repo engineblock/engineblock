@@ -66,10 +66,8 @@ public class SSLKsFactory {
 
                 Optional<String> keystorePath = def.getParams().getOptionalString("keystore");
                 Optional<String> keystorePass = def.getParams().getOptionalString("kspass");
-
                 Optional<String> truststorePath = def.getParams().getOptionalString("truststore");
                 Optional<String> truststorePass = def.getParams().getOptionalString("tspass");
-
                 String tlsVersion = def.getParams().getOptionalString("tlsversion").orElse("TLSv1.2");
 
                 if (keystorePath.isPresent() && keystorePass.isPresent() && truststorePath.isPresent() && truststorePass.isPresent()) {
@@ -114,6 +112,8 @@ public class SSLKsFactory {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
+                } else {
+                    throw new RuntimeException("SSL arguments are incorrectly configured. Please Check.");
                 }
 
 
@@ -172,4 +172,5 @@ public class SSLKsFactory {
         } else {
             return null;
         }
+    }
 }
