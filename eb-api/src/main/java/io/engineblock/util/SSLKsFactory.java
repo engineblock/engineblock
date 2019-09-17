@@ -30,6 +30,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -75,7 +76,17 @@ public class SSLKsFactory {
                     kmf.init(ks, keystorePass.toCharArray());
 
                     TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                    tmf.init(ks);
+                    String truststorePath = System.getProperty("javax.net.ssl.trustStore");
+                    if (truststorePath != null && !truststorePath.isEmpty()) {
+                        KeyStore ts = KeyStore.getInstance("JKS");
+                        InputStream trustStore = new FileInputStream(truststorePath);
+
+                        String truststorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
+                        ts.load(trustStore, truststorePassword.toCharArray());
+                        tmf.init(ts);
+                    } else {
+                        tmf.init(ks);
+                    }
 
                     SSLContext sc = SSLContext.getInstance(tlsVersion);
                     sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
@@ -105,7 +116,17 @@ public class SSLKsFactory {
                     ks.setCertificateEntry(cert.getSubjectX500Principal().getName(), cert);
 
                     TrustManagerFactory tMF = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                    tMF.init(ks);
+                    String truststorePath = System.getProperty("javax.net.ssl.trustStore");
+                    if (truststorePath != null && !truststorePath.isEmpty()) {
+                        KeyStore ts = KeyStore.getInstance("JKS");
+                        InputStream trustStore = new FileInputStream(truststorePath);
+
+                        String truststorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
+                        ts.load(trustStore, truststorePassword.toCharArray());
+                        tMF.init(ts);
+                    } else {
+                        tMF.init(ks);
+                    }
 
                     SslContext sslContext = SslContextBuilder
                             .forClient()
