@@ -9,7 +9,7 @@
         </encoder>
     </appender>
 
-    <appender name="DOCSLOGS" class="ch.qos.logback.core.rolling.RollingFileAppende">
+    <appender name="DOCSLOGS" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/docserver.log</file>
         <encoder>
             <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
@@ -24,6 +24,7 @@
             <maxHistory>1</maxHistory>
         </rollingPolicy>
     </appender>
+
     <logger name="io.virtdata.docsys" level="info" additivity="true">
         <appender-ref ref="DOCSLOGS"/>
     </logger>
