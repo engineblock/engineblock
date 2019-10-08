@@ -41,6 +41,7 @@ public class DiagOpData {
      *
      * @param simulatedDelayNanos The amount of nanos ensure as a minimum
      *                            of processing time for this op
+     * @return this diagnostic data, for method chaining
      */
     public DiagOpData setSimulatedDelayNanos(long simulatedDelayNanos) {
         this.simulatedDelayNanos = simulatedDelayNanos;

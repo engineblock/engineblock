@@ -241,6 +241,7 @@ public class SimpleActivity implements Activity {
      * Modify the provided ActivityDef with defaults for stride and cycles, if
      * they haven't been provided, based on the length of the sequence as determined
      * by the provided ratios.
+     * @param seq The calculated sequence for the activity
      */
     public void setDefaultsFromOpSequence(OpSequence seq) {
         Optional<String> strideOpt = getParams().getOptionalString("stride");
