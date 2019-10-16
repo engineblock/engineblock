@@ -83,7 +83,7 @@ public class SSLKsFactory {
                             KeyStore ts = KeyStore.getInstance("JKS");
                             InputStream trustStore = new FileInputStream(truststorePath.get());
 
-                            String truststorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
+                            String truststorePassword = truststorePass.get();
                             ts.load(trustStore, truststorePassword.toCharArray());
                             tmf.init(ts);
                         } else {
