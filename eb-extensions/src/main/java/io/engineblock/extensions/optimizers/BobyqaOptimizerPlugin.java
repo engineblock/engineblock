@@ -15,30 +15,28 @@
  * /
  */
 
-package io.engineblock.extensions.optimo;
+package io.engineblock.extensions.optimizers;
 
 import com.codahale.metrics.MetricRegistry;
-import io.engineblock.extensions.ScriptingPluginInfo;
-import io.virtdata.annotations.Service;
 import org.slf4j.Logger;
 
 import javax.script.ScriptContext;
 
-@Service(ScriptingPluginInfo.class)
-public class OptimoPluginData implements ScriptingPluginInfo<OptimoPlugin> {
+public class BobyqaOptimizerPlugin {
 
-    @Override
-    public String getDescription() {
-        return "Allows use of the BOBYQA optimizer in scripts.";
+    private final Logger logger;
+    private final MetricRegistry metricRegistry;
+    private final ScriptContext scriptContext;
+
+    public BobyqaOptimizerPlugin(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+        this.logger = logger;
+        this.metricRegistry = metricRegistry;
+        this.scriptContext = scriptContext;
     }
 
-    @Override
-    public OptimoPlugin getExtensionObject(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
-        return new OptimoPlugin(logger, metricRegistry, scriptContext);
+    public BobyqaOptimizerInstance init() {
+        return new BobyqaOptimizerInstance(logger,metricRegistry,scriptContext);
     }
 
-    @Override
-    public String getBaseVariableName() {
-        return "optimos";
-    }
+
 }

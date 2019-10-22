@@ -15,7 +15,7 @@
  * /
  */
 
-package io.engineblock.extensions.optimo;
+package io.engineblock.extensions.optimizers;
 
 import com.codahale.metrics.MetricRegistry;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -29,7 +29,7 @@ import javax.script.ScriptContext;
 import java.util.Arrays;
 import java.util.List;
 
-public class OptimoInstance {
+public class BobyqaOptimizerInstance {
 
     private final Logger logger;
     private final MetricRegistry metricRegistry;
@@ -40,62 +40,62 @@ public class OptimoInstance {
     private double stoppingTrustRegionRadius = 1.0D;
 
     private int varcount;
-    private MultiVariateScript advancingScriptObject;
-    private MultiVariateScript objectiveScriptObject;
+    private MultivariateDynamicScript advancingScriptObject;
+    private MultivariateDynamicScript objectiveScriptObject;
     private SimpleBounds bounds;
     private InitialGuess initialGuess;
     private PointValuePair result;
     private int maxEval;
 
-    public OptimoInstance(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
+    public BobyqaOptimizerInstance(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         this.logger = logger;
         this.metricRegistry = metricRegistry;
         this.scriptContext = scriptContext;
     }
 
-    public OptimoInstance setPoints(int numberOfInterpolationPoints) {
+    public BobyqaOptimizerInstance setPoints(int numberOfInterpolationPoints) {
         this.numberOfInterpolationPoints = numberOfInterpolationPoints;
         return this;
     }
-    public OptimoInstance setInitialRadius(double initialTrustRegionRadius) {
+    public BobyqaOptimizerInstance setInitialRadius(double initialTrustRegionRadius) {
         this.initialTrustRegionRadius = initialTrustRegionRadius;
         return this;
     }
-    public OptimoInstance setStoppingRadius(double stoppingTrustRegionRadius) {
+    public BobyqaOptimizerInstance setStoppingRadius(double stoppingTrustRegionRadius) {
         this.stoppingTrustRegionRadius=stoppingTrustRegionRadius;
         return this;
     }
 
-    public OptimoInstance setSteppingFunction(int varcount, Object f) {
+    public BobyqaOptimizerInstance setSteppingFunction(int varcount, Object f) {
         if (f instanceof ScriptObjectMirror) {
             ScriptObjectMirror scriptObject = (ScriptObjectMirror) f;
             if (!scriptObject.isFunction()) {
                 throw new RuntimeException("Unable to setFunction with a non-function object");
             }
-            this.advancingScriptObject = new MultiVariateScript(logger,varcount, scriptObject);
+            this.advancingScriptObject = new MultivariateDynamicScript(logger,varcount, scriptObject);
         }
         return this;
     }
 
-    public OptimoInstance setBounds(double... values) {
+    public BobyqaOptimizerInstance setBounds(double... values) {
         double[] bottom = Arrays.copyOfRange(values, 0, values.length >> 1);
         double[] top = Arrays.copyOfRange(values, values.length >> 1, values.length);
         this.bounds = new SimpleBounds(bottom, top);
         return this;
     }
 
-    public OptimoInstance setObjectiveFunction(int varcount, Object f) {
+    public BobyqaOptimizerInstance setObjectiveFunction(int varcount, Object f) {
         if (f instanceof ScriptObjectMirror) {
             ScriptObjectMirror scriptObject = (ScriptObjectMirror) f;
             if (!scriptObject.isFunction()) {
                 throw new RuntimeException("Unable to setFunction with a non-function object");
             }
-            this.objectiveScriptObject = new MultiVariateScript(logger,varcount, scriptObject);
+            this.objectiveScriptObject = new MultivariateDynamicScript(logger,varcount, scriptObject);
         }
         return this;
     }
 
-    public OptimoInstance setMaxEval(int maxEval) {
+    public BobyqaOptimizerInstance setMaxEval(int maxEval) {
         this.maxEval = maxEval;
         return this;
     }
