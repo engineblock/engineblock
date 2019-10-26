@@ -12,5 +12,5 @@ optimo.setObjectiveFunction(2,
     }
 );
 var result = optimo.optimize([1.0,1.0]);
-print("optimized result was " + result);
+print("optimized result was " + result[0] + "," + result[1]);
 
