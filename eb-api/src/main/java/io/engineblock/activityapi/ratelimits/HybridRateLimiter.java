@@ -171,7 +171,9 @@ public class HybridRateLimiter implements Startable, RateLimiter {
 
         switch (state) {
             case Started:
-                logger.warn("Tried to start a rate limiter that was already started. If this is desired, use restart() instead");
+//                logger.warn("Tried to start a rate limiter that was already started. If this is desired, use restart() instead");
+                // TODO: Find a better way to warn about spurious rate limiter
+                // starts, since the check condition was not properly isolated
             case Idle:
                 long nanos = getNanoClockTime();
                 this.starttime = nanos;
