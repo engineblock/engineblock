@@ -35,17 +35,18 @@ public class BobyqaOptimizerInstance {
     private final MetricRegistry metricRegistry;
     private final ScriptContext scriptContext;
 
-    private int numberOfInterpolationPoints = 9;
+    private int interpolations = 0;
     private double initialTrustRegionRadius = Double.MAX_VALUE;
     private double stoppingTrustRegionRadius = 1.0D;
 
-    private int varcount;
-    private MultivariateDynamicScript advancingScriptObject;
-    private MultivariateDynamicScript objectiveScriptObject;
+    private MVParams params = new MVParams();
+
+    private MultivariateObjectScript objectiveScriptObject;
     private SimpleBounds bounds;
     private InitialGuess initialGuess;
     private PointValuePair result;
     private int maxEval;
+    private MVLogger mvLogger;
 
     public BobyqaOptimizerInstance(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         this.logger = logger;
@@ -54,7 +55,7 @@ public class BobyqaOptimizerInstance {
     }
 
     public BobyqaOptimizerInstance setPoints(int numberOfInterpolationPoints) {
-        this.numberOfInterpolationPoints = numberOfInterpolationPoints;
+        this.interpolations = numberOfInterpolationPoints;
         return this;
     }
     public BobyqaOptimizerInstance setInitialRadius(double initialTrustRegionRadius) {
@@ -66,15 +67,18 @@ public class BobyqaOptimizerInstance {
         return this;
     }
 
-    public BobyqaOptimizerInstance setSteppingFunction(int varcount, Object f) {
-        if (f instanceof ScriptObjectMirror) {
-            ScriptObjectMirror scriptObject = (ScriptObjectMirror) f;
-            if (!scriptObject.isFunction()) {
-                throw new RuntimeException("Unable to setFunction with a non-function object");
-            }
-            this.advancingScriptObject = new MultivariateDynamicScript(logger,varcount, scriptObject);
-        }
-        return this;
+    public BobyqaOptimizerInstance setMaxPoints() {
+        return this.setPoints(getMaxInterpolations());
+    }
+    public int getMaxInterpolations() {
+        return (int) (0.5d* ((this.params.size()+1) * (this.params.size()+2)));
+    }
+
+    public BobyqaOptimizerInstance setMinPoints() {
+        return this.setPoints(getMinInterpolations());
+    }
+    public int getMinInterpolations() {
+        return this.params.size() +2;
     }
 
     public BobyqaOptimizerInstance setBounds(double... values) {
@@ -84,13 +88,14 @@ public class BobyqaOptimizerInstance {
         return this;
     }
 
-    public BobyqaOptimizerInstance setObjectiveFunction(int varcount, Object f) {
+    public BobyqaOptimizerInstance setObjectiveFunction(Object f) {
         if (f instanceof ScriptObjectMirror) {
             ScriptObjectMirror scriptObject = (ScriptObjectMirror) f;
             if (!scriptObject.isFunction()) {
                 throw new RuntimeException("Unable to setFunction with a non-function object");
             }
-            this.objectiveScriptObject = new MultivariateDynamicScript(logger,varcount, scriptObject);
+            this.objectiveScriptObject =
+                    new MultivariateObjectScript(logger, params, scriptObject);
         }
         return this;
     }
@@ -99,23 +104,62 @@ public class BobyqaOptimizerInstance {
         this.maxEval = maxEval;
         return this;
     }
-    public double[] optimize(double[] initialGuess) {
-        this.initialGuess = new InitialGuess(initialGuess);
+
+    public MVResult optimize() {
+        initialGuess = initialGuess==null ? computeInitialGuess() : initialGuess;
+        bounds = bounds==null? computeBounds() : bounds;
+        interpolations = interpolations ==0 ? getMinInterpolations() : interpolations;
 
         BOBYQAOptimizer mo = new BOBYQAOptimizer(
-                this.numberOfInterpolationPoints,
+                this.interpolations,
                 this.initialTrustRegionRadius,
                 this.stoppingTrustRegionRadius
         );
+
+        this.mvLogger = new MVLogger(this.objectiveScriptObject);
+        ObjectiveFunction objective = new ObjectiveFunction(this.mvLogger);
+
         List<OptimizationData> od = List.of(
-                new ObjectiveFunction(this.objectiveScriptObject),
+                objective,
                 GoalType.MAXIMIZE,
                 this.initialGuess,
                 new MaxEval(this.maxEval),
                 this.bounds
         );
+
         this.result = mo.optimize(od.toArray(new OptimizationData[0]));
-        return getResult();
+
+        return new MVResult(
+                this.result.getPoint(),
+                this.params,
+                this.mvLogger.getLogArray()
+        );
+    }
+
+    private SimpleBounds computeBounds() {
+        double[] lb = new double[params.size()];
+        double[] ub = new double[params.size()];
+        int pos = 0;
+        for (MVParams.MVParam param : params) {
+            lb[pos]=param.min;
+            ub[pos]=param.max;
+            pos++;
+        }
+        return new SimpleBounds(lb,ub);
+    }
+
+    private InitialGuess computeInitialGuess() {
+        double[] guess = new double[params.size()];
+        int pos = 0;
+        for (MVParams.MVParam param : params) {
+            guess[pos++]=param.min;
+        }
+        return new InitialGuess(guess);
+    }
+
+    public BobyqaOptimizerInstance param(String name, double min, double max) {
+        params.addParam(name,min,max);
+        return this;
     }
 
     public double[] getResult() {
