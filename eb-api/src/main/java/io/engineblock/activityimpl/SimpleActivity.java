@@ -1,17 +1,21 @@
 package io.engineblock.activityimpl;
 
+import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.cyclelog.filters.IntPredicateDispenser;
 import io.engineblock.activityapi.input.InputDispenser;
 import io.engineblock.activityapi.output.OutputDispenser;
+import io.engineblock.activityapi.planning.OpSequence;
 import io.engineblock.activityapi.ratelimits.RateLimiter;
 import io.engineblock.activityapi.ratelimits.RateLimiters;
 import io.engineblock.activityapi.ratelimits.RateSpec;
+import io.engineblock.metrics.ActivityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -121,14 +125,14 @@ public class SimpleActivity implements Activity {
     }
 
     @Override
-    public void setActivityController(ActivityController activityController) {
-        this.activityController = activityController;
-
+    public ActivityController getActivityController() {
+        return activityController;
     }
 
     @Override
-    public ActivityController getActivityController() {
-        return activityController;
+    public void setActivityController(ActivityController activityController) {
+        this.activityController = activityController;
+
     }
 
     @Override
@@ -189,6 +193,12 @@ public class SimpleActivity implements Activity {
         return phaseLimiter;
     }
 
+
+    @Override
+    public Timer getResultTimer() {
+        return ActivityMetrics.timer(getActivityDef(),"result");
+    }
+
     @Override
     public void setPhaseLimiter(RateLimiter rateLimiter) {
         this.phaseLimiter = phaseLimiter;
@@ -204,8 +214,8 @@ public class SimpleActivity implements Activity {
 
     @Override
     public synchronized ActivityInstrumentation getInstrumentation() {
-        if (activityInstrumentation==null) {
-            activityInstrumentation=new CoreActivityInstrumentation(this);
+        if (activityInstrumentation == null) {
+            activityInstrumentation = new CoreActivityInstrumentation(this);
         }
         return activityInstrumentation;
     }
@@ -219,7 +229,7 @@ public class SimpleActivity implements Activity {
 
         activityDef.getParams().getOptionalNamedParameter("cyclerate", "targetrate")
                 .map(RateSpec::new).ifPresent(
-                        spec-> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
+                spec -> cycleLimiter = RateLimiters.createOrUpdate(this.getActivityDef(), "cycles", cycleLimiter, spec));
 
         activityDef.getParams().getOptionalNamedParameter("phaserate")
                 .map(RateSpec::new)
@@ -227,5 +237,74 @@ public class SimpleActivity implements Activity {
 
     }
 
+    /**
+     * Modify the provided ActivityDef with defaults for stride and cycles, if
+     * they haven't been provided, based on the length of the sequence as determined
+     * by the provided ratios. Also, modify the ActivityDef with reasonable defaults when requested.
+     */
+    public void setDefaultsFromOpSequence(OpSequence seq) {
+        Optional<String> strideOpt = getParams().getOptionalString("stride");
+        if (strideOpt.isEmpty()) {
+            String stride = String.valueOf(seq.getSequence().length);
+            logger.info("defaulting stride to " + stride + " (the sequence length)");
+            getParams().set("stride", stride);
+        }
 
+        Optional<String> cyclesOpt = getParams().getOptionalString("cycles");
+        if (cyclesOpt.isEmpty()) {
+            String cycles = getParams().getOptionalString("stride").orElseThrow();
+            logger.info("defaulting cycles to " + cycles + " (the stride length)");
+            getParams().set("cycles", getParams().getOptionalString("stride").orElseThrow());
+        } else {
+            if (getActivityDef().getCycleCount() == 0) {
+                throw new RuntimeException(
+                        "You specified cycles, but the range specified means zero cycles: " + getParams().get("cycles")
+                );
+            }
+            long stride = getParams().getOptionalLong("stride").orElseThrow();
+            long cycles = getActivityDef().getCycleCount();
+            if (cycles < stride) {
+                throw new RuntimeException(
+                        "The specified cycles (" + cycles + ") are less than the stride (" + stride + "). This means there aren't enough cycles to cause a stride to be executed." +
+                                " If this was intended, then set stride low enough to allow it."
+                );
+            }
+        }
+
+        long cycleCount = getActivityDef().getCycleCount();
+        long stride = getActivityDef().getParams().getOptionalLong("stride").orElseThrow();
+        if ((cycleCount % stride) != 0) {
+            logger.warn("The stride does not evenly divide cycles. Only full strides will be executed," +
+                    "leaving some cycles unused.");
+        }
+
+        Optional<String> threadSpec = activityDef.getParams().getOptionalString("threads");
+        if (threadSpec.isPresent()) {
+            String spec = threadSpec.get();
+            int processors = Runtime.getRuntime().availableProcessors();
+            if (spec.toLowerCase().equals("auto")) {
+                int threads = processors*10;
+                logger.info("setting threads to " + threads + " (auto)");
+                activityDef.setThreads(threads);
+            } else if (spec.toLowerCase().matches("\\d+x")) {
+                String multiplier = spec.substring(0, spec.length() - 1);
+                int threads = processors * Integer.parseInt(multiplier);
+                logger.info("setting threads to " + threads + " (" + multiplier +"x)");
+                activityDef.setThreads(threads);
+            } else if (spec.toLowerCase().matches("\\d+")) {
+                logger.info("setting threads to " + spec + "(direct)");
+                activityDef.setThreads(Integer.parseInt(spec));
+            }
+        } else {
+            if (cycleCount>1000) {
+                logger.warn("For testing at scale, it is highly recommended that you " +
+                        "set threads to a value higher than the default of 1." +
+                        " hint: you can use threads=auto for reasonable default, or" +
+                        " consult the topic on threads with `help threads` for" +
+                        " more information.");
+
+            }
+        }
+
+    }
 }

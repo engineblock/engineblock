@@ -28,7 +28,8 @@ public class EBCLIOptions {
     private static final String ACTIVITY_TYPES = "--list-activity-types";
     private static final String WANTS_INPUT_TYPES = "--list-input-types";
     private static final String WANTS_OUTPUT_TYPES = "--list-output-types";
-    private static final String WANTS_VERSION_LONG = "--version";
+    private static final String WANTS_VERSION_COORDS = "--version-coords";
+    private static final String WANTS_VERSION_SHORT = "--version";
     private static final String SHOW_SCRIPT = "--show-script";
 
     // Execution
@@ -62,6 +63,7 @@ public class EBCLIOptions {
     private static final String CLASSIC_HISTOS = "--classic-histograms";
     private final static String LOG_LEVEL_OVERRIDE = "--log-level-override";
     private final static String ENABLE_CHART = "--enable-chart";
+    private final static String DOCKER_METRICS = "--docker-metrics";
 
     private static final Set<String> reserved_words = new HashSet<String>() {{
         addAll(
@@ -74,7 +76,8 @@ public class EBCLIOptions {
 
     private LinkedList<Cmd> cmdList = new LinkedList<>();
     private int logsMax = 0;
-    private boolean wantsVersion = false;
+    private boolean wantsVersionShort = false;
+    private boolean wantsVersionCoords = false;
     private boolean wantsActivityHelp = false;
     private String wantsActivityHelpFor;
     private boolean wantsActivityTypes = false;
@@ -101,6 +104,7 @@ public class EBCLIOptions {
     private String logsLevel = "INFO";
     private Map<String,Level> logLevelsOverrides = new HashMap<>();
     private boolean enableChart = false;
+    private boolean dockerMetrics = false;
 
     EBCLIOptions(String[] args) {
         parse(args);
@@ -193,9 +197,13 @@ public class EBCLIOptions {
                     arglist.removeFirst();
                     progressSpec = readWordOrThrow(arglist, "a progress indicator, like 'log:1m' or 'screen:10s', or just 'log' or 'screen'");
                     break;
-                case WANTS_VERSION_LONG:
+                case WANTS_VERSION_SHORT:
                     arglist.removeFirst();
-                    wantsVersion = true;
+                    wantsVersionShort = true;
+                    break;
+                case WANTS_VERSION_COORDS:
+                    arglist.removeFirst();
+                    wantsVersionCoords = true;
                     break;
                 case ADVANCED_HELP:
                     arglist.removeFirst();
@@ -204,6 +212,10 @@ public class EBCLIOptions {
                 case ENABLE_CHART:
                     arglist.removeFirst();
                     enableChart = true;
+                    break;
+                case DOCKER_METRICS:
+                    arglist.removeFirst();
+                    dockerMetrics = true;
                     break;
                 case HELP:
                 case "-h":
@@ -338,8 +350,12 @@ public class EBCLIOptions {
         return showScript;
     }
 
-    public boolean wantsVersion() {
-        return wantsVersion;
+    public boolean wantsVersionCoords() {
+        return wantsVersionCoords;
+    }
+
+    public boolean isWantsVersionShort() {
+        return wantsVersionShort;
     }
 
     public boolean wantsActivityTypes() {
@@ -364,6 +380,10 @@ public class EBCLIOptions {
 
     public boolean wantsEnableChart() {
         return enableChart;
+    }
+
+    public boolean wantsDockerMetrics() {
+        return dockerMetrics;
     }
 
     public int getReportInterval() {

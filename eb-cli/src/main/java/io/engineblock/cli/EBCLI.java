@@ -10,12 +10,12 @@ import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
 import io.engineblock.core.ShutdownManager;
 import io.engineblock.metrics.ActivityMetrics;
-import io.engineblock.metrics.HistoLogChartGenerator;
 import io.engineblock.metrics.MetricReporters;
 import io.engineblock.script.MetricsMapper;
 import io.engineblock.script.Scenario;
 import io.engineblock.script.ScenariosExecutor;
-import io.virtdata.apps.MainApp;
+import io.virtdata.apps.VirtDataMainApp;
+import io.virtdata.docsys.core.DocServerApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,11 @@ public class EBCLI {
 
     public void run(String[] args) { 
         if (args.length>0 && args[0].toLowerCase().equals("virtdata")) {
-            MainApp.main(Arrays.copyOfRange(args,1,args.length));
+            VirtDataMainApp.main(Arrays.copyOfRange(args,1,args.length));
+            System.exit(0);
+        }
+        if (args.length>0 && args[0].toLowerCase().equals("docserver")) {
+            DocServerApp.main(Arrays.copyOfRange(args,1,args.length));
             System.exit(0);
         }
 
@@ -60,8 +64,12 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsVersion()) {
+        if (options.isWantsVersionShort()) {
             System.out.println(new VersionInfo().getVersion());
+            System.exit(0);
+        }
+
+        if (options.wantsVersionCoords()) {
             System.out.println(new VersionInfo().getArtifactCoordinates());
             System.exit(0);
         }
@@ -106,12 +114,32 @@ public class EBCLI {
             System.exit(0);
         }
 
-        if (options.wantsReportGraphiteTo() != null || options.wantsReportCsvTo() != null) {
+        String reportGraphiteTo = options.wantsReportGraphiteTo();
+        if (options.wantsDockerMetrics()){
+            logger.info("Docker metrics is enabled. Docker must be installed for this to work");
+            DockerMetricsHelper dmh= new DockerMetricsHelper();
+            dmh.startMetrics();
+            logger.info("Docker Containers are started, for grafana and prometheus, hit" +
+                    "these urls in your browser: http://<host>:3000 and http://<host>:9090" +
+                    "the default grafana creds are admin/admin");
+            if (reportGraphiteTo != null){
+                logger.warn(String.format("Docker metrics are enabled (--docker-metrics)" +
+                    " but graphite reporting (--report-graphite-to) is set to %s \n" +
+                    "usually only one of the two is configured.",
+                    reportGraphiteTo));
+            }else{
+                //TODO: is this right?
+                logger.info("Setting graphite reporting to localhost");
+                reportGraphiteTo = "localhost:9109";
+            }
+        }
+
+        if (reportGraphiteTo != null || options.wantsReportCsvTo() != null) {
             MetricReporters reporters = MetricReporters.getInstance();
             reporters.addRegistry("workloads", ActivityMetrics.getMetricRegistry());
 
-            if (options.wantsReportGraphiteTo() != null) {
-                reporters.addGraphite(options.wantsReportGraphiteTo(), options.wantsMetricsPrefix());
+            if (reportGraphiteTo != null) {
+                reporters.addGraphite(reportGraphiteTo,  options.wantsMetricsPrefix());
             }
             if (options.wantsReportCsvTo() != null) {
                 reporters.addCSVReporter(options.wantsReportCsvTo(), options.wantsMetricsPrefix());

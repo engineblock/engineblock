@@ -17,25 +17,23 @@
 
 package io.engineblock.activityapi.cyclelog.buffers;
 
-import java.lang.reflect.Array;
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is a lightweight buffer implementation that allows for buffer
  * flipping and callbacks when the buffer is full.
  * @param <T> The type held in this buffer
  */
-public abstract class Buffer<T> implements Comparable<Buffer<T>> {
+public abstract class Buffer<T extends Comparable> {
 
     private int position;
     private int limit;
-    private T[] data;
+    protected ArrayList<T> data;
 
-    public Buffer(Class<T[]> clazz,int size) {
-        data = clazz.cast(Array.newInstance(clazz.getComponentType(), size));
-        limit=data.length;
-        position=0;
+    public Buffer(int size) {
+        data = new ArrayList<>(size);
+        this.limit=size;
     }
 
     protected void onFull() {
@@ -43,65 +41,38 @@ public abstract class Buffer<T> implements Comparable<Buffer<T>> {
 
     protected abstract int compare(T one, T other);
 
-    public int position() {
-        return position;
-    }
-
-    public Buffer<T> position(int position) {
-        this.position=position;
-        return this;
-    }
-
     public int remaining() {
         return limit-position;
     }
 
     public Buffer<T> put(T element) {
-        if (position>=limit) {
-            throw new BufferOverflowException();
-        }
-        data[position++]=element;
-        if (position==limit) {
+        data.add(element);
+        if (data.size()==limit) {
             onFull();
         }
         return this;
     }
 
-    public T get() {
-        if (position >=limit) {
-            throw new BufferUnderflowException();
-        }
-        T got = data[position++];
-        return got;
+//    @Override
+//    public int compareTo(Buffer<T> other) {
+//        int diff = Integer.compare(this.data.size(), other.data.size());
+//        if (diff!=0) return diff;
+//
+//        for (int i = 0; i < data.size(); i++) {
+//            diff = data.get(i).compareTo(other.data.get(i));
+//            if (diff!=0) {
+//                return diff;
+//            }
+//        }
+//        return 0;
+//    }
+
+    public List<T> getFlippedData() {
+        return data;
     }
-
-
-    public Buffer<T> flip() {
-        this.limit=position;
-        this.position=0;
-        return this;
-    }
-
-    @Override
-    public int compareTo(Buffer<T> other) {
-        int lengthDiff = Integer.compare(data.length, other.data.length);
-        if (lengthDiff!=0) {
-            return lengthDiff;
-        }
-        int compareTo = Math.min(position, other.position);
-
-        for (int pos = 0; pos<compareTo; pos++) {
-            int diff = compare(data[pos],other.data[pos]);
-            if (diff!=0) {
-                return diff;
-            }
-        }
-        return 0;
-    }
-
 
     @Override
     public String toString() {
-        return "position=" + this.position + ", limit=" + this.limit + ", capacity=" + (data!=null ? data.length : "NULLDATA");
+        return "position=" + this.position + ", limit=" + this.limit + ", capacity=" + (data!=null ? data.size() : "NULLDATA");
     }
 }

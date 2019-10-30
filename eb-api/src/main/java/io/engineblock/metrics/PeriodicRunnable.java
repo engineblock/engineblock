@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a simple and light way to run a periodic task run
+ * This is a simple and light way to run a periodic task
  */
 public class PeriodicRunnable<T extends Runnable> implements Runnable, AutoCloseable {
     private static Logger logger = LoggerFactory.getLogger(PeriodicRunnable.class);

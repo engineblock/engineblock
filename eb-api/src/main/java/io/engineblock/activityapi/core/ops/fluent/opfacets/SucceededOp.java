@@ -23,14 +23,6 @@ import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
  * An op should be deemed successful if it completes with no exception.
  * @param <D> The type of delegate needed for the implementing protocol
  */
-public interface SucceededOp<D> extends Payload<D>, CycleResult {
-
-    long getStartedAtNanos();
-
+public interface SucceededOp<D> extends Payload<D>, CycleResult, CompletedOp<D> {
     public int getTries();
-
-    public long getServiceTimeNanos();
-    public long getResponseTimeNanos();
-
-
 }

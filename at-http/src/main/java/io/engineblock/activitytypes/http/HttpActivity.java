@@ -51,14 +51,12 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
 
     private OpSequence<StringBindings> opSequence;
 
-
-
     public HttpActivity(ActivityDef activityDef) {
         super(activityDef);
-
         this.activityDef = activityDef;
-
-        String yaml_loc = activityDef.getParams().getOptionalString("yaml").orElse("default");
+        String yaml_loc = activityDef.getParams()
+                .getOptionalString("yaml")
+                .orElse("default");
 
         stmtsDocList = StatementsLoader.load(logger,yaml_loc, "activities");
     }
@@ -79,6 +77,7 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
 
 
         opSequence = initOpSequencer();
+        setDefaultsFromOpSequence(opSequence);
 
         bindTimer = ActivityMetrics.timer(activityDef, "bind");
         executeTimer = ActivityMetrics.timer(activityDef, "execute");
@@ -116,14 +115,6 @@ public class HttpActivity extends SimpleActivity implements Activity, ActivityDe
         }
 //
         OpSequence<StringBindings> opSequence = sequencer.resolve();
-        if (getActivityDef().getCycleCount() == 0) {
-            if (getParams().containsKey("cycles")) {
-                throw new RuntimeException("You specified cycles, but the range specified means zero cycles: " + getParams().get("cycles"));
-            }
-            logger.debug("Adjusting cycle count for " + activityDef.getAlias() + " to " + opSequence.getOps().size() +", which the size of the planned statement sequence.");
-            getActivityDef().setCycles(String.valueOf(opSequence.getOps().size()));
-        }
-
         return opSequence;
     }
 

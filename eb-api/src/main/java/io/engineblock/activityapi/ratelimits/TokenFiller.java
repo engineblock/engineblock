@@ -105,7 +105,7 @@ public class TokenFiller implements Runnable {
         thread.setPriority(Thread.MAX_PRIORITY);
         thread.setDaemon(true);
         thread.start();
-        System.out.println("Starting token filler thread: " + this.toString());
+        logger.debug("Starting token filler thread: " + this.toString());
         return this;
     }
 

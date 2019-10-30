@@ -96,7 +96,9 @@ public class Scenario implements Callable<ScenarioResult> {
         scriptEnv = new ScenarioContext(scenarioController);
         scriptEngine.setContext(scriptEnv);
         scenarioController = new ScenarioController();
-        progressIndicator = new ProgressIndicator(scenarioController,progressInterval);
+        if (!progressInterval.equals("disabled")) {
+            progressIndicator = new ProgressIndicator(scenarioController,progressInterval);
+        }
 
         scriptEngine.put("params", scenarioScriptParams);
         scriptEngine.put("scenario", scenarioController);
@@ -139,6 +141,8 @@ public class Scenario implements Callable<ScenarioResult> {
                 } else {
                     result = scriptEngine.eval(script);
                 }
+                System.err.flush();
+                System.out.flush();
             } catch (ScriptException e) {
                 String diagname = "diag_" + System.currentTimeMillis() + ".js";
                 try {

@@ -19,7 +19,6 @@ package io.engineblock.activityapi.core.ops.fluent.opfacets;
 
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResult;
 
-public interface SkippedOp<D> extends Payload<D>, CycleResult {
-    long getStartedAtNanos();
+public interface SkippedOp<D> extends Payload<D>, CycleResult, CompletedOp<D> {
     int getSkippedReason();
 }

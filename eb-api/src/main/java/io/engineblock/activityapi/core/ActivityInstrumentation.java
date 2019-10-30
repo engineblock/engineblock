@@ -87,4 +87,6 @@ public interface ActivityInstrumentation {
      * @return A new or existing Counter
      */
     Counter getOrCreatePendingOpCounter();
+
+    Counter getOrCreateOpTrackerBlockedCounter();
 }

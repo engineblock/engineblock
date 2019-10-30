@@ -16,11 +16,13 @@
  */
 package io.engineblock.activityimpl.motor;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.core.ops.fluent.OpTracker;
 import io.engineblock.activityapi.core.ops.fluent.OpTrackerImpl;
 import io.engineblock.activityapi.core.ops.fluent.opfacets.TrackedOp;
+import io.engineblock.activityapi.cyclelog.buffers.op_output.StrideOutputConsumer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultSegmentBuffer;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleResultsSegment;
 import io.engineblock.activityapi.cyclelog.buffers.results.CycleSegment;
@@ -77,6 +79,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
     private int stride = 1;
 
     private OpTracker<D> opTracker;
+    private Counter optrackerBlockCounter;
 
 
     /**
@@ -193,6 +196,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
             stridesServiceTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
             stridesResponseTimer = activity.getInstrumentation().getStridesResponseTimerOrNull();
+            optrackerBlockCounter = activity.getInstrumentation().getOrCreateOpTrackerBlockedCounter();
 
 
             inputTimer = activity.getInstrumentation().getOrCreateInputTimer();
@@ -231,10 +235,17 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
             // the async action is proven durable
             if (action instanceof AsyncAction) {
 
+
                 @SuppressWarnings("unchecked")
                 AsyncAction<D> async = AsyncAction.class.cast(action);
+
                 opTracker = new OpTrackerImpl<>(activity, slotId);
-                opTracker.setCycleOpFunction(((AsyncAction<D>) action).getOpInitFunction());
+                opTracker.setCycleOpFunction(async.getOpInitFunction());
+
+                StrideOutputConsumer<D> outputreader = null;
+                if (action instanceof StrideOutputConsumer) {
+                    outputreader = (StrideOutputConsumer<D>) async;
+                }
 
                 while (slotState.get() == Running) {
 
@@ -255,7 +266,14 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                         strideDelay = strideRateLimiter.maybeWaitForOp();
                     }
 
-                    StrideTracker<D> strideTracker = new StrideTracker<>(stridesServiceTimer,stridesResponseTimer, strideDelay, cycleSegment.peekNextCycle(), stride, output);
+                    StrideTracker<D> strideTracker = new StrideTracker<D>(
+                            stridesServiceTimer,
+                            stridesResponseTimer,
+                            strideDelay,
+                            cycleSegment.peekNextCycle(),
+                            stride,
+                            output,
+                            outputreader);
                     strideTracker.start();
 
                     long strideStart = System.nanoTime();
@@ -288,6 +306,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                                 while (opTracker.isFull()) {
                                     try {
                                         logger.trace("Blocking for enqueue with (" + opTracker.getPendingOps() + "/" + opTracker.getMaxPendingOps() + ") queued ops");
+                                        optrackerBlockCounter.inc();
                                         opTracker.wait(10000);
                                     } catch (InterruptedException ignored) {
                                     }
@@ -464,6 +483,10 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
         }
 
         this.stride = activityDef.getParams().getOptionalInteger("stride").orElse(1);
+        strideRateLimiter = activity.getStrideLimiter();
+        cycleRateLimiter = activity.getCycleLimiter();
+        phaseRateLimiter = activity.getPhaseLimiter();
+
     }
 
     @Override

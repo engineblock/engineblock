@@ -68,6 +68,22 @@ public class AsyncScriptIntegrationTests {
     }
 
     @Test
+    public void testOptimo() {
+        ScenarioResult scenarioResult = runScenario("optimo");
+        String iolog = scenarioResult.getIOLog();
+        System.out.println("iolog\n" + iolog);
+//        Pattern p = Pattern.compile(".*mean cycle rate = (\\d[.\\d]+).*", Pattern.DOTALL);
+//        Matcher m = p.matcher(iolog);
+//        assertThat(m.matches()).isTrue();
+//
+//        String digits = m.group(1);
+//        assertThat(digits).isNotEmpty();
+//        double rate = Double.valueOf(digits);
+//        assertThat(rate).isCloseTo(1000, Offset.offset(100.0));
+//
+    }
+
+    @Test
     public void testCycleRate() {
         ScenarioResult scenarioResult = runScenario("cycle_rate");
         String iolog = scenarioResult.getIOLog();

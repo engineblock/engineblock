@@ -57,9 +57,9 @@ public class EBCLIScriptAssembly {
                     sb.append("// from CLI as ").append(cmd).append("\n");
                     sb.append("scenario.awaitActivity(\"").append(cmdSpec).append("\");\n");
                     break;
-                case stop: // succeed activity
+                case stop: // stop activity
                     sb.append("// from CLI as ").append(cmd).append("\n");
-                    sb.append("scenario.succeed(\"").append(cmdSpec).append("\");\n");
+                    sb.append("scenario.stop(\"").append(cmdSpec).append("\");\n");
                     break;
                 case waitmillis:
                     sb.append("// from CLI as ").append(cmd).append("\n");
@@ -117,9 +117,11 @@ public class EBCLIScriptAssembly {
     private static String toJSON(Map<?,?> map) {
         StringBuilder sb = new StringBuilder();
         sb.append("params={\n");
-        map.forEach((k,v) -> { sb.append(" '").append(k.toString()).append("',\n"); });
-        sb.setLength(sb.length()-1);
-        sb.append("};\n");
+        map.forEach((k,v) -> {
+            sb.append(" '").append(k.toString()).append("': '").append(v.toString()).append("',\n");
+        });
+        sb.setLength(sb.length()-2);
+        sb.append("\n};\n");
         return sb.toString();
     }
 }

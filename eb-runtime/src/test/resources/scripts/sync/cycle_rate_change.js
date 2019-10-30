@@ -21,8 +21,7 @@ cycle_rate = {
     "cycles" : "0..300000",
     "threads" : "10",
     "cyclerate" : "2000",
-    "interval" : "2000",
-    "strictmetricnames" : "false"
+    "interval" : "2000"
 };
 
 print('starting cycle_rate');

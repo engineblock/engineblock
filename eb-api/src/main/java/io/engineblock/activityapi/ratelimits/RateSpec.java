@@ -187,7 +187,7 @@ public class RateSpec {
         double burstPortion = Math.abs(br - ((long) br));
         String burstfmt = (burstPortion > 0.001D) ? String.format("%,.3f", br) : String.format("%,d", (long) br);
 
-        return String.format("rate=%s burstRatio=%.3f (%s SOPSS %s BOPSS)", ratefmt, burstRatio, ratefmt, burstfmt);
+        return String.format("rate=%s burstRatio=%.3f (%s SOPSS %s BOPSS) [%s]", ratefmt, burstRatio, ratefmt, burstfmt, verb);
     }
 
     public RateSpec withOpsPerSecond(double rate) {
