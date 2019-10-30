@@ -22,6 +22,21 @@
        orient="auto"
        refY="0"
        refX="0"
+       id="marker10162"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path10160"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
        id="marker5537"
        style="overflow:visible"
        inkscape:isstock="true">
@@ -189,9 +204,9 @@
      showgrid="true"
      inkscape:current-layer="layer1"
      inkscape:document-units="mm"
-     inkscape:cy="282.98278"
-     inkscape:cx="348.24781"
-     inkscape:zoom="2"
+     inkscape:cy="380.56599"
+     inkscape:cx="348.26541"
+     inkscape:zoom="1.6379"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="1.0"
@@ -247,33 +262,33 @@
          y="56.387547"
          x="234.92065"
          sodipodi:role="line"
-         id="tspan4194-6">VALUE</tspan></text>
+         id="tspan4194-6">SCORE</tspan></text>
     <text
        id="text4362-2-0"
-       y="117.04953"
-       x="221.27989"
-       style="font-size:4.23333px;line-height:1;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+       y="116.8091"
+       x="222.9207"
+       style="font-size:8.1286px;line-height:1;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.508037"
        xml:space="preserve"><tspan
-         style="stroke-width:0.264583"
-         y="117.04953"
-         x="221.27989"
+         style="stroke-width:0.508037"
+         y="116.8091"
+         x="222.9207"
          sodipodi:role="line"
-         id="tspan4412-6">result score</tspan></text>
+         id="tspan4412-6">value</tspan></text>
     <text
        id="text4362-0-1"
-       y="115.88656"
-       x="124.02406"
-       style="font-size:4.23333px;line-height:1;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+       y="114.82746"
+       x="116.60229"
+       style="font-size:7.20838px;line-height:1;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.450523"
        xml:space="preserve"><tspan
          id="tspan4381-2-4"
-         style="text-align:start;text-anchor:start;stroke-width:0.264583"
-         y="115.88656"
-         x="124.02406"
+         style="text-align:start;text-anchor:start;stroke-width:0.450523"
+         y="114.82746"
+         x="116.60229"
          sodipodi:role="line">throughput</tspan><tspan
          id="tspan4643"
-         style="text-align:start;text-anchor:start;stroke-width:0.264583"
-         y="120.11989"
-         x="124.02406"
+         style="text-align:start;text-anchor:start;stroke-width:0.450523"
+         y="122.03584"
+         x="116.60229"
          sodipodi:role="line">latency</tspan></text>
     <text
        xml:space="preserve"
@@ -349,25 +364,25 @@
          style="font-weight:bold;text-align:center;text-anchor:middle;fill:#0000ff;fill-opacity:1;stroke-width:0.0156755">RESULT</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:4.23333px;line-height:1;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
-       x="32.798313"
-       y="110.91645"
+       style="font-size:6.74675px;line-height:1;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.421672"
+       x="32.730816"
+       y="112.82606"
        id="text4362-4"><tspan
          sodipodi:role="line"
-         x="32.798313"
-         y="110.91645"
-         style="text-align:start;text-anchor:start;stroke-width:0.264583"
-         id="tspan4364-9">target rate</tspan><tspan
+         x="32.730816"
+         y="112.82606"
+         style="text-align:start;text-anchor:start;stroke-width:0.421672"
+         id="tspan4364-9">ccph</tspan><tspan
          sodipodi:role="line"
-         x="32.798313"
-         y="115.14978"
-         style="text-align:start;text-anchor:start;stroke-width:0.264583"
-         id="tspan4379-2">concurrency</tspan><tspan
+         x="32.730816"
+         y="119.57281"
+         style="text-align:start;text-anchor:start;stroke-width:0.421672"
+         id="tspan4379-2">async</tspan><tspan
          sodipodi:role="line"
-         x="32.798313"
-         y="119.38311"
-         style="text-align:start;text-anchor:start;stroke-width:0.264583"
-         id="tspan4381-0">client threads</tspan></text>
+         x="32.730816"
+         y="126.31956"
+         style="text-align:start;text-anchor:start;stroke-width:0.421672"
+         id="tspan4381-0">threads</tspan></text>
     <path
        sodipodi:nodetypes="cc"
        inkscape:connector-curvature="0"
@@ -495,17 +510,24 @@
          y="120.9072"
          x="188.93344"
          sodipodi:role="line">V(R)</tspan></text>
+    <rect
+       y="39.6875"
+       x="15.875"
+       height="28.575001"
+       width="242.8875"
+       id="rect10158"
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#0000ff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker10162);paint-order:markers stroke fill;stop-color:#000000;stop-opacity:1" />
     <text
-       transform="scale(0.94694521,1.0560273)"
-       id="text4631-9-2-3-7-0-9-1"
-       y="62.735836"
-       x="154.04428"
+       xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:6.35px;line-height:1;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;opacity:1;fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.0156755;stop-opacity:1"
-       xml:space="preserve"><tspan
-         style="font-weight:bold;text-align:center;text-anchor:middle;fill:#0000ff;fill-opacity:1;stroke-width:0.0156755"
-         y="62.735836"
-         x="154.04428"
+       x="141.80322"
+       y="78.606888"
+       id="text4631-9-2-3-7-0-9-1"
+       transform="scale(0.94694521,1.0560273)"><tspan
+         id="tspan9807-1"
          sodipodi:role="line"
-         id="tspan9807-1">V(R(P))</tspan></text>
+         x="141.80322"
+         y="78.606888"
+         style="font-weight:bold;text-align:center;text-anchor:middle;fill:#0000ff;fill-opacity:1;stroke-width:0.0156755">V(R(P))</tspan></text>
   </g>
 </svg>
