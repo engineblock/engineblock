@@ -31,8 +31,9 @@ public class MultivariateObjectScript implements MultivariateFunction {
             map.put(params.get(i).name, doubles[i]);
         }
 
+        Object object = ScriptObjectMirror.wrap(map, null);
         Object result = null;
-        result = this.script.call(script,map);
+        result = this.script.call(script,object);
         return Double.valueOf(result.toString());
     }
 }

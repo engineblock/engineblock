@@ -47,6 +47,7 @@ public class BobyqaOptimizerInstance {
     private PointValuePair result;
     private int maxEval;
     private MVLogger mvLogger;
+    private double guessSlew = 0.25d;
 
     public BobyqaOptimizerInstance(Logger logger, MetricRegistry metricRegistry, ScriptContext scriptContext) {
         this.logger = logger;
@@ -58,27 +59,31 @@ public class BobyqaOptimizerInstance {
         this.interpolations = numberOfInterpolationPoints;
         return this;
     }
+
     public BobyqaOptimizerInstance setInitialRadius(double initialTrustRegionRadius) {
         this.initialTrustRegionRadius = initialTrustRegionRadius;
         return this;
     }
+
     public BobyqaOptimizerInstance setStoppingRadius(double stoppingTrustRegionRadius) {
-        this.stoppingTrustRegionRadius=stoppingTrustRegionRadius;
+        this.stoppingTrustRegionRadius = stoppingTrustRegionRadius;
         return this;
     }
 
     public BobyqaOptimizerInstance setMaxPoints() {
         return this.setPoints(getMaxInterpolations());
     }
+
     public int getMaxInterpolations() {
-        return (int) (0.5d* ((this.params.size()+1) * (this.params.size()+2)));
+        return (int) (0.5d * ((this.params.size() + 1) * (this.params.size() + 2)));
     }
 
     public BobyqaOptimizerInstance setMinPoints() {
         return this.setPoints(getMinInterpolations());
     }
+
     public int getMinInterpolations() {
-        return this.params.size() +2;
+        return this.params.size() + 2;
     }
 
     public BobyqaOptimizerInstance setBounds(double... values) {
@@ -106,9 +111,9 @@ public class BobyqaOptimizerInstance {
     }
 
     public MVResult optimize() {
-        initialGuess = initialGuess==null ? computeInitialGuess() : initialGuess;
-        bounds = bounds==null? computeBounds() : bounds;
-        interpolations = interpolations ==0 ? getMinInterpolations() : interpolations;
+        initialGuess = initialGuess == null ? computeInitialGuess() : initialGuess;
+        bounds = bounds == null ? computeBounds() : bounds;
+        interpolations = interpolations == 0 ? getMinInterpolations() : interpolations;
 
         BOBYQAOptimizer mo = new BOBYQAOptimizer(
                 this.interpolations,
@@ -136,29 +141,34 @@ public class BobyqaOptimizerInstance {
         );
     }
 
+    public BobyqaOptimizerInstance setGuessRatio(double slew) {
+        this.guessSlew = slew;
+        return this;
+    }
+
     private SimpleBounds computeBounds() {
         double[] lb = new double[params.size()];
         double[] ub = new double[params.size()];
         int pos = 0;
         for (MVParams.MVParam param : params) {
-            lb[pos]=param.min;
-            ub[pos]=param.max;
+            lb[pos] = param.min;
+            ub[pos] = param.max;
             pos++;
         }
-        return new SimpleBounds(lb,ub);
+        return new SimpleBounds(lb, ub);
     }
 
     private InitialGuess computeInitialGuess() {
         double[] guess = new double[params.size()];
         int pos = 0;
         for (MVParams.MVParam param : params) {
-            guess[pos++]=param.min;
+            guess[pos++] = param.min + ((param.max - param.min)*guessSlew);
         }
         return new InitialGuess(guess);
     }
 
     public BobyqaOptimizerInstance param(String name, double min, double max) {
-        params.addParam(name,min,max);
+        params.addParam(name, min, max);
         return this;
     }
 
