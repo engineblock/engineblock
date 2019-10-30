@@ -100,4 +100,10 @@ public class CoreActivityInstrumentation implements ActivityInstrumentation {
         return ActivityMetrics.counter(def, metricName);
     }
 
+    @Override
+    public synchronized Counter getOrCreateOpTrackerBlockedCounter() {
+        String metricName = "optracker_blocked";
+        return ActivityMetrics.counter(def, metricName);
+    }
+
 }
