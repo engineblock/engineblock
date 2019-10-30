@@ -46,6 +46,12 @@ public class EBCLIScriptAssembly {
                             .append("scenario.").append(cmdType.toString()).append("(\"")
                             .append(cmdSpec)
                             .append("\");\n");
+                    // workaroud for perf issue
+                    sb.append("// from CLI as ").append(cmd).append("\n");
+                    sb.append("activities.test.noop=\"noop\"");
+                    if (!cmdSpec.endsWith("\n")) {
+                        sb.append("\n");
+                    }
                     break;
                 case await: // await activity
                     sb.append("// from CLI as ").append(cmd).append("\n");
