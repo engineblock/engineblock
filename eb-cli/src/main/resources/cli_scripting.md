@@ -100,7 +100,7 @@ await <activity alias>
 
 To wait for a number of milliseconds before continuing:
 ~~~
-waitmills <milliseconds>
+waitmillis <milliseconds>
 ~~~
 
 To add a script fragment to the scenario script:
