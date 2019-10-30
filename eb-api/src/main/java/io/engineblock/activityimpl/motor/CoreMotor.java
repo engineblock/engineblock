@@ -16,6 +16,7 @@
  */
 package io.engineblock.activityimpl.motor;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import io.engineblock.activityapi.core.*;
 import io.engineblock.activityapi.core.ops.fluent.OpTracker;
@@ -78,6 +79,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
     private int stride = 1;
 
     private OpTracker<D> opTracker;
+    private Counter optrackerBlockCounter;
 
 
     /**
@@ -194,6 +196,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
 
             stridesServiceTimer = activity.getInstrumentation().getOrCreateStridesServiceTimer();
             stridesResponseTimer = activity.getInstrumentation().getStridesResponseTimerOrNull();
+            optrackerBlockCounter = activity.getInstrumentation().getOrCreateOpTrackerBlockedCounter();
 
 
             inputTimer = activity.getInstrumentation().getOrCreateInputTimer();
@@ -303,6 +306,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                                 while (opTracker.isFull()) {
                                     try {
                                         logger.trace("Blocking for enqueue with (" + opTracker.getPendingOps() + "/" + opTracker.getMaxPendingOps() + ") queued ops");
+                                        optrackerBlockCounter.inc();
                                         opTracker.wait(10000);
                                     } catch (InterruptedException ignored) {
                                     }
