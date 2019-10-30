@@ -55,7 +55,18 @@ public class EBCLIScriptAssembly {
                     }
                     break;
                 case start2: // run activity
+                    cmdType = EBCLIOptions.CmdType.start;
+                    cmd.setCmdType(cmdType);
+                    // Sanity check that this can parse before using it
+                    activityDef = ActivityDef.parseActivityDef(cmdSpec);
+                    sb.append("// from CLI as ").append(cmd).append("\n")
+                            .append("scenario.").append(cmdType.toString()).append("(\"")
+                            .append(cmdSpec)
+                            .append("\");\n");
+                    break;
                 case run2: // run activity
+                    cmdType = EBCLIOptions.CmdType.run;
+                    cmd.setCmdType(cmdType);
                     // Sanity check that this can parse before using it
                     activityDef = ActivityDef.parseActivityDef(cmdSpec);
                     sb.append("// from CLI as ").append(cmd).append("\n")

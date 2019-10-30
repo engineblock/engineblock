@@ -36,6 +36,8 @@ public class EBCLIOptions {
     private static final String ACTIVITY = "activity";
     private static final String RUN_ACTIVITY = "run";
     private static final String START_ACTIVITY = "start";
+    private static final String START_ACTIVITY2 = "start2";
+    private static final String RUN_ACTIVITY2 = "run2";
     private static final String SCRIPT_FRAGMENT = "fragment";
     private static final String STOP_ACTIVITY = "stop";
     private static final String AWAIT_ACTIVITY = "await";
@@ -138,6 +140,11 @@ public class EBCLIOptions {
                 case START_ACTIVITY:
                 case RUN_ACTIVITY:
                     Cmd activity = parseActivityCmd(arglist);
+                    cmdList.add(activity);
+                    break;
+                case START_ACTIVITY2:
+                case RUN_ACTIVITY2:
+                    activity = parseActivityCmd(arglist);
                     cmdList.add(activity);
                     break;
                 case METRICS:
@@ -582,6 +589,10 @@ public class EBCLIOptions {
 
         public CmdType getCmdType() {
             return cmdType;
+        }
+
+        public void setCmdType(CmdType cmdType) {
+            this.cmdType = cmdType;
         }
 
         public Map<String, String> getCmdArgs() {
