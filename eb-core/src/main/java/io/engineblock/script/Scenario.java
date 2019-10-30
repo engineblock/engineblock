@@ -96,7 +96,9 @@ public class Scenario implements Callable<ScenarioResult> {
         scriptEnv = new ScenarioContext(scenarioController);
         scriptEngine.setContext(scriptEnv);
         scenarioController = new ScenarioController();
-        progressIndicator = new ProgressIndicator(scenarioController,progressInterval);
+        if (!progressInterval.equals("disabled")) {
+            progressIndicator = new ProgressIndicator(scenarioController,progressInterval);
+        }
 
         scriptEngine.put("params", scenarioScriptParams);
         scriptEngine.put("scenario", scenarioController);
