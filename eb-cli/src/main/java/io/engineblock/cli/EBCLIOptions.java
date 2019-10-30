@@ -544,7 +544,9 @@ public class EBCLIOptions {
 
     public static enum CmdType {
         start,
+        start2,
         run,
+        run2,
         stop,
         await,
         script,

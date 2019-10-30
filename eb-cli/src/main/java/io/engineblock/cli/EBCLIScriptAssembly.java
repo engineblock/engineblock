@@ -20,6 +20,7 @@ public class EBCLIScriptAssembly {
         for (EBCLIOptions.Cmd cmd : options.getCommands()) {
             String cmdSpec = cmd.getCmdSpec();
             EBCLIOptions.CmdType cmdType = cmd.getCmdType();
+            ActivityDef activityDef;
             switch (cmd.getCmdType()) {
                 case script:
                     sb.append("// from CLI as ").append(cmd).append("\n");
@@ -41,7 +42,7 @@ public class EBCLIScriptAssembly {
                 case start: // start activity
                 case run: // run activity
                     // Sanity check that this can parse before using it
-                    ActivityDef activityDef = ActivityDef.parseActivityDef(cmdSpec);
+                    activityDef = ActivityDef.parseActivityDef(cmdSpec);
                     sb.append("// from CLI as ").append(cmd).append("\n")
                             .append("scenario.").append(cmdType.toString()).append("(\"")
                             .append(cmdSpec)
@@ -52,6 +53,15 @@ public class EBCLIScriptAssembly {
                     if (!cmdSpec.endsWith("\n")) {
                         sb.append("\n");
                     }
+                    break;
+                case start2: // run activity
+                case run2: // run activity
+                    // Sanity check that this can parse before using it
+                    activityDef = ActivityDef.parseActivityDef(cmdSpec);
+                    sb.append("// from CLI as ").append(cmd).append("\n")
+                            .append("scenario.").append(cmdType.toString()).append("(\"")
+                            .append(cmdSpec)
+                            .append("\");\n");
                     break;
                 case await: // await activity
                     sb.append("// from CLI as ").append(cmd).append("\n");
