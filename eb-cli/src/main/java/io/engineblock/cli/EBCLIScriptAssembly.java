@@ -39,40 +39,25 @@ public class EBCLIScriptAssembly {
                         sb.append("\n");
                     }
                     break;
+                case start2:
+                case run2:
                 case start: // start activity
                 case run: // run activity
                     // Sanity check that this can parse before using it
                     activityDef = ActivityDef.parseActivityDef(cmdSpec);
                     sb.append("// from CLI as ").append(cmd).append("\n")
-                            .append("scenario.").append(cmdType.toString()).append("(\"")
+                            .append("scenario.").append(cmdType.toString().replace("2","")).append("(\"")
                             .append(cmdSpec)
                             .append("\");\n");
-                    // workaroud for perf issue
                     sb.append("// from CLI as ").append(cmd).append("\n");
-                    sb.append("activities.test.noop=\"noop\"");
+                    // work-around for perf issue
+                    if (!cmdType.toString().contains("2")) {
+                        ActivityDef parsed = ActivityDef.parseActivityDef(cmdSpec);
+                        sb.append("activities."+parsed.getAlias()+".noop=\"noop\";");
+                    }
                     if (!cmdSpec.endsWith("\n")) {
                         sb.append("\n");
                     }
-                    break;
-                case start2: // run activity
-                    cmdType = EBCLIOptions.CmdType.start;
-                    cmd.setCmdType(cmdType);
-                    // Sanity check that this can parse before using it
-                    activityDef = ActivityDef.parseActivityDef(cmdSpec);
-                    sb.append("// from CLI as ").append(cmd).append("\n")
-                            .append("scenario.").append(cmdType.toString()).append("(\"")
-                            .append(cmdSpec)
-                            .append("\");\n");
-                    break;
-                case run2: // run activity
-                    cmdType = EBCLIOptions.CmdType.run;
-                    cmd.setCmdType(cmdType);
-                    // Sanity check that this can parse before using it
-                    activityDef = ActivityDef.parseActivityDef(cmdSpec);
-                    sb.append("// from CLI as ").append(cmd).append("\n")
-                            .append("scenario.").append(cmdType.toString()).append("(\"")
-                            .append(cmdSpec)
-                            .append("\");\n");
                     break;
                 case await: // await activity
                     sb.append("// from CLI as ").append(cmd).append("\n");
