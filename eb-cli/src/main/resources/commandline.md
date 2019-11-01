@@ -106,9 +106,9 @@ Specify the metrics name prefix for graphite reporting
 Log all HDR histogram data to a file
 
     --log-histograms histodata.log
-    --log-histostats 'histodata.log:.*'
-    --log-histostats 'histodata.log:.*:1m'
-    --log-histostats 'histodata.log:.*specialmetrics:10s'
+    --log-histograms 'histodata.log:.*'
+    --log-histograms 'histodata.log:.*:1m'
+    --log-histograms 'histodata.log:.*specialmetrics:10s'
 
 Log HDR histogram stats to a CSV file
 
