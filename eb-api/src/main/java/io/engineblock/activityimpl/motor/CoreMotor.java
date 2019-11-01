@@ -266,7 +266,7 @@ public class CoreMotor<D> implements ActivityDefObserver, Motor<D>, Stoppable {
                         strideDelay = strideRateLimiter.maybeWaitForOp();
                     }
 
-                    StrideTracker<D> strideTracker = new StrideTracker<D>(
+                    StrideTracker<D> strideTracker = new StrideTracker<>(
                             stridesServiceTimer,
                             stridesResponseTimer,
                             strideDelay,
