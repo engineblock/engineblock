@@ -13,8 +13,8 @@ import com.github.dockerjava.api.command.ListContainersCmd;
 import com.github.dockerjava.api.command.LogContainerCmd;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
-import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.core.async.ResultCallbackTemplate;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
@@ -26,7 +26,10 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +47,8 @@ public class DockerMetricsHelper {
 
     public DockerMetricsHelper() {
         this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
-        this.dockerClient = DockerClientBuilder.getInstance(config).build();
+        //this.dockerClient = DockerClientBuilder.getInstance(config).build();
+        this.dockerClient = DockerClientImpl.getInstance(config);
 
     }
 

@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <virtdata-version>2.11.38</virtdata-version>
+        <virtdata-version>2.11.39</virtdata-version>
         <metrics-version>3.2.6</metrics-version>
         <javadoc.name>EngineBlock</javadoc.name>
     </properties>
@@ -73,9 +73,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <release>11</release>
-                    <source>11</source>
-                    <target>11</target>
+                    <release>12</release>
+                    <source>12</source>
+                    <target>12</target>
                     <!--<compilerArgument>-Xdoclint:all</compilerArgument>-->
                     <compilerArgument>-Xlint:all</compilerArgument>
                 </configuration>
