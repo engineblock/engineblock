@@ -51,13 +51,16 @@ public class EBCLIScriptAssembly {
                             .append("\");\n");
                     sb.append("// from CLI as ").append(cmd).append("\n");
                     // work-around for perf issue
-                    if (!cmdType.toString().contains("2")) {
-                        ActivityDef parsed = ActivityDef.parseActivityDef(cmdSpec);
-                        sb.append("activities."+parsed.getAlias()+".noop=\"noop\";");
-                    }
                     if (!cmdSpec.endsWith("\n")) {
                         sb.append("\n");
                     }
+                    if (!cmdType.toString().contains("2")) {
+                        sb.append("// temporary work-around for issue until proper fix\n");
+                        sb.append("for each (paramset in activities.keySet()) {\n");
+                        sb.append(" paramset.noop='value';\n");
+                        sb.append("}\n");
+                    }
+
                     break;
                 case await: // await activity
                     sb.append("// from CLI as ").append(cmd).append("\n");
