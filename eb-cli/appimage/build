@@ -1,0 +1,60 @@
+#!/bin/bash
+set -x
+mkdir -p target/EB.AppDir
+
+if [ ! -f ../target/eb-cli.jar ]
+then
+ print "../target/eb-cli.jar does not exist"
+ exit 2
+fi
+
+rsync -av skel/ target/EB.AppDir/
+cp ../target/eb-cli.jar target/EB.AppDir/usr/bin/eb-cli.jar
+
+
+( cd target/EB.AppDir && (
+  if [ ! -d "usr/bin/jre" ]
+  then
+   printf "getting jre...\n";
+   # JRE 12
+   wget -c https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10/OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
+   tar xf OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
+   mv jdk-12.0.2+10-jre usr/bin/jre
+   rm OpenJDK12U-jre_x64_linux_hotspot_12.0.2_10.tar.gz
+
+   # JRE 13
+   # wget -c https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13%2B33/OpenJDK13U-jre_x64_linux_hotspot_13_33.tar.gz
+   # tar xf OpenJDK13U-jre_x64_linux_hotspot_13_33.tar.gz
+   #mv jdk-13+33-jre usr/bin/jre
+   #rm OpenJDK13U-jre_x64_linux_hotspot_13_33.tar.gz
+  else
+   printf "jre directory present, skipping...\n";
+  fi
+
+  if [ ! -f "AppRun" ]
+  then
+   ln -s usr/bin/eb AppRun
+  fi
+ 
+ )
+)
+
+printf "getting appimage tool and building image...\n";
+
+( cd target && (
+  if [ ! -x "appimagetool-x86_64.AppImage" ]
+  then
+   wget -c https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage
+   chmod +x appimagetool-x86_64.AppImage
+  fi
+
+  ARCH=x86_64 ./appimagetool-x86_64.AppImage EB.AppDir eb
+  # && chmod +x eb-cli
+ )
+)
+
+if [ -x "target/eb" ]
+then
+ printf "ebdse AppImage binary was built at target/eb\n";
+fi
+
