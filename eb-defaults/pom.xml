@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <virtdata-version>2.11.40</virtdata-version>
+        <virtdata-version>2.11.41</virtdata-version>
         <metrics-version>3.2.6</metrics-version>
         <javadoc.name>EngineBlock</javadoc.name>
     </properties>
