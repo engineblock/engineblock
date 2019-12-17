@@ -1,6 +1,6 @@
 language: java
 jdk:
- - oraclejdk11
+ - openjdk12
 cache:
   directories:
   - .autoconf
