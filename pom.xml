@@ -20,6 +20,7 @@
     </properties>
 
     <modules>
+        <module>eb-docs</module> <!-- Holds only docs for eb -->
         <module>eb-defaults</module> <!-- Holds project level defaults -->
         <module>at-diag</module> <!-- ActivityType driver for diagnostics, file, etc -->
         <module>eb-api</module> <!-- APIs needed to implement drivers to be loaded by the core -->
@@ -29,8 +30,9 @@
         <module>eb-extensions</module> <!-- scripting sandbox extensions for EB -->
 <!--        <module>eb-vis</module>-->
         <module>at-stdout</module>
-        <module>at-tcp</module>
-        <module>at-http</module>
+        <module>at-tcp</module> <!-- A TCP enabled version of stdout, client and server -->
+        <module>at-http</module> <!-- An HTTP activity type -->
+        <module>eb</module> <!-- a binary (appimage) build option for eb -->
     </modules>
 
     <licenses>

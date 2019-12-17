@@ -1,4 +1,4 @@
-package io.engineblock;
+package io.engineblock.docs;
 
 import io.virtdata.annotations.Service;
 import io.virtdata.docsys.api.Docs;

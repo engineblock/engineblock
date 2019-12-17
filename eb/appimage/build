@@ -2,14 +2,20 @@
 set -x
 mkdir -p target/EB.AppDir
 
-if [ ! -f ../target/eb-cli.jar ]
+if [ ! -f ../target/eb.jar ]
 then
- print "../target/eb-cli.jar does not exist"
+ print "../target/eb.jar does not exist"
  exit 2
 fi
 
+if [ -x "target/eb" ]
+then
+ printf "Removing stale target/eb...\n"
+ rm target/eb
+fi
+
 rsync -av skel/ target/EB.AppDir/
-cp ../target/eb-cli.jar target/EB.AppDir/usr/bin/eb-cli.jar
+cp ../target/eb.jar target/EB.AppDir/usr/bin/eb.jar
 
 
 ( cd target/EB.AppDir && (
@@ -31,8 +37,15 @@ cp ../target/eb-cli.jar target/EB.AppDir/usr/bin/eb-cli.jar
    printf "jre directory present, skipping...\n";
   fi
 
+  if [ -f "AppRun" ]
+  then
+   printf "Removing stale AppRun...\n";
+   rm AppRun
+  fi
+
   if [ ! -f "AppRun" ]
   then
+   printf "Linking AppRun...\n";
    ln -s usr/bin/eb AppRun
   fi
  
@@ -49,7 +62,7 @@ printf "getting appimage tool and building image...\n";
   fi
 
   ARCH=x86_64 ./appimagetool-x86_64.AppImage EB.AppDir eb
-  # && chmod +x eb-cli
+  # && chmod +x eb
  )
 )
 

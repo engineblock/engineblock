@@ -1,0 +1,15 @@
+#!/bin/bash
+#set -x 
+DIR="$(dirname "$(readlink -f "$0")")"
+if [ "$1" = "-DN" ]
+then
+ shift
+ exec $DIR/jre/bin/java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar $DIR/eb.jar "$@"
+elif [ "$1" = "-DY" ]
+then
+ shift
+ exec $DIR/jre/bin/java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -jar $DIR/eb.jar "$@"
+else
+ exec $DIR/jre/bin/java -jar $DIR/eb.jar "$@"
+fi
+
