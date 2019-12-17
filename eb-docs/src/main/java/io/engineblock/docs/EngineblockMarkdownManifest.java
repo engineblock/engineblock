@@ -11,6 +11,8 @@ public class EngineblockMarkdownManifest implements DocsysDynamicManifest {
     public DocsInfo getDocs() {
         return new Docs().namespace("docs-for-eb")
                 .addFirstFoundPath("eb-cli/src/main/resources/docs-for-eb/",
-                        "docs-for-eb/").asDocsInfo();
+                        "docs-for-eb/")
+                .setEnabledByDefault(false)
+                .asDocsInfo();
     }
 }
