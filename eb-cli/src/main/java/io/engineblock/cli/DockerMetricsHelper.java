@@ -9,15 +9,17 @@ package io.engineblock.cli;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.api.command.ListContainersCmd;
 import com.github.dockerjava.api.command.LogContainerCmd;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
-import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.core.async.ResultCallbackTemplate;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
+import com.github.dockerjava.netty.NettyDockerCmdExecFactory;
 import io.engineblock.util.EngineBlockFiles;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
@@ -46,10 +48,14 @@ public class DockerMetricsHelper {
     private Logger logger = LoggerFactory.getLogger(DockerMetricsHelper.class);
 
     public DockerMetricsHelper() {
-        this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
-        //this.dockerClient = DockerClientBuilder.getInstance(config).build();
-        this.dockerClient = DockerClientImpl.getInstance(config);
+        this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().withDockerHost("unix:///var/run/docker.sock").build();
+        DockerCmdExecFactory dockerCmdExecFactory = new NettyDockerCmdExecFactory()
+                .withReadTimeout(1000)
+                .withConnectTimeout(1000);
 
+        this.dockerClient = DockerClientBuilder.getInstance(config)
+                .withDockerCmdExecFactory(dockerCmdExecFactory)
+                .build();
     }
 
     public void startMetrics() {
