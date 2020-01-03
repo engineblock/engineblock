@@ -258,6 +258,7 @@ public class ActivityMetrics {
     /**
      * This should be called at the end of a process, so that open intervals can be finished, logs closed properly,
      * etc.
+     * @param showChart whether to chart metrics on console
      */
     public static void closeMetrics(boolean showChart) {
         logger.trace("Closing all registered metrics closable objects.");
