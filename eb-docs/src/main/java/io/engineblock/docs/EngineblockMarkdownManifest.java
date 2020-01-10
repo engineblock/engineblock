@@ -13,6 +13,6 @@ public class EngineblockMarkdownManifest implements DocsysDynamicManifest {
                 .addFirstFoundPath("eb-cli/src/main/resources/docs-for-eb/",
                         "docs-for-eb/")
                 .setEnabledByDefault(false)
-                .asDocsInfo();
+                .asDocsBinder();
     }
 }
