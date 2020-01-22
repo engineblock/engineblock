@@ -3,13 +3,13 @@
 
     <groupId>io.engineblock</groupId>
     <artifactId>eb-defaults</artifactId>
-    <version>2.12.51-SNAPSHOT</version>
+    <version>2.12.60-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <virtdata-version>2.11.45</virtdata-version>
+        <virtdata-version>2.12.7</virtdata-version>
         <metrics-version>3.2.6</metrics-version>
         <javadoc.name>EngineBlock</javadoc.name>
     </properties>
