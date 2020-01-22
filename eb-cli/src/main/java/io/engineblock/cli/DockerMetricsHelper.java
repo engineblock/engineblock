@@ -60,6 +60,8 @@ import java.util.concurrent.TimeUnit;
 
 public class DockerMetricsHelper {
 
+    private static final String DOCKER_HOST = "DOCKER_HOST";
+    private static final String DOCKER_HOST_ADDR = "unix:///var/run/docker.sock";
     String userHome = System.getProperty("user.home");
     private Client rsClient = ClientBuilder.newClient();
     private DockerClientConfig config;
@@ -67,7 +69,8 @@ public class DockerMetricsHelper {
     private Logger logger = LoggerFactory.getLogger(DockerMetricsHelper.class);
 
     public DockerMetricsHelper() {
-        this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().withDockerHost("unix:///var/run/docker.sock").build();
+        System.getProperties().setProperty(DOCKER_HOST, DOCKER_HOST_ADDR);
+        this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().withDockerHost(DOCKER_HOST_ADDR).build();
         DockerCmdExecFactory dockerCmdExecFactory = new NettyDockerCmdExecFactory()
                 .withReadTimeout(1000)
                 .withConnectTimeout(1000);
