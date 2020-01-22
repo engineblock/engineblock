@@ -20,6 +20,7 @@ import com.github.dockerjava.core.async.ResultCallbackTemplate;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.netty.NettyDockerCmdExecFactory;
+import com.sun.security.auth.module.UnixSystem;
 import io.engineblock.util.EngineBlockFiles;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
@@ -32,10 +33,28 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.*;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.AclEntry;
+import java.nio.file.attribute.AclEntryPermission;
+import java.nio.file.attribute.AclEntryType;
+import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.GroupPrincipal;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
@@ -95,7 +114,8 @@ public class DockerMetricsHelper {
 
         volumeDescList = Arrays.asList(
                 //cwd+"/docker-metrics/prometheus:/prometheus",
-                userHome + "/.prometheus:/etc/prometheus"
+                userHome + "/.eb/prometheus-conf:/etc/prometheus",
+                userHome + "/.eb/prometheus:/prometheus"
                 //"./prometheus/tg_dse.json:/etc/prometheus/tg_dse.json"
         );
 
@@ -116,7 +136,11 @@ public class DockerMetricsHelper {
         tag = "5.3.2";
         name = "grafana";
         port = Arrays.asList(3000);
+
+        setupGrafanaFiles(ip);
+
         volumeDescList = Arrays.asList(
+                userHome+"/.eb/grafana:/var/lib/grafana:rw"
                 //cwd+"/docker-metrics/grafana:/grafana",
                 //cwd+"/docker-metrics/grafana/datasources:/etc/grafana/provisioning/datasources",
                 //cwd+"/docker-metrics/grafana/dashboardconf:/etc/grafana/provisioning/dashboards"
@@ -168,10 +192,28 @@ public class DockerMetricsHelper {
 
         datasource = datasource.replace("!!!GRAPHITE_IP!!!", ip);
 
-        new java.io.File(userHome, ".prometheus").mkdir();
+        File prometheusDir = new File(userHome, ".eb/prometheus");
+        prometheusDir.mkdir();
+
+        new File(userHome, ".eb/prometheus-conf").mkdir();
+
+        Path prometheusDirPath = Paths.get(userHome, ".eb/prometheus");
+
+        Set<PosixFilePermission> perms = new HashSet<>();
+        perms.add(PosixFilePermission.OTHERS_READ);
+        perms.add(PosixFilePermission.OTHERS_WRITE);
+        perms.add(PosixFilePermission.OTHERS_EXECUTE);
+
+        try {
+            Files.setPosixFilePermissions(prometheusDirPath, perms);
+        } catch (IOException e) {
+            logger.error("failed to set permissions on prom backup directory (~/.eb/prometheus)");
+            e.printStackTrace();
+            System.exit(1);
+        }
 
         try (PrintWriter out = new PrintWriter(
-                new FileWriter(userHome + "/.prometheus/prometheus.yml", false))) {
+                new FileWriter(userHome + "/.eb/prometheus-conf/prometheus.yml", false))) {
             out.println(datasource);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -183,6 +225,30 @@ public class DockerMetricsHelper {
             System.exit(1);
         }
     }
+
+
+    private void setupGrafanaFiles(String ip) {
+
+        File grafanaDir = new File(userHome, ".eb/grafana");
+        grafanaDir.mkdir();
+
+        Path grafanaDirPath = Paths.get(userHome, ".eb/grafana");
+
+        Set<PosixFilePermission> perms = new HashSet<>();
+
+        perms.add(PosixFilePermission.OWNER_READ);
+        perms.add(PosixFilePermission.OWNER_WRITE);
+        perms.add(PosixFilePermission.OWNER_EXECUTE);
+
+        try {
+            Files.setPosixFilePermissions(grafanaDirPath, perms);
+        } catch (IOException e) {
+            logger.error("failed to set permissions on prom backup directory (~/.eb/prometheus)");
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
 
     private void configureGrafana() {
         Response response = post("http://localhost:3000/api/dashboards/db", "docker/dashboards/analysis.json", true);
@@ -301,6 +367,7 @@ public class DockerMetricsHelper {
                     //.withVolumes(volumeList)
                     .exec();
         } else {
+            long user = new UnixSystem().getUid();
             containerResponse = dockerClient.createContainerCmd(IMG + ":" + tag)
                     .withEnv(envList)
                     .withExposedPorts(tcpPorts)
@@ -311,6 +378,7 @@ public class DockerMetricsHelper {
                                     .withBinds(volumeBindList)
                     )
                     .withName(name)
+                    .withUser(""+user)
                     //.withVolumes(volumeList)
                     .exec();
         }
