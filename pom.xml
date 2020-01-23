@@ -32,6 +32,7 @@
         <module>at-tcp</module> <!-- A TCP enabled version of stdout, client and server -->
         <module>at-http</module> <!-- An HTTP activity type -->
         <module>eb</module> <!-- a binary (appimage) build option for eb -->
+        <module>eb-docker</module>
     </modules>
 
     <licenses>

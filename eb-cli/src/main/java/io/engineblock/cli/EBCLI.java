@@ -9,6 +9,7 @@ import io.engineblock.core.MarkdownDocInfo;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenariosResults;
 import io.engineblock.core.ShutdownManager;
+import io.engineblock.docker.DockerMetricsHelper;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricReporters;
 import io.engineblock.script.MetricsMapper;

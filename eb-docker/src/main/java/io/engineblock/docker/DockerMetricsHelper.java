@@ -1,4 +1,4 @@
-package io.engineblock.cli;
+package io.engineblock.docker;
 
 /*
  *
@@ -19,7 +19,7 @@ import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.async.ResultCallbackTemplate;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory;
+import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
 import com.sun.security.auth.module.UnixSystem;
 import io.engineblock.util.EngineBlockFiles;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -29,33 +29,15 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.*;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.AclEntry;
-import java.nio.file.attribute.AclEntryPermission;
-import java.nio.file.attribute.AclEntryType;
-import java.nio.file.attribute.AclFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.GroupPrincipal;
-import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.UserPrincipal;
-import java.nio.file.attribute.UserPrincipalLookupService;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+//import io.engineblock.util.EngineBlockFiles;
 
 
 public class DockerMetricsHelper {
@@ -71,7 +53,7 @@ public class DockerMetricsHelper {
     public DockerMetricsHelper() {
         System.getProperties().setProperty(DOCKER_HOST, DOCKER_HOST_ADDR);
         this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().withDockerHost(DOCKER_HOST_ADDR).build();
-        DockerCmdExecFactory dockerCmdExecFactory = new NettyDockerCmdExecFactory()
+        DockerCmdExecFactory dockerCmdExecFactory = new JerseyDockerCmdExecFactory()
                 .withReadTimeout(1000)
                 .withConnectTimeout(1000);
 

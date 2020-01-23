@@ -41,6 +41,9 @@ public class SSLKsFactory {
 
     private static SSLKsFactory instance = new SSLKsFactory();
 
+    /**
+     * Consider: https://gist.github.com/artem-smotrakov/bd14e4bde4d7238f7e5ab12c697a86a3
+     */
     private SSLKsFactory() {
     }
 
