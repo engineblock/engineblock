@@ -1,17 +1,17 @@
 /*
-*   Copyright 2015 jshook
-*   Licensed under the Apache License, Version 2.0 (the "License");
-*   you may not use this file except in compliance with the License.
-*   You may obtain a copy of the License at
-*
-*       http://www.apache.org/licenses/LICENSE-2.0
-*
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-*/
+ *   Copyright 2015 jshook
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package io.engineblock.core;
 
 import io.engineblock.activityapi.core.Activity;
@@ -44,7 +44,7 @@ public class ScenarioController {
      * @param activityDef string in alias=value1;type=value2;... format
      */
     public synchronized void start(ActivityDef activityDef) {
-        getActivityExecutor(activityDef,true).startActivity();
+        getActivityExecutor(activityDef, true).startActivity();
     }
 
     /**
@@ -75,26 +75,29 @@ public class ScenarioController {
 
     /**
      * Synchronously run the defined activity with a timeout in seconds.
-     * @param timeout seconds to await completion of the activity.
+     *
+     * @param timeout     seconds to await completion of the activity.
      * @param activityDef A definition for an activity to run
      */
     public synchronized void run(int timeout, ActivityDef activityDef) {
-        ActivityExecutor activityExecutor = getActivityExecutor(activityDef,true);
+        ActivityExecutor activityExecutor = getActivityExecutor(activityDef, true);
         activityExecutor.startActivity();
         activityExecutor.awaitCompletion(timeout);
     }
 
     public synchronized void run(int timeout, String activityDefString) {
         ActivityDef activityDef = ActivityDef.parseActivityDef(activityDefString);
-        run(timeout,activityDef);
+        run(timeout, activityDef);
     }
 
-    public synchronized void run(Map<String,String> activityDefMap) {
-        run(Integer.MAX_VALUE,activityDefMap);
+    public synchronized void run(Map<String, String> activityDefMap) {
+        run(Integer.MAX_VALUE, activityDefMap);
     }
+
     public synchronized void run(String activityDefString) {
-        run(Integer.MAX_VALUE,activityDefString);
+        run(Integer.MAX_VALUE, activityDefString);
     }
+
     public synchronized void run(ActivityDef activityDef) {
         run(Integer.MAX_VALUE, activityDef);
     }
@@ -124,7 +127,7 @@ public class ScenarioController {
      */
     public synchronized void stop(ActivityDef activityDef) {
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, false);
-        if (activityExecutor==null) {
+        if (activityExecutor == null) {
             throw new RuntimeException("could not stop missing activity:" + activityDef);
         }
         activityExecutor.stopActivity();
@@ -181,7 +184,7 @@ public class ScenarioController {
         String alias = appliedParams.get("alias");
 
         if (alias == null) {
-            throw new RuntimeException("alias must be provided");
+            throw new UserException("alias must be provided");
         }
 
         ActivityExecutor executor = activityExecutors.get(alias);
@@ -227,9 +230,31 @@ public class ScenarioController {
             ActivityExecutor executor = activityExecutors.get(activityDef.getAlias());
 
             if (executor == null && createIfMissing) {
-                String activityTypeName = activityDef.getParams().getOptionalString("type").orElse("diag");
-                ActivityType activityType = ActivityType.FINDER.getOrThrow(activityTypeName);
-                executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef,getActivityMap()));
+
+                String activityTypeName = activityDef.getParams().getOptionalString("type").orElse(null);
+                List<String> knownTypes = ActivityType.FINDER.getAll().stream().map(ActivityType::getName).collect(Collectors.toList());
+
+                // Infer the type from either alias or yaml if possible (exactly one matches)
+                if (activityTypeName==null) {
+                    List<String> matching = knownTypes.stream().filter(
+                            n ->
+                                    activityDef.getParams().getOptionalString("alias").orElse("").contains(n)
+                                            || activityDef.getParams().getOptionalString("yaml").orElse("").contains(n)
+                    ).collect(Collectors.toList());
+                    if (matching.size()==1) {
+                        activityTypeName=matching.get(0);
+                        logger.info("param 'type' was inferred as '" + activityTypeName + "' since it was seen in yaml or alias parameter.");
+                    }
+                }
+
+                if (activityTypeName==null) {
+                    String errmsg = "You must provide a type=<activity type> parameter. Valid examples are:\n" +
+                            knownTypes.stream().map(t -> " type="+t+"\n").collect(Collectors.joining());
+                    throw new UserException(errmsg);
+                }
+
+                ActivityType<?> activityType = ActivityType.FINDER.getOrThrow(activityTypeName);
+                executor = new ActivityExecutor(activityType.getAssembledActivity(activityDef, getActivityMap()));
                 activityExecutors.put(activityDef.getAlias(), executor);
             }
             return executor;
@@ -319,7 +344,7 @@ public class ScenarioController {
         if (alias.contains("=")) {
             return ActivityDef.parseActivityDef(alias);
         } else {
-            return ActivityDef.parseActivityDef("alias="+alias+";");
+            return ActivityDef.parseActivityDef("alias=" + alias + ";");
         }
     }
 
@@ -335,7 +360,7 @@ public class ScenarioController {
 
     public boolean awaitActivity(ActivityDef activityDef) {
         ActivityExecutor activityExecutor = getActivityExecutor(activityDef, false);
-        if (activityExecutor==null) {
+        if (activityExecutor == null) {
             throw new RuntimeException("Could not await missing activity: " + activityDef);
         }
         return activityExecutor.awaitFinish(Integer.MAX_VALUE);
@@ -352,15 +377,15 @@ public class ScenarioController {
         ActivityMetrics.reportTo(System.out);
     }
 
-    private Map<String,Activity> getActivityMap() {
-        Map<String,Activity> activityMap = new HashMap<String,Activity>();
+    private Map<String, Activity> getActivityMap() {
+        Map<String, Activity> activityMap = new HashMap<String, Activity>();
         for (Map.Entry<String, ActivityExecutor> entry : activityExecutors.entrySet()) {
-            activityMap.put(entry.getKey(),entry.getValue().getActivity());
+            activityMap.put(entry.getKey(), entry.getValue().getActivity());
         }
         return activityMap;
     }
 
     public Collection<ProgressMeter> getProgressMeters() {
-        return this.activityExecutors.values().stream().map(e -> (ProgressMeter)e).collect(Collectors.toList());
+        return this.activityExecutors.values().stream().map(e -> (ProgressMeter) e).collect(Collectors.toList());
     }
 }

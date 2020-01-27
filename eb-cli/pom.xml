@@ -51,6 +51,12 @@
       <artifactId>logback-classic</artifactId>
       <version>1.2.3</version>
     </dependency>
+    <dependency>
+      <groupId>io.engineblock</groupId>
+      <artifactId>eb-docker</artifactId>
+      <version>2.12.62-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
 
 
     <!--        <dependency>-->

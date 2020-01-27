@@ -46,7 +46,7 @@ public class ExitStatusIntegrationTests {
         ProcessResult result = invoker.run("exitstatus_initexception", 15,
                 "java", "-jar", JARNAME, "--logs-dir", "logs/test", "run", "type=diag", "initdelay=notanumber"
         );
-        String stderr = result.getStderrData().stream().collect(Collectors.joining("\n"));
+        String stderr = result.getStdoutData().stream().collect(Collectors.joining("\n"));
         assertThat(stderr).contains("Error initializing activity 'ALIAS_UNSET': For input string: \"notanumber\"");
         assertThat(result.exitStatus).isEqualTo(2);
     }

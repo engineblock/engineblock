@@ -17,14 +17,10 @@
 
 package io.engineblock.script;
 
-import io.engineblock.core.IndexedThreadFactory;
-import io.engineblock.core.ScenarioResult;
-import io.engineblock.core.ScenarioLogger;
-import io.engineblock.core.ScenariosResults;
+import io.engineblock.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -57,7 +53,7 @@ public class ScenariosExecutor {
     public synchronized void execute(Scenario scenario, ScenarioLogger scenarioLogger) {
         scenario.setScenarioLogger(scenarioLogger);
         if (submitted.get(scenario.getName()) != null) {
-            throw new RuntimeException("Scenario " + scenario.getName() + " is already defined. Remove it first to reuse the name.");
+            throw new UserException("Scenario " + scenario.getName() + " is already defined. Remove it first to reuse the name.");
         }
         Future<ScenarioResult> future = executor.submit(scenario);
         SubmittedScenario s = new SubmittedScenario(scenario, future);
@@ -87,7 +83,7 @@ public class ScenariosExecutor {
      */
     public ScenariosResults awaitAllResults(long timeout, long updateInterval) {
         if (updateInterval > timeout) {
-            throw new InvalidParameterException("timeout must be equal to or greater than updateInterval");
+            throw new UserException("timeout must be equal to or greater than updateInterval");
         }
         long timeoutAt = System.currentTimeMillis() + timeout;
 
@@ -185,7 +181,7 @@ public class ScenariosExecutor {
 
         Future<ScenarioResult> resultFuture1 = submitted.get(scenarioName).resultFuture;
         if (resultFuture1 == null) {
-            throw new RuntimeException("Unknown scenario name:" + scenarioName);
+            throw new UserException("Unknown scenario name:" + scenarioName);
         }
         if (resultFuture1.isDone()) {
             try {

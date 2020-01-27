@@ -20,6 +20,7 @@ import io.engineblock.activitycore.ProgressIndicator;
 import io.engineblock.core.ScenarioController;
 import io.engineblock.core.ScenarioLogger;
 import io.engineblock.core.ScenarioResult;
+import io.engineblock.core.UserException;
 import io.engineblock.extensions.ScriptingPluginInfo;
 import io.engineblock.metrics.ActivityMetrics;
 import io.engineblock.metrics.MetricRegistryBindings;
@@ -155,9 +156,12 @@ public class Scenario implements Callable<ScenarioResult> {
                 logger.error(errorDesc, e);
                 scenarioController.forceStopScenario(5000);
                 throw new RuntimeException("Script error while running scenario:" + e.getMessage(), e);
+            } catch (UserException ue) {
+                logger.error(ue.getMessage());
+                scenarioController.forceStopScenario(5000);
+                throw ue;
             } catch (Exception o) {
                 String errorDesc = "Non-Script error while running scenario:" + o.getMessage();
-                o.printStackTrace();
                 logger.error(errorDesc, o);
                 scenarioController.forceStopScenario(5000);
                 throw new RuntimeException("Non-Script error while running scenario:" + o.getMessage(), o);
