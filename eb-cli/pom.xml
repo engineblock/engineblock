@@ -4,7 +4,7 @@
     <parent>
         <artifactId>eb-defaults</artifactId>
         <groupId>io.engineblock</groupId>
-        <version>2.12.62</version>
+        <version>2.12.63-SNAPSHOT</version>
         <relativePath>../eb-defaults</relativePath>
     </parent>
 
@@ -23,13 +23,13 @@
     <dependency>
       <groupId>io.engineblock</groupId>
       <artifactId>eb-core</artifactId>
-      <version>2.12.62</version>
+      <version>2.12.63-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.engineblock</groupId>
       <artifactId>eb-docker</artifactId>
-      <version>2.12.62</version>
+      <version>2.12.63-SNAPSHOT</version>
       <classifier>shaded</classifier>
     </dependency>
 
@@ -54,7 +54,7 @@
     <dependency>
       <groupId>io.engineblock</groupId>
       <artifactId>eb-docker</artifactId>
-      <version>2.12.62</version>
+      <version>2.12.63-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
 
