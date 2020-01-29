@@ -28,24 +28,19 @@ activity types.
 
 ## stdout ActivityType Parameters
 
-- **filename** - this is the name of the output file 
+- **filename** - this is the name of the output file
     (defaults to "stdout", which actually writes to stdout, not the filesystem)
-- **yaml** - The file which holds the schema and statement defs. 
-    (no default, required)
-- **cycles** - standard, however the activity type will default 
-    this to however many statements are included in the current 
-    activity, after tag filtering, etc.
-   default: 0
-- **alias** - this is a standard engineblock parameter
-   default: derived from the yaml
 - **newline** - whether to automatically add a missing newline to the end
    of any statements.
    default: true
+- **format** - which format to use. If provided, the format will override
+   any statement formats provided by the YAML.
+   valid values are (csv, readout, json, inlinejson, and assignments)
 
 ## Configuration
 
 This activity type uses the uniform yaml configuration format.
-For more details on this format, please refer to the 
+For more details on this format, please refer to the
 [Standard YAML Format](http://docs.engineblock.io/user-guide/standard_yaml/)
 
 ## Configuration Parameters
@@ -69,7 +64,7 @@ in the statement params in your config as in:
 
     params:
      newline: false
- 
+
 ### Auto-generated statements
 
 If no statement is provided, then the defined binding names are used as-is
@@ -80,7 +75,9 @@ comma delimiters, so a set of bindings like this:
      one: Identity()
      two: NumberNameToString()
 
-would create an automatic string tempalte like this:
+would create an automatic string template like this:
 
     statements:
      - "{one},{two}\n"
+
+The auto-generation behavior is forced when the format parameter is supplied.

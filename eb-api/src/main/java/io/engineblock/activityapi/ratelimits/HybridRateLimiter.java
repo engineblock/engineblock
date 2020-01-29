@@ -72,7 +72,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * client can be converted into plateaus of throughput above the strict rate, but only at a speed that
  * fits within (op rate * burst ratio). This allows for workloads to approximate the average
  * target rate over time, with controllable bursting rates. This ability allows for near-strict
- * behavior while allowing clients to still track truer to rate limit expectations, so long as they
+ * behavior while allowing clients to still track truer to rate limit expectations, so long as the
  * overall workload is not saturating resources.
  * </p>
  */
