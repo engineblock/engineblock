@@ -93,6 +93,10 @@ public class ActivityExecutor implements ActivityController, ParameterMap.Listen
             activity.setRunState(RunState.Starting);
             activity.initActivity();
             //activity.onActivityDefUpdate(activityDef);
+
+            // Only wrap in Runtime Exception when the exception is not a UserException
+        } catch (UserException e) {
+            throw e;
         } catch (Exception e) {
             this.stoppingException = new RuntimeException("Error initializing activity '" +
                     activity.getAlias() +"': " + e.getMessage(),e);
