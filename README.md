@@ -3,6 +3,12 @@
 
 # Status
 
+__This project is now superseded by the nosqlbench.io project.__ The entire source based here has been imported and restructured in that project, along with the upstream virtual data set project. This should make it easier for contributors and maintainers.
+
+This project is being put in archival mode to avoid users continuing to work on unmaintained code. The last artifacts under this name on Maven central will be the last ones produced by this lineage of code.
+
+__Please go to nosqlbench.io project at https://github.com/nosqlbench/ to get started!__
+
 This is in active development. Collaborators are welcome. However, there is still work to be done to groom the slope for new users.
 
 ## Documentation Site
